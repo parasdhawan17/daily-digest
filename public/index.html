@@ -5,6 +5,19 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Daily Digest — Personalized stock news</title>
   <meta name="description" content="Twice-daily personalized US stock news for your watchlist.">
+  <meta name="color-scheme" content="light dark">
+  <script>
+    (function () {
+      try {
+        var stored = localStorage.getItem("daily-digest-theme");
+        var theme = stored === "light" || stored === "dark"
+          ? stored
+          : (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+        document.documentElement.setAttribute("data-theme", theme);
+        document.documentElement.style.colorScheme = theme;
+      } catch (e) {}
+    })();
+  </script>
   <style>
     :root {
       --bg: #eef1f5;
@@ -12,15 +25,17 @@
       --muted: #64748b;
       --link: #1d4ed8;
       --card: #ffffff;
+      --border: #e2e8f0;
+      --modal-backdrop: rgba(15, 23, 42, 0.55);
     }
-    @media (prefers-color-scheme: dark) {
-      :root {
-        --bg: #0b1220;
-        --text: #e2e8f0;
-        --muted: #94a3b8;
-        --link: #93c5fd;
-        --card: #111827;
-      }
+    html[data-theme="dark"] {
+      --bg: #0b1220;
+      --text: #e2e8f0;
+      --muted: #94a3b8;
+      --link: #93c5fd;
+      --card: #111827;
+      --border: #334155;
+      --modal-backdrop: rgba(2, 6, 23, 0.72);
     }
     * { box-sizing: border-box; }
     body {
@@ -38,6 +53,7 @@
       box-shadow: 0 4px 24px rgba(0,0,0,.08);
     }
     h1 { margin: 0 0 0.5rem; font-size: 1.75rem; }
+    h2 { margin: 1.5rem 0 0.75rem; font-size: 1.1rem; }
     .eyebrow {
       font-size: 0.75rem;
       letter-spacing: 0.12em;
@@ -45,32 +61,184 @@
       color: var(--muted);
       margin-bottom: 0.25rem;
     }
-    p { color: var(--muted); }
+    p, li { color: var(--muted); }
     a { color: var(--link); }
-    ul { padding-left: 1.25rem; color: var(--muted); }
+    ul { padding-left: 1.25rem; }
+    .actions { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 1.5rem; }
+    .btn {
+      display: inline-block;
+      padding: 0.65rem 1.1rem;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      text-decoration: none;
+      cursor: pointer;
+      border: none;
+    }
+    .btn-primary {
+      background: #1d4ed8;
+      color: #fff;
+    }
+    .btn-primary:hover { background: #1e40af; }
+    .btn-secondary {
+      background: transparent;
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+    .btn-secondary:hover { background: rgba(0,0,0,.04); }
+    html[data-theme="dark"] .btn-secondary:hover { background: rgba(255,255,255,.06); }
+    .theme-toggle {
+      position: fixed;
+      top: 1rem;
+      right: 1rem;
+      width: 40px;
+      height: 40px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: var(--card);
+      color: var(--text);
+      cursor: pointer;
+    }
+    .subscribe-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+    }
+    .subscribe-modal[hidden] { display: none; }
+    .subscribe-modal-backdrop {
+      position: absolute;
+      inset: 0;
+      background: var(--modal-backdrop);
+    }
+    .subscribe-modal-dialog {
+      position: relative;
+      width: min(100%, 480px);
+      max-height: 90vh;
+      background: var(--card);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 20px 50px rgba(0,0,0,.25);
+    }
+    .subscribe-modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem 1.25rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .subscribe-modal-header h2 { margin: 0; font-size: 1.1rem; color: var(--text); }
+    .subscribe-modal-close {
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      line-height: 1;
+      color: var(--muted);
+      cursor: pointer;
+    }
+    .subscribe-modal-body iframe {
+      display: block;
+      width: 100%;
+      min-height: 420px;
+      border: none;
+    }
+    .subscribe-success { padding: 2rem; text-align: center; }
+    .subscribe-success h3 { color: var(--text); margin: 0 0 0.5rem; }
   </style>
 </head>
 <body>
+  <button type="button" class="theme-toggle" id="theme-toggle" aria-label="Toggle theme">◐</button>
+
   <div class="wrap">
     <div class="card">
       <p class="eyebrow">Daily Digest</p>
       <h1>Your watchlist, twice a day</h1>
       <p>
         Pick your tickers, get personalized email briefings before the open and after the close,
-        and open a <strong>live full digest</strong> on the web from any email.
+        and open a <strong style="color: var(--text);">live full digest</strong> on the web from any email.
       </p>
+
       <h2>How it works</h2>
       <ul>
         <li>Subscribe and choose up to 10 tickers</li>
-        <li>Receive tailored news in your inbox</li>
+        <li>Receive tailored news in your inbox (9:15 AM and 4:15 PM ET)</li>
         <li>Click through for quotes, movers, and more stories online</li>
       </ul>
-      <p>
-        Subscribe form and Brevo embed will be wired in the next implementation phase.
-        See <code>documents/</code> in this repo for the full spec.
-      </p>
-      <p><a href="#subscribe">Subscribe</a> · <a href="#update-tickers">Update tickers</a></p>
+
+      <div class="actions">
+        <button type="button" class="btn btn-primary" onclick="openSubscribeModal()">Subscribe</button>
+        <button type="button" class="btn btn-secondary" onclick="openSubscribeModal()">Update tickers</button>
+      </div>
     </div>
   </div>
+
+  <div class="subscribe-modal" id="subscribe-modal" hidden>
+    <div class="subscribe-modal-backdrop" onclick="closeSubscribeModal()"></div>
+    <div class="subscribe-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="subscribe-modal-title">
+      <div class="subscribe-modal-header">
+        <h2 id="subscribe-modal-title">Subscribe or update your tickers</h2>
+        <button type="button" class="subscribe-modal-close" onclick="closeSubscribeModal()" aria-label="Close">&times;</button>
+      </div>
+      <div class="subscribe-modal-body" id="subscribe-modal-body">
+        <iframe
+          id="subscribe-iframe"
+          data-src="https://c45d1150.sibforms.com/serve/MUIFAHIL1jH-DeVrUnpoo9864EFxz9zv2_ZPiO5KF3s6v4dRsO78MCqs3Px8F3YEkQEleXXhoo3-ru-TV0wfGKmx-2GDoycH5AKn6zALH_5j980Isx-qMT0_GjO7sEv1dSME02tsPJpnG84htHPDroxqPtqY8u1Wt0NWE-MguymSMwInpWKhcLGiRmaKzN0-Y1ZM6iMYpio_ixYtWw=="
+          title="Email subscription form"
+        ></iframe>
+      </div>
+      <div class="subscribe-success" id="subscribe-success" hidden>
+        <h3>You're in!</h3>
+        <p>Confirm your email if needed. Your ticker picks apply on the next digest run.</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      var STORAGE_KEY = "daily-digest-theme";
+      var modal = document.getElementById("subscribe-modal");
+      var iframe = document.getElementById("subscribe-iframe");
+      var modalBody = document.getElementById("subscribe-modal-body");
+      var successPanel = document.getElementById("subscribe-success");
+
+      document.getElementById("theme-toggle").addEventListener("click", function () {
+        var current = document.documentElement.getAttribute("data-theme") || "light";
+        var next = current === "dark" ? "light" : "dark";
+        document.documentElement.setAttribute("data-theme", next);
+        document.documentElement.style.colorScheme = next;
+        try { localStorage.setItem(STORAGE_KEY, next); } catch (e) {}
+      });
+
+      window.openSubscribeModal = function () {
+        modal.hidden = false;
+        if (iframe && !iframe.src && iframe.dataset.src) {
+          iframe.src = iframe.dataset.src;
+        }
+        document.body.style.overflow = "hidden";
+      };
+
+      window.closeSubscribeModal = function () {
+        modal.hidden = true;
+        document.body.style.overflow = "";
+      };
+
+      function handleHash() {
+        var hash = window.location.hash.replace("#", "");
+        if (hash === "subscribe" || hash === "update-tickers") {
+          openSubscribeModal();
+        }
+      }
+
+      window.addEventListener("hashchange", handleHash);
+      handleHash();
+
+      document.addEventListener("keydown", function (e) {
+        if (e.key === "Escape" && !modal.hidden) closeSubscribeModal();
+      });
+    })();
+  </script>
 </body>
 </html>

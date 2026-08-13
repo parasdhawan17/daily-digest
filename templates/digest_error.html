@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ title }} · Daily Digest</title>
+  <meta name="color-scheme" content="light dark">
+  <style>
+    * { box-sizing: border-box; }
+    :root {
+      --page-bg: #eef1f5;
+      --card-bg: #ffffff;
+      --text: #1a1a2e;
+      --text-muted: #64748b;
+      --link: #1d4ed8;
+      --shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --page-bg: #0b1220;
+        --card-bg: #111827;
+        --text: #e2e8f0;
+        --text-muted: #94a3b8;
+        --link: #93c5fd;
+        --shadow: 0 4px 24px rgba(0, 0, 0, 0.35);
+      }
+    }
+    body {
+      margin: 0;
+      padding: 24px 16px;
+      background: var(--page-bg);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      color: var(--text);
+      line-height: 1.5;
+    }
+    .container { max-width: 40rem; margin: 0 auto; }
+    .card {
+      background: var(--card-bg);
+      border-radius: 12px;
+      padding: 2rem;
+      box-shadow: var(--shadow);
+    }
+    h1 { margin: 0 0 0.5rem; font-size: 1.5rem; }
+    p { color: var(--text-muted); margin: 0 0 1rem; }
+    a { color: var(--link); }
+    .detail { font-size: 0.9rem; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="card">
+      <p style="font-size: 0.75rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-muted);">Daily Digest</p>
+      <h1>{{ title }}</h1>
+      <p>{{ message }}</p>
+      {% if detail %}
+      <p class="detail">{{ detail }}</p>
+      {% endif %}
+      <p>
+        <a href="{{ site_url or '/' }}">Back to home</a>
+        {% if subscribe_form_url %}
+        · <a href="{{ site_url or '/' }}#subscribe">Subscribe</a>
+        {% endif %}
+      </p>
+    </div>
+  </div>
+</body>
+</html>
