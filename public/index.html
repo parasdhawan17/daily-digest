@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Daily Digest — Personalized stock news</title>
+  <meta name="description" content="Twice-daily personalized US stock news for your watchlist.">
+  <style>
+    :root {
+      --bg: #eef1f5;
+      --text: #1a1a2e;
+      --muted: #64748b;
+      --link: #1d4ed8;
+      --card: #ffffff;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0b1220;
+        --text: #e2e8f0;
+        --muted: #94a3b8;
+        --link: #93c5fd;
+        --card: #111827;
+      }
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+    }
+    .wrap { max-width: 42rem; margin: 0 auto; padding: 3rem 1.25rem; }
+    .card {
+      background: var(--card);
+      border-radius: 12px;
+      padding: 2rem;
+      box-shadow: 0 4px 24px rgba(0,0,0,.08);
+    }
+    h1 { margin: 0 0 0.5rem; font-size: 1.75rem; }
+    .eyebrow {
+      font-size: 0.75rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 0.25rem;
+    }
+    p { color: var(--muted); }
+    a { color: var(--link); }
+    ul { padding-left: 1.25rem; color: var(--muted); }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <p class="eyebrow">Daily Digest</p>
+      <h1>Your watchlist, twice a day</h1>
+      <p>
+        Pick your tickers, get personalized email briefings before the open and after the close,
+        and open a <strong>live full digest</strong> on the web from any email.
+      </p>
+      <h2>How it works</h2>
+      <ul>
+        <li>Subscribe and choose up to 10 tickers</li>
+        <li>Receive tailored news in your inbox</li>
+        <li>Click through for quotes, movers, and more stories online</li>
+      </ul>
+      <p>
+        Subscribe form and Brevo embed will be wired in the next implementation phase.
+        See <code>documents/</code> in this repo for the full spec.
+      </p>
+      <p><a href="#subscribe">Subscribe</a> · <a href="#update-tickers">Update tickers</a></p>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,13 @@
+{
+  "rewrites": [
+    { "source": "/digest", "destination": "/api/digest" }
+  ],
+  "headers": [
+    {
+      "source": "/api/digest",
+      "headers": [
+        { "key": "Cache-Control", "value": "private, no-store" }
+      ]
+    }
+  ]
+}
