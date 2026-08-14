@@ -4,14 +4,19 @@ import base64
 import hashlib
 import hmac
 import json
+import os
 import time
 
-from stock_news.config import DIGEST_SIGNING_SECRET, MAX_TICKERS_PER_USER, SITE_URL
+from stock_news.config import MAX_TICKERS_PER_USER, SITE_URL
 from stock_news.relevance import parse_tickers
 
 
 class TokenError(Exception):
     """Invalid or expired digest token."""
+
+
+def _signing_secret() -> str:
+    return os.environ.get("DIGEST_SIGNING_SECRET", "").strip()
 
 
 def _b64_encode(data: bytes) -> str:
@@ -24,7 +29,7 @@ def _b64_decode(data: str) -> bytes:
 
 
 def sign_digest_token(tickers: list[str], expires_days: int = 14) -> str:
-    secret = DIGEST_SIGNING_SECRET
+    secret = _signing_secret()
     if not secret:
         raise TokenError("DIGEST_SIGNING_SECRET is not configured")
 
@@ -43,7 +48,7 @@ def sign_digest_token(tickers: list[str], expires_days: int = 14) -> str:
 
 
 def verify_digest_token(token: str) -> list[str]:
-    secret = DIGEST_SIGNING_SECRET
+    secret = _signing_secret()
     if not secret:
         raise TokenError("DIGEST_SIGNING_SECRET is not configured")
 

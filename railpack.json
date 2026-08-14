@@ -1,0 +1,7 @@
+{
+  "$schema": "https://schema.railpack.com",
+  "provider": "python",
+  "deploy": {
+    "startCommand": "python scripts/send_digests.py --email"
+  }
+}

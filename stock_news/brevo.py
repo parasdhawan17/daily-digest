@@ -1,8 +1,11 @@
 """Brevo Contacts API for subscribe / update tickers."""
 
+import time
+
 import requests
 
-from stock_news.config import BREVO_TICKERS_ATTRIBUTE, SITE_URL
+from stock_news.config import BREVO_TICKERS_ATTRIBUTE, SEND_DELAY_SECONDS, SITE_URL
+from stock_news.relevance import parse_tickers
 
 
 class BrevoError(Exception):
@@ -142,6 +145,74 @@ def subscribe_or_update(
         "mode": "doi",
         "message": "Check your email to confirm your subscription.",
     }
+
+
+def fetch_subscribers_with_tickers(list_id: int, api_key: str) -> list[dict]:
+    subscribers: list[dict] = []
+    offset = 0
+    limit = 50
+
+    while True:
+        response = requests.get(
+            "https://api.brevo.com/v3/contacts",
+            headers=_headers(api_key),
+            params={"limit": limit, "offset": offset, "listIds": [list_id]},
+            timeout=30,
+        )
+        if not response.ok:
+            raise BrevoError(_safe_brevo_message(response))
+        contacts = response.json().get("contacts", [])
+        if not contacts:
+            break
+
+        for contact in contacts:
+            if contact.get("emailBlacklisted"):
+                continue
+            email = contact.get("email", "").strip()
+            if not email:
+                continue
+            attributes = contact.get("attributes") or {}
+            raw_tickers = attributes.get(BREVO_TICKERS_ATTRIBUTE, "")
+            tickers = parse_tickers(raw_tickers)
+            subscribers.append({"email": email, "tickers": tickers})
+
+        if len(contacts) < limit:
+            break
+        offset += limit
+
+    return subscribers
+
+
+def send_transactional_email(
+    html: str,
+    text: str,
+    api_key: str,
+    sender_email: str,
+    recipients: list[str],
+    sender_name: str,
+    subject: str,
+) -> None:
+    payload_base = {
+        "sender": {"name": sender_name, "email": sender_email},
+        "subject": subject,
+        "htmlContent": html,
+        "textContent": text,
+    }
+
+    total = len(recipients)
+    for index, recipient_email in enumerate(recipients, start=1):
+        response = requests.post(
+            "https://api.brevo.com/v3/smtp/email",
+            headers=_headers(api_key),
+            json={**payload_base, "to": [{"email": recipient_email}]},
+            timeout=30,
+        )
+        if not response.ok:
+            raise BrevoError(_safe_brevo_message(response))
+        message_id = response.json().get("messageId", response.text)
+        print(f"Email sent to {recipient_email} ({index}/{total}): {message_id}")
+        if index < total:
+            time.sleep(SEND_DELAY_SECONDS)
 
 
 def _safe_brevo_message(response: requests.Response) -> str:

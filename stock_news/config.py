@@ -22,6 +22,11 @@ SUMMARY_ALIAS_POINTS = 1
 TICKER_SYMBOL_BONUS = 1
 RIVAL_PENALTY = 3
 DIGEST_HEADING = "Your stock news briefing"
+SEND_DELAY_SECONDS = 2
+MAX_SUBJECT_MOVERS = 3
+MAX_SUBJECT_HEADLINES = 3
+SUBJECT_MAX_LEN = 78
+HEADLINE_SNIPPET_LEN = 32
 
 ET_ZONE = ZoneInfo("America/New_York")
 MARKET_OPEN_ET = time_of_day(9, 30)
@@ -44,6 +49,8 @@ BREVO_API_KEY = os.environ.get("BREVO_API_KEY", "").strip()
 BREVO_LIST_ID = os.environ.get("BREVO_LIST_ID", "").strip()
 BREVO_DOI_TEMPLATE_ID = os.environ.get("BREVO_DOI_TEMPLATE_ID", "").strip()
 BREVO_TICKERS_ATTRIBUTE = os.environ.get("BREVO_TICKERS_ATTRIBUTE", "TICKERS").strip().upper()
+EMAIL_FROM = os.environ.get("EMAIL_FROM", "").strip()
+EMAIL_FROM_NAME = os.environ.get("EMAIL_FROM_NAME", "Tickr Digest").strip()
 
 US_SYMBOL_TYPES = frozenset({"Common Stock", "ETF", "ADR", "ETN", "ETC", "Closed-End Fund"})
 FOREIGN_SYMBOL_SUFFIXES = (".DE", ".L", ".TO", ".HK", ".SW", ".PA", ".AS", ".MI", ".AX", ".KS", ".TW")

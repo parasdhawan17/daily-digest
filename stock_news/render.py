@@ -14,6 +14,7 @@ from stock_news.config import (
     TEMPLATES_PATH,
 )
 from stock_news.digest import count_web_stories, prepare_email_layout
+from stock_news.email import build_plain_text, build_email_content
 
 
 def get_jinja_env() -> Environment:
@@ -49,6 +50,46 @@ def build_web_digest(
         subscribe_enabled=subscribe_enabled(),
         **layout,
     )
+
+
+def build_email_digest(
+    sections: list[dict],
+    tickers: list[str],
+    total_stories: int,
+    session: str,
+    *,
+    digest_url: str | None = None,
+    update_tickers_url: str | None = None,
+) -> tuple[str, str, str]:
+    today_label = date.today().strftime("%d %b %Y")
+    layout, email_heading, subject = build_email_content(
+        sections,
+        tickers,
+        total_stories,
+        session,
+    )
+    env = get_jinja_env()
+    template = env.get_template("email_digest.html")
+    html = template.render(
+        date_label=today_label,
+        ticker_count=len(tickers),
+        story_count=total_stories,
+        site_url=SITE_URL,
+        email_heading=email_heading,
+        digest_url=digest_url,
+        update_tickers_url=update_tickers_url,
+        **layout,
+    )
+    text = build_plain_text(
+        layout,
+        today_label,
+        len(tickers),
+        total_stories,
+        email_heading=email_heading,
+        digest_url=digest_url,
+        update_tickers_url=update_tickers_url,
+    )
+    return html, text, subject
 
 
 def build_digest_error(title: str, message: str, detail: str | None = None) -> str:
