@@ -1,3 +1,4 @@
 [deploy]
 startCommand = "python scripts/send_digests.py --email"
+cronSchedule = "15 13,20 * * *"
 restartPolicyType = "NEVER"
