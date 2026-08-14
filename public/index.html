@@ -3,8 +3,10 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Daily Digest — Personalized stock news</title>
-  <meta name="description" content="Twice-daily personalized US stock news for your watchlist.">
+  <title>Daily Digest — Stock news for your holdings</title>
+  <meta name="description" content="Stay current on the US stocks and ETFs you invest in. Twice-daily briefings before the open and after the close, plus a live digest when you need the full picture.">
+  <meta property="og:title" content="Daily Digest — Stay current on your holdings">
+  <meta property="og:description" content="Curated stock news for informed investors. Session briefings on the names in your portfolio, with a live digest on demand.">
   <meta name="color-scheme" content="light dark">
   <script>
     (function () {
@@ -19,167 +21,1145 @@
     })();
   </script>
   <style>
+    * { box-sizing: border-box; }
     :root {
-      --bg: #eef1f5;
+      --page-bg: #eef1f5;
+      --card-bg: #ffffff;
+      --muted-bg: #f8fafc;
+      --panel-bg: #fafbfc;
       --text: #1a1a2e;
-      --muted: #64748b;
+      --text-strong: #0f172a;
+      --text-secondary: #475569;
+      --text-muted: #94a3b8;
+      --text-label: #64748b;
+      --border: #e8ecf0;
+      --border-strong: #e2e8f0;
+      --border-soft: #f1f5f9;
       --link: #1d4ed8;
-      --card: #ffffff;
-      --border: #e2e8f0;
+      --shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+      --pill-up-bg: #dcfce7;
+      --pill-up-fg: #15803d;
+      --pill-down-bg: #fee2e2;
+      --pill-down-fg: #b91c1c;
+      --pill-flat-bg: #f1f5f9;
+      --pill-flat-fg: #64748b;
+      --subscribe-bg: linear-gradient(180deg, #eff6ff 0%, #f8fafc 100%);
+      --subscribe-border: #bfdbfe;
       --modal-backdrop: rgba(15, 23, 42, 0.55);
+      --toggle-bg: rgba(255, 255, 255, 0.12);
+      --toggle-border: rgba(255, 255, 255, 0.22);
+      --toggle-fg: #f8fafc;
+      --section-max: 960px;
+      --duration-medium: 300ms;
+      --duration-slow: 500ms;
+      --easing: cubic-bezier(0.4, 0, 0.2, 1);
     }
     html[data-theme="dark"] {
-      --bg: #0b1220;
+      --page-bg: #0b1220;
+      --card-bg: #111827;
+      --muted-bg: #1e293b;
+      --panel-bg: #1e293b;
       --text: #e2e8f0;
-      --muted: #94a3b8;
-      --link: #93c5fd;
-      --card: #111827;
+      --text-strong: #f8fafc;
+      --text-secondary: #cbd5e1;
+      --text-muted: #94a3b8;
+      --text-label: #94a3b8;
       --border: #334155;
+      --border-strong: #334155;
+      --border-soft: #1f2937;
+      --link: #93c5fd;
+      --shadow: 0 4px 24px rgba(0, 0, 0, 0.35);
+      --pill-up-bg: #14532d;
+      --pill-up-fg: #86efac;
+      --pill-down-bg: #7f1d1d;
+      --pill-down-fg: #fca5a5;
+      --pill-flat-bg: #334155;
+      --pill-flat-fg: #cbd5e1;
+      --subscribe-bg: linear-gradient(180deg, #172554 0%, #1e293b 100%);
+      --subscribe-border: #1e40af;
       --modal-backdrop: rgba(2, 6, 23, 0.72);
     }
-    * { box-sizing: border-box; }
     body {
       margin: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background: var(--bg);
+      background: var(--page-bg);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
       color: var(--text);
       line-height: 1.5;
+      transition: background-color 0.2s ease, color 0.2s ease;
     }
-    .wrap { max-width: 42rem; margin: 0 auto; padding: 3rem 1.25rem; }
-    .card {
-      background: var(--card);
-      border-radius: 12px;
-      padding: 2rem;
-      box-shadow: 0 4px 24px rgba(0,0,0,.08);
-    }
-    h1 { margin: 0 0 0.5rem; font-size: 1.75rem; }
-    h2 { margin: 1.5rem 0 0.75rem; font-size: 1.1rem; }
-    .eyebrow {
-      font-size: 0.75rem;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: var(--muted);
-      margin-bottom: 0.25rem;
-    }
-    p, li { color: var(--muted); }
     a { color: var(--link); }
-    ul { padding-left: 1.25rem; }
-    .actions { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 1.5rem; }
-    .btn {
-      display: inline-block;
-      padding: 0.65rem 1.1rem;
-      border-radius: 8px;
-      font-size: 0.95rem;
-      font-weight: 600;
-      text-decoration: none;
-      cursor: pointer;
-      border: none;
-    }
-    .btn-primary {
-      background: #1d4ed8;
+
+    /* ── Hero (always dark, animated) ── */
+    .hero {
+      position: relative;
+      overflow: hidden;
+      isolation: isolate;
+      background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 100%);
+      padding: 72px 24px 64px;
+      text-align: center;
       color: #fff;
     }
-    .btn-primary:hover { background: #1e40af; }
-    .btn-secondary {
-      background: transparent;
-      color: var(--text);
-      border: 1px solid var(--border);
-    }
-    .btn-secondary:hover { background: rgba(0,0,0,.04); }
-    html[data-theme="dark"] .btn-secondary:hover { background: rgba(255,255,255,.06); }
     .theme-toggle {
-      position: fixed;
-      top: 1rem;
-      right: 1rem;
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      z-index: 2;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
       width: 40px;
       height: 40px;
+      padding: 0;
+      border: 1px solid var(--toggle-border);
       border-radius: 999px;
-      border: 1px solid var(--border);
-      background: var(--card);
-      color: var(--text);
+      background: var(--toggle-bg);
+      color: var(--toggle-fg);
       cursor: pointer;
+      backdrop-filter: blur(6px);
+      transition: background 0.15s ease, transform 0.15s ease;
     }
-    .subscribe-modal {
-      position: fixed;
+    .theme-toggle:hover {
+      transform: translateY(-1px);
+      background: rgba(255, 255, 255, 0.2);
+    }
+    .theme-toggle:focus-visible {
+      outline: 2px solid #93c5fd;
+      outline-offset: 2px;
+    }
+    .theme-toggle svg { width: 18px; height: 18px; display: block; }
+    .theme-toggle .icon-sun { display: none; }
+    .theme-toggle .icon-moon { display: block; }
+    html[data-theme="dark"] .theme-toggle .icon-sun { display: block; }
+    html[data-theme="dark"] .theme-toggle .icon-moon { display: none; }
+    .header-bg {
+      position: absolute;
       inset: 0;
-      z-index: 100;
+      z-index: 0;
+      pointer-events: none;
+    }
+    .header-grid {
+      position: absolute;
+      inset: -40px;
+      background-image:
+        linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+      background-size: 36px 36px;
+      animation: header-grid-scroll 24s linear infinite;
+    }
+    @keyframes header-grid-scroll {
+      0% { transform: translate(0, 0); }
+      100% { transform: translate(36px, 36px); }
+    }
+    .header-chart {
+      position: absolute;
+      bottom: -8%;
+      left: 0;
+      width: 100%;
+      height: 72%;
+      opacity: 0.45;
+    }
+    .chart-line {
+      fill: none;
+      stroke-width: 2.5;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+    .chart-line-up {
+      stroke: #34d399;
+      stroke-dasharray: 1400;
+      stroke-dashoffset: 1400;
+      animation: chart-line-draw 5s ease-in-out infinite alternate;
+    }
+    .chart-line-down {
+      stroke: #f87171;
+      stroke-width: 2;
+      stroke-dasharray: 1000;
+      stroke-dashoffset: 1000;
+      opacity: 0.7;
+      animation: chart-line-draw 6s ease-in-out infinite alternate-reverse;
+    }
+    .chart-grid-line { stroke: rgba(255, 255, 255, 0.07); stroke-width: 1; }
+    .chart-candle { animation: candle-pulse 3s ease-in-out infinite; }
+    .chart-candle.up { fill: rgba(34, 197, 94, 0.35); }
+    .chart-candle.down { fill: rgba(248, 113, 113, 0.3); }
+    .chart-candle:nth-child(odd) { animation-delay: 0.4s; }
+    .chart-candle:nth-child(even) { animation-delay: 1.2s; }
+    @keyframes chart-line-draw { to { stroke-dashoffset: 0; } }
+    @keyframes candle-pulse {
+      0%, 100% { opacity: 0.35; transform: scaleY(1); transform-origin: center bottom; }
+      50% { opacity: 0.75; transform: scaleY(1.15); transform-origin: center bottom; }
+    }
+    .header-tickers { position: absolute; inset: 0; }
+    .header-ticker {
+      position: absolute;
+      font-size: 10px;
+      font-weight: 700;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      padding: 3px 7px;
+      border-radius: 5px;
+      letter-spacing: 0.02em;
+      animation: ticker-float 7s ease-in-out infinite;
+    }
+    .header-ticker.up {
+      color: #6ee7b7;
+      background: rgba(34, 197, 94, 0.14);
+      border: 1px solid rgba(34, 197, 94, 0.2);
+    }
+    .header-ticker.down {
+      color: #fca5a5;
+      background: rgba(248, 113, 113, 0.12);
+      border: 1px solid rgba(248, 113, 113, 0.18);
+    }
+    .header-ticker:nth-child(1) { top: 14%; left: 6%; animation-delay: 0s; }
+    .header-ticker:nth-child(2) { top: 22%; right: 8%; animation-delay: 1.1s; }
+    .header-ticker:nth-child(3) { top: 58%; left: 10%; animation-delay: 2.3s; }
+    .header-ticker:nth-child(4) { top: 68%; right: 12%; animation-delay: 0.6s; }
+    .header-ticker:nth-child(5) { top: 38%; left: 22%; animation-delay: 3.2s; }
+    .header-ticker:nth-child(6) { top: 48%; right: 20%; animation-delay: 1.8s; }
+    @keyframes ticker-float {
+      0%, 100% { transform: translateY(0); opacity: 0.18; }
+      50% { transform: translateY(-7px); opacity: 0.38; }
+    }
+    .header-shimmer {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(105deg, transparent 42%, rgba(255, 255, 255, 0.05) 50%, transparent 58%);
+      animation: header-shimmer 7s ease-in-out infinite;
+    }
+    @keyframes header-shimmer {
+      0%, 100% { transform: translateX(-120%); }
+      50% { transform: translateX(120%); }
+    }
+    .hero-content {
+      position: relative;
+      z-index: 1;
+      max-width: 640px;
+      margin: 0 auto;
+      isolation: isolate;
+    }
+    .hero-content::before {
+      content: "";
+      position: absolute;
+      inset: -28px -20px;
+      z-index: -1;
+      pointer-events: none;
+      background: radial-gradient(ellipse 85% 90% at 50% 50%, rgba(15, 23, 42, 0.72) 0%, rgba(15, 23, 42, 0.35) 55%, transparent 100%);
+    }
+    .hero .eyebrow {
+      margin: 0 0 8px;
+      font-size: 11px;
+      color: #f1f5f9;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      font-weight: 600;
+      text-shadow: 0 1px 10px rgba(0, 0, 0, 0.65);
+    }
+    .hero h1 {
+      margin: 0 0 16px;
+      font-size: clamp(2rem, 5vw, 3rem);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1.1;
+      color: #fff;
+      text-shadow: 0 0 24px rgba(15, 23, 42, 0.95), 0 2px 6px rgba(0, 0, 0, 0.7);
+    }
+    .hero .subhead {
+      margin: 0 0 28px;
+      font-size: 17px;
+      color: #e2e8f0;
+      line-height: 1.6;
+      text-shadow: 0 1px 8px rgba(0, 0, 0, 0.65);
+    }
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      justify-content: center;
+    }
+    .btn-subscribe {
+      padding: 12px 28px;
+      border: none;
+      border-radius: 999px;
+      background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+      color: #fff;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.45), 0 4px 14px rgba(220, 38, 38, 0.4);
+      transition: background 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
+    }
+    .btn-subscribe:hover {
+      background: linear-gradient(135deg, #f87171 0%, #b91c1c 100%);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 18px rgba(220, 38, 38, 0.45);
+    }
+    .btn-ghost {
+      padding: 12px 24px;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.08);
+      color: #dbeafe;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      backdrop-filter: blur(4px);
+      transition: background 0.15s ease, transform 0.15s ease, border-color 0.15s ease;
+    }
+    .btn-ghost:hover {
+      background: rgba(255, 255, 255, 0.16);
+      transform: translateY(-1px);
+      border-color: rgba(255, 255, 255, 0.45);
+    }
+
+    /* Hero entrance stagger */
+    @keyframes fade-up {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .hero-enter {
+      animation: fade-up var(--duration-slow) var(--easing) both;
+    }
+    .hero-enter.delay-1 { animation-delay: 100ms; }
+    .hero-enter.delay-2 { animation-delay: 200ms; }
+    .hero-enter.delay-3 { animation-delay: 300ms; }
+    .hero-enter.delay-4 { animation-delay: 500ms; }
+    .hero-enter.delay-5 { animation-delay: 600ms; }
+
+    /* ── Social proof strip ── */
+    .social-proof {
+      background: var(--card-bg);
+      border-bottom: 1px solid var(--border);
+      padding: 20px 24px;
+    }
+    .social-proof-inner {
+      max-width: var(--section-max);
+      margin: 0 auto;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 24px 40px;
+    }
+    .stat {
+      text-align: center;
+    }
+    .stat-value {
+      display: block;
+      font-size: 28px;
+      font-weight: 800;
+      color: var(--text-strong);
+      letter-spacing: -0.02em;
+      line-height: 1.1;
+    }
+    .stat-label {
+      display: block;
+      margin-top: 4px;
+      font-size: 13px;
+      color: var(--text-label);
+      font-weight: 500;
+    }
+
+    /* ── Sections ── */
+    .section {
+      padding: 64px 24px;
+    }
+    .section-inner {
+      max-width: var(--section-max);
+      margin: 0 auto;
+    }
+    .section-alt { background: var(--muted-bg); }
+    .section-header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+    .section-header .eyebrow {
+      margin: 0 0 8px;
+      font-size: 11px;
+      color: var(--text-label);
+      letter-spacing: 0.14em;
+      padding-left: 0.14em;
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+    .section-header h2 {
+      margin: 0 0 12px;
+      font-size: clamp(1.5rem, 3vw, 2rem);
+      font-weight: 800;
+      color: var(--text-strong);
+      letter-spacing: -0.02em;
+    }
+    .section-header > p:not(.eyebrow) {
+      margin: 0 auto;
+      max-width: 520px;
+      font-size: 16px;
+      color: var(--text-secondary);
+    }
+
+    /* ── How it works ── */
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+    .step-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border-strong);
+      border-radius: 16px;
+      padding: 28px 24px;
+      box-shadow: var(--shadow);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .step-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 32px rgba(15, 23, 42, 0.1);
+    }
+    html[data-theme="dark"] .step-card:hover {
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
+    .step-num {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      border-radius: 999px;
+      background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 100%);
+      color: #fff;
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 16px;
+    }
+    .step-card h3 {
+      margin: 0 0 8px;
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text-strong);
+    }
+    .step-card p {
+      margin: 0;
+      font-size: 14px;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+    .step-icon {
+      margin-top: 16px;
+      padding: 12px;
+      background: var(--muted-bg);
+      border-radius: 10px;
+      font-size: 12px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      color: var(--text-label);
+    }
+    .step-icon .pill {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 5px;
+      margin: 2px;
+    }
+    .pill.up { background: var(--pill-up-bg); color: var(--pill-up-fg); }
+    .pill.down { background: var(--pill-down-bg); color: var(--pill-down-fg); }
+
+    /* ── Product preview mock ── */
+    .preview-wrap {
+      max-width: 560px;
+      margin: 0 auto;
+    }
+    .preview-card {
+      background: var(--card-bg);
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border-strong);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .preview-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 12px 40px rgba(15, 23, 42, 0.12);
+    }
+    html[data-theme="dark"] .preview-card:hover {
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
+    }
+    .preview-header {
+      padding: 16px 20px;
+      background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 100%);
+      color: #fff;
+      font-size: 13px;
+      font-weight: 600;
+    }
+    .preview-movers {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      padding: 12px 16px;
+      background: var(--muted-bg);
+      border-bottom: 1px solid var(--border);
+    }
+    .preview-movers .pill {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 6px;
+    }
+    .preview-story {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border-soft);
+    }
+    .preview-story:last-child { border-bottom: none; }
+    .preview-ticker-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    .preview-ticker-name {
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--text-strong);
+    }
+    .preview-price {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-strong);
+    }
+    .preview-change {
+      font-size: 12px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 5px;
+    }
+    .preview-change.up { background: var(--pill-up-bg); color: var(--pill-up-fg); }
+    .preview-headline {
+      margin: 0;
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--link);
+      line-height: 1.4;
+    }
+    .preview-meta {
+      margin: 6px 0 0;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    /* ── Benefits ── */
+    .benefits-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+    }
+    .benefit-item {
+      display: flex;
+      gap: 16px;
+      padding: 20px;
+      background: var(--card-bg);
+      border: 1px solid var(--border-strong);
+      border-radius: 12px;
+    }
+    .benefit-icon {
+      flex-shrink: 0;
+      width: 44px;
+      height: 44px;
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 1rem;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 100%);
+      color: #6ee7b7;
+      font-size: 20px;
+    }
+    .benefit-item h3 {
+      margin: 0 0 4px;
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-strong);
+    }
+    .benefit-item p {
+      margin: 0;
+      font-size: 14px;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+
+    /* ── Ticker showcase ── */
+    .ticker-showcase {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+    }
+    .ticker-showcase .pill {
+      font-size: 14px;
+      font-weight: 700;
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      transition: transform 0.15s ease;
+    }
+    .ticker-showcase .pill:hover { transform: translateY(-2px); }
+    .pill.flat { background: var(--pill-flat-bg); color: var(--pill-flat-fg); }
+
+    /* ── FAQ ── */
+    .faq-list {
+      max-width: 640px;
+      margin: 0 auto;
+    }
+    .faq-item {
+      border: 1px solid var(--border-strong);
+      border-radius: 12px;
+      margin-bottom: 10px;
+      overflow: hidden;
+      background: var(--card-bg);
+    }
+    .faq-item summary {
+      padding: 18px 20px;
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text-strong);
+      cursor: pointer;
+      list-style: none;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      transition: background 0.15s ease;
+    }
+    .faq-item summary::-webkit-details-marker { display: none; }
+    .faq-item summary::after {
+      content: "+";
+      font-size: 20px;
+      font-weight: 400;
+      color: var(--text-label);
+      transition: transform 0.2s ease;
+      flex-shrink: 0;
+    }
+    .faq-item[open] summary::after { transform: rotate(45deg); }
+    .faq-item summary:hover { background: var(--muted-bg); }
+    .faq-answer {
+      padding: 0 20px 18px;
+      font-size: 14px;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+
+    /* ── Final CTA ── */
+    .final-cta {
+      position: relative;
+      overflow: hidden;
+      padding: 72px 24px;
+      text-align: center;
+      background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 100%);
+      color: #fff;
+    }
+    .final-cta::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+      background-size: 36px 36px;
+      pointer-events: none;
+    }
+    .final-cta-inner {
+      position: relative;
+      z-index: 1;
+      max-width: 520px;
+      margin: 0 auto;
+    }
+    .final-cta h2 {
+      margin: 0 0 12px;
+      font-size: clamp(1.5rem, 3vw, 2rem);
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+    .final-cta p {
+      margin: 0 0 28px;
+      font-size: 16px;
+      color: #cbd5e1;
+      line-height: 1.6;
+    }
+    .final-cta .btn-subscribe {
+      font-size: 17px;
+      padding: 14px 32px;
+    }
+    .final-cta-link {
+      display: inline-block;
+      margin-top: 16px;
+      padding: 0;
+      border: none;
+      background: none;
+      color: #93c5fd;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: underline;
+    }
+    .final-cta-link:hover { color: #dbeafe; }
+
+    /* ── Footer ── */
+    .site-footer {
+      padding: 40px 24px;
+      background: var(--muted-bg);
+      border-top: 1px solid var(--border);
+    }
+    .footer-inner {
+      max-width: var(--section-max);
+      margin: 0 auto;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 24px;
+    }
+    .footer-brand {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-strong);
+    }
+    .footer-brand p {
+      margin: 6px 0 0;
+      font-weight: 400;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+    .footer-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px 24px;
+      align-items: flex-start;
+    }
+    .footer-links button,
+    .footer-links a {
+      padding: 0;
+      border: none;
+      background: none;
+      color: var(--text-label);
+      font-size: 13px;
+      cursor: pointer;
+      text-decoration: none;
+    }
+    .footer-links button:hover,
+    .footer-links a:hover { color: var(--text-secondary); }
+    .footer-bottom {
+      max-width: var(--section-max);
+      margin: 24px auto 0;
+      padding-top: 20px;
+      border-top: 1px solid var(--border);
+      font-size: 12px;
+      color: var(--text-muted);
+      text-align: center;
+    }
+
+    /* ── Scroll reveal ── */
+    .reveal {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity 0.6s var(--easing), transform 0.6s var(--easing);
+    }
+    .reveal.is-visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .reveal-stagger > * {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.5s var(--easing), transform 0.5s var(--easing);
+    }
+    .reveal-stagger.is-visible > *:nth-child(1) { transition-delay: 0ms; opacity: 1; transform: translateY(0); }
+    .reveal-stagger.is-visible > *:nth-child(2) { transition-delay: 100ms; opacity: 1; transform: translateY(0); }
+    .reveal-stagger.is-visible > *:nth-child(3) { transition-delay: 200ms; opacity: 1; transform: translateY(0); }
+    .reveal-stagger.is-visible > *:nth-child(4) { transition-delay: 300ms; opacity: 1; transform: translateY(0); }
+
+    /* ── Subscribe modal ── */
+    .subscribe-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px 16px;
     }
     .subscribe-modal[hidden] { display: none; }
     .subscribe-modal-backdrop {
       position: absolute;
       inset: 0;
       background: var(--modal-backdrop);
+      backdrop-filter: blur(2px);
     }
     .subscribe-modal-dialog {
       position: relative;
-      width: min(100%, 480px);
-      max-height: 90vh;
-      background: var(--card);
-      border-radius: 12px;
+      width: 100%;
+      max-width: 560px;
+      max-height: calc(100vh - 48px);
       overflow: hidden;
-      box-shadow: 0 20px 50px rgba(0,0,0,.25);
+      border-radius: 16px;
+      background: var(--card-bg);
+      box-shadow: 0 24px 48px rgba(15, 23, 42, 0.2);
     }
     .subscribe-modal-header {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 1rem 1.25rem;
-      border-bottom: 1px solid var(--border);
+      padding: 18px 20px;
+      border-bottom: 1px solid var(--border-strong);
+      background: var(--muted-bg);
     }
-    .subscribe-modal-header h2 { margin: 0; font-size: 1.1rem; color: var(--text); }
+    .subscribe-modal-header h2 {
+      margin: 0;
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text-strong);
+    }
     .subscribe-modal-close {
-      background: none;
-      border: none;
-      font-size: 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      border: 0;
+      border-radius: 8px;
+      background: transparent;
+      color: var(--text-label);
+      font-size: 24px;
       line-height: 1;
-      color: var(--muted);
       cursor: pointer;
+    }
+    .subscribe-modal-close:hover {
+      background: var(--border);
+      color: var(--text-strong);
     }
     .subscribe-modal-body iframe {
       display: block;
       width: 100%;
-      min-height: 420px;
-      border: none;
+      height: 380px;
+      border: 0;
+      background: var(--card-bg);
     }
-    .subscribe-success { padding: 2rem; text-align: center; }
-    .subscribe-success h3 { color: var(--text); margin: 0 0 0.5rem; }
+    .subscribe-success {
+      padding: 48px 32px;
+      text-align: center;
+    }
+    .subscribe-success h3 {
+      margin: 0 0 10px;
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--pill-up-fg);
+    }
+    .subscribe-success p {
+      margin: 0;
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 768px) {
+      .steps { grid-template-columns: 1fr; }
+      .benefits-grid { grid-template-columns: 1fr; }
+      .hero { padding: 64px 20px 48px; }
+      .section { padding: 48px 20px; }
+      .hero-actions { flex-direction: column; align-items: stretch; }
+      .btn-subscribe, .btn-ghost { width: 100%; text-align: center; }
+      .footer-inner { flex-direction: column; }
+      .header-ticker { font-size: 9px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .header-grid, .chart-line-up, .chart-line-down, .chart-candle,
+      .header-ticker, .header-shimmer, .hero-enter, .reveal, .reveal-stagger > * {
+        animation: none !important;
+        transition: none !important;
+        opacity: 1 !important;
+        transform: none !important;
+      }
+      .chart-line-up, .chart-line-down { stroke-dashoffset: 0; }
+    }
   </style>
 </head>
 <body>
-  <button type="button" class="theme-toggle" id="theme-toggle" aria-label="Toggle theme">◐</button>
 
-  <div class="wrap">
-    <div class="card">
-      <p class="eyebrow">Daily Digest</p>
-      <h1>Your watchlist, twice a day</h1>
-      <p>
-        Pick your tickers, get personalized email briefings before the open and after the close,
-        and open a <strong style="color: var(--text);">live full digest</strong> on the web from any email.
+  <!-- Step 1: Animated hero -->
+  <header class="hero">
+    <button type="button" class="theme-toggle" id="theme-toggle" aria-label="Switch to dark mode" title="Toggle color theme">
+      <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M21 14.5A8.5 8.5 0 1 1 9.5 3 7 7 0 0 0 21 14.5z"></path>
+      </svg>
+      <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle cx="12" cy="12" r="4"></circle>
+        <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"></path>
+      </svg>
+    </button>
+    <div class="header-bg" aria-hidden="true">
+      <div class="header-grid"></div>
+      <svg class="header-chart" viewBox="0 0 800 140" preserveAspectRatio="none">
+        <line class="chart-grid-line" x1="0" y1="35" x2="800" y2="35" />
+        <line class="chart-grid-line" x1="0" y1="70" x2="800" y2="70" />
+        <line class="chart-grid-line" x1="0" y1="105" x2="800" y2="105" />
+        <rect class="chart-candle up" x="60" y="82" width="8" height="22" rx="1" />
+        <rect class="chart-candle down" x="140" y="48" width="8" height="18" rx="1" />
+        <rect class="chart-candle up" x="220" y="72" width="8" height="28" rx="1" />
+        <rect class="chart-candle up" x="300" y="58" width="8" height="35" rx="1" />
+        <rect class="chart-candle down" x="380" y="42" width="8" height="20" rx="1" />
+        <rect class="chart-candle up" x="460" y="65" width="8" height="30" rx="1" />
+        <rect class="chart-candle down" x="540" y="50" width="8" height="16" rx="1" />
+        <rect class="chart-candle up" x="620" y="70" width="8" height="26" rx="1" />
+        <rect class="chart-candle up" x="700" y="55" width="8" height="32" rx="1" />
+        <path class="chart-line chart-line-up" d="M0,108 L50,100 L100,104 L150,88 L200,92 L250,76 L300,82 L350,68 L400,74 L450,58 L500,64 L550,50 L600,56 L650,42 L700,48 L750,36 L800,40" />
+        <path class="chart-line chart-line-down" d="M0,52 L50,58 L100,54 L150,64 L200,60 L250,70 L300,66 L350,76 L400,72 L450,82 L500,78 L550,88 L600,84 L650,94 L700,90 L750,98 L800,95" />
+      </svg>
+      <div class="header-tickers">
+        <span class="header-ticker up">AAPL +1.2%</span>
+        <span class="header-ticker down">TSLA -0.6%</span>
+        <span class="header-ticker up">NVDA +2.1%</span>
+        <span class="header-ticker down">META -0.3%</span>
+        <span class="header-ticker up">MSFT +0.8%</span>
+        <span class="header-ticker up">VOO +0.4%</span>
+      </div>
+      <div class="header-shimmer"></div>
+    </div>
+    <div class="hero-content">
+      <p class="eyebrow hero-enter">Daily Digest</p>
+      <h1 class="hero-enter delay-1">Stay current on<br>what you own.</h1>
+      <p class="subhead hero-enter delay-2">
+        Curated stock news for the US equities and ETFs in your portfolio — a focused briefing before the open and after the close, with a live digest when you want the full picture.
       </p>
-
-      <h2>How it works</h2>
-      <ul>
-        <li>Subscribe and choose up to 10 tickers</li>
-        <li>Receive tailored news in your inbox (9:15 AM and 4:15 PM ET)</li>
-        <li>Click through for quotes, movers, and more stories online</li>
-      </ul>
-
-      <div class="actions">
-        <button type="button" class="btn btn-primary" onclick="openSubscribeModal()">Subscribe</button>
-        <button type="button" class="btn btn-secondary" onclick="openSubscribeModal()">Update tickers</button>
+      <div class="hero-actions hero-enter delay-3">
+        <button type="button" class="btn-subscribe" onclick="openSubscribeModal()">Get your digest</button>
+        <button type="button" class="btn-ghost" onclick="openSubscribeModal()">Update holdings</button>
       </div>
     </div>
-  </div>
+  </header>
 
+  <!-- Step 2: Social proof -->
+  <section class="social-proof" aria-label="Product highlights">
+    <div class="social-proof-inner reveal">
+      <div class="stat">
+        <span class="stat-value">2×</span>
+        <span class="stat-label">Session briefings daily</span>
+      </div>
+      <div class="stat">
+        <span class="stat-value">9:15 &amp; 4:15</span>
+        <span class="stat-label">ET — pre-open &amp; post-close</span>
+      </div>
+      <div class="stat">
+        <span class="stat-value">10</span>
+        <span class="stat-label">Holdings per investor</span>
+      </div>
+      <div class="stat">
+        <span class="stat-value">Live</span>
+        <span class="stat-label">Full digest on demand</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Step 2: How it works -->
+  <section class="section" id="how-it-works">
+    <div class="section-inner">
+      <div class="section-header reveal">
+        <p class="eyebrow">How it works</p>
+        <h2>Three steps to stay informed</h2>
+        <p>Add your holdings once. We deliver what matters at the sessions that count.</p>
+      </div>
+      <div class="steps reveal-stagger">
+        <article class="step-card">
+          <span class="step-num">1</span>
+          <h3>Name your holdings</h3>
+          <p>Subscribe with your email and select up to 10 US stocks or ETFs you hold or actively track.</p>
+          <div class="step-icon">
+            <span class="pill up">AAPL</span>
+            <span class="pill up">NVDA</span>
+            <span class="pill down">TSLA</span>
+            <span class="pill up">MSFT</span>
+          </div>
+        </article>
+        <article class="step-card">
+          <span class="step-num">2</span>
+          <h3>Read the session brief</h3>
+          <p>Headlines and price action on your positions — delivered at 9:15 AM and 4:15 PM ET, when it matters most.</p>
+          <div class="step-icon">Pre-open · Post-close</div>
+        </article>
+        <article class="step-card">
+          <span class="step-num">3</span>
+          <h3>Go deeper on the web</h3>
+          <p>Open the live digest from any email for quotes, session movers, and expanded coverage on your holdings.</p>
+          <div class="step-icon">Full live digest →</div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- Step 3: Product preview -->
+  <section class="section section-alt" id="preview">
+    <div class="section-inner">
+      <div class="section-header reveal">
+        <p class="eyebrow">The digest</p>
+        <h2>Everything on your holdings, in one place</h2>
+        <p>Each email links to a live page — quotes, session movers, and the headlines driving your positions.</p>
+      </div>
+      <div class="preview-wrap reveal">
+        <div class="preview-card">
+          <div class="preview-header">Daily Digest · Aug 15, 2026 · Pre-open session</div>
+          <div class="preview-movers">
+            <span class="pill up">NVDA +2.1%</span>
+            <span class="pill up">AAPL +1.2%</span>
+            <span class="pill down">TSLA -0.6%</span>
+            <span class="pill up">MSFT +0.8%</span>
+          </div>
+          <div class="preview-story">
+            <div class="preview-ticker-row">
+              <span class="preview-ticker-name">NVDA</span>
+              <span class="preview-price">$142.50</span>
+              <span class="preview-change up">+2.14%</span>
+            </div>
+            <p class="preview-headline">Nvidia announces next-gen chip roadmap ahead of earnings</p>
+            <p class="preview-meta">Reuters · 2h ago</p>
+          </div>
+          <div class="preview-story">
+            <div class="preview-ticker-row">
+              <span class="preview-ticker-name">AAPL</span>
+              <span class="preview-price">$228.30</span>
+              <span class="preview-change up">+1.18%</span>
+            </div>
+            <p class="preview-headline">Apple expands AI features across iOS 19 developer preview</p>
+            <p class="preview-meta">Bloomberg · 4h ago</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Step 3: Benefits -->
+  <section class="section" id="benefits">
+    <div class="section-inner">
+      <div class="section-header reveal">
+        <p class="eyebrow">Built for investors</p>
+        <h2>News that respects your portfolio</h2>
+      </div>
+      <div class="benefits-grid reveal-stagger">
+        <div class="benefit-item">
+          <div class="benefit-icon" aria-hidden="true">◎</div>
+          <div>
+            <h3>Holdings-only coverage</h3>
+            <p>News and quotes for the names you own — not a generic market firehose.</p>
+          </div>
+        </div>
+        <div class="benefit-item">
+          <div class="benefit-icon" aria-hidden="true">⏱</div>
+          <div>
+            <h3>Session-aware timing</h3>
+            <p>Briefings land before the open and after the close — when portfolio decisions actually happen.</p>
+          </div>
+        </div>
+        <div class="benefit-item">
+          <div class="benefit-icon" aria-hidden="true">↗</div>
+          <div>
+            <h3>Price action &amp; context</h3>
+            <p>Session movers, live quotes, and the stories behind the moves — side by side.</p>
+          </div>
+        </div>
+        <div class="benefit-item">
+          <div class="benefit-icon" aria-hidden="true">✓</div>
+          <div>
+            <h3>No friction</h3>
+            <p>Free, email-only signup. Adjust your holdings anytime — same form, same email.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Step 3: Ticker showcase -->
+  <section class="section section-alt" id="tickers">
+    <div class="section-inner">
+      <div class="section-header reveal">
+        <p class="eyebrow">Your positions</p>
+        <h2>Track the names in your portfolio</h2>
+        <p>Up to 10 US stocks or ETFs — individual equities, sector leaders, or core index holdings.</p>
+      </div>
+      <div class="ticker-showcase reveal">
+        <span class="pill up">AAPL +1.2%</span>
+        <span class="pill up">MSFT +0.8%</span>
+        <span class="pill up">NVDA +2.1%</span>
+        <span class="pill down">TSLA -0.6%</span>
+        <span class="pill up">GOOGL +0.5%</span>
+        <span class="pill down">META -0.3%</span>
+        <span class="pill up">AMZN +0.9%</span>
+        <span class="pill flat">VOO +0.4%</span>
+        <span class="pill flat">SPY +0.3%</span>
+        <span class="pill up">AMD +1.5%</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Step 4: FAQ -->
+  <section class="section" id="faq">
+    <div class="section-inner">
+      <div class="section-header reveal">
+        <p class="eyebrow">FAQ</p>
+        <h2>Common questions</h2>
+      </div>
+      <div class="faq-list reveal">
+        <details class="faq-item">
+          <summary>Is Daily Digest free?</summary>
+          <p class="faq-answer">Yes — no subscription fee. Just your email and the holdings you want covered.</p>
+        </details>
+        <details class="faq-item">
+          <summary>How often will I receive emails?</summary>
+          <p class="faq-answer">Twice each trading day — pre-open at 9:15 AM ET and post-close at 4:15 PM ET. Each briefing covers only the positions in your portfolio.</p>
+        </details>
+        <details class="faq-item">
+          <summary>How many holdings can I track?</summary>
+          <p class="faq-answer">Up to 10 US stocks or ETFs per investor. Focus on the names you actually hold or watch closely.</p>
+        </details>
+        <details class="faq-item">
+          <summary>Can I change my holdings later?</summary>
+          <p class="faq-answer">Yes. Resubmit the form with the same email address to update your positions. Changes apply on the next session.</p>
+        </details>
+        <details class="faq-item">
+          <summary>What is the live web digest?</summary>
+          <p class="faq-answer">A personalized page with live quotes, session movers, and full headline coverage for your holdings — refreshed when you open it from email.</p>
+        </details>
+        <details class="faq-item">
+          <summary>Do I need to create an account?</summary>
+          <p class="faq-answer">No. Your email identifies your holdings. Subscribe, confirm if prompted, and you're covered.</p>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <!-- Step 4: Final CTA -->
+  <section class="final-cta" id="subscribe">
+    <div class="final-cta-inner reveal">
+      <h2>Stay informed on what you own</h2>
+      <p>Join investors who start and end each session knowing what's moving in their holdings — free.</p>
+      <button type="button" class="btn-subscribe" onclick="openSubscribeModal()">Get your digest</button>
+      <br>
+      <button type="button" class="final-cta-link" onclick="openSubscribeModal()">Already subscribed? Update your holdings</button>
+    </div>
+  </section>
+
+  <!-- Step 4: Footer -->
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        Daily Digest
+        <p>Stock news for informed investors — twice daily.</p>
+      </div>
+      <div class="footer-links">
+        <button type="button" onclick="openSubscribeModal()">Subscribe</button>
+        <button type="button" onclick="openSubscribeModal()">Update holdings</button>
+        <a href="#how-it-works">How it works</a>
+        <a href="#faq">FAQ</a>
+      </div>
+    </div>
+    <p class="footer-bottom">© 2026 Daily Digest · Curated news for your US holdings</p>
+  </footer>
+
+  <!-- Subscribe modal -->
   <div class="subscribe-modal" id="subscribe-modal" hidden>
     <div class="subscribe-modal-backdrop" onclick="closeSubscribeModal()"></div>
     <div class="subscribe-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="subscribe-modal-title">
       <div class="subscribe-modal-header">
-        <h2 id="subscribe-modal-title">Subscribe or update your tickers</h2>
+        <h2 id="subscribe-modal-title">Subscribe or update your holdings</h2>
         <button type="button" class="subscribe-modal-close" onclick="closeSubscribeModal()" aria-label="Close">&times;</button>
       </div>
       <div class="subscribe-modal-body" id="subscribe-modal-body">
@@ -190,8 +1170,8 @@
         ></iframe>
       </div>
       <div class="subscribe-success" id="subscribe-success" hidden>
-        <h3>You're in!</h3>
-        <p>Confirm your email if needed. Your ticker picks apply on the next digest run.</p>
+        <h3>You're subscribed</h3>
+        <p>Confirm your email if prompted. Your holdings update on the next session.</p>
       </div>
     </div>
   </div>
@@ -199,18 +1179,47 @@
   <script>
     (function () {
       var STORAGE_KEY = "daily-digest-theme";
+      var root = document.documentElement;
+      var themeBtn = document.getElementById("theme-toggle");
       var modal = document.getElementById("subscribe-modal");
       var iframe = document.getElementById("subscribe-iframe");
       var modalBody = document.getElementById("subscribe-modal-body");
       var successPanel = document.getElementById("subscribe-success");
 
-      document.getElementById("theme-toggle").addEventListener("click", function () {
-        var current = document.documentElement.getAttribute("data-theme") || "light";
-        var next = current === "dark" ? "light" : "dark";
-        document.documentElement.setAttribute("data-theme", next);
-        document.documentElement.style.colorScheme = next;
-        try { localStorage.setItem(STORAGE_KEY, next); } catch (e) {}
-      });
+      function currentTheme() {
+        return root.getAttribute("data-theme") === "dark" ? "dark" : "light";
+      }
+
+      function syncToggle(theme) {
+        if (!themeBtn) return;
+        var next = theme === "dark" ? "light" : "dark";
+        themeBtn.setAttribute("aria-label", "Switch to " + next + " mode");
+        themeBtn.setAttribute("title", "Switch to " + next + " mode");
+      }
+
+      function applyTheme(theme) {
+        root.setAttribute("data-theme", theme);
+        root.style.colorScheme = theme;
+        try { localStorage.setItem(STORAGE_KEY, theme); } catch (e) {}
+        syncToggle(theme);
+      }
+
+      if (themeBtn) {
+        if (!root.getAttribute("data-theme")) {
+          var stored = null;
+          try { stored = localStorage.getItem(STORAGE_KEY); } catch (e) {}
+          applyTheme(
+            stored === "light" || stored === "dark"
+              ? stored
+              : (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light")
+          );
+        } else {
+          syncToggle(currentTheme());
+        }
+        themeBtn.addEventListener("click", function () {
+          applyTheme(currentTheme() === "dark" ? "light" : "dark");
+        });
+      }
 
       window.openSubscribeModal = function () {
         modal.hidden = false;
@@ -238,6 +1247,28 @@
       document.addEventListener("keydown", function (e) {
         if (e.key === "Escape" && !modal.hidden) closeSubscribeModal();
       });
+
+      /* Scroll reveal */
+      if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+        var revealEls = document.querySelectorAll(".reveal, .reveal-stagger");
+        if ("IntersectionObserver" in window) {
+          var observer = new IntersectionObserver(function (entries) {
+            entries.forEach(function (entry) {
+              if (entry.isIntersecting) {
+                entry.target.classList.add("is-visible");
+                observer.unobserve(entry.target);
+              }
+            });
+          }, { threshold: 0.15, rootMargin: "0px 0px -40px 0px" });
+          revealEls.forEach(function (el) { observer.observe(el); });
+        } else {
+          revealEls.forEach(function (el) { el.classList.add("is-visible"); });
+        }
+      } else {
+        document.querySelectorAll(".reveal, .reveal-stagger").forEach(function (el) {
+          el.classList.add("is-visible");
+        });
+      }
     })();
   </script>
 </body>

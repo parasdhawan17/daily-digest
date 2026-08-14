@@ -114,6 +114,40 @@
       backdrop-filter: blur(6px);
       transition: background 0.15s ease, transform 0.15s ease, border-color 0.15s ease;
     }
+    .header-home-link {
+      position: absolute;
+      top: 14px;
+      left: 14px;
+      z-index: 2;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      height: 40px;
+      padding: 0 14px 0 11px;
+      border: 1px solid var(--toggle-border);
+      border-radius: 999px;
+      background: var(--toggle-bg);
+      color: var(--toggle-fg);
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 600;
+      backdrop-filter: blur(6px);
+      transition: background 0.15s ease, transform 0.15s ease, border-color 0.15s ease;
+    }
+    .header-home-link svg {
+      width: 16px;
+      height: 16px;
+      display: block;
+      flex-shrink: 0;
+    }
+    .header-home-link:hover {
+      transform: translateY(-1px);
+      background: rgba(255, 255, 255, 0.2);
+    }
+    .header-home-link:focus-visible {
+      outline: 2px solid #93c5fd;
+      outline-offset: 2px;
+    }
     .theme-toggle:hover {
       transform: translateY(-1px);
       background: rgba(255, 255, 255, 0.2);
@@ -815,6 +849,12 @@
         width: 100%;
         max-width: 280px;
       }
+      .header-home-link span { display: none; }
+      .header-home-link {
+        width: 40px;
+        padding: 0;
+        justify-content: center;
+      }
       .header-ticker { font-size: 9px; }
     }
     @media (prefers-reduced-motion: reduce) {
@@ -837,6 +877,14 @@
   <div class="container">
     <div class="card">
       <header class="header">
+        {% if site_url %}
+        <a href="{{ site_url }}/" class="header-home-link" aria-label="Back to home">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M19 12H5M12 19l-7-7 7-7"></path>
+          </svg>
+          <span>Home</span>
+        </a>
+        {% endif %}
         <button type="button" class="theme-toggle" id="theme-toggle" aria-label="Switch to dark mode" title="Toggle color theme">
           <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M21 14.5A8.5 8.5 0 1 1 9.5 3 7 7 0 0 0 21 14.5z"></path>
@@ -884,9 +932,6 @@
         <p class="badge">Today's biggest move: <strong>{{ top_mover_label }}</strong></p>
         {% endif %}
         <nav class="nav">
-          {% if site_url %}
-          <a href="{{ site_url }}/">Home</a>
-          {% endif %}
           {% if subscribe_form_url %}
           <button type="button" class="header-nav-link" onclick="openSubscribeModal()">Update tickers</button>
           <button type="button" class="header-subscribe-btn" onclick="openSubscribeModal()">Subscribe</button>
