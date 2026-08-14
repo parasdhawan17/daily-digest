@@ -145,7 +145,7 @@
       {% endif %}
       <div class="actions">
         <a class="btn-primary" href="{{ site_url or '/' }}">Back to home</a>
-        {% if subscribe_form_url %}
+        {% if subscribe_enabled %}
         <a href="{{ site_url or '/' }}#subscribe">Subscribe</a>
         {% endif %}
       </div>

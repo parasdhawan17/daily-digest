@@ -792,7 +792,7 @@
       width: 100%;
       max-width: 560px;
       max-height: calc(100vh - 48px);
-      overflow: hidden;
+      overflow: visible;
       border-radius: 16px;
       background: var(--card-bg);
       box-shadow: 0 24px 48px rgba(15, 23, 42, 0.2);
@@ -829,11 +829,8 @@
       background: var(--border);
       color: var(--text-strong);
     }
-    .subscribe-modal-body iframe {
-      display: block;
-      width: 100%;
-      height: 380px;
-      border: 0;
+    .subscribe-modal-body {
+      padding: 0;
       background: var(--card-bg);
     }
     .subscribe-success {
@@ -874,6 +871,7 @@
       .chart-line-up, .chart-line-down { stroke-dashoffset: 0; }
     }
   </style>
+  <link rel="stylesheet" href="/subscribe-form.css">
 </head>
 <body>
 
@@ -1162,13 +1160,7 @@
         <h2 id="subscribe-modal-title">Subscribe or update your holdings</h2>
         <button type="button" class="subscribe-modal-close" onclick="closeSubscribeModal()" aria-label="Close">&times;</button>
       </div>
-      <div class="subscribe-modal-body" id="subscribe-modal-body">
-        <iframe
-          id="subscribe-iframe"
-          data-src="https://c45d1150.sibforms.com/serve/MUIFAHIL1jH-DeVrUnpoo9864EFxz9zv2_ZPiO5KF3s6v4dRsO78MCqs3Px8F3YEkQEleXXhoo3-ru-TV0wfGKmx-2GDoycH5AKn6zALH_5j980Isx-qMT0_GjO7sEv1dSME02tsPJpnG84htHPDroxqPtqY8u1Wt0NWE-MguymSMwInpWKhcLGiRmaKzN0-Y1ZM6iMYpio_ixYtWw=="
-          title="Email subscription form"
-        ></iframe>
-      </div>
+      <div class="subscribe-modal-body" id="subscribe-modal-body"></div>
       <div class="subscribe-success" id="subscribe-success" hidden>
         <h3>You're subscribed</h3>
         <p>Confirm your email if prompted. Your holdings update on the next session.</p>
@@ -1181,10 +1173,6 @@
       var STORAGE_KEY = "daily-digest-theme";
       var root = document.documentElement;
       var themeBtn = document.getElementById("theme-toggle");
-      var modal = document.getElementById("subscribe-modal");
-      var iframe = document.getElementById("subscribe-iframe");
-      var modalBody = document.getElementById("subscribe-modal-body");
-      var successPanel = document.getElementById("subscribe-success");
 
       function currentTheme() {
         return root.getAttribute("data-theme") === "dark" ? "dark" : "light";
@@ -1221,33 +1209,6 @@
         });
       }
 
-      window.openSubscribeModal = function () {
-        modal.hidden = false;
-        if (iframe && !iframe.src && iframe.dataset.src) {
-          iframe.src = iframe.dataset.src;
-        }
-        document.body.style.overflow = "hidden";
-      };
-
-      window.closeSubscribeModal = function () {
-        modal.hidden = true;
-        document.body.style.overflow = "";
-      };
-
-      function handleHash() {
-        var hash = window.location.hash.replace("#", "");
-        if (hash === "subscribe" || hash === "update-tickers") {
-          openSubscribeModal();
-        }
-      }
-
-      window.addEventListener("hashchange", handleHash);
-      handleHash();
-
-      document.addEventListener("keydown", function (e) {
-        if (e.key === "Escape" && !modal.hidden) closeSubscribeModal();
-      });
-
       /* Scroll reveal */
       if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
         var revealEls = document.querySelectorAll(".reveal, .reveal-stagger");
@@ -1271,5 +1232,6 @@
       }
     })();
   </script>
+  <script src="/subscribe-form.js" defer></script>
 </body>
 </html>

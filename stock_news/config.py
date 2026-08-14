@@ -40,4 +40,10 @@ PUBLISHER_LOGO_MARKERS = (
 FINNHUB_KEY = os.environ.get("FINNHUB_API_KEY")
 SITE_URL = os.environ.get("SITE_URL", "").rstrip("/")
 DIGEST_SIGNING_SECRET = os.environ.get("DIGEST_SIGNING_SECRET", "")
-BREVO_SUBSCRIBE_FORM_URL = os.environ.get("BREVO_SUBSCRIBE_FORM_URL", "").strip()
+BREVO_API_KEY = os.environ.get("BREVO_API_KEY", "").strip()
+BREVO_LIST_ID = os.environ.get("BREVO_LIST_ID", "").strip()
+BREVO_DOI_TEMPLATE_ID = os.environ.get("BREVO_DOI_TEMPLATE_ID", "").strip()
+BREVO_TICKERS_ATTRIBUTE = os.environ.get("BREVO_TICKERS_ATTRIBUTE", "TICKERS").strip().upper()
+
+US_SYMBOL_TYPES = frozenset({"Common Stock", "ETF", "ADR", "ETN", "ETC", "Closed-End Fund"})
+FOREIGN_SYMBOL_SUFFIXES = (".DE", ".L", ".TO", ".HK", ".SW", ".PA", ".AS", ".MI", ".AX", ".KS", ".TW")

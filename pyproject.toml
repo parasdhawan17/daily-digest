@@ -6,6 +6,3 @@ dependencies = [
     "requests>=2.31.0",
     "jinja2>=3.1.0",
 ]
-
-[tool.vercel]
-entrypoint = "api.digest:handler"

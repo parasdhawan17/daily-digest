@@ -9,10 +9,6 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
 os.environ.setdefault("SITE_URL", "http://localhost:8765")
-os.environ.setdefault(
-    "BREVO_SUBSCRIBE_FORM_URL",
-    "https://c45d1150.sibforms.com/serve/MUIFAHIL1jH-DeVrUnpoo9864EFxz9zv2_ZPiO5KF3s6v4dRsO78MCqs3Px8F3YEkQEleXXhoo3-ru-TV0wfGKmx-2GDoycH5AKn6zALH_5j980Isx-qMT0_GjO7sEv1dSME02tsPJpnG84htHPDroxqPtqY8u1Wt0NWE-MguymSMwInpWKhcLGiRmaKzN0-Y1ZM6iMYpio_ixYtWw==",
-)
 
 from stock_news.render import build_web_digest
 

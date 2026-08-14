@@ -636,7 +636,7 @@
       width: 100%;
       max-width: 560px;
       max-height: calc(100vh - 48px);
-      overflow: hidden;
+      overflow: visible;
       border-radius: 16px;
       background: var(--card-bg);
       box-shadow: 0 24px 48px rgba(15, 23, 42, 0.2);
@@ -675,13 +675,6 @@
     }
     .subscribe-modal-body {
       padding: 0;
-      background: var(--card-bg);
-    }
-    .subscribe-modal-body iframe {
-      display: block;
-      width: 100%;
-      height: 380px;
-      border: 0;
       background: var(--card-bg);
     }
     .subscribe-success {
@@ -786,6 +779,7 @@
       }
     }
   </style>
+  <link rel="stylesheet" href="/subscribe-form.css">
 </head>
 <body>
   <header class="header">
@@ -844,7 +838,7 @@
         <p class="badge">Today's biggest move: <strong>{{ top_mover_label }}</strong></p>
         {% endif %}
         <nav class="nav">
-          {% if subscribe_form_url %}
+          {% if subscribe_enabled %}
           <button type="button" class="header-subscribe-btn" onclick="openSubscribeModal()">Update tickers</button>
           {% endif %}
         </nav>
@@ -969,12 +963,12 @@
     <div class="section-inner">
       <p class="footer-brand">Daily Digest</p>
       <p>Your personalized stock brief</p>
-      {% if subscribe_form_url %}
+      {% if subscribe_enabled %}
       <p><button type="button" class="footer-link-btn" onclick="openSubscribeModal()">Update your tickers</button></p>
       {% endif %}
     </div>
   </footer>
-  {% if subscribe_form_url %}
+  {% if subscribe_enabled %}
   <div class="subscribe-modal" id="subscribe-modal" hidden>
     <div class="subscribe-modal-backdrop" onclick="closeSubscribeModal()"></div>
     <div class="subscribe-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="subscribe-modal-title">
@@ -982,107 +976,14 @@
         <h2 id="subscribe-modal-title">Update your tickers</h2>
         <button type="button" class="subscribe-modal-close" onclick="closeSubscribeModal()" aria-label="Close">&times;</button>
       </div>
-      <div class="subscribe-modal-body" id="subscribe-modal-body">
-        <iframe
-          id="subscribe-iframe"
-          data-src="{{ subscribe_form_url }}"
-          title="Email subscription form"
-        ></iframe>
-      </div>
+      <div class="subscribe-modal-body" id="subscribe-modal-body"></div>
       <div class="subscribe-success" id="subscribe-success" hidden>
         <h3>You're in!</h3>
         <p>Confirm your email if needed. Your ticker picks apply on the next digest run.</p>
       </div>
     </div>
   </div>
-  <script>
-    (function () {
-      var modal = document.getElementById("subscribe-modal");
-      var iframe = document.getElementById("subscribe-iframe");
-      var modalBody = document.getElementById("subscribe-modal-body");
-      var successPanel = document.getElementById("subscribe-success");
-      var iframeLoadCount = 0;
-      var successHandled = false;
-      var trustedOrigin = /sibforms\.com|brevo\.com|sendinblue\.com/i;
-      var successPattern = /success|subscribed|confirm|thank|submitted|complete/i;
-
-      window.openSubscribeModal = function () {
-        successHandled = false;
-        iframeLoadCount = 0;
-        modalBody.hidden = false;
-        successPanel.hidden = true;
-        iframe.src = iframe.dataset.src;
-        modal.hidden = false;
-        document.body.style.overflow = "hidden";
-      };
-
-      window.closeSubscribeModal = function () {
-        modal.hidden = true;
-        document.body.style.overflow = "";
-        iframe.src = "about:blank";
-      };
-
-      function handleSubscribeSuccess() {
-        if (successHandled) {
-          return;
-        }
-        successHandled = true;
-        modalBody.hidden = true;
-        successPanel.hidden = false;
-        window.setTimeout(function () {
-          closeSubscribeModal();
-        }, 1800);
-      }
-
-      function isSuccessMessage(data) {
-        if (!data) {
-          return false;
-        }
-        if (typeof data === "string") {
-          return successPattern.test(data);
-        }
-        if (typeof data === "object") {
-          return successPattern.test(JSON.stringify(data));
-        }
-        return false;
-      }
-
-      iframe.addEventListener("load", function () {
-        if (modal.hidden) {
-          return;
-        }
-        iframeLoadCount += 1;
-        if (iframeLoadCount > 1) {
-          window.setTimeout(handleSubscribeSuccess, 800);
-        }
-      });
-
-      window.addEventListener("message", function (event) {
-        if (!trustedOrigin.test(event.origin || "")) {
-          return;
-        }
-        if (isSuccessMessage(event.data)) {
-          handleSubscribeSuccess();
-        }
-      });
-
-      window.addEventListener("keydown", function (event) {
-        if (event.key === "Escape" && !modal.hidden) {
-          closeSubscribeModal();
-        }
-      });
-
-      function openFromHash() {
-        var hash = (window.location.hash || "").toLowerCase();
-        if (hash === "#subscribe" || hash === "#update-tickers") {
-          openSubscribeModal();
-        }
-      }
-
-      openFromHash();
-      window.addEventListener("hashchange", openFromHash);
-    })();
-  </script>
+  <script src="/subscribe-form.js" defer></script>
   {% endif %}
   <script>
     (function () {

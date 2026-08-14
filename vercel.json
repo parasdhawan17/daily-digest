@@ -1,6 +1,8 @@
 {
   "rewrites": [
-    { "source": "/digest", "destination": "/api/digest" }
+    { "source": "/digest", "destination": "/api/digest" },
+    { "source": "/api/tickers/search", "destination": "/api/tickers_search" },
+    { "source": "/api/tickers/validate", "destination": "/api/tickers_validate" }
   ],
   "headers": [
     {

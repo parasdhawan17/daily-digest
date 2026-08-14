@@ -1,12 +1,13 @@
 """Jinja HTML rendering for web digest."""
 
-import os
 from datetime import date
 
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 from stock_news.config import (
-    BREVO_SUBSCRIBE_FORM_URL,
+    BREVO_API_KEY,
+    BREVO_DOI_TEMPLATE_ID,
+    BREVO_LIST_ID,
     DIGEST_HEADING,
     HEADLINES_PER_TICKER,
     SITE_URL,
@@ -22,6 +23,10 @@ def get_jinja_env() -> Environment:
     )
 
 
+def subscribe_enabled() -> bool:
+    return bool(BREVO_API_KEY and BREVO_LIST_ID and BREVO_DOI_TEMPLATE_ID)
+
+
 def build_web_digest(
     sections: list[dict],
     tickers: list[str],
@@ -33,7 +38,6 @@ def build_web_digest(
     web_story_count = count_web_stories(sections)
     env = get_jinja_env()
     template = env.get_template("web_digest.html")
-    subscribe_form_url = os.environ.get("BREVO_SUBSCRIBE_FORM_URL", "").strip() or BREVO_SUBSCRIBE_FORM_URL or None
     return template.render(
         date_label=today_label,
         ticker_count=len(tickers),
@@ -42,7 +46,7 @@ def build_web_digest(
         fetched_at_label=fetched_at_label,
         visible_story_count=HEADLINES_PER_TICKER,
         digest_heading=DIGEST_HEADING,
-        subscribe_form_url=subscribe_form_url,
+        subscribe_enabled=subscribe_enabled(),
         **layout,
     )
 
@@ -55,5 +59,5 @@ def build_digest_error(title: str, message: str, detail: str | None = None) -> s
         message=message,
         detail=detail,
         site_url=SITE_URL,
-        subscribe_form_url=BREVO_SUBSCRIBE_FORM_URL or None,
+        subscribe_enabled=subscribe_enabled(),
     )
