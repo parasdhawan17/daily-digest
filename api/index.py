@@ -3,20 +3,40 @@
 import sys
 from http.server import BaseHTTPRequestHandler
 from pathlib import Path
-from urllib.parse import urlparse
+from urllib.parse import parse_qs, urlparse
 
 ROOT = Path(__file__).resolve().parent.parent
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from api.digest import handler as DigestHandler
-from api.subscribe import handler as SubscribeHandler
-from api.tickers_search import handler as SearchHandler
-from api.tickers_validate import handler as ValidateHandler
+from api.digest import handle_get as handle_digest
+from api.subscribe import handle_post as handle_subscribe
+from api.tickers_search import handle_get as handle_search
+from api.tickers_validate import handle_get as handle_validate_get, handle_post as handle_validate_post
+
+_ORIGINAL_PATH_HEADERS = (
+    "x-vercel-original-url",
+    "x-forwarded-uri",
+    "x-original-url",
+    "x-invoke-path",
+)
 
 
-def _route(path: str) -> str | None:
-    normalized = path.rstrip("/") or "/"
+def request_path(handler: BaseHTTPRequestHandler) -> str:
+    for header in _ORIGINAL_PATH_HEADERS:
+        value = handler.headers.get(header)
+        if value:
+            return urlparse(value).path
+    return urlparse(handler.path).path
+
+
+def route(handler: BaseHTTPRequestHandler) -> str | None:
+    query = parse_qs(urlparse(handler.path).query)
+    explicit = (query.get("route") or [""])[0].strip().lower()
+    if explicit in ("digest", "subscribe", "search", "validate"):
+        return explicit
+
+    normalized = request_path(handler).rstrip("/") or "/"
     if normalized in ("/digest", "/api/digest", "/api/index"):
         return "digest"
     if normalized == "/api/subscribe":
@@ -30,21 +50,21 @@ def _route(path: str) -> str | None:
 
 class handler(BaseHTTPRequestHandler):
     def do_GET(self) -> None:
-        route = _route(urlparse(self.path).path)
-        if route == "digest":
-            DigestHandler.do_GET(self)
-        elif route == "search":
-            SearchHandler.do_GET(self)
-        elif route == "validate":
-            ValidateHandler.do_GET(self)
+        matched = route(self)
+        if matched == "digest":
+            handle_digest(self)
+        elif matched == "search":
+            handle_search(self)
+        elif matched == "validate":
+            handle_validate_get(self)
         else:
             self.send_error(404)
 
     def do_POST(self) -> None:
-        route = _route(urlparse(self.path).path)
-        if route == "subscribe":
-            SubscribeHandler.do_POST(self)
-        elif route == "validate":
-            ValidateHandler.do_POST(self)
+        matched = route(self)
+        if matched == "subscribe":
+            handle_subscribe(self)
+        elif matched == "validate":
+            handle_validate_post(self)
         else:
             self.send_error(404)

@@ -1,9 +1,9 @@
 {
   "rewrites": [
-    { "source": "/digest", "destination": "/api/index" },
-    { "source": "/api/tickers/search", "destination": "/api/index" },
-    { "source": "/api/tickers/validate", "destination": "/api/index" },
-    { "source": "/api/subscribe", "destination": "/api/index" }
+    { "source": "/digest", "destination": "/api/index?route=digest" },
+    { "source": "/api/tickers/search", "destination": "/api/index?route=search" },
+    { "source": "/api/tickers/validate", "destination": "/api/index?route=validate" },
+    { "source": "/api/subscribe", "destination": "/api/index?route=subscribe" }
   ],
   "headers": [
     {
