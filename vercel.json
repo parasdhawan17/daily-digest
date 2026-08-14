@@ -1,12 +1,13 @@
 {
   "rewrites": [
-    { "source": "/digest", "destination": "/api/digest" },
-    { "source": "/api/tickers/search", "destination": "/api/tickers_search" },
-    { "source": "/api/tickers/validate", "destination": "/api/tickers_validate" }
+    { "source": "/digest", "destination": "/api/index" },
+    { "source": "/api/tickers/search", "destination": "/api/index" },
+    { "source": "/api/tickers/validate", "destination": "/api/index" },
+    { "source": "/api/subscribe", "destination": "/api/index" }
   ],
   "headers": [
     {
-      "source": "/api/digest",
+      "source": "/digest",
       "headers": [
         { "key": "Cache-Control", "value": "private, no-store" }
       ]
