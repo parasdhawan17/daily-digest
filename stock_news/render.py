@@ -1,5 +1,6 @@
 """Jinja HTML rendering for web digest."""
 
+import os
 from datetime import date
 
 from jinja2 import Environment, FileSystemLoader, select_autoescape
@@ -32,6 +33,7 @@ def build_web_digest(
     web_story_count = count_web_stories(sections)
     env = get_jinja_env()
     template = env.get_template("web_digest.html")
+    subscribe_form_url = os.environ.get("BREVO_SUBSCRIBE_FORM_URL", "").strip() or BREVO_SUBSCRIBE_FORM_URL or None
     return template.render(
         date_label=today_label,
         ticker_count=len(tickers),
@@ -40,7 +42,7 @@ def build_web_digest(
         fetched_at_label=fetched_at_label,
         visible_story_count=HEADLINES_PER_TICKER,
         digest_heading=DIGEST_HEADING,
-        subscribe_form_url=BREVO_SUBSCRIBE_FORM_URL or None,
+        subscribe_form_url=subscribe_form_url,
         **layout,
     )
 

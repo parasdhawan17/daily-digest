@@ -29,7 +29,6 @@ def collect_digest_data(tickers: list[str], api_key: str) -> tuple[list[dict], i
             "ticker": ticker,
             "quote": None,
             "logo": None,
-            "hero_image": None,
             "stories": [],
             "web_stories": [],
             "error": None,
@@ -90,7 +89,6 @@ def collect_digest_data(tickers: list[str], api_key: str) -> tuple[list[dict], i
             ticker=ticker,
             watched_tickers=watched,
         )
-        section["hero_image"] = next((story["image"] for story in stories if story["image"]), None)
         total_stories += len(stories)
 
     return sections, total_stories
