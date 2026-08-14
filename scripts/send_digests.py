@@ -63,6 +63,23 @@ def email_configured() -> bool:
     return bool(BREVO_API_KEY and EMAIL_FROM and BREVO_LIST_ID)
 
 
+def missing_email_env() -> list[str]:
+    missing: list[str] = []
+    if not os.environ.get("FINNHUB_API_KEY", "").strip():
+        missing.append("FINNHUB_API_KEY")
+    if not os.environ.get("BREVO_API_KEY", "").strip():
+        missing.append("BREVO_API_KEY")
+    if not os.environ.get("BREVO_LIST_ID", "").strip():
+        missing.append("BREVO_LIST_ID")
+    if not os.environ.get("EMAIL_FROM", "").strip():
+        missing.append("EMAIL_FROM")
+    if not os.environ.get("DIGEST_SIGNING_SECRET", "").strip():
+        missing.append("DIGEST_SIGNING_SECRET")
+    if not os.environ.get("SITE_URL", "").strip():
+        missing.append("SITE_URL")
+    return missing
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Fetch stock news and send personalized digest emails via Brevo.",
@@ -99,6 +116,14 @@ def main() -> None:
     if not args.email:
         print("Error: pass --email to send digest emails.", file=sys.stderr)
         sys.exit(1)
+
+    missing = missing_email_env()
+    if missing:
+        print(
+            "Email env not configured yet — skipping send. "
+            f"Set in Railway Variables: {', '.join(missing)}",
+        )
+        return
 
     recipient_filter = (args.recipient or "").strip().lower() or None
     dry_run = args.dry_run

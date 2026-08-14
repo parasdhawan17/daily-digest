@@ -66,9 +66,10 @@ Production email digests run on a **separate Railway cron service** connected to
 
 1. Create a Railway project (e.g. **daily-digest-cron**).
 2. Connect the `daily-digest` GitHub repo as a new service.
-3. Railway reads [`railway.toml`](railway.toml):
-   - Schedule: `15 13,20 * * *` UTC (~9:15 AM and 4:15 PM ET during EDT)
-   - Command: `python scripts/send_digests.py --email`
+3. In Railway **Settings** (not `railway.toml` — set cron in the UI):
+   - **Cron Schedule:** `15 13,20 * * *` UTC (~9:15 AM and 4:15 PM ET during EDT)
+   - **Start Command:** `python scripts/send_digests.py --email`
+   - **Restart Policy:** Never
 4. Set environment variables on the Railway service:
 
 | Variable | Required |
