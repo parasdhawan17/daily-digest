@@ -86,6 +86,8 @@ Production email digests run on a **separate Railway cron service** connected to
 
 5. Trigger a manual deploy in Railway to verify logs before the first scheduled run.
 
+Or run `./scripts/setup_railway_env.sh` after `npx @railway/cli login` and `railway link`.
+
 Each email includes a signed **See the full digest online** link (`/digest?t=...`) personalized to that subscriber's tickers. The web digest loads live from Finnhub when clicked.
 
 ## Related repos
