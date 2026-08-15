@@ -32,7 +32,7 @@
       '<p class="subscribe-error" id="subscribe-error" hidden></p>' +
       '<label for="subscribe-email">Email</label>' +
       '<input type="email" id="subscribe-email" name="email" required autocomplete="email" placeholder="you@example.com">' +
-      '<label for="subscribe-ticker-input">Holdings (up to ' + MAX_TICKERS + ')</label>' +
+      '<label for="subscribe-ticker-input">US tickers (up to ' + MAX_TICKERS + ')</label>' +
       '<div class="subscribe-ticker-field">' +
       '<div class="subscribe-ticker-row">' +
       '<input type="text" id="subscribe-ticker-input" class="subscribe-ticker-input" autocomplete="off" placeholder="Search by ticker or company name">' +
@@ -42,7 +42,7 @@
       '<ul class="subscribe-suggestions" id="subscribe-suggestions" hidden></ul>' +
       "</div>" +
       '<div class="subscribe-chips" id="subscribe-chips"></div>' +
-      '<p class="subscribe-hint">Each holding is validated against Finnhub before it is added.</p>' +
+      '<p class="subscribe-hint">Each ticker is validated as a US-listed stock or ETF before it is added.</p>' +
       '<button type="submit" class="btn-subscribe" id="subscribe-submit">Get your digest</button>' +
       "</form>";
 
@@ -102,7 +102,7 @@
     els.tickerInput.disabled = full;
     els.addBtn.disabled = full;
     els.tickerInput.placeholder = full
-      ? "Maximum holdings reached"
+      ? "Maximum tickers reached"
       : "Search by ticker or company name";
   }
 
@@ -478,7 +478,7 @@
       return;
     }
     if (!selectedTickers.length) {
-      showError("Add at least one validated holding.");
+      showError("Add at least one validated ticker.");
       return;
     }
 
@@ -517,7 +517,7 @@
     }
     if (successTitle) {
       successTitle.textContent =
-        data.mode === "update" ? "Holdings updated" : "Almost there";
+        data.mode === "update" ? "Tickers updated" : "Almost there";
     }
     if (successText) {
       successText.textContent = data.message || "You're all set.";

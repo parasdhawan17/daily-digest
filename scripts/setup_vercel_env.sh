@@ -42,8 +42,9 @@ add_env() {
 add_env FINNHUB_API_KEY "${FINNHUB_API_KEY:-}"
 add_env DIGEST_SIGNING_SECRET "${DIGEST_SIGNING_SECRET:-}"
 add_env BREVO_API_KEY "${BREVO_API_KEY:-}"
-add_env BREVO_LIST_ID "${BREVO_LIST_ID:-}"
+add_env BREVO_LIST_ID "${BREVO_LIST_ID:-7}"
 add_env BREVO_DOI_TEMPLATE_ID "${BREVO_DOI_TEMPLATE_ID:-}"
+add_env BREVO_TICKERS_ATTRIBUTE "${BREVO_TICKERS_ATTRIBUTE:-US_TICKERS}"
 add_env SITE_URL "${SITE_URL:-}"
 
 echo "Done. Redeploy: npx vercel --prod"

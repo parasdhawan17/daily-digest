@@ -51,8 +51,9 @@ python3 -m venv .venv
 | `DIGEST_SIGNING_SECRET` | Signed digest links | Must match Railway cron service |
 | `SITE_URL` | Digest links + Brevo DOI redirect | e.g. `https://yourdomain.com` |
 | `BREVO_API_KEY` | Subscribe form | |
-| `BREVO_LIST_ID` | Subscribe form | Brevo list ID |
+| `BREVO_LIST_ID` | Subscribe form | Brevo list ID (e.g. `7` for Daily Digest - US) |
 | `BREVO_DOI_TEMPLATE_ID` | New subscribers | Double opt-in template ID from Brevo |
+| `BREVO_TICKERS_ATTRIBUTE` | Subscribe + email cron | Optional (default `US_TICKERS` — text, comma-separated) |
 
 Copy from sibling `stock-news-bot/.env` via `./scripts/setup_vercel_env.sh`.
 
@@ -82,7 +83,7 @@ Production email digests run on a **separate Railway cron service** connected to
 | `DIGEST_SIGNING_SECRET` | Yes — must match Vercel |
 | `SITE_URL` | Yes — production domain |
 | `TZ` | `America/New_York` (recommended) |
-| `BREVO_TICKERS_ATTRIBUTE` | Optional (default `TICKERS`) |
+| `BREVO_TICKERS_ATTRIBUTE` | Optional (default `US_TICKERS`) |
 
 5. Trigger a manual deploy in Railway to verify logs before the first scheduled run.
 

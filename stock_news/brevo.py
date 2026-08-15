@@ -20,6 +20,21 @@ def _headers(api_key: str) -> dict[str, str]:
     }
 
 
+def format_tickers_attribute(tickers: list[str]) -> str:
+    """Serialize tickers for a Brevo text attribute (comma-separated)."""
+    return ", ".join(parse_tickers(tickers))
+
+
+def _get_contact_attribute(attributes: dict | None, name: str):
+    if not attributes:
+        return ""
+    target = name.upper()
+    for key, value in attributes.items():
+        if str(key).upper() == target:
+            return value
+    return ""
+
+
 def get_contact(email: str, api_key: str) -> dict | None:
     response = requests.get(
         f"https://api.brevo.com/v3/contacts/{email}",
@@ -33,49 +48,22 @@ def get_contact(email: str, api_key: str) -> dict | None:
     return response.json()
 
 
-def get_ticker_catalog_options(api_key: str, attr_name: str = BREVO_TICKERS_ATTRIBUTE) -> list[str]:
-    response = requests.get(
-        "https://api.brevo.com/v3/contacts/attributes",
-        headers=_headers(api_key),
-        timeout=30,
-    )
-    if not response.ok:
-        raise BrevoError(_safe_brevo_message(response))
-    for attribute in response.json().get("attributes", []):
-        if attribute.get("name", "").upper() == attr_name.upper():
-            return [str(opt).strip().upper() for opt in (attribute.get("multiCategoryOptions") or [])]
-    return []
-
-
-def ensure_ticker_catalog_options(
-    tickers: list[str],
-    api_key: str,
-    attr_name: str = BREVO_TICKERS_ATTRIBUTE,
-) -> None:
-    existing = set(get_ticker_catalog_options(api_key, attr_name))
-    if all(ticker in existing for ticker in tickers):
-        return
-    merged = sorted(existing | set(tickers))
-    response = requests.put(
-        f"https://api.brevo.com/v3/contacts/attributes/normal/{attr_name}",
-        headers=_headers(api_key),
-        json={"multiCategoryOptions": merged},
-        timeout=30,
-    )
-    if not response.ok:
-        raise BrevoError(_safe_brevo_message(response))
-
-
 def update_contact_tickers(
     email: str,
     tickers: list[str],
     api_key: str,
     attr_name: str = BREVO_TICKERS_ATTRIBUTE,
+    *,
+    list_id: int | None = None,
 ) -> None:
+    payload: dict = {"attributes": {attr_name: format_tickers_attribute(tickers)}}
+    if list_id is not None:
+        payload["listIds"] = [list_id]
+
     response = requests.put(
         f"https://api.brevo.com/v3/contacts/{email}",
         headers=_headers(api_key),
-        json={"attributes": {attr_name: tickers}},
+        json=payload,
         timeout=30,
     )
     if not response.ok:
@@ -99,7 +87,7 @@ def create_doi_contact(
             "includeListIds": [list_id],
             "templateId": template_id,
             "redirectionUrl": redirection_url,
-            "attributes": {attr_name: tickers},
+            "attributes": {attr_name: format_tickers_attribute(tickers)},
         },
         timeout=30,
     )
@@ -117,19 +105,24 @@ def subscribe_or_update(
     attr_name: str = BREVO_TICKERS_ATTRIBUTE,
     site_url: str | None = None,
 ) -> dict:
-    ensure_ticker_catalog_options(tickers, api_key, attr_name)
     contact = get_contact(email, api_key)
     redirection_url = f"{(site_url or SITE_URL or '').rstrip('/')}/" or "/"
 
     if contact and not contact.get("emailBlacklisted"):
         contact_lists = contact.get("listIds") or []
-        if list_id in contact_lists:
-            update_contact_tickers(email, tickers, api_key, attr_name)
-            return {
-                "ok": True,
-                "mode": "update",
-                "message": "Your holdings are updated for the next session.",
-            }
+        on_list = list_id in contact_lists
+        update_contact_tickers(
+            email,
+            tickers,
+            api_key,
+            attr_name,
+            list_id=None if on_list else list_id,
+        )
+        return {
+            "ok": True,
+            "mode": "update",
+            "message": "Your tickers are updated for the next session.",
+        }
 
     create_doi_contact(
         email,
@@ -147,7 +140,11 @@ def subscribe_or_update(
     }
 
 
-def fetch_subscribers_with_tickers(list_id: int, api_key: str) -> list[dict]:
+def fetch_subscribers_with_tickers(
+    list_id: int,
+    api_key: str,
+    attr_name: str = BREVO_TICKERS_ATTRIBUTE,
+) -> list[dict]:
     subscribers: list[dict] = []
     offset = 0
     limit = 50
@@ -172,7 +169,7 @@ def fetch_subscribers_with_tickers(list_id: int, api_key: str) -> list[dict]:
             if not email:
                 continue
             attributes = contact.get("attributes") or {}
-            raw_tickers = attributes.get(BREVO_TICKERS_ATTRIBUTE, "")
+            raw_tickers = _get_contact_attribute(attributes, attr_name)
             tickers = parse_tickers(raw_tickers)
             subscribers.append({"email": email, "tickers": tickers})
 
