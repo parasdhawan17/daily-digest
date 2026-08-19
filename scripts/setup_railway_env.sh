@@ -4,6 +4,7 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+PRODUCTION_SITE_URL="https://www.mydailydigest.online"
 BOT_ENV="$ROOT/../stock-news-bot/.env"
 LOCAL_ENV="$ROOT/.env.local"
 
@@ -30,7 +31,7 @@ load_env "$LOCAL_ENV"
 : "${BREVO_LIST_ID:?Missing BREVO_LIST_ID}"
 : "${EMAIL_FROM:?Missing EMAIL_FROM (set in stock-news-bot/.env)}"
 : "${DIGEST_SIGNING_SECRET:?Missing DIGEST_SIGNING_SECRET}"
-: "${SITE_URL:?Missing SITE_URL}"
+SITE_URL="${SITE_URL:-$PRODUCTION_SITE_URL}"
 
 EMAIL_FROM_NAME="${EMAIL_FROM_NAME:-Tickr Digest}"
 TZ="${TZ:-America/New_York}"

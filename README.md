@@ -41,7 +41,7 @@ python3 -m venv .venv
 2. Project name: **Daily Digest**.
 3. Production branch: `main`.
 4. Set environment variables (see below).
-5. Add custom domain; set `SITE_URL` to match.
+5. Add custom domain (`www.mydailydigest.online`); set `SITE_URL` to `https://www.mydailydigest.online`.
 
 ### Environment variables (Vercel)
 
@@ -49,7 +49,7 @@ python3 -m venv .venv
 |----------|--------------|-------|
 | `FINNHUB_API_KEY` | Digest + ticker search/validation | |
 | `DIGEST_SIGNING_SECRET` | Signed digest links | Must match Railway cron service |
-| `SITE_URL` | Digest links + Brevo DOI redirect | e.g. `https://yourdomain.com` |
+| `SITE_URL` | Digest links + Brevo DOI redirect | `https://www.mydailydigest.online` |
 | `BREVO_API_KEY` | Subscribe form | |
 | `BREVO_LIST_ID` | Subscribe form | Brevo list ID (e.g. `7` for Daily Digest - US) |
 | `BREVO_DOI_TEMPLATE_ID` | New subscribers | Double opt-in template ID from Brevo |
@@ -81,7 +81,7 @@ Production email digests run on a **separate Railway cron service** connected to
 | `EMAIL_FROM` | Yes |
 | `EMAIL_FROM_NAME` | Yes |
 | `DIGEST_SIGNING_SECRET` | Yes — must match Vercel |
-| `SITE_URL` | Yes — production domain |
+| `SITE_URL` | Yes — `https://www.mydailydigest.online` |
 | `TZ` | `America/New_York` (recommended) |
 | `BREVO_TICKERS_ATTRIBUTE` | Optional (default `US_TICKERS`) |
 

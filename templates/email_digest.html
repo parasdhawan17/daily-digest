@@ -44,10 +44,6 @@
         background-color: #0f172a !important;
         border-color: #334155 !important;
       }
-      .compact-card {
-        background-color: #1e293b !important;
-        border-color: #334155 !important;
-      }
       .text-primary {
         color: #f8fafc !important;
       }
@@ -110,9 +106,7 @@
                     <div class="gmail-blend" style="display:inline-block;">
                       <div class="gmail-blend-inner" style="display:inline-block;">
                         <p style="margin:0 0 8px;font-size:11px;color:#f1f5f9;letter-spacing:2px;text-transform:uppercase;font-weight:600;">Tickr Digest</p>
-                        <h1 style="margin:0 0 10px;font-size:26px;font-weight:700;color:#ffffff;letter-spacing:-0.5px;line-height:1.25;">{{ email_heading }}</h1>
-                        <p style="margin:0 0 6px;font-size:14px;color:#e2e8f0;line-height:1.45;">{{ date_label }} · {{ ticker_count }} tickers · {{ story_count }} stories</p>
-                        <p style="margin:0;font-size:13px;color:#cbd5e1;">{{ market_summary.gainers }} up · {{ market_summary.losers }} down · {{ market_summary.flat }} flat</p>
+                        <h1 style="margin:0;font-size:26px;font-weight:700;color:#ffffff;letter-spacing:-0.5px;line-height:1.25;">{{ email_heading }}</h1>
                         {% if top_mover_label %}
                         <p style="margin:14px 0 0;font-size:13px;color:#f8fafc;background-color:rgba(15,23,42,0.45);border:1px solid rgba(255,255,255,0.2);display:inline-block;padding:6px 14px;border-radius:20px;">Today's biggest move: <strong>{{ top_mover_label }}</strong></p>
                         {% endif %}
@@ -254,79 +248,80 @@
           </tr>
           {% endif %}
 
-          <!-- Compact grid: remaining tickers -->
+          <!-- Compact list: remaining tickers -->
           {% if compact %}
           <tr>
-            <td class="email-card" bgcolor="#ffffff" style="padding:8px 24px 4px;background-color:#ffffff;">
-              <p class="text-label" style="margin:0 0 8px;font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#64748b;">Other Movers</p>
+            <td class="email-card" bgcolor="#ffffff" style="padding:16px 24px 4px;background-color:#ffffff;">
+              <p class="text-label" style="margin:0 0 12px;font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#64748b;">Other Movers</p>
             </td>
           </tr>
-          {% for row in compact|batch(2, fill_with=none) %}
+          {% for section in compact %}
+          {% set sec_quote = section.quote %}
+          {% set sec_positive = sec_quote and sec_quote.change_pct is not none and sec_quote.change_pct >= 0 %}
+          {% set sec_negative = sec_quote and sec_quote.change_pct is not none and sec_quote.change_pct < 0 %}
           <tr>
-            <td class="email-card" bgcolor="#ffffff" style="padding:0 16px 8px;background-color:#ffffff;">
-              <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+            <td class="email-card" bgcolor="#ffffff" style="padding:0 24px 12px;background-color:#ffffff;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-radius:12px;overflow:hidden;border:1px solid #e2e8f0;border-left:4px solid {% if sec_positive %}#16a34a{% elif sec_negative %}#dc2626{% else %}#94a3b8{% endif %};">
                 <tr>
-                  {% for section in row %}
-                  <td width="50%" valign="top" style="padding:6px;{% if not section %}border:none;{% endif %}">
-                    {% if section %}
-                    {% set sec_quote = section.quote %}
-                    {% set sec_positive = sec_quote and sec_quote.change_pct is not none and sec_quote.change_pct >= 0 %}
-                    {% set sec_negative = sec_quote and sec_quote.change_pct is not none and sec_quote.change_pct < 0 %}
-                    <table role="presentation" class="compact-card" width="100%" cellpadding="0" cellspacing="0" bgcolor="#f8fafc" style="background-color:#f8fafc;border-radius:10px;border:1px solid #e8ecf0;height:100%;">
+                  <td class="hero-panel" bgcolor="#fafbfc" style="padding:14px 16px;background-color:#fafbfc;">
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
                       <tr>
-                        <td style="padding:12px 14px 8px;">
-                          <span class="text-primary" style="font-size:14px;font-weight:700;color:#0f172a;">{{ section.ticker }}</span>
+                        {% if section.logo %}
+                        <td width="40" style="vertical-align:middle;padding-right:12px;">
+                          <img src="{{ section.logo }}" alt="{{ section.ticker }}" width="40" height="40" style="display:block;width:40px;height:40px;object-fit:contain;">
+                        </td>
+                        {% endif %}
+                        <td style="vertical-align:middle;">
+                          <span class="text-primary" style="font-size:18px;font-weight:800;color:#0f172a;letter-spacing:-0.5px;">{{ section.ticker }}</span>
                           {% if sec_quote %}
-                          <span class="text-secondary" style="font-size:13px;font-weight:600;color:#334155;margin-left:6px;">${{ "%.2f"|format(sec_quote.price) }}</span>
+                          <span class="text-primary" style="font-size:16px;font-weight:700;color:#1e293b;margin-left:8px;">${{ "%.2f"|format(sec_quote.price) }}</span>
                           {% if sec_quote.change_pct is not none %}
-                          <span class="{% if sec_positive %}price-up{% elif sec_negative %}price-down{% else %}price-flat{% endif %}" style="font-size:11px;font-weight:700;margin-left:4px;color:{% if sec_positive %}#16a34a{% elif sec_negative %}#dc2626{% else %}#64748b{% endif %};">
-                            {% if sec_quote.change_pct >= 0 %}+{% endif %}{{ "%.1f"|format(sec_quote.change_pct) }}%
+                          <span class="{% if sec_positive %}badge-up{% else %}badge-down{% endif %}" style="display:inline-block;font-size:12px;font-weight:700;margin-left:8px;padding:3px 8px;border-radius:6px;
+                            {% if sec_positive %}background-color:#dcfce7;color:#15803d;{% else %}background-color:#fee2e2;color:#b91c1c;{% endif %}">
+                            {% if sec_quote.change_pct >= 0 %}+{% endif %}{{ "%.2f"|format(sec_quote.change_pct) }}%
                           </span>
                           {% endif %}
                           {% endif %}
                         </td>
                       </tr>
-                      {% if section.error %}
-                      <tr>
-                        <td style="padding:0 14px 12px;">
-                          <p class="text-muted" style="margin:0;font-size:12px;color:#94a3b8;font-style:italic;">News unavailable</p>
-                        </td>
-                      </tr>
-                      {% elif section.stories %}
-                      {% set story = section.stories[0] %}
-                      <tr>
-                        <td style="padding:0 14px 12px;">
-                          <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
-                            <tr>
-                              {% if story.image %}
-                              <td width="60" style="vertical-align:top;padding-right:8px;">
-                                <img src="{{ story.image }}" alt="" width="60" height="40" style="display:block;width:60px;height:40px;object-fit:cover;border-radius:4px;">
-                              </td>
-                              {% elif section.logo %}
-                              <td width="36" style="vertical-align:top;padding-right:8px;">
-                                <img src="{{ section.logo }}" alt="{{ section.ticker }}" width="36" height="36" style="display:block;width:36px;height:36px;object-fit:contain;">
-                              </td>
-                              {% endif %}
-                              <td style="vertical-align:top;">
-                                <a href="{{ story.url }}" class="link-primary" style="font-size:12px;font-weight:600;color:#1d4ed8;text-decoration:none;line-height:1.4;">{{ story.headline }}</a>
-                                <p class="text-muted" style="margin:4px 0 0;font-size:10px;color:#94a3b8;">{{ story.source }}{% if story.relative_time %} · {{ story.relative_time }}{% endif %}</p>
-                              </td>
-                            </tr>
-                          </table>
-                        </td>
-                      </tr>
-                      {% else %}
-                      <tr>
-                        <td style="padding:0 14px 12px;">
-                          <p class="text-muted" style="margin:0;font-size:12px;color:#94a3b8;font-style:italic;">No news today</p>
-                        </td>
-                      </tr>
-                      {% endif %}
                     </table>
-                    {% endif %}
                   </td>
-                  {% endfor %}
                 </tr>
+                {% if section.error %}
+                <tr>
+                  <td class="email-card" bgcolor="#ffffff" style="padding:0 16px 16px;background-color:#ffffff;">
+                    <p class="text-muted" style="margin:0;font-size:13px;color:#718096;font-style:italic;">Could not fetch news for {{ section.ticker }}.</p>
+                  </td>
+                </tr>
+                {% elif section.stories %}
+                {% set story = section.stories[0] %}
+                <tr>
+                  <td class="email-card" bgcolor="#ffffff" style="padding:12px 16px 16px;background-color:#ffffff;">
+                    <table role="presentation" class="story-card" width="100%" cellpadding="0" cellspacing="0" bgcolor="#ffffff" style="background-color:#ffffff;border-radius:8px;border:1px solid #e8ecf0;">
+                      <tr>
+                        {% if story.image %}
+                        <td width="100" style="vertical-align:top;padding:0;">
+                          <img src="{{ story.image }}" alt="" width="100" height="70" style="display:block;width:100px;height:70px;object-fit:cover;border-radius:8px 0 0 8px;">
+                        </td>
+                        {% endif %}
+                        <td style="vertical-align:top;padding:12px 14px;">
+                          <a href="{{ story.url }}" class="link-primary" style="font-size:15px;font-weight:600;color:#1d4ed8;text-decoration:none;line-height:1.4;">{{ story.headline }}</a>
+                          {% if story.summary %}
+                          <p class="text-secondary" style="margin:6px 0 0;font-size:12px;color:#475569;line-height:1.5;">{{ story.summary }}</p>
+                          {% endif %}
+                          <p class="text-muted" style="margin:6px 0 0;font-size:11px;color:#94a3b8;">{{ story.source }}{% if story.relative_time %} · {{ story.relative_time }}{% endif %}</p>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+                {% else %}
+                <tr>
+                  <td class="email-card" bgcolor="#ffffff" style="padding:0 16px 16px;background-color:#ffffff;">
+                    <p class="text-muted" style="margin:0;font-size:13px;color:#718096;font-style:italic;">No major news for {{ section.ticker }} today.</p>
+                  </td>
+                </tr>
+                {% endif %}
               </table>
             </td>
           </tr>

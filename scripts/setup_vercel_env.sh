@@ -4,6 +4,7 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+PRODUCTION_SITE_URL="https://www.mydailydigest.online"
 SOURCE_ENV="${STOCK_NEWS_BOT_ENV:-$ROOT/../stock-news-bot/.env}"
 
 if [[ ! -f "$SOURCE_ENV" ]]; then
@@ -21,10 +22,7 @@ if [[ -z "${DIGEST_SIGNING_SECRET:-}" ]]; then
   echo "Generated new DIGEST_SIGNING_SECRET (save for stock-news-bot later)"
 fi
 
-if [[ -z "${SITE_URL:-}" ]]; then
-  echo "SITE_URL not set — pass after first deploy, e.g.:"
-  echo "  SITE_URL=https://daily-digest.vercel.app ./scripts/setup_vercel_env.sh"
-fi
+SITE_URL="${SITE_URL:-$PRODUCTION_SITE_URL}"
 
 cd "$ROOT"
 
