@@ -46,8 +46,9 @@ FINNHUB_KEY = os.environ.get("FINNHUB_API_KEY")
 SITE_URL = os.environ.get("SITE_URL", "").rstrip("/")
 DIGEST_SIGNING_SECRET = os.environ.get("DIGEST_SIGNING_SECRET", "")
 BREVO_API_KEY = os.environ.get("BREVO_API_KEY", "").strip()
-BREVO_LIST_ID = os.environ.get("BREVO_LIST_ID", "").strip()
 BREVO_DOI_TEMPLATE_ID = os.environ.get("BREVO_DOI_TEMPLATE_ID", "").strip()
+# Canonical list: Daily Digest - US. Subscribe and cron always use this id.
+BREVO_LIST_ID = "7"
 BREVO_TICKERS_ATTRIBUTE = os.environ.get("BREVO_TICKERS_ATTRIBUTE", "US_TICKERS").strip().upper()
 EMAIL_FROM = os.environ.get("EMAIL_FROM", "").strip()
 EMAIL_FROM_NAME = os.environ.get("EMAIL_FROM_NAME", "Tickr Digest").strip()

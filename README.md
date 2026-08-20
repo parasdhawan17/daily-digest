@@ -51,7 +51,7 @@ python3 -m venv .venv
 | `DIGEST_SIGNING_SECRET` | Signed digest links | Must match Railway cron service |
 | `SITE_URL` | Digest links + Brevo DOI redirect | `https://www.mydailydigest.online` |
 | `BREVO_API_KEY` | Subscribe form | |
-| `BREVO_LIST_ID` | Subscribe form | Brevo list ID (e.g. `7` for Daily Digest - US) |
+| `BREVO_LIST_ID` | Subscribe form | Always `7` (Daily Digest - US). Setup scripts pin this. |
 | `BREVO_DOI_TEMPLATE_ID` | New subscribers | Double opt-in template ID from Brevo |
 | `BREVO_TICKERS_ATTRIBUTE` | Subscribe + email cron | Optional (default `US_TICKERS` — text, comma-separated) |
 
@@ -77,7 +77,7 @@ Production email digests run on a **separate Railway cron service** connected to
 |----------|----------|
 | `FINNHUB_API_KEY` | Yes |
 | `BREVO_API_KEY` | Yes |
-| `BREVO_LIST_ID` | Yes |
+| `BREVO_LIST_ID` | Yes — `7` |
 | `EMAIL_FROM` | Yes |
 | `EMAIL_FROM_NAME` | Yes |
 | `DIGEST_SIGNING_SECRET` | Yes — must match Vercel |

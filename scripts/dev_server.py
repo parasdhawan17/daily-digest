@@ -117,16 +117,15 @@ class DevHandler(BaseHTTPRequestHandler):
 
     def _subscribe(self) -> None:
         api_key = os.environ.get("BREVO_API_KEY", "").strip()
-        list_id = os.environ.get("BREVO_LIST_ID", "").strip()
+        list_id = BREVO_LIST_ID
         template_id = os.environ.get("BREVO_DOI_TEMPLATE_ID", "").strip()
         finnhub_key = os.environ.get("FINNHUB_API_KEY", "").strip()
 
-        if not api_key or not list_id or not template_id:
+        if not api_key or not template_id:
             missing = [
                 name
                 for name, value in (
                     ("BREVO_API_KEY", api_key),
-                    ("BREVO_LIST_ID", list_id),
                     ("BREVO_DOI_TEMPLATE_ID", template_id),
                 )
                 if not value

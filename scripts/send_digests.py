@@ -69,8 +69,6 @@ def missing_email_env() -> list[str]:
         missing.append("FINNHUB_API_KEY")
     if not os.environ.get("BREVO_API_KEY", "").strip():
         missing.append("BREVO_API_KEY")
-    if not os.environ.get("BREVO_LIST_ID", "").strip():
-        missing.append("BREVO_LIST_ID")
     if not os.environ.get("EMAIL_FROM", "").strip():
         missing.append("EMAIL_FROM")
     if not os.environ.get("DIGEST_SIGNING_SECRET", "").strip():

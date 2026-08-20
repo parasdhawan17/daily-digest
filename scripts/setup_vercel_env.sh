@@ -23,6 +23,7 @@ if [[ -z "${DIGEST_SIGNING_SECRET:-}" ]]; then
 fi
 
 SITE_URL="${SITE_URL:-$PRODUCTION_SITE_URL}"
+BREVO_LIST_ID=7
 
 cd "$ROOT"
 
