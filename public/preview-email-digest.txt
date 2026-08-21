@@ -1,58 +1,63 @@
 NVDA moved high
-19 Aug 2026 · 7 tickers · 9 stories
-3 up · 4 down · 0 flat
+21 Aug 2026 · 8 tickers · 10 stories
+3 up · 4 down · 1 flat
 
 Today's biggest move: NVDA +4.82%
 
 === BIGGEST MOVER ===
 NVDA  $142.50  +4.82%
 ---------------------
-1. Nvidia announces next-gen chip roadmap ahead of earnings
-   Analysts weigh supply constraints, guidance, and sector rotation as investors reposition ahead of the next earnings cycle.
-   Reuters · 2h ago
-   https://example.com/nvda/0
+1. Nvidia Blackwell shipments accelerate as hyperscalers lock in multi-year AI capacity deals
+   Major cloud providers are front-loading orders for next-gen GPUs, with supply still tight through year-end. Analysts say data-center revenue could beat consensus again in FQ3.
+   Reuters · 21 Aug 2026, 11:18 AM UTC
+   https://example.com/nvda/blackwell-shipments
 
-2. Data center demand keeps Nvidia supply chain at full tilt
-   Analysts weigh supply constraints, guidance, and sector rotation as investors reposition ahead of the next earnings cycle.
-   Bloomberg · 4h ago
-   https://example.com/nvda/1
+2. Data center demand keeps Nvidia supply chain at full tilt through 2026
+   Co-packaged optics and HBM shortages remain bottlenecks, but channel checks suggest backlog visibility has extended to eight quarters for top-tier customers.
+   Bloomberg · 21 Aug 2026, 9:22 AM UTC
+   https://example.com/nvda/data-center-demand
 
-3. Wall Street raises price targets after AI infrastructure spend
-   Analysts weigh supply constraints, guidance, and sector rotation as investors reposition ahead of the next earnings cycle.
-   CNBC · 6h ago
-   https://example.com/nvda/2
+3. Wall Street raises price targets after another round of AI infrastructure spend surveys
+   Twelve firms lifted targets this week, citing stronger enterprise inference demand and improving gross margins on mature architectures.
+   CNBC · 21 Aug 2026, 7:05 AM UTC
+   https://example.com/nvda/price-targets
 
 
-TSLA  $248.90  -2.64%
+TSLA  $345.13  -1.71%
 ---------------------
-• Tesla delivery estimates shift as competition intensifies
-  https://example.com/tsla/0
-
-META  $512.40  -1.45%
----------------------
-• Meta ad revenue beats estimates on Reels monetization
-  https://example.com/meta/0
+• JPMorgan Says Tesla Is Confident of Scaling Cybercab Operations, Touts Future Models Based on Platform—FSD V15 a ‘Step-Change’ From Previous Versions
+  https://example.com/tsla/jpm-cybercab
 
 AAPL  $228.30  +1.18%
 ---------------------
-• Apple expands AI features across iOS developer preview
-  https://example.com/aapl/0
+• Apple Intelligence rollout expands to more regions as developers adopt on-device APIs
+  https://example.com/aapl/intelligence-rollout
 
 AMZN  $198.75  -0.92%
 ---------------------
-• Amazon Web Services wins large federal cloud contract
-  https://example.com/amzn/0
+• Amazon Web Services wins large federal cloud contract, expanding AI-ready regions
+  https://example.com/amzn/aws-federal
 
 MSFT  $415.20  +0.82%
 ---------------------
-• Microsoft cloud growth stays resilient in enterprise spend survey
-  https://example.com/msft/0
+• Microsoft Azure AI bookings remain ahead of plan, Copilot seat growth steady in enterprise
+  https://example.com/msft/azure-ai
 
 GOOGL  $178.20  -0.35%
 ----------------------
-• Alphabet search share holds steady amid AI chat competition
-  https://example.com/googl/0
+• Alphabet search share holds steady as Gemini integrations roll out across core products
+  https://example.com/googl/gemini-search
 
-7 tickers · 9 stories · Tickr Digest
+META  $545.83  -0.04%
+---------------------
+• Meta Platforms: H2 2026 May Disappoint - Value Trap Risks Meet Rich Rebound Prospects
+  https://example.com/meta/h2-outlook
+
+AMD  $162.40  +0.00%
+--------------------
+• AMD MI350 ramp on track, but investors await clearer hyperscaler mix shift
+  https://example.com/amd/mi350-ramp
+
+8 tickers · 10 stories · Tickr Digest
 Read full digest: http://localhost:8765/digest?t=preview-token
 Update your tickers: http://localhost:8765/#update-tickers

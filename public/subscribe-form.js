@@ -509,6 +509,11 @@
   }
 
   function showSuccess(data) {
+    if (data.mode !== "update") {
+      closeSubscribeModal();
+      window.location.href = "/welcome?submitted=1";
+      return;
+    }
     if (modalBody) {
       modalBody.hidden = true;
     }
@@ -516,11 +521,10 @@
       successPanel.hidden = false;
     }
     if (successTitle) {
-      successTitle.textContent =
-        data.mode === "update" ? "Tickers updated" : "Almost there";
+      successTitle.textContent = "Tickers updated";
     }
     if (successText) {
-      successText.textContent = data.message || "You're all set.";
+      successText.textContent = data.message || "Your tickers update on the next session.";
     }
     window.setTimeout(function () {
       closeSubscribeModal();

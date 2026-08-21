@@ -205,8 +205,9 @@ def format_section_plain_text(section: dict, *, compact: bool = False) -> list[s
             if story["summary"]:
                 lines.append(f"   {story['summary']}")
             meta = story["source"]
-            if story["relative_time"]:
-                meta = f"{meta} · {story['relative_time']}"
+            story_time = story.get("published_at") or story.get("relative_time")
+            if story_time:
+                meta = f"{meta} · {story_time}"
             lines.append(f"   {meta}")
             if story["url"]:
                 lines.append(f"   {story['url']}")

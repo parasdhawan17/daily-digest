@@ -106,7 +106,7 @@ def subscribe_or_update(
     site_url: str | None = None,
 ) -> dict:
     contact = get_contact(email, api_key)
-    redirection_url = f"{(site_url or SITE_URL or '').rstrip('/')}/" or "/"
+    redirection_url = f"{(site_url or SITE_URL or '').rstrip('/')}/welcome" or "/welcome"
 
     if contact and not contact.get("emailBlacklisted"):
         contact_lists = contact.get("listIds") or []
