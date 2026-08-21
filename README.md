@@ -68,9 +68,10 @@ Production email digests run on a **separate Railway cron service** connected to
 1. Create a Railway project (e.g. **daily-digest-cron**).
 2. Connect the `daily-digest` GitHub repo as a new service.
 3. In Railway **Settings** (not `railway.toml` — set cron in the UI):
-   - **Cron Schedule:** `15 13,20 * * *` UTC (~9:15 AM and 4:15 PM ET during EDT)
+   - **Cron Schedule:** `0 13,20 * * *` UTC (~9:00 AM and 4:00 PM ET during EDT)
    - **Start Command:** `python scripts/send_digests.py --email`
    - **Restart Policy:** Never
+   Prep starts 15 minutes early. Brevo `scheduledAt` holds delivery until **9:15 AM / 4:15 PM ET**. If the job finishes after that time, or a run is outside the 30-minute window (manual tests), emails send immediately. Scheduled transactional mail may still slip by a few minutes.
 4. Set environment variables on the Railway service:
 
 | Variable | Required |

@@ -47,7 +47,7 @@ from stock_news.config import (
     SITE_URL,
 )
 from stock_news.digest import collect_digest_data, filter_sections
-from stock_news.email import count_email_stories, digest_session, union_tickers
+from stock_news.email import count_email_stories, digest_session, scheduled_send_at_iso, union_tickers
 from stock_news.render import build_email_digest
 from stock_news.tokens import build_digest_url
 
@@ -177,6 +177,11 @@ def main() -> None:
     sections, _ = collect_digest_data(digest_tickers, finnhub_key)
 
     print(f"Email subject session: {email_session}")
+    scheduled_at = scheduled_send_at_iso(email_session)
+    if scheduled_at:
+        print(f"Scheduling Brevo delivery at {scheduled_at}")
+    else:
+        print("Sending immediately (no scheduledAt).")
     if dry_run:
         print("Email dry-run: subjects and digest URLs will be printed, nothing sent.")
 
@@ -221,6 +226,7 @@ def main() -> None:
                 [email],
                 EMAIL_FROM_NAME,
                 subject,
+                scheduled_at=scheduled_at,
             )
             sent_count += 1
         except BrevoError as exc:

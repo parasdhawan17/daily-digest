@@ -31,6 +31,10 @@ HEADLINE_SNIPPET_LEN = 32
 ET_ZONE = ZoneInfo("America/New_York")
 MARKET_OPEN_ET = time_of_day(9, 30)
 MARKET_CLOSE_ET = time_of_day(16, 0)
+PRE_OPEN_SEND_ET = time_of_day(9, 15)
+POST_CLOSE_SEND_ET = time_of_day(16, 15)
+# Only schedule if the target is still ahead and close (cron window).
+EMAIL_SCHEDULE_MAX_AHEAD_MINUTES = 30
 TICKER_PATTERN = re.compile(r"^[A-Z][A-Z0-9.]{0,9}$")
 
 PUBLISHER_LOGO_MARKERS = (

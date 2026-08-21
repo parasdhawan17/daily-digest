@@ -188,6 +188,7 @@ def send_transactional_email(
     recipients: list[str],
     sender_name: str,
     subject: str,
+    scheduled_at: str | None = None,
 ) -> None:
     payload_base = {
         "sender": {"name": sender_name, "email": sender_email},
@@ -195,6 +196,8 @@ def send_transactional_email(
         "htmlContent": html,
         "textContent": text,
     }
+    if scheduled_at:
+        payload_base["scheduledAt"] = scheduled_at
 
     total = len(recipients)
     for index, recipient_email in enumerate(recipients, start=1):
@@ -207,7 +210,8 @@ def send_transactional_email(
         if not response.ok:
             raise BrevoError(_safe_brevo_message(response))
         message_id = response.json().get("messageId", response.text)
-        print(f"Email sent to {recipient_email} ({index}/{total}): {message_id}")
+        action = "scheduled" if scheduled_at else "sent"
+        print(f"Email {action} to {recipient_email} ({index}/{total}): {message_id}")
         if index < total:
             time.sleep(SEND_DELAY_SECONDS)
 

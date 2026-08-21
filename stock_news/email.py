@@ -1,15 +1,18 @@
 """Email digest subject lines, plain text, and session helpers."""
 
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 
 from stock_news.config import (
     DIGEST_HEADING,
+    EMAIL_SCHEDULE_MAX_AHEAD_MINUTES,
     ET_ZONE,
     HEADLINE_SNIPPET_LEN,
     MARKET_CLOSE_ET,
     MARKET_OPEN_ET,
     MAX_SUBJECT_HEADLINES,
     MAX_SUBJECT_MOVERS,
+    POST_CLOSE_SEND_ET,
+    PRE_OPEN_SEND_ET,
     SITE_URL,
     SUBJECT_MAX_LEN,
 )
@@ -43,6 +46,23 @@ def digest_session(now: datetime | None = None, override: str = "auto") -> str:
     if local_time >= MARKET_CLOSE_ET:
         return "post_close"
     return "pre_open" if current.hour < 12 else "post_close"
+
+
+def scheduled_send_at_iso(session: str, now: datetime | None = None) -> str | None:
+    """ISO-8601 time for Brevo scheduledAt, or None to send immediately."""
+    current = (now or datetime.now(ET_ZONE)).astimezone(ET_ZONE)
+    send_clock = PRE_OPEN_SEND_ET if session == "pre_open" else POST_CLOSE_SEND_ET
+    target = current.replace(
+        hour=send_clock.hour,
+        minute=send_clock.minute,
+        second=0,
+        microsecond=0,
+    )
+    if target <= current:
+        return None
+    if (target - current) > timedelta(minutes=EMAIL_SCHEDULE_MAX_AHEAD_MINUTES):
+        return None
+    return target.isoformat()
 
 
 def truncate_subject_snippet(text: str, max_len: int = HEADLINE_SNIPPET_LEN) -> str:
