@@ -31,6 +31,16 @@ def fetch_news(symbol: str, api_key: str, limit: int = FETCH_LIMIT_PER_TICKER) -
     return response.json()[:limit]
 
 
+def fetch_us_market_holidays(api_key: str) -> list[dict]:
+    response = requests.get(
+        "https://finnhub.io/api/v1/stock/market-holiday",
+        params={"exchange": "US", "token": api_key},
+        timeout=30,
+    )
+    response.raise_for_status()
+    return response.json().get("data") or []
+
+
 def fetch_quote(symbol: str, api_key: str) -> dict | None:
     response = requests.get(
         "https://finnhub.io/api/v1/quote",

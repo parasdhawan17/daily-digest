@@ -48,6 +48,7 @@ from stock_news.config import (
 )
 from stock_news.digest import collect_digest_data, filter_sections
 from stock_news.email import count_email_stories, digest_session, scheduled_send_at_iso, union_tickers
+from stock_news.market_calendar import trading_day_skip_reason
 from stock_news.render import build_email_digest
 from stock_news.tokens import build_digest_url
 
@@ -106,6 +107,11 @@ def parse_args() -> argparse.Namespace:
         metavar="EMAIL",
         help="Only prepare/send email for this subscriber address (case-insensitive).",
     )
+    parser.add_argument(
+        "--force",
+        action="store_true",
+        help="Send even on weekends or market holidays (manual testing).",
+    )
     return parser.parse_args()
 
 
@@ -150,6 +156,12 @@ def main() -> None:
             file=sys.stderr,
         )
         sys.exit(1)
+
+    if not args.force:
+        skip = trading_day_skip_reason(api_key=finnhub_key)
+        if skip:
+            print(f"Not a US trading day (ET) — skipping digest send ({skip}).")
+            return
 
     subscribers = fetch_subscribers_with_tickers(list_id, brevo_key)
     print(f"Fetched {len(subscribers)} subscriber(s) from Brevo list {list_id}")
