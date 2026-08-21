@@ -240,6 +240,8 @@ class DevHandler(BaseHTTPRequestHandler):
     def _serve_static(self, path: str) -> None:
         if path == "/":
             path = "/index.html"
+        elif path == "/welcome":
+            path = "/welcome.html"
         file_path = PUBLIC / path.lstrip("/")
         if not file_path.is_file():
             self.send_error(404)

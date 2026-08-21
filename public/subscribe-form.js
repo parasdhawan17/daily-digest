@@ -509,11 +509,6 @@
   }
 
   function showSuccess(data) {
-    if (data.mode !== "update") {
-      closeSubscribeModal();
-      window.location.href = "/welcome?submitted=1";
-      return;
-    }
     if (modalBody) {
       modalBody.hidden = true;
     }
@@ -521,10 +516,14 @@
       successPanel.hidden = false;
     }
     if (successTitle) {
-      successTitle.textContent = "Tickers updated";
+      successTitle.textContent =
+        data.mode === "update" ? "Tickers updated" : "Almost there";
     }
     if (successText) {
-      successText.textContent = data.message || "Your tickers update on the next session.";
+      successText.textContent =
+        data.mode === "update"
+          ? (data.message || "Your tickers update on the next session.")
+          : "Confirm your email to subscribe.";
     }
     window.setTimeout(function () {
       closeSubscribeModal();

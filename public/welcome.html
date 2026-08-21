@@ -231,15 +231,15 @@
       </div>
       <p class="eyebrow">Tickr Digest</p>
       <h1>Welcome to Tickr Digest</h1>
-      <p class="message" id="welcome-message">
-        You're subscribed. Personalized US stock news for your tickers is on the way.
+      <p class="message">
+        You're all set. Your next briefing covers the US tickers you picked — delivered twice each trading day.
       </p>
       <div class="next-steps">
         <h2>What happens next</h2>
-        <ol id="welcome-steps">
-          <li id="step-confirm"><strong>Confirm your email</strong> if you haven't yet — check your inbox for a link from Tickr Digest.</li>
+        <ol>
           <li><strong>First briefing</strong> arrives at the next session — <strong>9:15 AM</strong> or <strong>4:15 PM ET</strong> on US trading days.</li>
           <li><strong>Go deeper anytime</strong> — open the live digest from any email for quotes, movers, and full headlines.</li>
+          <li><strong>Change your tickers</strong> anytime from the home page with the same email address.</li>
         </ol>
       </div>
       <div class="actions">
@@ -254,8 +254,6 @@
       var STORAGE_KEY = "daily-digest-theme";
       var root = document.documentElement;
       var themeBtn = document.getElementById("theme-toggle");
-      var messageEl = document.getElementById("welcome-message");
-      var confirmStep = document.getElementById("step-confirm");
 
       function currentTheme() {
         return root.getAttribute("data-theme") === "dark" ? "dark" : "light";
@@ -280,20 +278,6 @@
         themeBtn.addEventListener("click", function () {
           applyTheme(currentTheme() === "dark" ? "light" : "dark");
         });
-      }
-
-      var params = new URLSearchParams(window.location.search);
-      var submitted = params.get("submitted") === "1";
-
-      if (submitted && messageEl) {
-        messageEl.textContent =
-          "Almost there — check your email to confirm your subscription. Your tickers are saved and ready.";
-      } else if (messageEl) {
-        messageEl.textContent =
-          "You're all set. Your next briefing covers the US tickers you picked — delivered twice each trading day.";
-        if (confirmStep) {
-          confirmStep.hidden = true;
-        }
       }
     })();
   </script>
