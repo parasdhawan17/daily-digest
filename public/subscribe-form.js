@@ -523,11 +523,8 @@
       successText.textContent =
         data.mode === "update"
           ? (data.message || "Your tickers update on the next session.")
-          : "Confirm your email to subscribe.";
+          : "Check your inbox for a confirmation email from Tickr Digest and click Confirm subscription to finish signing up.";
     }
-    window.setTimeout(function () {
-      closeSubscribeModal();
-    }, 2200);
   }
 
   function resetForm() {
