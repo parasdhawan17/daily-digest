@@ -5,7 +5,7 @@ import requests
 from stock_news.config import HEADLINES_PER_TICKER, MIN_RELEVANCE_SCORE
 from stock_news.finnhub import story_dedupe_key
 from stock_news.market_data import fetch_company_logo, fetch_news, fetch_quote
-from stock_news.markets import display_symbol, market_of
+from stock_news.markets import display_symbol, market_badge, market_of
 from stock_news.relevance import relevance_score, select_stories, select_web_stories
 
 
@@ -27,10 +27,12 @@ def collect_digest_data(
 
     raw_news: dict[str, list[dict]] = {}
     for ticker in tickers:
+        market = market_of(ticker)
         section: dict = {
             "ticker": ticker,
             "display_symbol": display_symbol(ticker),
-            "market": market_of(ticker),
+            "market": market,
+            "exchange": market_badge(market) if market else "",
             "quote": None,
             "logo": None,
             "stories": [],
@@ -166,6 +168,8 @@ def prepare_email_layout(sections: list[dict]) -> dict:
             {
                 "ticker": section["ticker"],
                 "display_symbol": section.get("display_symbol") or section["ticker"],
+                "market": section.get("market"),
+                "exchange": section.get("exchange", ""),
                 "price": price,
                 "change_pct": change_pct,
                 "is_positive": is_positive,

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import re
 import time
 from datetime import date, datetime, timedelta, timezone
 from email.utils import parsedate_to_datetime
@@ -17,6 +18,11 @@ from stock_news.config import (
 from stock_news.markets import bare_symbol, format_prefixed
 
 ENTITIES_CACHE_TTL_SECONDS = 24 * 3600
+_HTML_TAG_RE = re.compile(r"<[^>]+>")
+
+
+def _strip_html(text: str) -> str:
+    return _HTML_TAG_RE.sub("", text).strip()
 
 
 def _api_root(base_url: str | None = None) -> str:
@@ -59,19 +65,23 @@ def _parse_published_at(value: str | int | float | None) -> int | None:
 
 
 def _normalize_news_item(item: dict) -> dict:
-    headline = (
-        item.get("title")
-        or item.get("headline")
-        or item.get("heading")
-        or ""
-    ).strip()
-    summary = (
-        item.get("summary")
-        or item.get("description")
-        or item.get("content")
-        or item.get("snippet")
-        or ""
-    ).strip()
+    headline = _strip_html(
+        (
+            item.get("title")
+            or item.get("headline")
+            or item.get("heading")
+            or ""
+        ).strip()
+    )
+    summary = _strip_html(
+        (
+            item.get("summary")
+            or item.get("description")
+            or item.get("content")
+            or item.get("snippet")
+            or ""
+        ).strip()
+    )
     url = (item.get("url") or item.get("link") or item.get("storyUrl") or "").strip()
     source = (item.get("source") or item.get("publisher") or item.get("provider") or "News").strip()
     published = _parse_published_at(

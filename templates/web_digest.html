@@ -458,6 +458,32 @@
       letter-spacing: -0.02em;
       font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
     }
+    .exchange-badge {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      vertical-align: middle;
+    }
+    .exchange-badge.us {
+      background: #dbeafe;
+      color: #1d4ed8;
+    }
+    .exchange-badge.in {
+      background: #ffedd5;
+      color: #c2410c;
+    }
+    html[data-theme="dark"] .exchange-badge.us {
+      background: #1e3a8a;
+      color: #93c5fd;
+    }
+    html[data-theme="dark"] .exchange-badge.in {
+      background: #7c2d12;
+      color: #fdba74;
+    }
     .ticker-quote {
       display: flex;
       align-items: center;
@@ -851,7 +877,7 @@
       <div class="movers">
         {% for mover in movers_bar %}
         <span class="pill {% if mover.is_positive == true %}up{% elif mover.is_positive == false %}down{% else %}flat{% endif %}">
-          {{ mover.display_symbol or mover.ticker }}{% if mover.change_pct is not none %} {% if mover.change_pct >= 0 %}+{% endif %}{{ "%.1f"|format(mover.change_pct) }}%{% endif %}
+          {{ mover.display_symbol or mover.ticker }}{% if mover.exchange %} <span class="exchange-badge {{ mover.market|lower }}">{{ mover.exchange }}</span>{% endif %}{% if mover.change_pct is not none %} {% if mover.change_pct >= 0 %}+{% endif %}{{ "%.1f"|format(mover.change_pct) }}%{% endif %}
         </span>
         {% endfor %}
       </div>
@@ -910,7 +936,8 @@
         {% endif %}
         <div class="ticker-head-main">
           <div class="ticker-row">
-            <span class="ticker-symbol">{{ section.display_symbol or section.ticker }}</span>
+            <span class="ticker-symbol">{{ section.display_symbol or section.ticker }}</span>{% if section.exchange %}
+            <span class="exchange-badge {{ section.market|lower }}">{{ section.exchange }}</span>{% endif %}
             {% if is_highlight and not is_hero %}
             <span class="mover-badge">Mover</span>
             {% endif %}

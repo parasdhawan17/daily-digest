@@ -130,10 +130,13 @@
       </td>
       {% endif %}
       <td valign="top" style="vertical-align:top;">
-        <p class="text-primary" style="margin:0;font-size:{{ symbol_size }}px;font-weight:800;color:#0f172a;letter-spacing:-0.5px;line-height:1.2;font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;">{{ section.display_symbol or section.ticker }}</p>
+        <p class="text-primary" style="margin:0;font-size:{{ symbol_size }}px;font-weight:800;color:#0f172a;letter-spacing:-0.5px;line-height:1.2;font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;">
+          <span style="vertical-align:middle;">{{ section.display_symbol or section.ticker }}</span>{% if section.exchange %}
+          <span style="display:inline-block;font-size:{{ (symbol_size * 0.45)|round|int }}px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;padding:2px 8px;border-radius:4px;margin-left:8px;vertical-align:middle;{% if section.market == 'IN' %}background-color:#ffedd5;color:#c2410c;{% else %}background-color:#dbeafe;color:#1d4ed8;{% endif %}">{{ section.exchange }}</span>{% endif %}
+        </p>
         {% if quote %}
         <p style="margin:8px 0 0;font-size:0;line-height:1.4;">
-          <span class="text-primary" style="font-size:{{ price_size }}px;font-weight:700;color:#1e293b;vertical-align:middle;">${{ "%.2f"|format(quote.price) }}</span>
+          <span class="text-primary" style="font-size:{{ price_size }}px;font-weight:700;color:#1e293b;vertical-align:middle;">{% if section.market == 'IN' %}₹{% else %}${% endif %}{{ "%.2f"|format(quote.price) }}</span>
           {% if quote.change_pct is not none %}
           <span class="{% if cls == 'up' %}badge-up{% elif cls == 'down' %}badge-down{% else %}badge-flat{% endif %}" style="display:inline-block;font-size:{{ badge_size }}px;font-weight:700;margin-left:10px;padding:4px 10px;border-radius:6px;vertical-align:middle;
             {% if cls == 'up' %}background-color:#dcfce7;color:#15803d;
@@ -244,7 +247,7 @@
                       {% if mover.is_positive == true %}background-color:#dcfce7;color:#15803d;
                       {% elif mover.is_positive == false %}background-color:#fee2e2;color:#b91c1c;
                       {% else %}background-color:#f1f5f9;color:#64748b;{% endif %}">
-                      {{ mover.display_symbol or mover.ticker }}{% if mover.change_pct is not none %} {% if mover.change_pct >= 0 %}+{% endif %}{{ "%.1f"|format(mover.change_pct) }}%{% endif %}
+                      {{ mover.display_symbol or mover.ticker }}{% if mover.exchange %} <span style="font-size:9px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;opacity:0.85;">{{ mover.exchange }}</span>{% endif %}{% if mover.change_pct is not none %} {% if mover.change_pct >= 0 %}+{% endif %}{{ "%.1f"|format(mover.change_pct) }}%{% endif %}
                     </span>
                   </td>
                   {% if loop.index % 4 == 0 and not loop.last %}

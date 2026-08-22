@@ -34,6 +34,7 @@ def main() -> None:
             "ticker": "US:NVDA",
             "display_symbol": "NVDA",
             "market": "US",
+            "exchange": "US",
             "quote": {"price": 142.50, "change_pct": 2.14},
             "logo": "https://static2.finnhub.io/file/publicdatany/finnhubimage/stock_logo/NVDA.png",
             "web_stories": [
@@ -49,6 +50,7 @@ def main() -> None:
             "ticker": "IN:RELIANCE",
             "display_symbol": "RELIANCE",
             "market": "IN",
+            "exchange": "NSE",
             "quote": {"price": 2856.40, "change_pct": -0.42},
             "logo": None,
             "web_stories": [
@@ -61,6 +63,7 @@ def main() -> None:
             "ticker": "US:AAPL",
             "display_symbol": "AAPL",
             "market": "US",
+            "exchange": "US",
             "quote": {"price": 228.30, "change_pct": 1.18},
             "logo": "https://static2.finnhub.io/file/publicdatany/finnhubimage/stock_logo/AAPL.png",
             "web_stories": [
@@ -73,6 +76,7 @@ def main() -> None:
             "ticker": "IN:TCS",
             "display_symbol": "TCS",
             "market": "IN",
+            "exchange": "NSE",
             "quote": {"price": 4125.75, "change_pct": 0.85},
             "logo": None,
             "web_stories": [

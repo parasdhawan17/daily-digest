@@ -55,6 +55,7 @@ def main() -> None:
             "ticker": "US:NVDA",
             "display_symbol": "NVDA",
             "market": "US",
+            "exchange": "US",
             "quote": {"price": 142.50, "change_pct": 4.82},
             "logo": "https://static2.finnhub.io/file/publicdatany/finnhubimage/stock_logo/NVDA.png",
             "hero_image": IMAGES["nvda_hero"],
@@ -90,6 +91,7 @@ def main() -> None:
             "ticker": "IN:RELIANCE",
             "display_symbol": "RELIANCE",
             "market": "IN",
+            "exchange": "NSE",
             "quote": {"price": 2856.40, "change_pct": -0.42},
             "logo": None,
             "stories": [
@@ -108,6 +110,7 @@ def main() -> None:
             "ticker": "US:TSLA",
             "display_symbol": "TSLA",
             "market": "US",
+            "exchange": "US",
             "quote": {"price": 345.13, "change_pct": -1.71},
             "logo": "https://static2.finnhub.io/file/publicdatany/finnhubimage/stock_logo/TSLA.png",
             "stories": [
@@ -126,6 +129,7 @@ def main() -> None:
             "ticker": "US:META",
             "display_symbol": "META",
             "market": "US",
+            "exchange": "US",
             "quote": {"price": 545.83, "change_pct": -0.04},
             "logo": "https://static2.finnhub.io/file/publicdatany/finnhubimage/stock_logo/META.png",
             "stories": [
@@ -144,6 +148,7 @@ def main() -> None:
             "ticker": "US:AAPL",
             "display_symbol": "AAPL",
             "market": "US",
+            "exchange": "US",
             "quote": {"price": 228.30, "change_pct": 1.18},
             "logo": "https://static2.finnhub.io/file/publicdatany/finnhubimage/stock_logo/AAPL.png",
             "stories": [
@@ -162,6 +167,7 @@ def main() -> None:
             "ticker": "US:MSFT",
             "display_symbol": "MSFT",
             "market": "US",
+            "exchange": "US",
             "quote": {"price": 415.20, "change_pct": 0.82},
             "logo": "https://static2.finnhub.io/file/publicdatany/finnhubimage/stock_logo/MSFT.png",
             "stories": [
@@ -180,6 +186,7 @@ def main() -> None:
             "ticker": "US:AMZN",
             "display_symbol": "AMZN",
             "market": "US",
+            "exchange": "US",
             "quote": {"price": 198.75, "change_pct": -0.92},
             "logo": "https://static2.finnhub.io/file/publicdatany/finnhubimage/stock_logo/AMZN.png",
             "stories": [
@@ -198,6 +205,7 @@ def main() -> None:
             "ticker": "US:GOOGL",
             "display_symbol": "GOOGL",
             "market": "US",
+            "exchange": "US",
             "quote": {"price": 178.20, "change_pct": -0.35},
             "logo": "https://static2.finnhub.io/file/publicdatany/finnhubimage/stock_logo/GOOGL.png",
             "stories": [
@@ -216,6 +224,7 @@ def main() -> None:
             "ticker": "US:AMD",
             "display_symbol": "AMD",
             "market": "US",
+            "exchange": "US",
             "quote": {"price": 162.40, "change_pct": 0.0},
             "logo": "https://static2.finnhub.io/file/publicdatany/finnhubimage/stock_logo/AMD.png",
             "stories": [
