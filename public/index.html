@@ -332,7 +332,7 @@
     .social-proof {
       background: var(--card-bg);
       border-bottom: 1px solid var(--border);
-      padding: 20px 24px;
+      padding: 16px 24px;
     }
     .social-proof-inner {
       max-width: var(--section-max);
@@ -340,10 +340,12 @@
       display: flex;
       flex-wrap: wrap;
       justify-content: center;
-      gap: 24px 40px;
+      align-items: flex-start;
+      gap: 20px 36px;
     }
     .stat {
       text-align: center;
+      min-width: 0;
     }
     .stat-value {
       display: block;
@@ -359,7 +361,9 @@
       font-size: 13px;
       color: var(--text-label);
       font-weight: 500;
+      line-height: 1.35;
     }
+    .stat-label-short { display: none; }
 
     /* ── Sections ── */
     .section {
@@ -946,12 +950,38 @@
       .steps { grid-template-columns: 1fr; }
       .benefits-grid { grid-template-columns: 1fr; }
       .markets-grid { grid-template-columns: 1fr; }
-      .hero { padding: 64px 20px 48px; }
+      .hero { padding: 64px 20px 40px; }
       .section { padding: 48px 20px; }
       .hero-actions { flex-direction: column; align-items: stretch; }
       .btn-subscribe, .btn-ghost { width: 100%; text-align: center; }
       .footer-inner { flex-direction: column; }
       .header-ticker { font-size: 9px; }
+      .social-proof {
+        padding: 12px 16px;
+      }
+      .social-proof-inner {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px 12px;
+      }
+      .stat {
+        text-align: left;
+        padding: 10px 12px;
+        background: var(--muted-bg);
+        border-radius: 10px;
+        border: 1px solid var(--border-soft);
+      }
+      .stat-value {
+        font-size: 20px;
+        line-height: 1.15;
+      }
+      .stat-label {
+        margin-top: 2px;
+        font-size: 11px;
+        line-height: 1.3;
+      }
+      .stat-label-long { display: none; }
+      .stat-label-short { display: block; }
     }
     @media (prefers-reduced-motion: reduce) {
       .header-grid, .chart-line-up, .chart-line-down, .chart-candle,
@@ -1025,19 +1055,23 @@
     <div class="social-proof-inner reveal">
       <div class="stat">
         <span class="stat-value">US + IN</span>
-        <span class="stat-label">Supported today · more soon</span>
+        <span class="stat-label stat-label-long">Supported today · more soon</span>
+        <span class="stat-label stat-label-short">Markets live today</span>
       </div>
       <div class="stat">
         <span class="stat-value">4×</span>
-        <span class="stat-label">Briefings · 15 min before open &amp; after close</span>
+        <span class="stat-label stat-label-long">Briefings · 15 min before open &amp; after close</span>
+        <span class="stat-label stat-label-short">Pre-open &amp; post-close</span>
       </div>
       <div class="stat">
         <span class="stat-value">10</span>
-        <span class="stat-label">tickers per subscriber (mix markets)</span>
+        <span class="stat-label stat-label-long">tickers per subscriber (mix markets)</span>
+        <span class="stat-label stat-label-short">Tickers per list</span>
       </div>
       <div class="stat">
         <span class="stat-value">Live</span>
-        <span class="stat-label">Web digest — $ &amp; ₹ quotes</span>
+        <span class="stat-label stat-label-long">Web digest — $ &amp; ₹ quotes</span>
+        <span class="stat-label stat-label-short">$ &amp; ₹ web digest</span>
       </div>
     </div>
   </section>
