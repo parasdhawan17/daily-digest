@@ -43,7 +43,7 @@
       "</div>" +
       '<div class="subscribe-chips" id="subscribe-chips"></div>' +
       '<p class="subscribe-hint">US stocks, ETFs, and NSE listings are validated before they are added.</p>' +
-      '<button type="submit" class="btn-subscribe" id="subscribe-submit">Get stock news</button>' +
+      '<button type="submit" class="btn-subscribe" id="subscribe-submit">Get your digest</button>' +
       "</form>";
 
     els.form = document.getElementById("subscribe-form");
@@ -551,7 +551,7 @@
       successText.textContent =
         data.mode === "update"
           ? (data.message || "Your tickers update on the next session.")
-          : "Check your inbox for a confirmation email from Stock News and click Confirm subscription to finish signing up.";
+          : "Check your inbox for a confirmation email from Tickr Digest and click Confirm subscription to finish signing up.";
     }
   }
 

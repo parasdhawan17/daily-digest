@@ -162,7 +162,7 @@ def format_pre_open_subject(layout: dict, date_label: str) -> str:
             break
 
     subject = join_subject_chips(chips, prefix="💡 ")
-    return subject or f"📊 Stock News · {date_label}"
+    return subject or f"📊 Tickr Digest · {date_label}"
 
 
 def format_post_close_subject(layout: dict, date_label: str) -> str:
@@ -176,7 +176,7 @@ def format_post_close_subject(layout: dict, date_label: str) -> str:
             break
 
     subject = join_subject_chips(chips)
-    return subject or f"📊 Stock News · {date_label}"
+    return subject or f"📊 Tickr Digest · {date_label}"
 
 
 def format_email_subject(layout: dict, date_label: str, session: str) -> str:
@@ -208,7 +208,7 @@ def footer_text(
     digest_url: str | None = None,
     update_tickers_url: str | None = None,
 ) -> str:
-    line = f"{ticker_count} tickers · {story_count} stories · Stock News"
+    line = f"{ticker_count} tickers · {story_count} stories · Tickr Digest"
     if digest_url:
         line += f"\nRead full digest: {digest_url}"
     if update_tickers_url:
@@ -270,7 +270,7 @@ def build_plain_text(
     update_tickers_url: str | None = None,
 ) -> str:
     summary = layout["market_summary"]
-    title = email_heading or f"Stock News · {date_label}"
+    title = email_heading or f"Tickr Digest · {date_label}"
     lines = [
         title,
         f"{date_label} · {ticker_count} tickers · {story_count} stories",

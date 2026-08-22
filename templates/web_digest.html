@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Stock News — {{ date_label }}</title>
+  <title>Tickr Digest — {{ date_label }}</title>
   <meta name="color-scheme" content="light dark">
   <script>
     (function () {
@@ -829,7 +829,7 @@
           <div class="header-shimmer"></div>
         </div>
         <div class="header-content">
-        <p class="eyebrow">Stock News</p>
+        <p class="eyebrow">Tickr Digest</p>
         <h1>{{ digest_heading }}</h1>
         {% if fetched_at_label %}
         <p class="muted">{{ fetched_at_label }}</p>
@@ -961,7 +961,7 @@
 
   <footer class="site-footer">
     <div class="section-inner">
-      <p class="footer-brand">Stock News</p>
+      <p class="footer-brand">Tickr Digest</p>
       <p>Your personalized stock brief</p>
       {% if subscribe_enabled %}
       <p><button type="button" class="footer-link-btn" onclick="openSubscribeModal()">Update your tickers</button></p>

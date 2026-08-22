@@ -63,6 +63,6 @@ AMD  $162.40  +0.00%
 • AMD MI350 ramp on track, but investors await clearer hyperscaler mix shift
   https://example.com/amd/mi350-ramp
 
-9 tickers · 11 stories · Stock News
+9 tickers · 11 stories · Tickr Digest
 Read full digest: http://localhost:8765/digest?t=preview-token
 Update your tickers: http://localhost:8765/#update-tickers
