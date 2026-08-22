@@ -39,6 +39,8 @@ add_env() {
 }
 
 add_env FINNHUB_API_KEY "${FINNHUB_API_KEY:-}"
+add_env INDIANAPI_API_KEY "${INDIANAPI_API_KEY:-}"
+add_env INDIANAPI_BASE_URL "${INDIANAPI_BASE_URL:-https://stock.indianapi.in}"
 add_env DIGEST_SIGNING_SECRET "${DIGEST_SIGNING_SECRET:-}"
 add_env BREVO_API_KEY "${BREVO_API_KEY:-}"
 add_env BREVO_LIST_ID "${BREVO_LIST_ID:-7}"

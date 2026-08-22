@@ -1,6 +1,6 @@
 # Daily Digest
 
-Live web app for **Daily Digest** — marketing landing page plus on-demand personalized stock news digests on Vercel. Twice-daily email digests run on Railway cron.
+Live web app for **Daily Digest** — marketing landing page plus on-demand personalized stock news digests on Vercel. Session email digests for US and India markets run on Railway cron.
 
 ## What this repo contains
 
@@ -8,13 +8,22 @@ Live web app for **Daily Digest** — marketing landing page plus on-demand pers
 |------|---------|
 | `public/` | Static landing page (`/`) |
 | `api/digest.py` | Vercel serverless — live digest (`/digest?t=...`) |
-| `api/tickers_search.py` | Ticker autocomplete (Finnhub search) |
+| `api/tickers_search.py` | Ticker autocomplete (Finnhub + IndianAPI.in) |
 | `api/subscribe.py` | Subscribe / update holdings (Brevo API) |
 | `scripts/send_digests.py` | Email cron entrypoint (Railway) |
-| `stock_news/` | Python package (Finnhub fetch, relevance, render, tokens) |
+| `stock_news/` | Python package (market routing, relevance, render, tokens) |
 | `templates/` | Jinja HTML templates (web + email) |
 | `railway.toml` | Railway cron schedule and start command |
 | `documents/` | Product requirements, technical spec, implementation plan |
+
+## Ticker format
+
+Tickers are stored with a market prefix:
+
+- `US:AAPL` — US stocks and ETFs (Finnhub)
+- `IN:RELIANCE` — NSE listings (IndianAPI.in)
+
+Bare symbols from existing subscribers (e.g. `AAPL`) are normalized to `US:AAPL` on read.
 
 ## Quick start (local)
 
@@ -31,8 +40,8 @@ python3 -m venv .venv
 
 ```bash
 # Copy env from stock-news-bot/.env or set variables manually
-.venv/bin/python scripts/send_digests.py --email --dry-run
-.venv/bin/python scripts/send_digests.py --email --dry-run --recipient you@example.com
+.venv/bin/python scripts/send_digests.py --email --cron auto --dry-run
+.venv/bin/python scripts/send_digests.py --email --market US --session pre_open --dry-run
 ```
 
 ## Deploy (Vercel)
@@ -47,7 +56,9 @@ python3 -m venv .venv
 
 | Variable | Required for | Notes |
 |----------|--------------|-------|
-| `FINNHUB_API_KEY` | Digest + ticker search/validation | |
+| `FINNHUB_API_KEY` | US digest + search/validation | |
+| `INDIANAPI_API_KEY` | India digest + search/validation | Free key at [IndianAPI.in](https://indianapi.in/indian-stock-market) |
+| `INDIANAPI_BASE_URL` | India API | Optional (default `https://stock.indianapi.in`) |
 | `DIGEST_SIGNING_SECRET` | Signed digest links | Must match Railway cron service |
 | `SITE_URL` | Digest links + Brevo DOI redirect | `https://www.mydailydigest.online` |
 | `BREVO_API_KEY` | Subscribe form | |
@@ -67,17 +78,17 @@ Production email digests run on a **separate Railway cron service** connected to
 
 1. Create a Railway project (e.g. **daily-digest-cron**).
 2. Connect the `daily-digest` GitHub repo as a new service.
-3. In Railway **Settings** (not `railway.toml` — set cron in the UI):
-   - **Cron Schedule:** `0 13,20 * * 1-5` UTC (~9:00 AM and 4:00 PM ET on weekdays during EDT)
-   - **Start Command:** `python scripts/send_digests.py --email`
+3. Cron is defined in [`railway.toml`](railway.toml):
+   - **Cron Schedule:** `0,45 3,10,13,15,20 * * 1-5` UTC
+   - **Start Command:** `python scripts/send_digests.py --email --cron auto`
    - **Restart Policy:** Never
-   Prep starts 15 minutes early. Brevo `scheduledAt` holds delivery until **9:15 AM / 4:15 PM ET**. If the job finishes after that time, or a run is outside the 30-minute window (manual tests), emails send immediately. Scheduled transactional mail may still slip by a few minutes.
-   **Non-trading days:** The cron skips weekends (Mon–Fri UTC schedule plus an ET check). Full US market closure days are skipped using [`config/us_market_holidays.json`](config/us_market_holidays.json) (NYSE/NASDAQ full closures only — early-close days still send). Use `--force` on manual runs to bypass. Refresh the holiday cache before each new year: `python scripts/refresh_market_holidays.py` (requires `FINNHUB_API_KEY`).
+   Four session windows: India 9:15 AM & 3:45 PM IST, US 9:15 AM & 4:15 PM ET.
 4. Set environment variables on the Railway service:
 
 | Variable | Required |
 |----------|----------|
-| `FINNHUB_API_KEY` | Yes |
+| `FINNHUB_API_KEY` | Yes (for US tickers) |
+| `INDIANAPI_API_KEY` | Yes (for India tickers) |
 | `BREVO_API_KEY` | Yes |
 | `BREVO_LIST_ID` | Yes — `7` |
 | `EMAIL_FROM` | Yes |
@@ -91,7 +102,9 @@ Production email digests run on a **separate Railway cron service** connected to
 
 Or run `./scripts/setup_railway_env.sh` after `npx @railway/cli login` and `railway link`.
 
-Each email includes a signed **See the full digest online** link (`/digest?t=...`) personalized to that subscriber's tickers. The web digest loads live from Finnhub when clicked.
+**Holiday caches:** US — `python scripts/refresh_market_holidays.py`. India — `python scripts/refresh_in_market_holidays.py`.
+
+Each email includes a signed **See the full digest online** link (`/digest?t=...`) personalized to that subscriber's tickers. The web digest loads live from Finnhub (US) and IndianAPI.in (India) when clicked.
 
 ## Related repos
 

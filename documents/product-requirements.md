@@ -1,8 +1,8 @@
 # Daily Digest — Product Requirements
 
 **Status:** Draft  
-**Version:** 1.1  
-**Last updated:** 2026-08-13  
+**Version:** 1.2  
+**Last updated:** 2026-08-22  
 **Related:** [Technical Implementation](./technical-implementation.md)
 
 ---
@@ -12,7 +12,7 @@
 | Repository | Role |
 |------------|------|
 | **[daily-digest](https://github.com/parasdhawan17/daily-digest)** (this project) | Vercel web app — landing page + live `/digest` |
-| **[stock-news-bot](https://github.com/parasdhawan17/stock-news-bot)** (unchanged repo) | Email cron, Brevo, Finnhub fetch for email bodies |
+| **[stock-news-bot](https://github.com/parasdhawan17/stock-news-bot)** (unchanged repo) | Email cron, Brevo, Finnhub + IndianAPI fetch for email bodies |
 
 This PRD covers the **Daily Digest** web product. Email requirements that touch the web (footer links, signing) are listed here; email sending stays in `stock-news-bot`.
 
@@ -20,7 +20,7 @@ This PRD covers the **Daily Digest** web product. Email requirements that touch 
 
 ## 1. Overview
 
-**Daily Digest** is a free, twice-daily US stock news product. Subscribers choose tickers, receive personalized email briefings (from `stock-news-bot`), and can open a **live web digest** for their watchlist via a link in the email.
+**Daily Digest** is a free stock news product for **US and India** markets. Subscribers choose tickers (with `US:` or `IN:` prefixes), receive personalized email briefings, and can open a **live web digest** for their watchlist via a link in the email.
 
 This document defines **what** the new **Daily Digest** site delivers: a **dynamic site on a custom domain**, hosted on **Vercel**. Email delivery stays on the existing `stock-news-bot` schedule; the website lives in a **separate repository**.
 
@@ -52,7 +52,7 @@ This document defines **what** the new **Daily Digest** site delivers: a **dynam
 | Marketing site at root | `https://yourdomain.com/` explains product and embeds Brevo subscribe form |
 | Live personalized digest | Email link opens digest with current quotes/news for subscriber tickers only |
 | Custom domain | Production site served on owned domain with HTTPS |
-| Zero hosting cost | Vercel Hobby + existing Finnhub/Brevo free tiers (domain purchase OK) |
+| Zero hosting cost | Vercel Hobby + existing Finnhub/IndianAPI/Brevo free tiers (domain purchase OK) |
 | No deploy spam | Email cron does not trigger site redeploys |
 
 ---
@@ -77,7 +77,7 @@ This document defines **what** the new **Daily Digest** site delivers: a **dynam
 
 - Deploys **Daily Digest** by pushing to `main` on `daily-digest` (Vercel auto-deploy).
 - Runs email via GitHub Actions on `stock-news-bot` only; no web commits from email runs.
-- Monitors Finnhub/Brevo/Vercel usage within free tiers.
+- Monitors Finnhub/IndianAPI/Brevo/Vercel usage within free tiers.
 
 ---
 
@@ -101,7 +101,7 @@ flowchart LR
 flowchart LR
   A[Open email] --> B[Click See full digest online]
   B --> C[yourdomain.com/digest?t=...]
-  C --> D[Live Finnhub fetch]
+  C --> D[Live market data fetch]
   D --> E[Full digest HTML for my tickers]
   E --> F[Click story headline to source]
 ```
@@ -175,7 +175,7 @@ flowchart LR
 | ID | Requirement |
 |----|-------------|
 | NFR-1 | Hosting cost: $0 on Vercel Hobby (excluding domain) |
-| NFR-2 | Finnhub API key never exposed to client |
+| NFR-2 | Finnhub and IndianAPI keys never exposed to client |
 | NFR-3 | Digest links expire (default 14 days) |
 | NFR-4 | Basic abuse protection on digest endpoint (rate limit per IP) |
 | NFR-5 | Digest responses not CDN-cached (`Cache-Control: no-store`) |
@@ -224,6 +224,7 @@ Not required for launch, but useful later:
 | Risk | Mitigation |
 |------|------------|
 | Finnhub quota exhaustion from digest clicks | Rate limiting; token-only access; optimize email job to fetch union of subscriber tickers only |
+| IndianAPI quota / NSE holiday gaps | Cache entity list; skip India sends on NSE holidays; monitor IndianAPI dashboard |
 | Expired email links | 14-day expiry + clear error page with subscribe link |
 | Vercel cold starts feel slow | Document expectation; optional loading state in v2 |
 | Shared digest link leaks watchlist | Tickers in token are visible in URL to anyone with link—acceptable for v1; no email in token |

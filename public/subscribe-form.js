@@ -32,7 +32,7 @@
       '<p class="subscribe-error" id="subscribe-error" hidden></p>' +
       '<label for="subscribe-email">Email</label>' +
       '<input type="email" id="subscribe-email" name="email" required autocomplete="email" placeholder="you@example.com">' +
-      '<label for="subscribe-ticker-input">US tickers (up to ' + MAX_TICKERS + ')</label>' +
+      '<label for="subscribe-ticker-input">Tickers (up to ' + MAX_TICKERS + ')</label>' +
       '<div class="subscribe-ticker-field">' +
       '<div class="subscribe-ticker-row">' +
       '<input type="text" id="subscribe-ticker-input" class="subscribe-ticker-input" autocomplete="off" placeholder="Search by ticker or company name">' +
@@ -42,8 +42,8 @@
       '<ul class="subscribe-suggestions" id="subscribe-suggestions" hidden></ul>' +
       "</div>" +
       '<div class="subscribe-chips" id="subscribe-chips"></div>' +
-      '<p class="subscribe-hint">Each ticker is validated as a US-listed stock or ETF before it is added.</p>' +
-      '<button type="submit" class="btn-subscribe" id="subscribe-submit">Get your digest</button>' +
+      '<p class="subscribe-hint">US stocks, ETFs, and NSE listings are validated before they are added.</p>' +
+      '<button type="submit" class="btn-subscribe" id="subscribe-submit">Get stock news</button>' +
       "</form>";
 
     els.form = document.getElementById("subscribe-form");
@@ -94,6 +94,27 @@
     }
   }
 
+  function displaySymbol(symbol) {
+    var value = (symbol || "").trim().toUpperCase();
+    var parts = value.split(":");
+    return parts.length > 1 ? parts[1] : value;
+  }
+
+  function marketBadge(symbol) {
+    var value = (symbol || "").trim().toUpperCase();
+    if (value.indexOf("IN:") === 0) {
+      return "NSE";
+    }
+    if (value.indexOf("US:") === 0) {
+      return "US";
+    }
+    return "US";
+  }
+
+  function bareSymbol(symbol) {
+    return displaySymbol(symbol);
+  }
+
   function syncTickerInputState() {
     if (!els.tickerInput || !els.addBtn) {
       return;
@@ -112,13 +133,14 @@
     }
     els.chips.innerHTML = selectedTickers
       .map(function (symbol) {
+        var label = displaySymbol(symbol) + " · " + marketBadge(symbol);
         return (
           '<span class="subscribe-chip">' +
-          symbol +
+          label +
           '<button type="button" class="subscribe-chip-remove" data-symbol="' +
           symbol +
           '" aria-label="Remove ' +
-          symbol +
+          displaySymbol(symbol) +
           '">&times;</button>' +
           "</span>"
         );
@@ -153,7 +175,7 @@
       els.tickerInput.value = "";
     }
     showError("");
-    setFieldStatus("success", upper + " added. Add another or submit.");
+    setFieldStatus("success", displaySymbol(upper) + " added. Add another or submit.");
     return true;
   }
 
@@ -193,8 +215,10 @@
           '<li class="subscribe-suggestion" data-index="' +
           index +
           '"><strong>' +
-          item.symbol +
-          "</strong> — " +
+          displaySymbol(item.symbol) +
+          "</strong> · " +
+          (item.market === "IN" ? "NSE" : "US") +
+          " — " +
           item.name +
           "</li>"
         );
@@ -227,11 +251,12 @@
     var upper = query.trim().toUpperCase();
     var lower = query.trim().toLowerCase();
     var symbol = item.symbol || "";
+    var bare = bareSymbol(symbol);
     var name = (item.name || "").toLowerCase();
-    if (symbol === upper) {
+    if (symbol === upper || bare === upper) {
       return 100;
     }
-    if (symbol.indexOf(upper) === 0) {
+    if (bare.indexOf(upper) === 0) {
       return 80;
     }
     if (name.indexOf(lower) === 0) {
@@ -300,7 +325,7 @@
           var results = result.data.results || [];
           if (!results.length) {
             hideSuggestions();
-            setFieldStatus("error", "No US stocks or ETFs found for \"" + query + "\".");
+            setFieldStatus("error", "No US or NSE listings found for \"" + query + "\".");
             return;
           }
           renderSuggestions(results);
@@ -318,7 +343,10 @@
   function findExactSuggestion(query) {
     var upper = query.trim().toUpperCase();
     for (var i = 0; i < currentSuggestions.length; i++) {
-      if (currentSuggestions[i].symbol === upper) {
+      if (
+        currentSuggestions[i].symbol === upper ||
+        bareSymbol(currentSuggestions[i].symbol) === upper
+      ) {
         return currentSuggestions[i];
       }
     }
@@ -399,7 +427,7 @@
         return;
       }
       if (addTicker(data.symbol)) {
-        setFieldStatus("success", data.symbol + " — " + data.name);
+        setFieldStatus("success", displaySymbol(data.symbol) + " — " + data.name);
       }
     });
   }
@@ -523,7 +551,7 @@
       successText.textContent =
         data.mode === "update"
           ? (data.message || "Your tickers update on the next session.")
-          : "Check your inbox for a confirmation email from Tickr Digest and click Confirm subscription to finish signing up.";
+          : "Check your inbox for a confirmation email from Stock News and click Confirm subscription to finish signing up.";
     }
   }
 

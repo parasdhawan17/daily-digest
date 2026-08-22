@@ -40,7 +40,8 @@ from stock_news.config import (
 )
 from stock_news.digest import collect_digest_data, filter_sections
 from stock_news.formatting import format_fetched_at_label
-from stock_news.finnhub import lookup_symbol, resolve_symbol_query, search_symbols, validate_symbol
+from stock_news.market_data import resolve_symbol_query, search_symbols, validate_symbol
+from stock_news.markets import market_of
 from stock_news.render import build_digest_error, build_web_digest
 from stock_news.relevance import parse_tickers
 from stock_news.tokens import TokenError, verify_digest_token
@@ -75,8 +76,9 @@ class DevHandler(BaseHTTPRequestHandler):
         self.send_error(404)
 
     def _search(self, query: dict) -> None:
-        api_key = os.environ.get("FINNHUB_API_KEY")
-        if not api_key:
+        finnhub_key = os.environ.get("FINNHUB_API_KEY", "").strip()
+        indianapi_key = os.environ.get("INDIANAPI_API_KEY", "").strip()
+        if not finnhub_key and not indianapi_key:
             self._json(503, {"ok": False, "error": "Search is not configured."})
             return
         q = (query.get("q") or [""])[0]
@@ -84,14 +86,20 @@ class DevHandler(BaseHTTPRequestHandler):
             self._json(400, {"ok": False, "error": "Enter a ticker or company name."})
             return
         try:
-            self._json(200, {"ok": True, "results": search_symbols(q, api_key)})
+            results = search_symbols(
+                q,
+                finnhub_key=finnhub_key,
+                indianapi_key=indianapi_key,
+            )
+            self._json(200, {"ok": True, "results": results})
         except Exception:
             traceback.print_exc()
             self._json(503, {"ok": False, "error": "Could not search tickers right now."})
 
     def _validate(self, query: dict) -> None:
-        api_key = os.environ.get("FINNHUB_API_KEY")
-        if not api_key:
+        finnhub_key = os.environ.get("FINNHUB_API_KEY", "").strip()
+        indianapi_key = os.environ.get("INDIANAPI_API_KEY", "").strip()
+        if not finnhub_key and not indianapi_key:
             self._json(503, {"ok": False, "valid": False, "error": "Validation is not configured."})
             return
         ticker = (query.get("symbol") or [""])[0]
@@ -99,14 +107,18 @@ class DevHandler(BaseHTTPRequestHandler):
             self._json(400, {"ok": False, "valid": False, "error": "Enter a ticker or company name."})
             return
         try:
-            match = resolve_symbol_query(ticker, api_key)
+            match = resolve_symbol_query(
+                ticker,
+                finnhub_key=finnhub_key,
+                indianapi_key=indianapi_key,
+            )
             if not match:
                 self._json(
                     200,
                     {
                         "ok": True,
                         "valid": False,
-                        "error": f"Could not find a US listing for \"{ticker.strip()}\".",
+                        "error": f"Could not find a listing for \"{ticker.strip()}\".",
                     },
                 )
                 return
@@ -120,6 +132,7 @@ class DevHandler(BaseHTTPRequestHandler):
         list_id = BREVO_LIST_ID
         template_id = os.environ.get("BREVO_DOI_TEMPLATE_ID", "").strip()
         finnhub_key = os.environ.get("FINNHUB_API_KEY", "").strip()
+        indianapi_key = os.environ.get("INDIANAPI_API_KEY", "").strip()
 
         if not api_key or not template_id:
             missing = [
@@ -139,7 +152,7 @@ class DevHandler(BaseHTTPRequestHandler):
                 },
             )
             return
-        if not finnhub_key:
+        if not finnhub_key and not indianapi_key:
             self._json(503, {"ok": False, "error": "Ticker validation is not configured."})
             return
 
@@ -167,7 +180,11 @@ class DevHandler(BaseHTTPRequestHandler):
             self._json(400, {"ok": False, "error": f"Maximum {MAX_TICKERS_PER_USER} tickers allowed."})
             return
 
-        invalid = [symbol for symbol in tickers if not validate_symbol(symbol, finnhub_key)]
+        invalid = [
+            symbol
+            for symbol in tickers
+            if not validate_symbol(symbol, finnhub_key=finnhub_key, indianapi_key=indianapi_key)
+        ]
         if invalid:
             self._json(400, {"ok": False, "error": f"Could not validate: {', '.join(invalid)}"})
             return
@@ -212,18 +229,28 @@ class DevHandler(BaseHTTPRequestHandler):
             self._html(status, html)
             return
 
-        api_key = os.environ.get("FINNHUB_API_KEY")
-        if not api_key:
+        finnhub_key = os.environ.get("FINNHUB_API_KEY", "").strip()
+        indianapi_key = os.environ.get("INDIANAPI_API_KEY", "").strip()
+        missing = []
+        if any(market_of(symbol) == "US" for symbol in tickers) and not finnhub_key:
+            missing.append("FINNHUB_API_KEY")
+        if any(market_of(symbol) == "IN" for symbol in tickers) and not indianapi_key:
+            missing.append("INDIANAPI_API_KEY")
+        if missing:
             html = build_digest_error(
                 "Service unavailable",
                 "The digest service is not configured.",
-                detail="FINNHUB_API_KEY is missing.",
+                detail="Missing: " + ", ".join(missing),
             )
             self._html(503, html)
             return
 
         try:
-            sections, _ = collect_digest_data(tickers, api_key)
+            sections, _ = collect_digest_data(
+                tickers,
+                finnhub_key=finnhub_key,
+                indianapi_key=indianapi_key,
+            )
             sections = filter_sections(sections, tickers)
             fetched_at = format_fetched_at_label(datetime.now().astimezone())
             html = build_web_digest(sections, tickers, fetched_at_label=fetched_at)

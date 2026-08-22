@@ -1,14 +1,11 @@
-"""Collect Finnhub data and prepare digest layout."""
+"""Collect market data and prepare digest layout."""
 
 import requests
 
 from stock_news.config import HEADLINES_PER_TICKER, MIN_RELEVANCE_SCORE
-from stock_news.finnhub import (
-    fetch_company_logo,
-    fetch_news,
-    fetch_quote,
-    story_dedupe_key,
-)
+from stock_news.finnhub import story_dedupe_key
+from stock_news.market_data import fetch_company_logo, fetch_news, fetch_quote
+from stock_news.markets import display_symbol, market_of
 from stock_news.relevance import relevance_score, select_stories, select_web_stories
 
 
@@ -17,7 +14,12 @@ def filter_sections(sections: list[dict], tickers: list[str]) -> list[dict]:
     return [section for section in sections if section["ticker"] in ticker_set]
 
 
-def collect_digest_data(tickers: list[str], api_key: str) -> tuple[list[dict], int]:
+def collect_digest_data(
+    tickers: list[str],
+    *,
+    finnhub_key: str,
+    indianapi_key: str,
+) -> tuple[list[dict], int]:
     seen_stories: set[str] = set()
     sections: list[dict] = []
     total_stories = 0
@@ -27,6 +29,8 @@ def collect_digest_data(tickers: list[str], api_key: str) -> tuple[list[dict], i
     for ticker in tickers:
         section: dict = {
             "ticker": ticker,
+            "display_symbol": display_symbol(ticker),
+            "market": market_of(ticker),
             "quote": None,
             "logo": None,
             "stories": [],
@@ -35,17 +39,29 @@ def collect_digest_data(tickers: list[str], api_key: str) -> tuple[list[dict], i
         }
 
         try:
-            section["quote"] = fetch_quote(ticker, api_key)
+            section["quote"] = fetch_quote(
+                ticker,
+                finnhub_key=finnhub_key,
+                indianapi_key=indianapi_key,
+            )
         except requests.RequestException:
             pass
 
         try:
-            section["logo"] = fetch_company_logo(ticker, api_key)
+            section["logo"] = fetch_company_logo(
+                ticker,
+                finnhub_key=finnhub_key,
+                indianapi_key=indianapi_key,
+            )
         except requests.RequestException:
             pass
 
         try:
-            raw_news[ticker] = fetch_news(ticker, api_key)
+            raw_news[ticker] = fetch_news(
+                ticker,
+                finnhub_key=finnhub_key,
+                indianapi_key=indianapi_key,
+            )
         except requests.RequestException as exc:
             section["error"] = str(exc)
             raw_news[ticker] = []
@@ -149,6 +165,7 @@ def prepare_email_layout(sections: list[dict]) -> dict:
         movers_bar.append(
             {
                 "ticker": section["ticker"],
+                "display_symbol": section.get("display_symbol") or section["ticker"],
                 "price": price,
                 "change_pct": change_pct,
                 "is_positive": is_positive,

@@ -12,15 +12,16 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from api._responses import send_json
-from stock_news.finnhub import search_symbols
+from stock_news.market_data import search_symbols
 
 
 def handle_get(handler: BaseHTTPRequestHandler) -> None:
     query = parse_qs(urlparse(handler.path).query)
     q = (query.get("q") or [""])[0]
 
-    api_key = os.environ.get("FINNHUB_API_KEY")
-    if not api_key:
+    finnhub_key = os.environ.get("FINNHUB_API_KEY", "").strip()
+    indianapi_key = os.environ.get("INDIANAPI_API_KEY", "").strip()
+    if not finnhub_key and not indianapi_key:
         send_json(handler, 503, {"ok": False, "error": "Search is not configured."})
         return
 
@@ -29,7 +30,7 @@ def handle_get(handler: BaseHTTPRequestHandler) -> None:
         return
 
     try:
-        results = search_symbols(q, api_key)
+        results = search_symbols(q, finnhub_key=finnhub_key, indianapi_key=indianapi_key)
         send_json(handler, 200, {"ok": True, "results": results})
     except Exception:
         traceback.print_exc()

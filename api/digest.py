@@ -15,8 +15,20 @@ if str(ROOT) not in sys.path:
 from api._responses import send_html
 from stock_news.digest import collect_digest_data, filter_sections
 from stock_news.formatting import format_fetched_at_label
+from stock_news.markets import market_of
 from stock_news.render import build_digest_error, build_web_digest
 from stock_news.tokens import TokenError, verify_digest_token
+
+
+def _missing_data_keys(tickers: list[str]) -> list[str]:
+    missing: list[str] = []
+    needs_us = any(market_of(ticker) == "US" for ticker in tickers)
+    needs_in = any(market_of(ticker) == "IN" for ticker in tickers)
+    if needs_us and not os.environ.get("FINNHUB_API_KEY", "").strip():
+        missing.append("FINNHUB_API_KEY")
+    if needs_in and not os.environ.get("INDIANAPI_API_KEY", "").strip():
+        missing.append("INDIANAPI_API_KEY")
+    return missing
 
 
 def handle_get(handler: BaseHTTPRequestHandler) -> None:
@@ -49,18 +61,25 @@ def handle_get(handler: BaseHTTPRequestHandler) -> None:
         send_html(handler, status, html)
         return
 
-    api_key = os.environ.get("FINNHUB_API_KEY")
-    if not api_key:
+    missing = _missing_data_keys(tickers)
+    if missing:
         html = build_digest_error(
             "Service unavailable",
             "The digest service is not configured.",
-            detail="FINNHUB_API_KEY is missing.",
+            detail="Missing: " + ", ".join(missing),
         )
         send_html(handler, 503, html)
         return
 
+    finnhub_key = os.environ.get("FINNHUB_API_KEY", "").strip()
+    indianapi_key = os.environ.get("INDIANAPI_API_KEY", "").strip()
+
     try:
-        sections, _ = collect_digest_data(tickers, api_key)
+        sections, _ = collect_digest_data(
+            tickers,
+            finnhub_key=finnhub_key,
+            indianapi_key=indianapi_key,
+        )
         sections = filter_sections(sections, tickers)
         fetched_at = format_fetched_at_label(datetime.now().astimezone())
         html = build_web_digest(sections, tickers, fetched_at_label=fetched_at)

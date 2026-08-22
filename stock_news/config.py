@@ -33,9 +33,17 @@ MARKET_OPEN_ET = time_of_day(9, 30)
 MARKET_CLOSE_ET = time_of_day(16, 0)
 PRE_OPEN_SEND_ET = time_of_day(9, 15)
 POST_CLOSE_SEND_ET = time_of_day(16, 15)
+
+IST_ZONE = ZoneInfo("Asia/Kolkata")
+IN_MARKET_OPEN_IST = time_of_day(9, 30)
+IN_MARKET_CLOSE_IST = time_of_day(15, 30)
+IN_PRE_OPEN_SEND_IST = time_of_day(9, 15)
+IN_POST_CLOSE_SEND_IST = time_of_day(15, 45)
+
 # Only schedule if the target is still ahead and close (cron window).
 EMAIL_SCHEDULE_MAX_AHEAD_MINUTES = 30
 TICKER_PATTERN = re.compile(r"^[A-Z][A-Z0-9.]{0,9}$")
+IN_ENTITIES_CACHE_PATH = REPO_ROOT / "config" / "in_entities_cache.json"
 
 PUBLISHER_LOGO_MARKERS = (
     "yahoo_finance",
@@ -47,6 +55,11 @@ PUBLISHER_LOGO_MARKERS = (
 )
 
 FINNHUB_KEY = os.environ.get("FINNHUB_API_KEY")
+INDIANAPI_BASE_URL = os.environ.get(
+    "INDIANAPI_BASE_URL",
+    "https://stock.indianapi.in",
+).rstrip("/")
+INDIANAPI_API_KEY = os.environ.get("INDIANAPI_API_KEY", "").strip()
 SITE_URL = os.environ.get("SITE_URL", "").rstrip("/")
 DIGEST_SIGNING_SECRET = os.environ.get("DIGEST_SIGNING_SECRET", "")
 BREVO_API_KEY = os.environ.get("BREVO_API_KEY", "").strip()
@@ -55,7 +68,7 @@ BREVO_DOI_TEMPLATE_ID = os.environ.get("BREVO_DOI_TEMPLATE_ID", "").strip()
 BREVO_LIST_ID = "7"
 BREVO_TICKERS_ATTRIBUTE = os.environ.get("BREVO_TICKERS_ATTRIBUTE", "US_TICKERS").strip().upper()
 EMAIL_FROM = os.environ.get("EMAIL_FROM", "").strip()
-EMAIL_FROM_NAME = os.environ.get("EMAIL_FROM_NAME", "Tickr Digest").strip()
+EMAIL_FROM_NAME = os.environ.get("EMAIL_FROM_NAME", "Stock News").strip()
 
 US_SYMBOL_TYPES = frozenset({"Common Stock", "ETF", "ETP", "ADR", "ETN", "ETC", "Closed-End Fund"})
 FOREIGN_SYMBOL_SUFFIXES = (".DE", ".L", ".TO", ".HK", ".SW", ".PA", ".AS", ".MI", ".AX", ".KS", ".TW")

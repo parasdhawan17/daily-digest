@@ -559,9 +559,73 @@ No new runtime deps for v1. Optional later: `pytest` for token tests.
 
 ---
 
+## 17. Multi-market extension (US + India)
+
+**Added:** 2026-08-22
+
+### Ticker format
+
+| Prefix | Market | Provider | Example |
+|--------|--------|----------|---------|
+| `US:` | US equities | Finnhub | `US:AAPL` |
+| `IN:` | NSE equities | IndianAPI.in | `IN:RELIANCE` |
+
+Bare symbols (e.g. `AAPL`) normalize to `US:AAPL` for backward compatibility. Brevo stores prefixed tickers in the `US_TICKERS` attribute.
+
+### Data routing
+
+```
+subscribe / search / validate / digest
+        ↓
+  stock_news/market_data.py
+        ├── US: → stock_news/finnhub.py
+        └── IN: → stock_news/indianapi.py
+```
+
+`collect_digest_data(tickers, *, finnhub_key, indianapi_key)` routes per ticker prefix.
+
+### Environment variables
+
+| Variable | Required | Purpose |
+|----------|----------|---------|
+| `FINNHUB_API_KEY` | US tickers | Finnhub quotes + news |
+| `INDIANAPI_API_KEY` | IN tickers | IndianAPI.in quotes + news |
+| `INDIANAPI_BASE_URL` | No | Default `https://stock.indianapi.in` |
+
+### Dual cron schedule
+
+Railway cron (`railway.toml`): `0,45 3,10,13,15,20 * * 1-5`
+
+| UTC | Market | Session (local) |
+|-----|--------|-----------------|
+| 03:45 | IN | 9:15 AM IST pre-open |
+| 10:15 | IN | 3:45 PM IST post-close |
+| 13:00 | US | 9:15 AM ET pre-open |
+| 20:00 | US | 4:15 PM ET post-close |
+
+`scripts/send_digests.py --cron auto` matches the current UTC minute to the correct market session. Each send includes **all** subscriber tickers (US + IN). Trading-day skips use `market_calendar.py` (US) and `in_market_calendar.py` (NSE holidays).
+
+### India calendar
+
+- `config/in_market_holidays.json` — seeded NSE holidays
+- `scripts/refresh_in_market_holidays.py` — refresh from NSE public API
+- `config/in_entities_cache.json` — offline fallback for ticker search
+
+### API quota model (India)
+
+| Event | API calls |
+|-------|-----------|
+| Email job (IN tickers) | `1 × |IN tickers|` per run (combined quote + news endpoint) |
+| Digest page load (IN) | `1 × |IN tickers|` |
+
+Monitor IndianAPI dashboard alongside Finnhub.
+
+---
+
 ## 16. Document history
 
 | Version | Date | Changes |
 |---------|------|---------|
 | 1.0 | 2026-08-13 | Initial technical spec for Vercel migration |
 | 1.1 | 2026-08-13 | Renamed to Daily Digest; split `daily-digest` vs `stock-news-bot` repos |
+| 1.2 | 2026-08-22 | Multi-market extension: US + India, IndianAPI.in, dual cron, ticker prefixes |

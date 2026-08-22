@@ -4,6 +4,7 @@
 import argparse
 import os
 import sys
+from datetime import datetime, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -47,8 +48,16 @@ from stock_news.config import (
     SITE_URL,
 )
 from stock_news.digest import collect_digest_data, filter_sections
-from stock_news.email import count_email_stories, digest_session, scheduled_send_at_iso, union_tickers
+from stock_news.email import (
+    count_email_stories,
+    cron_sessions,
+    digest_session,
+    scheduled_send_at_iso,
+    union_tickers,
+)
+from stock_news.in_market_calendar import in_trading_day_skip_reason
 from stock_news.market_calendar import trading_day_skip_reason
+from stock_news.markets import Market, market_of
 from stock_news.render import build_email_digest
 from stock_news.tokens import build_digest_url
 
@@ -66,8 +75,6 @@ def email_configured() -> bool:
 
 def missing_email_env() -> list[str]:
     missing: list[str] = []
-    if not os.environ.get("FINNHUB_API_KEY", "").strip():
-        missing.append("FINNHUB_API_KEY")
     if not os.environ.get("BREVO_API_KEY", "").strip():
         missing.append("BREVO_API_KEY")
     if not os.environ.get("EMAIL_FROM", "").strip():
@@ -77,6 +84,23 @@ def missing_email_env() -> list[str]:
     if not os.environ.get("SITE_URL", "").strip():
         missing.append("SITE_URL")
     return missing
+
+
+def missing_data_env_for_tickers(tickers: list[str]) -> list[str]:
+    missing: list[str] = []
+    if any(market_of(ticker) == "US" for ticker in tickers):
+        if not os.environ.get("FINNHUB_API_KEY", "").strip():
+            missing.append("FINNHUB_API_KEY")
+    if any(market_of(ticker) == "IN" for ticker in tickers):
+        if not os.environ.get("INDIANAPI_API_KEY", "").strip():
+            missing.append("INDIANAPI_API_KEY")
+    return missing
+
+
+def trading_day_skip_for_market(market: Market, *, finnhub_key: str) -> str | None:
+    if market == "US":
+        return trading_day_skip_reason(api_key=finnhub_key)
+    return in_trading_day_skip_reason()
 
 
 def parse_args() -> argparse.Namespace:
@@ -89,12 +113,23 @@ def parse_args() -> argparse.Namespace:
         help="Send the HTML email digest via Brevo.",
     )
     parser.add_argument(
+        "--cron",
+        choices=("auto", "off"),
+        default="off",
+        help="When auto, run only for market sessions matching the current UTC cron window.",
+    )
+    parser.add_argument(
+        "--market",
+        choices=("US", "IN"),
+        help="Force a specific market session when --cron is off.",
+    )
+    parser.add_argument(
         "--session",
         choices=("auto", "pre_open", "post_close"),
         default="auto",
         help=(
             "Email subject style: pre_open uses multi-headline teasers, "
-            "post_close uses multi-mover chips. Default auto uses America/New_York clock."
+            "post_close uses multi-mover chips. Default auto uses market clock."
         ),
     )
     parser.add_argument(
@@ -115,87 +150,84 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def main() -> None:
-    args = parse_args()
-    if not args.email:
-        print("Error: pass --email to send digest emails.", file=sys.stderr)
-        sys.exit(1)
+def resolve_runs(args: argparse.Namespace) -> list[tuple[Market, str]]:
+    if args.cron == "auto":
+        runs = cron_sessions()
+        if not runs:
+            print("No market session matches the current UTC cron window — skipping.")
+        return runs
 
-    missing = missing_email_env()
-    if missing:
-        print(
-            "Email env not configured yet — skipping send. "
-            f"Set in Railway Variables: {', '.join(missing)}",
-        )
-        return
+    market = args.market or "US"
+    session = digest_session(market, override=args.session)
+    return [(market, session)]
 
-    recipient_filter = (args.recipient or "").strip().lower() or None
-    dry_run = args.dry_run
-    email_session = digest_session(override=args.session)
 
-    if not email_configured():
-        print(
-            "Error: BREVO_API_KEY, EMAIL_FROM, and BREVO_LIST_ID are required.",
-            file=sys.stderr,
-        )
-        sys.exit(1)
-
-    finnhub_key = require_env("FINNHUB_API_KEY", FINNHUB_KEY)
-    brevo_key = require_env("BREVO_API_KEY", BREVO_API_KEY)
-    list_id = int(require_env("BREVO_LIST_ID", BREVO_LIST_ID))
-    sender_email = require_env("EMAIL_FROM", EMAIL_FROM)
-    site_url = require_env("SITE_URL", os.environ.get("SITE_URL", "").rstrip("/"))
-    signing_secret = require_env(
-        "DIGEST_SIGNING_SECRET",
-        os.environ.get("DIGEST_SIGNING_SECRET", "").strip(),
-    )
-    if signing_secret in ("[SENSITIVE]", "test-secret-for-dry-run") or len(signing_secret) < 32:
-        print(
-            "Error: DIGEST_SIGNING_SECRET looks invalid. "
-            "Use a real secret from .env.local (vercel env pull only returns [SENSITIVE]).",
-            file=sys.stderr,
-        )
-        sys.exit(1)
-
+def send_for_market(
+    market: Market,
+    session: str,
+    *,
+    args: argparse.Namespace,
+    finnhub_key: str,
+    indianapi_key: str,
+    brevo_key: str,
+    list_id: int,
+    sender_email: str,
+    site_url: str,
+    signing_secret: str,
+) -> int:
     if not args.force:
-        skip = trading_day_skip_reason(api_key=finnhub_key)
+        skip = trading_day_skip_for_market(market, finnhub_key=finnhub_key)
         if skip:
-            print(f"Not a US trading day (ET) — skipping digest send ({skip}).")
-            return
+            print(f"Not a {market} trading day — skipping digest send ({skip}).")
+            return 0
 
     subscribers = fetch_subscribers_with_tickers(list_id, brevo_key)
-    print(f"Fetched {len(subscribers)} subscriber(s) from Brevo list {list_id}")
+    print(f"[{market}] Fetched {len(subscribers)} subscriber(s) from Brevo list {list_id}")
 
+    recipient_filter = (args.recipient or "").strip().lower() or None
     if recipient_filter:
         matched = [
             s for s in subscribers if s.get("email", "").strip().lower() == recipient_filter
         ]
         if not matched:
             print(f"No subscriber matched --recipient {args.recipient}", file=sys.stderr)
-            sys.exit(1)
+            return 0
         subscribers = matched
         print(f"Filtered to recipient: {subscribers[0]['email']}")
 
     if not subscribers:
         print("No email recipients found; nothing to send.")
-        return
+        return 0
 
     digest_tickers = union_tickers(subscribers)
     if not digest_tickers:
         print("No valid tickers across subscribers; nothing to send.")
-        return
+        return 0
 
-    print(f"Fetching digest data for {len(digest_tickers)} ticker(s): {', '.join(digest_tickers)}")
-    sections, _ = collect_digest_data(digest_tickers, finnhub_key)
+    missing_data = missing_data_env_for_tickers(digest_tickers)
+    if missing_data:
+        print(
+            "Data provider env not configured — skipping send. "
+            f"Set in Railway Variables: {', '.join(missing_data)}",
+        )
+        return 0
 
-    print(f"Email subject session: {email_session}")
-    scheduled_at = scheduled_send_at_iso(email_session)
+    print(
+        f"[{market}] Fetching digest data for {len(digest_tickers)} ticker(s): "
+        f"{', '.join(digest_tickers)}"
+    )
+    sections, _ = collect_digest_data(
+        digest_tickers,
+        finnhub_key=finnhub_key,
+        indianapi_key=indianapi_key,
+    )
+
+    print(f"[{market}] Email subject session: {session}")
+    scheduled_at = scheduled_send_at_iso(session, market)
     if scheduled_at:
         print(f"Scheduling Brevo delivery at {scheduled_at}")
     else:
         print("Sending immediately (no scheduledAt).")
-    if dry_run:
-        print("Email dry-run: subjects and digest URLs will be printed, nothing sent.")
 
     update_tickers_url = f"{site_url.rstrip('/')}/#update-tickers"
     sent_count = 0
@@ -214,7 +246,7 @@ def main() -> None:
             user_sections,
             user_tickers,
             user_story_count,
-            email_session,
+            session,
             digest_url=digest_url,
             update_tickers_url=update_tickers_url,
         )
@@ -222,9 +254,9 @@ def main() -> None:
             f"Prepared email for {email} "
             f"({len(user_tickers)} tickers, subject: {subject})"
         )
-        if dry_run:
+        if args.dry_run:
             print(f"Dry-run digest URL: {digest_url}")
-            print(f"Dry-run subject [{email_session}]: {subject}")
+            print(f"Dry-run subject [{market}/{session}]: {subject}")
             print(f"Dry-run HTML size: {len(html)} chars")
             sent_count += 1
             continue
@@ -244,7 +276,69 @@ def main() -> None:
         except BrevoError as exc:
             print(f"Failed to send to {email}: {exc}", file=sys.stderr)
 
-    print(f"Done. {'Would send' if dry_run else 'Sent'} {sent_count} email(s).")
+    return sent_count
+
+
+def main() -> None:
+    args = parse_args()
+    if not args.email:
+        print("Error: pass --email to send digest emails.", file=sys.stderr)
+        sys.exit(1)
+
+    missing = missing_email_env()
+    if missing:
+        print(
+            "Email env not configured yet — skipping send. "
+            f"Set in Railway Variables: {', '.join(missing)}",
+        )
+        return
+
+    if not email_configured():
+        print(
+            "Error: BREVO_API_KEY, EMAIL_FROM, and BREVO_LIST_ID are required.",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+
+    finnhub_key = os.environ.get("FINNHUB_API_KEY", "").strip() or (FINNHUB_KEY or "")
+    indianapi_key = os.environ.get("INDIANAPI_API_KEY", "").strip()
+    brevo_key = require_env("BREVO_API_KEY", BREVO_API_KEY)
+    list_id = int(require_env("BREVO_LIST_ID", BREVO_LIST_ID))
+    sender_email = require_env("EMAIL_FROM", EMAIL_FROM)
+    site_url = require_env("SITE_URL", os.environ.get("SITE_URL", "").rstrip("/"))
+    signing_secret = require_env(
+        "DIGEST_SIGNING_SECRET",
+        os.environ.get("DIGEST_SIGNING_SECRET", "").strip(),
+    )
+    if signing_secret in ("[SENSITIVE]", "test-secret-for-dry-run") or len(signing_secret) < 32:
+        print(
+            "Error: DIGEST_SIGNING_SECRET looks invalid. "
+            "Use a real secret from .env.local (vercel env pull only returns [SENSITIVE]).",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+
+    runs = resolve_runs(args)
+    if not runs:
+        return
+
+    total_sent = 0
+    for market, session in runs:
+        total_sent += send_for_market(
+            market,
+            session,
+            args=args,
+            finnhub_key=finnhub_key,
+            indianapi_key=indianapi_key,
+            brevo_key=brevo_key,
+            list_id=list_id,
+            sender_email=sender_email,
+            site_url=site_url,
+            signing_secret=signing_secret,
+        )
+
+    label = "Would send" if args.dry_run else "Sent"
+    print(f"Done. {label} {total_sent} email(s).")
 
 
 if __name__ == "__main__":

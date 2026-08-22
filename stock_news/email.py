@@ -1,12 +1,17 @@
 """Email digest subject lines, plain text, and session helpers."""
 
-from datetime import date, datetime, timedelta
+from datetime import date, datetime, timedelta, timezone
 
 from stock_news.config import (
     DIGEST_HEADING,
     EMAIL_SCHEDULE_MAX_AHEAD_MINUTES,
     ET_ZONE,
     HEADLINE_SNIPPET_LEN,
+    IN_MARKET_CLOSE_IST,
+    IN_MARKET_OPEN_IST,
+    IN_POST_CLOSE_SEND_IST,
+    IN_PRE_OPEN_SEND_IST,
+    IST_ZONE,
     MARKET_CLOSE_ET,
     MARKET_OPEN_ET,
     MAX_SUBJECT_HEADLINES,
@@ -17,6 +22,14 @@ from stock_news.config import (
     SUBJECT_MAX_LEN,
 )
 from stock_news.digest import prepare_email_layout
+from stock_news.markets import Market, display_symbol
+
+CRON_WINDOWS: tuple[tuple[Market, str, int, int], ...] = (
+    ("IN", "pre_open", 3, 45),
+    ("IN", "post_close", 10, 15),
+    ("US", "pre_open", 13, 0),
+    ("US", "post_close", 20, 0),
+)
 
 
 def union_tickers(subscribers: list[dict]) -> list[str]:
@@ -34,24 +47,41 @@ def count_email_stories(sections: list[dict]) -> int:
     return sum(len(section.get("stories", [])) for section in sections)
 
 
-def digest_session(now: datetime | None = None, override: str = "auto") -> str:
-    """Return 'pre_open' or 'post_close' from ET clock or an explicit override."""
+def digest_session(
+    market: Market = "US",
+    now: datetime | None = None,
+    override: str = "auto",
+) -> str:
+    """Return 'pre_open' or 'post_close' for a market clock or explicit override."""
     if override in ("pre_open", "post_close"):
         return override
 
-    current = (now or datetime.now(ET_ZONE)).astimezone(ET_ZONE)
+    zone = IST_ZONE if market == "IN" else ET_ZONE
+    open_clock = IN_MARKET_OPEN_IST if market == "IN" else MARKET_OPEN_ET
+    close_clock = IN_MARKET_CLOSE_IST if market == "IN" else MARKET_CLOSE_ET
+
+    current = (now or datetime.now(zone)).astimezone(zone)
     local_time = current.time()
-    if local_time < MARKET_OPEN_ET:
+    if local_time < open_clock:
         return "pre_open"
-    if local_time >= MARKET_CLOSE_ET:
+    if local_time >= close_clock:
         return "post_close"
     return "pre_open" if current.hour < 12 else "post_close"
 
 
-def scheduled_send_at_iso(session: str, now: datetime | None = None) -> str | None:
+def scheduled_send_at_iso(
+    session: str,
+    market: Market = "US",
+    now: datetime | None = None,
+) -> str | None:
     """ISO-8601 time for Brevo scheduledAt, or None to send immediately."""
-    current = (now or datetime.now(ET_ZONE)).astimezone(ET_ZONE)
-    send_clock = PRE_OPEN_SEND_ET if session == "pre_open" else POST_CLOSE_SEND_ET
+    zone = IST_ZONE if market == "IN" else ET_ZONE
+    if market == "IN":
+        send_clock = IN_PRE_OPEN_SEND_IST if session == "pre_open" else IN_POST_CLOSE_SEND_IST
+    else:
+        send_clock = PRE_OPEN_SEND_ET if session == "pre_open" else POST_CLOSE_SEND_ET
+
+    current = (now or datetime.now(zone)).astimezone(zone)
     target = current.replace(
         hour=send_clock.hour,
         minute=send_clock.minute,
@@ -63,6 +93,17 @@ def scheduled_send_at_iso(session: str, now: datetime | None = None) -> str | No
     if (target - current) > timedelta(minutes=EMAIL_SCHEDULE_MAX_AHEAD_MINUTES):
         return None
     return target.isoformat()
+
+
+def cron_sessions(now: datetime | None = None) -> list[tuple[Market, str]]:
+    """Return active (market, session) pairs for the current UTC cron window."""
+    current = (now or datetime.now(timezone.utc)).astimezone(timezone.utc)
+    active: list[tuple[Market, str]] = []
+    for market, session, hour, minute in CRON_WINDOWS:
+        delta = abs((current.hour * 60 + current.minute) - (hour * 60 + minute))
+        if delta <= EMAIL_SCHEDULE_MAX_AHEAD_MINUTES:
+            active.append((market, session))
+    return active
 
 
 def truncate_subject_snippet(text: str, max_len: int = HEADLINE_SNIPPET_LEN) -> str:
@@ -85,7 +126,7 @@ def mover_subject_chip(mover: dict) -> str | None:
         emoji = "📉"
     else:
         emoji = "➡️"
-    return f"{emoji} {mover['ticker']} {change_pct:+.1f}%"
+    return f"{emoji} {mover.get('display_symbol') or display_symbol(mover['ticker'])} {change_pct:+.1f}%"
 
 
 def join_subject_chips(chips: list[str], *, prefix: str = "") -> str | None:
@@ -116,12 +157,12 @@ def format_pre_open_subject(layout: dict, date_label: str) -> str:
         if not headline:
             continue
         snippet = truncate_subject_snippet(headline)
-        chips.append(f"{section['ticker']} · {snippet}")
+        chips.append(f"{display_symbol(section['ticker'])} · {snippet}")
         if len(chips) >= MAX_SUBJECT_HEADLINES:
             break
 
     subject = join_subject_chips(chips, prefix="💡 ")
-    return subject or f"📊 Tickr Digest · {date_label}"
+    return subject or f"📊 Stock News · {date_label}"
 
 
 def format_post_close_subject(layout: dict, date_label: str) -> str:
@@ -135,7 +176,7 @@ def format_post_close_subject(layout: dict, date_label: str) -> str:
             break
 
     subject = join_subject_chips(chips)
-    return subject or f"📊 Tickr Digest · {date_label}"
+    return subject or f"📊 Stock News · {date_label}"
 
 
 def format_email_subject(layout: dict, date_label: str, session: str) -> str:
@@ -148,7 +189,7 @@ def format_email_heading(layout: dict) -> str:
     hero = layout.get("hero")
     if not hero:
         return DIGEST_HEADING
-    ticker = hero["ticker"]
+    ticker = display_symbol(hero["ticker"])
     quote = hero.get("quote")
     if not quote or quote.get("change_pct") is None:
         return DIGEST_HEADING
@@ -167,7 +208,7 @@ def footer_text(
     digest_url: str | None = None,
     update_tickers_url: str | None = None,
 ) -> str:
-    line = f"{ticker_count} tickers · {story_count} stories · Tickr Digest"
+    line = f"{ticker_count} tickers · {story_count} stories · Stock News"
     if digest_url:
         line += f"\nRead full digest: {digest_url}"
     if update_tickers_url:
@@ -180,10 +221,11 @@ def footer_text(
 
 def format_section_plain_text(section: dict, *, compact: bool = False) -> list[str]:
     lines: list[str] = []
-    ticker_line = section["ticker"]
+    ticker_line = display_symbol(section["ticker"])
     if section["quote"]:
         quote = section["quote"]
-        ticker_line += f"  ${quote['price']:.2f}"
+        currency = "₹" if section.get("market") == "IN" else "$"
+        ticker_line += f"  {currency}{quote['price']:.2f}"
         if quote["change_pct"] is not None:
             sign = "+" if quote["change_pct"] >= 0 else ""
             ticker_line += f"  {sign}{quote['change_pct']:.2f}%"
@@ -228,7 +270,7 @@ def build_plain_text(
     update_tickers_url: str | None = None,
 ) -> str:
     summary = layout["market_summary"]
-    title = email_heading or f"Tickr Digest · {date_label}"
+    title = email_heading or f"Stock News · {date_label}"
     lines = [
         title,
         f"{date_label} · {ticker_count} tickers · {story_count} stories",

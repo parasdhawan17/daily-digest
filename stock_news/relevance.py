@@ -11,9 +11,9 @@ from stock_news.config import (
     RIVAL_PENALTY,
     SUMMARY_ALIAS_POINTS,
     TICKER_ALIASES_PATH,
-    TICKER_PATTERN,
     TICKER_SYMBOL_BONUS,
 )
+from stock_news.markets import display_symbol, normalize_ticker
 from stock_news.finnhub import story_dedupe_key, sanitize_article_image
 from stock_news.formatting import excerpt_summary, format_full_datetime, format_relative_time
 
@@ -100,7 +100,7 @@ def relevance_score(
     score += min(headline_hits, 2) * HEADLINE_ALIAS_POINTS
     score += min(summary_hits, 2) * SUMMARY_ALIAS_POINTS
 
-    if whole_word_match(ticker, headline):
+    if whole_word_match(ticker, headline) or whole_word_match(display_symbol(ticker), headline):
         score += TICKER_SYMBOL_BONUS
 
     own_hit = score > 0
@@ -130,13 +130,11 @@ def parse_tickers(raw: str | list | tuple | None) -> list[str]:
     seen: set[str] = set()
     result: list[str] = []
     for part in parts:
-        ticker = part.strip().upper()
-        if not ticker or ticker in seen:
+        normalized = normalize_ticker(part)
+        if not normalized or normalized in seen:
             continue
-        if not TICKER_PATTERN.match(ticker):
-            continue
-        seen.add(ticker)
-        result.append(ticker)
+        seen.add(normalized)
+        result.append(normalized)
         if len(result) >= MAX_TICKERS_PER_USER:
             break
     return result

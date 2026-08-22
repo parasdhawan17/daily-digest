@@ -12,7 +12,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from api._responses import read_json, send_json
-from stock_news.finnhub import resolve_symbol_query
+from stock_news.market_data import resolve_symbol_query
 
 
 def handle_get(handler: BaseHTTPRequestHandler) -> None:
@@ -32,18 +32,23 @@ def handle_post(handler: BaseHTTPRequestHandler) -> None:
 
 
 def validate_symbol(handler: BaseHTTPRequestHandler, symbol: str) -> None:
-    api_key = os.environ.get("FINNHUB_API_KEY")
-    if not api_key:
+    finnhub_key = os.environ.get("FINNHUB_API_KEY", "").strip()
+    indianapi_key = os.environ.get("INDIANAPI_API_KEY", "").strip()
+    if not finnhub_key and not indianapi_key:
         send_json(handler, 503, {"ok": False, "valid": False, "error": "Validation is not configured."})
         return
 
-    ticker = symbol.strip().upper()
+    ticker = symbol.strip()
     if not ticker:
         send_json(handler, 400, {"ok": False, "valid": False, "error": "Enter a ticker or company name."})
         return
 
     try:
-        match = resolve_symbol_query(symbol, api_key)
+        match = resolve_symbol_query(
+            ticker,
+            finnhub_key=finnhub_key,
+            indianapi_key=indianapi_key,
+        )
         if not match:
             send_json(
                 handler,
@@ -51,7 +56,7 @@ def validate_symbol(handler: BaseHTTPRequestHandler, symbol: str) -> None:
                 {
                     "ok": True,
                     "valid": False,
-                    "error": f"Could not find a US listing for \"{symbol.strip()}\".",
+                    "error": f"Could not find a listing for \"{symbol.strip()}\".",
                 },
             )
             return

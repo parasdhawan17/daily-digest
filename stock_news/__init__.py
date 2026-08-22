@@ -1,1 +1,1 @@
-"""Daily Digest core library — Finnhub, relevance scoring, templates, signed URLs."""
+"""Daily Digest core library — market data, relevance scoring, templates, signed URLs."""

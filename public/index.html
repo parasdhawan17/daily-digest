@@ -3,10 +3,10 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Daily Digest — US stock news for your tickers</title>
-  <meta name="description" content="Free twice-daily news on US stocks and ETFs you follow. Subscribe with your tickers — email briefings at 9:15 AM and 4:15 PM ET, plus a live digest on demand. Not a brokerage or portfolio tracker.">
-  <meta property="og:title" content="Daily Digest — US stock news for your tickers">
-  <meta property="og:description" content="A free news digest for US stocks you follow. Twice-daily email briefings and a live web digest — subscribe with your tickers, not your portfolio.">
+  <title>Stock News — personalized stock news for your tickers</title>
+  <meta name="description" content="Free stock news on the tickers you follow. US and India markets supported today — more regions coming soon. Session email briefings and a live web digest.">
+  <meta property="og:title" content="Stock News — personalized stock news for your tickers">
+  <meta property="og:description" content="Stock news for your watchlist. US and India supported now — more markets coming soon. Free session briefings and a live digest.">
   <meta property="og:url" content="https://www.mydailydigest.online/">
   <meta property="og:type" content="website">
   <link rel="canonical" href="https://www.mydailydigest.online/">
@@ -601,6 +601,95 @@
     }
     .ticker-showcase .pill:hover { transform: translateY(-2px); }
     .pill.flat { background: var(--pill-flat-bg); color: var(--pill-flat-fg); }
+    .pill .market-tag {
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      opacity: 0.75;
+      margin-right: 4px;
+    }
+
+    /* ── Markets callout ── */
+    .markets-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      max-width: 960px;
+      margin: 0 auto;
+    }
+    .market-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border-strong);
+      border-radius: 14px;
+      padding: 20px 22px;
+      box-shadow: var(--shadow);
+    }
+    .market-card h3 {
+      margin: 0 0 6px;
+      font-size: 17px;
+      font-weight: 800;
+      color: var(--text-strong);
+      letter-spacing: -0.02em;
+    }
+    .market-card .market-badge {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 3px 8px;
+      border-radius: 5px;
+      margin-bottom: 10px;
+    }
+    .market-badge.us { background: #dbeafe; color: #1d4ed8; }
+    .market-badge.in { background: #ffedd5; color: #c2410c; }
+    html[data-theme="dark"] .market-badge.us { background: #1e3a8a; color: #93c5fd; }
+    html[data-theme="dark"] .market-badge.in { background: #7c2d12; color: #fdba74; }
+    .market-badge.soon { background: var(--pill-flat-bg); color: var(--text-label); }
+    .market-card.coming-soon {
+      border-style: dashed;
+      background: var(--muted-bg);
+    }
+    .market-card.coming-soon p {
+      color: var(--text-muted);
+    }
+    .market-card p {
+      margin: 0 0 10px;
+      font-size: 14px;
+      color: var(--text-secondary);
+      line-height: 1.55;
+    }
+    .market-card .market-times {
+      font-size: 12px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      color: var(--text-label);
+      line-height: 1.5;
+    }
+    .market-examples {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 12px;
+    }
+    .market-examples .pill {
+      font-size: 11px;
+      padding: 4px 9px;
+    }
+    .preview-market-tag {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 2px 7px;
+      border-radius: 4px;
+      margin-left: 6px;
+      vertical-align: middle;
+    }
+    .preview-market-tag.us { background: #dbeafe; color: #1d4ed8; }
+    .preview-market-tag.in { background: #ffedd5; color: #c2410c; }
+    html[data-theme="dark"] .preview-market-tag.us { background: #1e3a8a; color: #93c5fd; }
+    html[data-theme="dark"] .preview-market-tag.in { background: #7c2d12; color: #fdba74; }
 
     /* ── FAQ ── */
     .faq-list {
@@ -856,6 +945,7 @@
     @media (max-width: 768px) {
       .steps { grid-template-columns: 1fr; }
       .benefits-grid { grid-template-columns: 1fr; }
+      .markets-grid { grid-template-columns: 1fr; }
       .hero { padding: 64px 20px 48px; }
       .section { padding: 48px 20px; }
       .hero-actions { flex-direction: column; align-items: stretch; }
@@ -909,22 +999,22 @@
       </svg>
       <div class="header-tickers">
         <span class="header-ticker up">AAPL +1.2%</span>
-        <span class="header-ticker down">TSLA -0.6%</span>
+        <span class="header-ticker down">RELIANCE -0.4%</span>
         <span class="header-ticker up">NVDA +2.1%</span>
-        <span class="header-ticker down">META -0.3%</span>
+        <span class="header-ticker up">TCS +0.8%</span>
         <span class="header-ticker up">MSFT +0.8%</span>
-        <span class="header-ticker up">VOO +0.4%</span>
+        <span class="header-ticker down">META -0.3%</span>
       </div>
       <div class="header-shimmer"></div>
     </div>
     <div class="hero-content">
-      <p class="eyebrow hero-enter">Daily Digest</p>
-      <h1 class="hero-enter delay-1">US stock news<br>for your tickers.</h1>
+      <p class="eyebrow hero-enter">Stock News</p>
+      <h1 class="hero-enter delay-1">Stock news<br>for your tickers.</h1>
       <p class="subhead hero-enter delay-2">
-        A free news digest for US-listed stocks and ETFs — subscribe with the tickers you follow and get twice-daily email briefings before the open and after the close, plus a live web digest when you want more.
+        Personalized session briefings and a live web digest for the stocks you follow. <strong>US and India markets supported today</strong> — more regions coming soon.
       </p>
       <div class="hero-actions hero-enter delay-3">
-        <button type="button" class="btn-subscribe" onclick="openSubscribeModal()">Get your digest</button>
+        <button type="button" class="btn-subscribe" onclick="openSubscribeModal()">Get stock news</button>
         <button type="button" class="btn-ghost" onclick="openSubscribeModal()">Update tickers</button>
       </div>
     </div>
@@ -934,20 +1024,63 @@
   <section class="social-proof" aria-label="Product highlights">
     <div class="social-proof-inner reveal">
       <div class="stat">
-        <span class="stat-value">2×</span>
-        <span class="stat-label">Session briefings daily</span>
+        <span class="stat-value">US + IN</span>
+        <span class="stat-label">Supported today · more soon</span>
       </div>
       <div class="stat">
-        <span class="stat-value">9:15 AM &amp; 4:15 PM</span>
-        <span class="stat-label">ET — pre-open &amp; post-close</span>
+        <span class="stat-value">4×</span>
+        <span class="stat-label">Briefings · 15 min before open &amp; after close</span>
       </div>
       <div class="stat">
         <span class="stat-value">10</span>
-        <span class="stat-label">US tickers per subscriber</span>
+        <span class="stat-label">tickers per subscriber (mix markets)</span>
       </div>
       <div class="stat">
         <span class="stat-value">Live</span>
-        <span class="stat-label">Full digest on demand</span>
+        <span class="stat-label">Web digest — $ &amp; ₹ quotes</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Markets callout -->
+  <section class="section" id="markets" style="padding-top: 48px; padding-bottom: 48px;">
+    <div class="section-inner">
+      <div class="section-header reveal">
+        <p class="eyebrow">Supported markets</p>
+        <h2>US and India today — more coming soon</h2>
+        <p>Start with NYSE, NASDAQ, and NSE tickers in one watchlist. We're expanding to additional markets and exchanges.</p>
+      </div>
+      <div class="markets-grid reveal-stagger">
+        <article class="market-card">
+          <span class="market-badge us">United States</span>
+          <h3>US stocks &amp; ETFs</h3>
+          <p>NYSE and NASDAQ listings — blue chips, growth names, and ETFs like VOO and SPY.</p>
+          <p class="market-times">15 min before open (9:15 AM ET) · 15 min after close (4:15 PM ET)</p>
+          <div class="market-examples">
+            <span class="pill up">AAPL</span>
+            <span class="pill up">NVDA</span>
+            <span class="pill flat">MSFT</span>
+            <span class="pill flat">VOO</span>
+          </div>
+        </article>
+        <article class="market-card">
+          <span class="market-badge in">India · NSE</span>
+          <h3>NSE-listed equities</h3>
+          <p>National Stock Exchange listings — large caps, IT, banking, and energy names.</p>
+          <p class="market-times">15 min before open (9:15 AM IST) · 15 min after close (3:45 PM IST)</p>
+          <div class="market-examples">
+            <span class="pill up">RELIANCE</span>
+            <span class="pill up">TCS</span>
+            <span class="pill flat">INFY</span>
+            <span class="pill down">HDFCBANK</span>
+          </div>
+        </article>
+        <article class="market-card coming-soon">
+          <span class="market-badge soon">Coming soon</span>
+          <h3>More markets</h3>
+          <p>Additional regions and exchanges are on the way. Subscribe now — your watchlist grows as we expand.</p>
+          <p class="market-times">Europe · UK · Asia-Pacific · more</p>
+        </article>
       </div>
     </div>
   </section>
@@ -958,25 +1091,25 @@
       <div class="section-header reveal">
         <p class="eyebrow">How it works</p>
         <h2>Three steps to stay informed</h2>
-        <p>Pick your US tickers once. We email the news that matters at each session.</p>
+        <p>Pick your tickers once. We email the news that matters at each US and India trading session.</p>
       </div>
       <div class="steps reveal-stagger">
         <article class="step-card">
           <span class="step-num">1</span>
           <h3>Pick your tickers</h3>
-          <p>Subscribe with your email and add up to 10 US stocks or ETFs you want news on.</p>
+          <p>Subscribe with your email and add up to 10 tickers — mix US stocks, ETFs, and NSE names in one list.</p>
           <div class="step-icon">
             <span class="pill up">AAPL</span>
             <span class="pill up">NVDA</span>
-            <span class="pill down">TSLA</span>
-            <span class="pill up">MSFT</span>
+            <span class="pill up">RELIANCE</span>
+            <span class="pill up">TCS</span>
           </div>
         </article>
         <article class="step-card">
           <span class="step-num">2</span>
           <h3>Read the session brief</h3>
-          <p>Headlines and price action on your stocks — delivered at 9:15 AM and 4:15 PM ET, when it matters most.</p>
-          <div class="step-icon">Pre-open · Post-close</div>
+          <p>Stock news on your watchlist — sent <strong>15 minutes before market open</strong> and <strong>15 minutes after market close</strong> for US (ET) and India (IST).</p>
+          <div class="step-icon">15 min before open · 15 min after close · each trading day</div>
         </article>
         <article class="step-card">
           <span class="step-num">3</span>
@@ -992,22 +1125,22 @@
   <section class="section section-alt" id="preview">
     <div class="section-inner">
       <div class="section-header reveal">
-        <p class="eyebrow">The digest</p>
+        <p class="eyebrow">Your briefing</p>
         <h2>News on your stocks, in one place</h2>
-        <p>Each email links to a live page — quotes, session movers, and the headlines driving your tickers.</p>
+        <p>Each email links to a live page — quotes, session movers, and headlines for your full watchlist.</p>
       </div>
       <div class="preview-wrap reveal">
         <div class="preview-card">
-          <div class="preview-header">Daily Digest · Aug 15, 2026 · Pre-open session</div>
+          <div class="preview-header">Stock News · Aug 15, 2026 · US pre-open session</div>
           <div class="preview-movers">
             <span class="pill up">NVDA +2.1%</span>
             <span class="pill up">AAPL +1.2%</span>
-            <span class="pill down">TSLA -0.6%</span>
-            <span class="pill up">MSFT +0.8%</span>
+            <span class="pill up">RELIANCE +0.8%</span>
+            <span class="pill up">TCS +0.5%</span>
           </div>
           <div class="preview-story">
             <div class="preview-ticker-row">
-              <span class="preview-ticker-name">NVDA</span>
+              <span class="preview-ticker-name">NVDA<span class="preview-market-tag us">US</span></span>
               <span class="preview-price">$142.50</span>
               <span class="preview-change up">+2.14%</span>
             </div>
@@ -1016,12 +1149,12 @@
           </div>
           <div class="preview-story">
             <div class="preview-ticker-row">
-              <span class="preview-ticker-name">AAPL</span>
-              <span class="preview-price">$228.30</span>
-              <span class="preview-change up">+1.18%</span>
+              <span class="preview-ticker-name">RELIANCE<span class="preview-market-tag in">NSE</span></span>
+              <span class="preview-price">₹2,856.40</span>
+              <span class="preview-change up">+0.42%</span>
             </div>
-            <p class="preview-headline">Apple expands AI features across iOS 19 developer preview</p>
-            <p class="preview-meta">Bloomberg · 4h ago</p>
+            <p class="preview-headline">Reliance Industries reports steady refining margins in quarterly update</p>
+            <p class="preview-meta">Economic Times · 3h ago</p>
           </div>
         </div>
       </div>
@@ -1037,24 +1170,31 @@
       </div>
       <div class="benefits-grid reveal-stagger">
         <div class="benefit-item">
+          <div class="benefit-icon" aria-hidden="true">🌐</div>
+          <div>
+            <h3>Multi-market watchlist</h3>
+            <p>US and India supported today — mix tickers in one subscription. More markets coming soon.</p>
+          </div>
+        </div>
+        <div class="benefit-item">
           <div class="benefit-icon" aria-hidden="true">◎</div>
           <div>
             <h3>Your tickers only</h3>
-            <p>News and quotes for the US stocks you subscribed to — not a generic market firehose.</p>
+            <p>News and quotes for the stocks you subscribed to — not a generic market firehose.</p>
           </div>
         </div>
         <div class="benefit-item">
           <div class="benefit-icon" aria-hidden="true">⏱</div>
           <div>
             <h3>Session-aware timing</h3>
-            <p>Briefings land at 9:15 AM and 4:15 PM ET — before the open and after the close.</p>
+            <p>Four briefings on trading days — stock news 15 minutes before each market opens and 15 minutes after it closes.</p>
           </div>
         </div>
         <div class="benefit-item">
           <div class="benefit-icon" aria-hidden="true">↗</div>
           <div>
             <h3>Price action &amp; context</h3>
-            <p>Session movers, live quotes, and the stories behind the moves — side by side.</p>
+            <p>Session movers, live quotes in $ and ₹, and the stories behind the moves — side by side.</p>
           </div>
         </div>
         <div class="benefit-item">
@@ -1073,20 +1213,20 @@
     <div class="section-inner">
       <div class="section-header reveal">
         <p class="eyebrow">Your tickers</p>
-        <h2>Follow the US stocks you care about</h2>
-        <p>Up to 10 US-listed stocks or ETFs — blue chips, growth names, or index funds like SPY and VOO.</p>
+        <h2>Follow the stocks you care about</h2>
+        <p>Up to 10 tickers — US, India (NSE), and more markets as we expand.</p>
       </div>
       <div class="ticker-showcase reveal">
         <span class="pill up">AAPL +1.2%</span>
-        <span class="pill up">MSFT +0.8%</span>
         <span class="pill up">NVDA +2.1%</span>
-        <span class="pill down">TSLA -0.6%</span>
-        <span class="pill up">GOOGL +0.5%</span>
-        <span class="pill down">META -0.3%</span>
-        <span class="pill up">AMZN +0.9%</span>
+        <span class="pill up">RELIANCE +0.8%</span>
+        <span class="pill up">TCS +0.5%</span>
+        <span class="pill up">MSFT +0.8%</span>
+        <span class="pill flat">INFY +0.2%</span>
+        <span class="pill down">HDFCBANK -0.3%</span>
         <span class="pill flat">VOO +0.4%</span>
-        <span class="pill flat">SPY +0.3%</span>
-        <span class="pill up">AMD +1.5%</span>
+        <span class="pill up">GOOGL +0.5%</span>
+        <span class="pill up">AMZN +0.9%</span>
       </div>
     </div>
   </section>
@@ -1100,16 +1240,28 @@
       </div>
       <div class="faq-list reveal">
         <details class="faq-item">
-          <summary>Is Daily Digest free?</summary>
-          <p class="faq-answer">Yes — no subscription fee. Just your email and the US tickers you want news on.</p>
+          <summary>Is Stock News free?</summary>
+          <p class="faq-answer">Yes — no subscription fee. Just your email and the tickers you want news on.</p>
+        </details>
+        <details class="faq-item">
+          <summary>Which markets do you cover?</summary>
+          <p class="faq-answer">United States (NYSE and NASDAQ stocks and ETFs) and India (NSE-listed equities) are supported today. Search by ticker or company name when subscribing — results are labeled by market. More regions are coming soon.</p>
+        </details>
+        <details class="faq-item">
+          <summary>Will you add more markets?</summary>
+          <p class="faq-answer">Yes. US and India are live now. We're working on additional markets and exchanges — subscribe today and your watchlist will work as we expand.</p>
+        </details>
+        <details class="faq-item">
+          <summary>Can I mix US and India tickers?</summary>
+          <p class="faq-answer">Yes. Add up to 10 tickers in one subscription — for example AAPL, NVDA, RELIANCE, and TCS together. Each briefing includes your full watchlist with the correct currency ($ for US, ₹ for NSE).</p>
         </details>
         <details class="faq-item">
           <summary>How often will I receive emails?</summary>
-          <p class="faq-answer">Twice each US trading day — pre-open at 9:15 AM ET and post-close at 4:15 PM ET. Each briefing covers only the stocks you subscribed to.</p>
+          <p class="faq-answer">Up to four briefings on trading days — one 15 minutes before market open and one 15 minutes after market close for each supported market (US and India). US sends at 9:15 AM ET and 4:15 PM ET; India at 9:15 AM IST and 3:45 PM IST. India sends are skipped on NSE holidays. Each email covers all your tickers.</p>
         </details>
         <details class="faq-item">
           <summary>How many tickers can I follow?</summary>
-          <p class="faq-answer">Up to 10 US-listed stocks or ETFs per subscriber. Pick the tickers you actually watch or own.</p>
+          <p class="faq-answer">Up to 10 tickers per subscriber — mix US and NSE listings in one subscription.</p>
         </details>
         <details class="faq-item">
           <summary>Can I change my tickers later?</summary>
@@ -1121,7 +1273,7 @@
         </details>
         <details class="faq-item">
           <summary>Is this a brokerage or portfolio tracker?</summary>
-          <p class="faq-answer">No. Daily Digest is a free news service. We don't hold your stocks, track your portfolio, or give investment advice — we email and publish news on the US tickers you choose.</p>
+          <p class="faq-answer">No. Stock News is a free news service. We don't hold your stocks, track your portfolio, or give investment advice — we email and publish news on the tickers you choose.</p>
         </details>
         <details class="faq-item">
           <summary>Do I need to create an account?</summary>
@@ -1134,9 +1286,9 @@
   <!-- Step 4: Final CTA -->
   <section class="final-cta" id="subscribe">
     <div class="final-cta-inner reveal">
-      <h2>Get US stock news on your tickers</h2>
-      <p>Join investors who start and end each session knowing what's moving in the stocks they follow — free.</p>
-      <button type="button" class="btn-subscribe" onclick="openSubscribeModal()">Get your digest</button>
+      <h2>Get stock news on your tickers</h2>
+      <p>Free session briefings — 15 min before open and after close. US and India supported; more markets on the way.</p>
+      <button type="button" class="btn-subscribe" onclick="openSubscribeModal()">Get stock news</button>
       <br>
       <button type="button" class="final-cta-link" onclick="openSubscribeModal()">Already subscribed? Update your tickers</button>
     </div>
@@ -1146,17 +1298,18 @@
   <footer class="site-footer">
     <div class="footer-inner">
       <div class="footer-brand">
-        Daily Digest
-        <p>US stock news for informed investors — twice daily.</p>
+        Stock News
+        <p>Personalized stock news — US and India supported today, more markets coming soon.</p>
       </div>
       <div class="footer-links">
         <button type="button" onclick="openSubscribeModal()">Subscribe</button>
         <button type="button" onclick="openSubscribeModal()">Update tickers</button>
+        <a href="#markets">Markets</a>
         <a href="#how-it-works">How it works</a>
         <a href="#faq">FAQ</a>
       </div>
     </div>
-    <p class="footer-bottom">© 2026 Daily Digest · Curated US stock news for your tickers</p>
+    <p class="footer-bottom">© 2026 Stock News · US &amp; India supported · more markets coming soon</p>
   </footer>
 
   <!-- Subscribe modal -->
@@ -1170,7 +1323,7 @@
       <div class="subscribe-modal-body" id="subscribe-modal-body"></div>
       <div class="subscribe-success" id="subscribe-success" hidden>
         <h3>Almost there</h3>
-        <p>Check your inbox for a confirmation email from Tickr Digest and click Confirm subscription to finish signing up.</p>
+        <p>Check your inbox for a confirmation email from Stock News and click Confirm subscription to finish signing up.</p>
       </div>
     </div>
   </div>

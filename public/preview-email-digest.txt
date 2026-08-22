@@ -1,8 +1,8 @@
 NVDA moved high
-21 Aug 2026 · 8 tickers · 10 stories
-3 up · 4 down · 1 flat
+22 Aug 2026 · 9 tickers · 11 stories
+3 up · 5 down · 1 flat
 
-Today's biggest move: NVDA +4.82%
+Today's biggest move: US:NVDA +4.82%
 
 === BIGGEST MOVER ===
 NVDA  $142.50  +4.82%
@@ -43,6 +43,11 @@ MSFT  $415.20  +0.82%
 • Microsoft Azure AI bookings remain ahead of plan, Copilot seat growth steady in enterprise
   https://example.com/msft/azure-ai
 
+RELIANCE  ₹2856.40  -0.42%
+--------------------------
+• Reliance Industries reports steady refining margins in quarterly update
+  https://example.com/reliance/refining
+
 GOOGL  $178.20  -0.35%
 ----------------------
 • Alphabet search share holds steady as Gemini integrations roll out across core products
@@ -58,6 +63,6 @@ AMD  $162.40  +0.00%
 • AMD MI350 ramp on track, but investors await clearer hyperscaler mix shift
   https://example.com/amd/mi350-ramp
 
-8 tickers · 10 stories · Tickr Digest
+9 tickers · 11 stories · Stock News
 Read full digest: http://localhost:8765/digest?t=preview-token
 Update your tickers: http://localhost:8765/#update-tickers

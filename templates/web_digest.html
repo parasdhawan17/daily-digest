@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Daily Digest — {{ date_label }}</title>
+  <title>Stock News — {{ date_label }}</title>
   <meta name="color-scheme" content="light dark">
   <script>
     (function () {
@@ -829,7 +829,7 @@
           <div class="header-shimmer"></div>
         </div>
         <div class="header-content">
-        <p class="eyebrow">Daily Digest</p>
+        <p class="eyebrow">Stock News</p>
         <h1>{{ digest_heading }}</h1>
         {% if fetched_at_label %}
         <p class="muted">{{ fetched_at_label }}</p>
@@ -851,7 +851,7 @@
       <div class="movers">
         {% for mover in movers_bar %}
         <span class="pill {% if mover.is_positive == true %}up{% elif mover.is_positive == false %}down{% else %}flat{% endif %}">
-          {{ mover.ticker }}{% if mover.change_pct is not none %} {% if mover.change_pct >= 0 %}+{% endif %}{{ "%.1f"|format(mover.change_pct) }}%{% endif %}
+          {{ mover.display_symbol or mover.ticker }}{% if mover.change_pct is not none %} {% if mover.change_pct >= 0 %}+{% endif %}{{ "%.1f"|format(mover.change_pct) }}%{% endif %}
         </span>
         {% endfor %}
       </div>
@@ -910,14 +910,14 @@
         {% endif %}
         <div class="ticker-head-main">
           <div class="ticker-row">
-            <span class="ticker-symbol">{{ section.ticker }}</span>
+            <span class="ticker-symbol">{{ section.display_symbol or section.ticker }}</span>
             {% if is_highlight and not is_hero %}
             <span class="mover-badge">Mover</span>
             {% endif %}
           </div>
           {% if sec_quote %}
           <div class="ticker-quote">
-            <span class="ticker-price">${{ "%.2f"|format(sec_quote.price) }}</span>
+            <span class="ticker-price">{% if section.market == 'IN' %}₹{% else %}${% endif %}{{ "%.2f"|format(sec_quote.price) }}</span>
             {% if sec_quote.change_pct is not none %}
             <span class="ticker-change {{ cls }}">
               {% if sec_quote.change_pct >= 0 %}+{% endif %}{{ "%.2f"|format(sec_quote.change_pct) }}%
@@ -929,7 +929,7 @@
       </div>
 
       {% if section.error %}
-      <p class="empty">Could not fetch news for {{ section.ticker }}.</p>
+      <p class="empty">Could not fetch news for {{ section.display_symbol or section.ticker }}.</p>
       {% elif section.web_stories %}
       <div class="story-list">
         {% for story in section.web_stories[:visible_story_count] %}
@@ -945,7 +945,7 @@
         {% endif %}
       </div>
       {% else %}
-      <p class="empty">No major news for {{ section.ticker }} today.</p>
+      <p class="empty">No major news for {{ section.display_symbol or section.ticker }} today.</p>
       {% endif %}
     </div>
   </section>
@@ -961,7 +961,7 @@
 
   <footer class="site-footer">
     <div class="section-inner">
-      <p class="footer-brand">Daily Digest</p>
+      <p class="footer-brand">Stock News</p>
       <p>Your personalized stock brief</p>
       {% if subscribe_enabled %}
       <p><button type="button" class="footer-link-btn" onclick="openSubscribeModal()">Update your tickers</button></p>

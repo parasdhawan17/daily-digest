@@ -20,7 +20,8 @@ from stock_news.config import (
     MAX_TICKERS_PER_USER,
     SITE_URL,
 )
-from stock_news.finnhub import validate_symbol
+from stock_news.market_data import validate_symbol
+from stock_news.markets import market_of
 from stock_news.relevance import parse_tickers
 
 EMAIL_PATTERN = re.compile(r"^[^\s@]+@[^\s@]+\.[^\s@]+$")
@@ -31,6 +32,7 @@ def handle_post(handler: BaseHTTPRequestHandler) -> None:
     list_id = BREVO_LIST_ID
     template_id = os.environ.get("BREVO_DOI_TEMPLATE_ID", "").strip()
     finnhub_key = os.environ.get("FINNHUB_API_KEY", "").strip()
+    indianapi_key = os.environ.get("INDIANAPI_API_KEY", "").strip()
 
     if not api_key or not template_id:
         missing = [
@@ -50,7 +52,7 @@ def handle_post(handler: BaseHTTPRequestHandler) -> None:
             },
         )
         return
-    if not finnhub_key:
+    if not finnhub_key and not indianapi_key:
         send_json(handler, 503, {"ok": False, "error": "Ticker validation is not configured."})
         return
 
@@ -78,10 +80,23 @@ def handle_post(handler: BaseHTTPRequestHandler) -> None:
         send_json(handler, 400, {"ok": False, "error": f"Maximum {MAX_TICKERS_PER_USER} tickers allowed."})
         return
 
-    invalid = [symbol for symbol in tickers if not validate_symbol(symbol, finnhub_key)]
+    invalid = [
+        symbol
+        for symbol in tickers
+        if not validate_symbol(symbol, finnhub_key=finnhub_key, indianapi_key=indianapi_key)
+    ]
     if invalid:
         label = ", ".join(invalid)
         send_json(handler, 400, {"ok": False, "error": f"Could not validate: {label}"})
+        return
+
+    needs_us = any(market_of(symbol) == "US" for symbol in tickers)
+    needs_in = any(market_of(symbol) == "IN" for symbol in tickers)
+    if needs_us and not finnhub_key:
+        send_json(handler, 503, {"ok": False, "error": "US ticker validation is not configured."})
+        return
+    if needs_in and not indianapi_key:
+        send_json(handler, 503, {"ok": False, "error": "India ticker validation is not configured."})
         return
 
     try:

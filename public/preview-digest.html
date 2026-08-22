@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Daily Digest — 15 Aug 2026</title>
+  <title>Stock News — 22 Aug 2026</title>
   <meta name="color-scheme" content="light dark">
   <script>
     (function () {
@@ -636,7 +636,7 @@
       width: 100%;
       max-width: 560px;
       max-height: calc(100vh - 48px);
-      overflow: hidden;
+      overflow: visible;
       border-radius: 16px;
       background: var(--card-bg);
       box-shadow: 0 24px 48px rgba(15, 23, 42, 0.2);
@@ -675,13 +675,6 @@
     }
     .subscribe-modal-body {
       padding: 0;
-      background: var(--card-bg);
-    }
-    .subscribe-modal-body iframe {
-      display: block;
-      width: 100%;
-      height: 380px;
-      border: 0;
       background: var(--card-bg);
     }
     .subscribe-success {
@@ -786,6 +779,7 @@
       }
     }
   </style>
+  <link rel="stylesheet" href="/subscribe-form.css">
 </head>
 <body>
   <header class="header">
@@ -835,17 +829,15 @@
           <div class="header-shimmer"></div>
         </div>
         <div class="header-content">
-        <p class="eyebrow">Daily Digest</p>
+        <p class="eyebrow">Stock News</p>
         <h1>Your stock news briefing</h1>
         
         <p class="muted">Fetched at 9:15 AM ET · Aug 15, 2026</p>
         
         
-        <p class="badge">Today's biggest move: <strong>NVDA +2.14%</strong></p>
+        <p class="badge">Today's biggest move: <strong>US:NVDA +2.14%</strong></p>
         
         <nav class="nav">
-          
-          <button type="button" class="header-subscribe-btn" onclick="openSubscribeModal()">Update tickers</button>
           
         </nav>
         </div>
@@ -865,11 +857,11 @@
         </span>
         
         <span class="pill up">
-          MSFT +0.8%
+          TCS +0.8%
         </span>
         
         <span class="pill down">
-          TSLA -0.6%
+          RELIANCE -0.4%
         </span>
         
       </div>
@@ -894,7 +886,7 @@
       
       <div class="ticker-head">
         
-        <img class="ticker-logo" src="https://static2.finnhub.io/file/publicdatany/finnhubimage/stock_logo/NVDA.png" alt="NVDA">
+        <img class="ticker-logo" src="https://static2.finnhub.io/file/publicdatany/finnhubimage/stock_logo/NVDA.png" alt="US:NVDA">
         
         <div class="ticker-head-main">
           <div class="ticker-row">
@@ -1027,7 +1019,7 @@
       
       <div class="ticker-head">
         
-        <img class="ticker-logo" src="https://static2.finnhub.io/file/publicdatany/finnhubimage/stock_logo/AAPL.png" alt="AAPL">
+        <img class="ticker-logo" src="https://static2.finnhub.io/file/publicdatany/finnhubimage/stock_logo/AAPL.png" alt="US:AAPL">
         
         <div class="ticker-head-main">
           <div class="ticker-row">
@@ -1102,21 +1094,19 @@
       
       <div class="ticker-head">
         
-        <img class="ticker-logo" src="https://static2.finnhub.io/file/publicdatany/finnhubimage/stock_logo/MSFT.png" alt="MSFT">
-        
         <div class="ticker-head-main">
           <div class="ticker-row">
-            <span class="ticker-symbol">MSFT</span>
+            <span class="ticker-symbol">TCS</span>
             
             <span class="mover-badge">Mover</span>
             
           </div>
           
           <div class="ticker-quote">
-            <span class="ticker-price">$415.20</span>
+            <span class="ticker-price">₹4125.75</span>
             
             <span class="ticker-change up">
-              +0.82%
+              +0.85%
             </span>
             
           </div>
@@ -1130,14 +1120,14 @@
         
   
   <article class="story has-thumb">
-    <img class="story-thumb" src="https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=800&amp;h=400&amp;fit=crop&amp;sig=MSFT0" alt="">
+    <img class="story-thumb" src="https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=800&amp;h=400&amp;fit=crop&amp;sig=TCS0" alt="">
     <div class="story-body">
-      <h3 class="story-headline"><a href="https://example.com/msft/0" target="_blank" rel="noopener">Microsoft cloud growth stays resilient in enterprise spend survey</a></h3>
+      <h3 class="story-headline"><a href="https://example.com/tcs/0" target="_blank" rel="noopener">TCS wins large deal in European banking sector</a></h3>
       
       <p class="summary">Analysts weigh supply constraints, guidance, and sector rotation as investors reposition ahead of the next earnings cycle.</p>
       
       <p class="meta">
-        Reuters
+        Business Standard
          · 1h ago
       </p>
     </div>
@@ -1160,19 +1150,17 @@
       
       <div class="ticker-head">
         
-        <img class="ticker-logo" src="https://static2.finnhub.io/file/publicdatany/finnhubimage/stock_logo/TSLA.png" alt="TSLA">
-        
         <div class="ticker-head-main">
           <div class="ticker-row">
-            <span class="ticker-symbol">TSLA</span>
+            <span class="ticker-symbol">RELIANCE</span>
             
           </div>
           
           <div class="ticker-quote">
-            <span class="ticker-price">$248.90</span>
+            <span class="ticker-price">₹2856.40</span>
             
             <span class="ticker-change down">
-              -0.64%
+              -0.42%
             </span>
             
           </div>
@@ -1186,15 +1174,15 @@
         
   
   <article class="story has-thumb">
-    <img class="story-thumb" src="https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=800&amp;h=400&amp;fit=crop&amp;sig=TSLA0" alt="">
+    <img class="story-thumb" src="https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=800&amp;h=400&amp;fit=crop&amp;sig=RELIANCE0" alt="">
     <div class="story-body">
-      <h3 class="story-headline"><a href="https://example.com/tsla/0" target="_blank" rel="noopener">Tesla delivery estimates shift as competition intensifies</a></h3>
+      <h3 class="story-headline"><a href="https://example.com/reliance/0" target="_blank" rel="noopener">Reliance Industries reports steady refining margins</a></h3>
       
       <p class="summary">Analysts weigh supply constraints, guidance, and sector rotation as investors reposition ahead of the next earnings cycle.</p>
       
       <p class="meta">
-        Bloomberg
-         · 3h ago
+        Economic Times
+         · 2h ago
       </p>
     </div>
   </article>
@@ -1205,13 +1193,13 @@
   
   <article class="story">
     <div class="story-body">
-      <h3 class="story-headline"><a href="https://example.com/tsla/1" target="_blank" rel="noopener">Analysts debate margin outlook after recent price adjustments</a></h3>
+      <h3 class="story-headline"><a href="https://example.com/reliance/1" target="_blank" rel="noopener">Jio subscriber growth remains strong in quarterly update</a></h3>
       
       <p class="summary">Analysts weigh supply constraints, guidance, and sector rotation as investors reposition ahead of the next earnings cycle.</p>
       
       <p class="meta">
-        CNBC
-         · 6h ago
+        Mint
+         · 5h ago
       </p>
     </div>
   </article>
@@ -1228,122 +1216,11 @@
 
   <footer class="site-footer">
     <div class="section-inner">
-      <p class="footer-brand">Daily Digest</p>
+      <p class="footer-brand">Stock News</p>
       <p>Your personalized stock brief</p>
-      
-      <p><button type="button" class="footer-link-btn" onclick="openSubscribeModal()">Update your tickers</button></p>
       
     </div>
   </footer>
-  
-  <div class="subscribe-modal" id="subscribe-modal" hidden>
-    <div class="subscribe-modal-backdrop" onclick="closeSubscribeModal()"></div>
-    <div class="subscribe-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="subscribe-modal-title">
-      <div class="subscribe-modal-header">
-        <h2 id="subscribe-modal-title">Update your tickers</h2>
-        <button type="button" class="subscribe-modal-close" onclick="closeSubscribeModal()" aria-label="Close">&times;</button>
-      </div>
-      <div class="subscribe-modal-body" id="subscribe-modal-body">
-        <iframe
-          id="subscribe-iframe"
-          data-src="https://c45d1150.sibforms.com/serve/MUIFAHIL1jH-DeVrUnpoo9864EFxz9zv2_ZPiO5KF3s6v4dRsO78MCqs3Px8F3YEkQEleXXhoo3-ru-TV0wfGKmx-2GDoycH5AKn6zALH_5j980Isx-qMT0_GjO7sEv1dSME02tsPJpnG84htHPDroxqPtqY8u1Wt0NWE-MguymSMwInpWKhcLGiRmaKzN0-Y1ZM6iMYpio_ixYtWw=="
-          title="Email subscription form"
-        ></iframe>
-      </div>
-      <div class="subscribe-success" id="subscribe-success" hidden>
-        <h3>You're in!</h3>
-        <p>Confirm your email if needed. Your ticker picks apply on the next digest run.</p>
-      </div>
-    </div>
-  </div>
-  <script>
-    (function () {
-      var modal = document.getElementById("subscribe-modal");
-      var iframe = document.getElementById("subscribe-iframe");
-      var modalBody = document.getElementById("subscribe-modal-body");
-      var successPanel = document.getElementById("subscribe-success");
-      var iframeLoadCount = 0;
-      var successHandled = false;
-      var trustedOrigin = /sibforms\.com|brevo\.com|sendinblue\.com/i;
-      var successPattern = /success|subscribed|confirm|thank|submitted|complete/i;
-
-      window.openSubscribeModal = function () {
-        successHandled = false;
-        iframeLoadCount = 0;
-        modalBody.hidden = false;
-        successPanel.hidden = true;
-        iframe.src = iframe.dataset.src;
-        modal.hidden = false;
-        document.body.style.overflow = "hidden";
-      };
-
-      window.closeSubscribeModal = function () {
-        modal.hidden = true;
-        document.body.style.overflow = "";
-        iframe.src = "about:blank";
-      };
-
-      function handleSubscribeSuccess() {
-        if (successHandled) {
-          return;
-        }
-        successHandled = true;
-        modalBody.hidden = true;
-        successPanel.hidden = false;
-        window.setTimeout(function () {
-          closeSubscribeModal();
-        }, 1800);
-      }
-
-      function isSuccessMessage(data) {
-        if (!data) {
-          return false;
-        }
-        if (typeof data === "string") {
-          return successPattern.test(data);
-        }
-        if (typeof data === "object") {
-          return successPattern.test(JSON.stringify(data));
-        }
-        return false;
-      }
-
-      iframe.addEventListener("load", function () {
-        if (modal.hidden) {
-          return;
-        }
-        iframeLoadCount += 1;
-        if (iframeLoadCount > 1) {
-          window.setTimeout(handleSubscribeSuccess, 800);
-        }
-      });
-
-      window.addEventListener("message", function (event) {
-        if (!trustedOrigin.test(event.origin || "")) {
-          return;
-        }
-        if (isSuccessMessage(event.data)) {
-          handleSubscribeSuccess();
-        }
-      });
-
-      window.addEventListener("keydown", function (event) {
-        if (event.key === "Escape" && !modal.hidden) {
-          closeSubscribeModal();
-        }
-      });
-
-      function openFromHash() {
-        var hash = (window.location.hash || "").toLowerCase();
-        if (hash === "#subscribe" || hash === "#update-tickers") {
-          openSubscribeModal();
-        }
-      }
-
-      openFromHash();
-      window.addEventListener("hashchange", openFromHash);
-    })();
-  </script>
   
   <script>
     (function () {

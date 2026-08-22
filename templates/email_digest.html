@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="color-scheme" content="light dark">
   <meta name="supported-color-schemes" content="light dark">
-  <title>{{ email_heading }} · Tickr Digest</title>
+  <title>{{ email_heading }} · Stock News</title>
   <style type="text/css">
     :root {
       color-scheme: light dark;
@@ -130,7 +130,7 @@
       </td>
       {% endif %}
       <td valign="top" style="vertical-align:top;">
-        <p class="text-primary" style="margin:0;font-size:{{ symbol_size }}px;font-weight:800;color:#0f172a;letter-spacing:-0.5px;line-height:1.2;font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;">{{ section.ticker }}</p>
+        <p class="text-primary" style="margin:0;font-size:{{ symbol_size }}px;font-weight:800;color:#0f172a;letter-spacing:-0.5px;line-height:1.2;font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;">{{ section.display_symbol or section.ticker }}</p>
         {% if quote %}
         <p style="margin:8px 0 0;font-size:0;line-height:1.4;">
           <span class="text-primary" style="font-size:{{ price_size }}px;font-weight:700;color:#1e293b;vertical-align:middle;">${{ "%.2f"|format(quote.price) }}</span>
@@ -182,7 +182,7 @@
                   <td align="center" style="padding:28px 28px 18px;text-align:center;">
                     <div class="gmail-blend" style="display:inline-block;">
                       <div class="gmail-blend-inner" style="display:inline-block;">
-                        <p style="margin:0 0 8px;font-size:11px;color:#f1f5f9;letter-spacing:2px;text-transform:uppercase;font-weight:600;">Tickr Digest</p>
+                        <p style="margin:0 0 8px;font-size:11px;color:#f1f5f9;letter-spacing:2px;text-transform:uppercase;font-weight:600;">Stock News</p>
                         <h1 style="margin:0;font-size:26px;font-weight:700;color:#ffffff;letter-spacing:-0.5px;line-height:1.25;">{{ email_heading }}</h1>
                         {% if top_mover_label %}
                         <p style="margin:14px 0 0;font-size:13px;color:#f8fafc;background-color:rgba(15,23,42,0.45);border:1px solid rgba(255,255,255,0.2);display:inline-block;padding:6px 14px;border-radius:20px;">Today's biggest move: <strong>{{ top_mover_label }}</strong></p>
@@ -244,7 +244,7 @@
                       {% if mover.is_positive == true %}background-color:#dcfce7;color:#15803d;
                       {% elif mover.is_positive == false %}background-color:#fee2e2;color:#b91c1c;
                       {% else %}background-color:#f1f5f9;color:#64748b;{% endif %}">
-                      {{ mover.ticker }}{% if mover.change_pct is not none %} {% if mover.change_pct >= 0 %}+{% endif %}{{ "%.1f"|format(mover.change_pct) }}%{% endif %}
+                      {{ mover.display_symbol or mover.ticker }}{% if mover.change_pct is not none %} {% if mover.change_pct >= 0 %}+{% endif %}{{ "%.1f"|format(mover.change_pct) }}%{% endif %}
                     </span>
                   </td>
                   {% if loop.index % 4 == 0 and not loop.last %}
@@ -264,13 +264,13 @@
               <p class="text-label" style="margin:0 0 16px;font-size:11px;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;color:#64748b;">Biggest mover</p>
               {% call render_ticker_card(hero, hero.quote, logo_size=48, symbol_size=24, price_size=18, badge_size=13) %}
               {% if hero.error %}
-              <p class="text-muted" style="margin:0;font-size:14px;color:#718096;font-style:italic;">Could not fetch news for {{ hero.ticker }}.</p>
+              <p class="text-muted" style="margin:0;font-size:14px;color:#718096;font-style:italic;">Could not fetch news for {{ hero.display_symbol or hero.ticker }}.</p>
               {% elif hero.stories %}
               {% for story in hero.stories %}
               {{ render_story(story, is_first=loop.first, hero_image=hero.hero_image, headline_size=17, show_divider=not loop.first) }}
               {% endfor %}
               {% else %}
-              <p class="text-muted" style="margin:0;font-size:14px;color:#718096;font-style:italic;">No major news for {{ hero.ticker }} today.</p>
+              <p class="text-muted" style="margin:0;font-size:14px;color:#718096;font-style:italic;">No major news for {{ hero.display_symbol or hero.ticker }} today.</p>
               {% endif %}
               {% endcall %}
             </td>
@@ -289,12 +289,12 @@
             <td class="email-card" bgcolor="#ffffff" style="padding:0 24px 12px;background-color:#ffffff;">
               {% call render_ticker_card(section, section.quote, logo_size=48, symbol_size=20, price_size=16, badge_size=12, head_padding='14px 16px', body_padding='0 16px 16px') %}
               {% if section.error %}
-              <p class="text-muted" style="margin:0;font-size:13px;color:#718096;font-style:italic;">Could not fetch news for {{ section.ticker }}.</p>
+              <p class="text-muted" style="margin:0;font-size:13px;color:#718096;font-style:italic;">Could not fetch news for {{ section.display_symbol or section.ticker }}.</p>
               {% elif section.stories %}
               {% set story = section.stories[0] %}
               {{ render_story(story, headline_size=15, show_divider=false) }}
               {% else %}
-              <p class="text-muted" style="margin:0;font-size:13px;color:#718096;font-style:italic;">No major news for {{ section.ticker }} today.</p>
+              <p class="text-muted" style="margin:0;font-size:13px;color:#718096;font-style:italic;">No major news for {{ section.display_symbol or section.ticker }} today.</p>
               {% endif %}
               {% endcall %}
             </td>
@@ -305,7 +305,7 @@
           <!-- Footer -->
           <tr>
             <td class="footer-bg" bgcolor="#f8fafc" style="padding:24px 28px;background-color:#f8fafc;border-top:1px solid #e8ecf0;text-align:center;">
-              <p class="text-muted" style="margin:0;font-size:12px;color:#94a3b8;">Tickr Digest · your personalized stock brief</p>
+              <p class="text-muted" style="margin:0;font-size:12px;color:#94a3b8;">Stock News · your personalized stock brief</p>
               {% if digest_url %}
               <p style="margin:8px 0 0;font-size:12px;"><a href="{{ digest_url }}" class="footer-link" style="color:#64748b;text-decoration:none;">See the full digest online</a></p>
               {% endif %}

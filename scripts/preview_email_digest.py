@@ -52,7 +52,9 @@ def story(
 def main() -> None:
     sections = [
         {
-            "ticker": "NVDA",
+            "ticker": "US:NVDA",
+            "display_symbol": "NVDA",
+            "market": "US",
             "quote": {"price": 142.50, "change_pct": 4.82},
             "logo": "https://static2.finnhub.io/file/publicdatany/finnhubimage/stock_logo/NVDA.png",
             "hero_image": IMAGES["nvda_hero"],
@@ -85,7 +87,27 @@ def main() -> None:
             "error": None,
         },
         {
-            "ticker": "TSLA",
+            "ticker": "IN:RELIANCE",
+            "display_symbol": "RELIANCE",
+            "market": "IN",
+            "quote": {"price": 2856.40, "change_pct": -0.42},
+            "logo": None,
+            "stories": [
+                story(
+                    headline="Reliance Industries reports steady refining margins in quarterly update",
+                    url="https://example.com/reliance/refining",
+                    source="Economic Times",
+                    published_at="21 Aug 2026, 6:30 AM UTC",
+                    summary="Analysts noted stable petrochemical spreads and continued Jio subscriber growth as key offsets to softer retail footfall in select regions.",
+                    image=IMAGES["meta_piggy"],
+                ),
+            ],
+            "error": None,
+        },
+        {
+            "ticker": "US:TSLA",
+            "display_symbol": "TSLA",
+            "market": "US",
             "quote": {"price": 345.13, "change_pct": -1.71},
             "logo": "https://static2.finnhub.io/file/publicdatany/finnhubimage/stock_logo/TSLA.png",
             "stories": [
@@ -101,7 +123,9 @@ def main() -> None:
             "error": None,
         },
         {
-            "ticker": "META",
+            "ticker": "US:META",
+            "display_symbol": "META",
+            "market": "US",
             "quote": {"price": 545.83, "change_pct": -0.04},
             "logo": "https://static2.finnhub.io/file/publicdatany/finnhubimage/stock_logo/META.png",
             "stories": [
@@ -117,7 +141,9 @@ def main() -> None:
             "error": None,
         },
         {
-            "ticker": "AAPL",
+            "ticker": "US:AAPL",
+            "display_symbol": "AAPL",
+            "market": "US",
             "quote": {"price": 228.30, "change_pct": 1.18},
             "logo": "https://static2.finnhub.io/file/publicdatany/finnhubimage/stock_logo/AAPL.png",
             "stories": [
@@ -133,7 +159,9 @@ def main() -> None:
             "error": None,
         },
         {
-            "ticker": "MSFT",
+            "ticker": "US:MSFT",
+            "display_symbol": "MSFT",
+            "market": "US",
             "quote": {"price": 415.20, "change_pct": 0.82},
             "logo": "https://static2.finnhub.io/file/publicdatany/finnhubimage/stock_logo/MSFT.png",
             "stories": [
@@ -149,7 +177,9 @@ def main() -> None:
             "error": None,
         },
         {
-            "ticker": "AMZN",
+            "ticker": "US:AMZN",
+            "display_symbol": "AMZN",
+            "market": "US",
             "quote": {"price": 198.75, "change_pct": -0.92},
             "logo": "https://static2.finnhub.io/file/publicdatany/finnhubimage/stock_logo/AMZN.png",
             "stories": [
@@ -165,7 +195,9 @@ def main() -> None:
             "error": None,
         },
         {
-            "ticker": "GOOGL",
+            "ticker": "US:GOOGL",
+            "display_symbol": "GOOGL",
+            "market": "US",
             "quote": {"price": 178.20, "change_pct": -0.35},
             "logo": "https://static2.finnhub.io/file/publicdatany/finnhubimage/stock_logo/GOOGL.png",
             "stories": [
@@ -181,7 +213,9 @@ def main() -> None:
             "error": None,
         },
         {
-            "ticker": "AMD",
+            "ticker": "US:AMD",
+            "display_symbol": "AMD",
+            "market": "US",
             "quote": {"price": 162.40, "change_pct": 0.0},
             "logo": "https://static2.finnhub.io/file/publicdatany/finnhubimage/stock_logo/AMD.png",
             "stories": [

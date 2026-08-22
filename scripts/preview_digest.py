@@ -31,7 +31,9 @@ def story(i: int, ticker: str, headline: str, source: str = "Reuters", mins: int
 def main() -> None:
     sections = [
         {
-            "ticker": "NVDA",
+            "ticker": "US:NVDA",
+            "display_symbol": "NVDA",
+            "market": "US",
             "quote": {"price": 142.50, "change_pct": 2.14},
             "logo": "https://static2.finnhub.io/file/publicdatany/finnhubimage/stock_logo/NVDA.png",
             "web_stories": [
@@ -44,7 +46,21 @@ def main() -> None:
             "error": None,
         },
         {
-            "ticker": "AAPL",
+            "ticker": "IN:RELIANCE",
+            "display_symbol": "RELIANCE",
+            "market": "IN",
+            "quote": {"price": 2856.40, "change_pct": -0.42},
+            "logo": None,
+            "web_stories": [
+                story(0, "RELIANCE", "Reliance Industries reports steady refining margins", "Economic Times", 2),
+                story(1, "RELIANCE", "Jio subscriber growth remains strong in quarterly update", "Mint", 4, False),
+            ],
+            "error": None,
+        },
+        {
+            "ticker": "US:AAPL",
+            "display_symbol": "AAPL",
+            "market": "US",
             "quote": {"price": 228.30, "change_pct": 1.18},
             "logo": "https://static2.finnhub.io/file/publicdatany/finnhubimage/stock_logo/AAPL.png",
             "web_stories": [
@@ -54,21 +70,13 @@ def main() -> None:
             "error": None,
         },
         {
-            "ticker": "MSFT",
-            "quote": {"price": 415.20, "change_pct": 0.82},
-            "logo": "https://static2.finnhub.io/file/publicdatany/finnhubimage/stock_logo/MSFT.png",
+            "ticker": "IN:TCS",
+            "display_symbol": "TCS",
+            "market": "IN",
+            "quote": {"price": 4125.75, "change_pct": 0.85},
+            "logo": None,
             "web_stories": [
-                story(0, "MSFT", "Microsoft cloud growth stays resilient in enterprise spend survey", "Reuters", 1),
-            ],
-            "error": None,
-        },
-        {
-            "ticker": "TSLA",
-            "quote": {"price": 248.90, "change_pct": -0.64},
-            "logo": "https://static2.finnhub.io/file/publicdatany/finnhubimage/stock_logo/TSLA.png",
-            "web_stories": [
-                story(0, "TSLA", "Tesla delivery estimates shift as competition intensifies", "Bloomberg", 3),
-                story(1, "TSLA", "Analysts debate margin outlook after recent price adjustments", "CNBC", 5, False),
+                story(0, "TCS", "TCS wins large deal in European banking sector", "Business Standard", 1),
             ],
             "error": None,
         },

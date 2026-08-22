@@ -410,6 +410,78 @@
       "Johnson & Johnson",
       "Johnson and Johnson",
       "J&J"
+    ],
+    "IN:RELIANCE": [
+      "RELIANCE",
+      "Reliance Industries",
+      "Reliance",
+      "RIL",
+      "Jio"
+    ],
+    "IN:TCS": [
+      "TCS",
+      "Tata Consultancy Services",
+      "Tata Consultancy"
+    ],
+    "IN:HDFCBANK": [
+      "HDFCBANK",
+      "HDFC Bank",
+      "HDFC"
+    ],
+    "IN:INFY": [
+      "INFY",
+      "Infosys"
+    ],
+    "IN:ICICIBANK": [
+      "ICICIBANK",
+      "ICICI Bank",
+      "ICICI"
+    ],
+    "IN:SBIN": [
+      "SBIN",
+      "State Bank of India",
+      "SBI"
+    ],
+    "IN:ITC": [
+      "ITC"
+    ],
+    "IN:HINDUNILVR": [
+      "HINDUNILVR",
+      "Hindustan Unilever",
+      "HUL"
+    ],
+    "IN:BAJFINANCE": [
+      "BAJFINANCE",
+      "Bajaj Finance"
+    ],
+    "IN:TATAMOTORS": [
+      "TATAMOTORS",
+      "Tata Motors"
+    ],
+    "IN:WIPRO": [
+      "WIPRO",
+      "Wipro"
+    ],
+    "IN:AXISBANK": [
+      "AXISBANK",
+      "Axis Bank",
+      "Axis"
+    ],
+    "IN:KOTAKBANK": [
+      "KOTAKBANK",
+      "Kotak Mahindra Bank",
+      "Kotak Bank",
+      "Kotak"
+    ],
+    "IN:LT": [
+      "LT",
+      "Larsen & Toubro",
+      "L&T"
+    ],
+    "IN:BHARTIARTL": [
+      "BHARTIARTL",
+      "Bharti Airtel",
+      "Airtel"
     ]
   }
 }
