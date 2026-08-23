@@ -7,7 +7,7 @@ import json
 import os
 import time
 
-from stock_news.config import MAX_TICKERS_PER_USER, SITE_URL
+from stock_news.config import SITE_URL
 from stock_news.relevance import parse_tickers
 
 
@@ -38,7 +38,7 @@ def sign_digest_token(tickers: list[str], expires_days: int = 14) -> str:
         raise TokenError("No valid tickers")
 
     payload = {
-        "tickers": tickers[:MAX_TICKERS_PER_USER],
+        "tickers": tickers,
         "exp": int(time.time()) + expires_days * 86400,
         "v": 1,
     }

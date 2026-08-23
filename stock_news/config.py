@@ -10,7 +10,6 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 TICKER_ALIASES_PATH = REPO_ROOT / "config" / "ticker_aliases.json"
 TEMPLATES_PATH = REPO_ROOT / "templates"
 
-MAX_TICKERS_PER_USER = 10
 HEADLINES_PER_TICKER = 3
 WEB_HEADLINES_PER_TICKER = 10
 FETCH_LIMIT_PER_TICKER = 10

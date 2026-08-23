@@ -5,7 +5,6 @@ import re
 
 from stock_news.config import (
     HEADLINE_ALIAS_POINTS,
-    MAX_TICKERS_PER_USER,
     MIN_RELEVANCE_SCORE,
     MIN_STORIES_PER_TICKER,
     RIVAL_PENALTY,
@@ -135,8 +134,6 @@ def parse_tickers(raw: str | list | tuple | None) -> list[str]:
             continue
         seen.add(normalized)
         result.append(normalized)
-        if len(result) >= MAX_TICKERS_PER_USER:
-            break
     return result
 
 

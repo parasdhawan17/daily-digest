@@ -143,7 +143,7 @@ flowchart LR
 | DG-2 | Shows quotes, movers bar, hero mover, per-ticker stories for token tickers | Must |
 | DG-3 | Data fetched at **request time** (not pre-generated snapshot) | Must |
 | DG-4 | “Fetched at” timestamp reflects request time | Must |
-| DG-5 | Up to 10 tickers per link (same cap as email) | Must |
+| DG-5 | All tickers in the subscriber’s watchlist are included in the link | Must |
 | DG-6 | Story expand/collapse behavior matches current web digest UX | Should |
 | DG-7 | Link back to subscribe / home for non-subscribers who land without token | Should |
 | DG-8 | Friendly error pages: missing token, invalid token, expired token, API failure | Must |
@@ -165,7 +165,7 @@ flowchart LR
 |----|-------------|----------|
 | SUB-1 | Subscribe only via Brevo embedded form on landing | Must |
 | SUB-2 | `TICKERS` multiple-choice attribute unchanged | Must |
-| SUB-3 | Max 10 tickers per subscriber enforced in bot | Must |
+| SUB-3 | All validated tickers in a subscriber’s watchlist are preserved | Must |
 | SUB-4 | Re-submit form updates tickers for same email | Must |
 
 ---

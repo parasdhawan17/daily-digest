@@ -35,7 +35,6 @@ from stock_news.config import (
     BREVO_DOI_TEMPLATE_ID,
     BREVO_LIST_ID,
     BREVO_TICKERS_ATTRIBUTE,
-    MAX_TICKERS_PER_USER,
     SITE_URL,
 )
 from stock_news.digest import collect_digest_data, filter_sections
@@ -176,10 +175,6 @@ class DevHandler(BaseHTTPRequestHandler):
         if not tickers:
             self._json(400, {"ok": False, "error": "Select at least one valid ticker."})
             return
-        if len(tickers) > MAX_TICKERS_PER_USER:
-            self._json(400, {"ok": False, "error": f"Maximum {MAX_TICKERS_PER_USER} tickers allowed."})
-            return
-
         invalid = [
             symbol
             for symbol in tickers

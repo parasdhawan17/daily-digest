@@ -1,5 +1,4 @@
 (function () {
-  var MAX_TICKERS = 10;
   var SEARCH_DEBOUNCE_MS = 280;
   var TICKER_PATTERN = /^[A-Za-z][A-Za-z0-9.]{0,9}$/;
 
@@ -32,7 +31,7 @@
       '<p class="subscribe-error" id="subscribe-error" hidden></p>' +
       '<label for="subscribe-email">Email</label>' +
       '<input type="email" id="subscribe-email" name="email" required autocomplete="email" placeholder="you@example.com">' +
-      '<label for="subscribe-ticker-input">Tickers (up to ' + MAX_TICKERS + ')</label>' +
+      '<label for="subscribe-ticker-input">Tickers</label>' +
       '<div class="subscribe-ticker-field">' +
       '<div class="subscribe-ticker-row">' +
       '<input type="text" id="subscribe-ticker-input" class="subscribe-ticker-input" autocomplete="off" placeholder="Search by ticker or company name">' +
@@ -119,12 +118,9 @@
     if (!els.tickerInput || !els.addBtn) {
       return;
     }
-    var full = selectedTickers.length >= MAX_TICKERS;
-    els.tickerInput.disabled = full;
-    els.addBtn.disabled = full;
-    els.tickerInput.placeholder = full
-      ? "Maximum tickers reached"
-      : "Search by ticker or company name";
+    els.tickerInput.disabled = false;
+    els.addBtn.disabled = false;
+    els.tickerInput.placeholder = "Search by ticker or company name";
   }
 
   function renderChips() {
@@ -162,10 +158,6 @@
     }
     if (selectedTickers.indexOf(upper) !== -1) {
       setFieldStatus("error", upper + " is already in your list.");
-      return false;
-    }
-    if (selectedTickers.length >= MAX_TICKERS) {
-      showError("Maximum " + MAX_TICKERS + " tickers allowed.");
       return false;
     }
     selectedTickers.push(upper);
@@ -421,7 +413,7 @@
 
     validateSymbol(query).then(function (data) {
       if (els.addBtn) {
-        els.addBtn.disabled = selectedTickers.length >= MAX_TICKERS;
+        els.addBtn.disabled = false;
       }
       if (!data) {
         return;

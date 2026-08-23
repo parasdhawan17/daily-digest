@@ -297,7 +297,7 @@ Add to GitHub Secrets (`DIGEST_SIGNING_SECRET`) and Vercel Production environmen
 
 ### 5.3 Validation rules
 
-- Max 10 tickers; same regex as `parse_tickers`.
+- Any number of valid tickers; same regex as `parse_tickers`.
 - Reject expired `exp`.
 - Reject bad signature.
 - Do not embed email in payload (privacy).

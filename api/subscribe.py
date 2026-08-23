@@ -17,7 +17,6 @@ from stock_news.config import (
     BREVO_DOI_TEMPLATE_ID,
     BREVO_LIST_ID,
     BREVO_TICKERS_ATTRIBUTE,
-    MAX_TICKERS_PER_USER,
     SITE_URL,
 )
 from stock_news.market_data import validate_symbol
@@ -76,10 +75,6 @@ def handle_post(handler: BaseHTTPRequestHandler) -> None:
     if not tickers:
         send_json(handler, 400, {"ok": False, "error": "Select at least one valid ticker."})
         return
-    if len(tickers) > MAX_TICKERS_PER_USER:
-        send_json(handler, 400, {"ok": False, "error": f"Maximum {MAX_TICKERS_PER_USER} tickers allowed."})
-        return
-
     invalid = [
         symbol
         for symbol in tickers
