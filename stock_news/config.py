@@ -39,6 +39,9 @@ IN_MARKET_CLOSE_IST = time_of_day(15, 30)
 IN_PRE_OPEN_SEND_IST = time_of_day(9, 15)
 IN_POST_CLOSE_SEND_IST = time_of_day(15, 45)
 
+# Allow a small delay between Railway starting the cron container and this process.
+CRON_MATCH_TOLERANCE_MINUTES = 5
+
 # Only schedule if the target is still ahead and close (cron window).
 EMAIL_SCHEDULE_MAX_AHEAD_MINUTES = 30
 TICKER_PATTERN = re.compile(r"^[A-Z][A-Z0-9.]{0,9}$")

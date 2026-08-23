@@ -594,16 +594,16 @@ subscribe / search / validate / digest
 
 ### Dual cron schedule
 
-Railway cron (`railway.toml`): `0,45 3,10,13,15,20 * * 1-5`
+Railway cron (`railway.toml`): `15,45 3,10,13,14,20,21 * * 1-5`
 
 | UTC | Market | Session (local) |
 |-----|--------|-----------------|
 | 03:45 | IN | 9:15 AM IST pre-open |
 | 10:15 | IN | 3:45 PM IST post-close |
-| 13:00 | US | 9:15 AM ET pre-open |
-| 20:00 | US | 4:15 PM ET post-close |
+| 13:15 (EDT) / 14:15 (EST) | US | 9:15 AM ET pre-open |
+| 20:15 (EDT) / 21:15 (EST) | US | 4:15 PM ET post-close |
 
-`scripts/send_digests.py --cron auto` matches the current UTC minute to the correct market session. Each send includes **all** subscriber tickers (US + IN). Trading-day skips use `market_calendar.py` (US) and `in_market_calendar.py` (NSE holidays).
+`scripts/send_digests.py --cron auto` matches the exchange-local clock to the correct market session, including EST/EDT changes. Each send includes only that market's tickers and skips subscribers without tickers in that market. Trading-day skips use `market_calendar.py` (US) and `in_market_calendar.py` (NSE holidays).
 
 ### India calendar
 

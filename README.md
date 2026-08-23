@@ -79,10 +79,13 @@ Production email digests run on a **separate Railway cron service** connected to
 1. Create a Railway project (e.g. **daily-digest-cron**).
 2. Connect the `daily-digest` GitHub repo as a new service.
 3. Cron is defined in [`railway.toml`](railway.toml):
-   - **Cron Schedule:** `0,45 3,10,13,15,20 * * 1-5` UTC
+   - **Cron Schedule:** `15,45 3,10,13,14,20,21 * * 1-5` UTC
    - **Start Command:** `python scripts/send_digests.py --email --cron auto`
    - **Restart Policy:** Never
    Four session windows: India 9:15 AM & 3:45 PM IST, US 9:15 AM & 4:15 PM ET.
+   The extra UTC candidates cover EST/EDT; the entrypoint validates the current
+   exchange-local time and no-ops for non-matching candidates. Each run sends only
+   that market's tickers to subscribers who follow at least one of them.
 4. Set environment variables on the Railway service:
 
 | Variable | Required |

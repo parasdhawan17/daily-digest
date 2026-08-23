@@ -1,4 +1,6 @@
 [deploy]
 startCommand = "python scripts/send_digests.py --email --cron auto"
-cronSchedule = "0,45 3,10,13,15,20 * * 1-5"
+# India: 03:45/10:15 UTC. US: 13:15/20:15 UTC during EDT and
+# 14:15/21:15 UTC during EST. The app validates the exchange-local time.
+cronSchedule = "15,45 3,10,13,14,20,21 * * 1-5"
 restartPolicyType = "NEVER"

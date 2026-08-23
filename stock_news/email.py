@@ -3,6 +3,7 @@
 from datetime import date, datetime, timedelta, timezone
 
 from stock_news.config import (
+    CRON_MATCH_TOLERANCE_MINUTES,
     DIGEST_HEADING,
     EMAIL_SCHEDULE_MAX_AHEAD_MINUTES,
     ET_ZONE,
@@ -22,13 +23,13 @@ from stock_news.config import (
     SUBJECT_MAX_LEN,
 )
 from stock_news.digest import prepare_email_layout
-from stock_news.markets import Market, display_symbol
+from stock_news.markets import Market, display_symbol, market_of
 
-CRON_WINDOWS: tuple[tuple[Market, str, int, int], ...] = (
-    ("IN", "pre_open", 3, 45),
-    ("IN", "post_close", 10, 15),
-    ("US", "pre_open", 13, 0),
-    ("US", "post_close", 20, 0),
+MARKET_SESSIONS: tuple[tuple[Market, str], ...] = (
+    ("IN", "pre_open"),
+    ("IN", "post_close"),
+    ("US", "pre_open"),
+    ("US", "post_close"),
 )
 
 
@@ -41,6 +42,20 @@ def union_tickers(subscribers: list[dict]) -> list[str]:
                 seen.add(ticker)
                 result.append(ticker)
     return result
+
+
+def subscribers_for_market(subscribers: list[dict], market: Market) -> list[dict]:
+    """Return subscribers with only the tickers belonging to one market."""
+    filtered: list[dict] = []
+    for subscriber in subscribers:
+        tickers = [
+            ticker
+            for ticker in subscriber.get("tickers", [])
+            if market_of(ticker) == market
+        ]
+        if tickers:
+            filtered.append({**subscriber, "tickers": tickers})
+    return filtered
 
 
 def count_email_stories(sections: list[dict]) -> int:
@@ -96,12 +111,25 @@ def scheduled_send_at_iso(
 
 
 def cron_sessions(now: datetime | None = None) -> list[tuple[Market, str]]:
-    """Return active (market, session) pairs for the current UTC cron window."""
+    """Return sessions whose exchange-local send time just passed."""
     current = (now or datetime.now(timezone.utc)).astimezone(timezone.utc)
     active: list[tuple[Market, str]] = []
-    for market, session, hour, minute in CRON_WINDOWS:
-        delta = abs((current.hour * 60 + current.minute) - (hour * 60 + minute))
-        if delta <= EMAIL_SCHEDULE_MAX_AHEAD_MINUTES:
+    for market, session in MARKET_SESSIONS:
+        zone = IST_ZONE if market == "IN" else ET_ZONE
+        if market == "IN":
+            send_clock = IN_PRE_OPEN_SEND_IST if session == "pre_open" else IN_POST_CLOSE_SEND_IST
+        else:
+            send_clock = PRE_OPEN_SEND_ET if session == "pre_open" else POST_CLOSE_SEND_ET
+
+        local = current.astimezone(zone)
+        target = local.replace(
+            hour=send_clock.hour,
+            minute=send_clock.minute,
+            second=0,
+            microsecond=0,
+        )
+        delay_minutes = (local - target).total_seconds() / 60
+        if 0 <= delay_minutes <= CRON_MATCH_TOLERANCE_MINUTES:
             active.append((market, session))
     return active
 

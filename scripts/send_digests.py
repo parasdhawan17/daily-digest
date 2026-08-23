@@ -53,6 +53,7 @@ from stock_news.email import (
     cron_sessions,
     digest_session,
     scheduled_send_at_iso,
+    subscribers_for_market,
     union_tickers,
 )
 from stock_news.in_market_calendar import in_trading_day_skip_reason
@@ -195,8 +196,10 @@ def send_for_market(
         subscribers = matched
         print(f"Filtered to recipient: {subscribers[0]['email']}")
 
+    subscribers = subscribers_for_market(subscribers, market)
+
     if not subscribers:
-        print("No email recipients found; nothing to send.")
+        print(f"[{market}] No subscribers with {market} tickers; nothing to send.")
         return 0
 
     digest_tickers = union_tickers(subscribers)
