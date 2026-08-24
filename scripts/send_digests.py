@@ -197,13 +197,6 @@ def send_for_market(
         subscribers = matched
         print(f"Filtered to recipient: {subscribers[0]['email']}")
 
-    # Keep the complete subscription for the web CTA. The email itself is
-    # market-scoped, but the linked web digest should include all subscribed
-    # markets so its AI briefing has the full context.
-    full_tickers_by_email = {
-        s["email"].strip().lower(): list(s.get("tickers") or [])
-        for s in subscribers
-    }
     subscribers = subscribers_for_market(subscribers, market)
 
     if not subscribers:
@@ -261,8 +254,7 @@ def send_for_market(
         user_sections = filter_sections(sections, user_tickers)
         user_ai_summary = filter_ai_summary(ai_summary, user_tickers)
         user_story_count = count_email_stories(user_sections)
-        full_user_tickers = full_tickers_by_email.get(email.strip().lower(), user_tickers)
-        digest_url = build_digest_url(full_user_tickers, site_url=site_url)
+        digest_url = build_digest_url(user_tickers, site_url=site_url)
         html, text, subject = build_email_digest(
             user_sections,
             user_tickers,
