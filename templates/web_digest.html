@@ -403,18 +403,26 @@
     .movers-bar {
       background: var(--card-bg);
       border-bottom: 1px solid var(--border);
-      padding: 20px 0;
+      padding: 10px 0;
     }
     .movers {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-      justify-content: center;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(104px, 1fr));
+      gap: 5px;
+      max-height: 92px;
+      overflow-y: auto;
+      align-content: start;
+      scrollbar-width: thin;
+      scrollbar-gutter: stable;
     }
     .pill {
-      font-size: 11px;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      text-align: center;
+      font-size: 10px;
       font-weight: 600;
-      padding: 4px 10px;
+      padding: 3px 6px;
       border-radius: 6px;
       white-space: nowrap;
     }
@@ -873,6 +881,10 @@
         justify-content: center;
       }
       .header-ticker { font-size: 9px; }
+      .movers {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        max-height: 84px;
+      }
       .header { padding: 56px 20px 40px; }
     }
     @media (prefers-reduced-motion: reduce) {
