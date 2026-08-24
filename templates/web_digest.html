@@ -403,32 +403,54 @@
     .movers-bar {
       background: var(--card-bg);
       border-bottom: 1px solid var(--border);
-      padding: 10px 0;
+      padding: 12px 0 14px;
+    }
+    .movers-wrap { position: relative; }
+    .movers-wrap::before,
+    .movers-wrap::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      bottom: 8px;
+      width: 28px;
+      z-index: 1;
+      pointer-events: none;
+    }
+    .movers-wrap::before {
+      left: 0;
+      background: linear-gradient(90deg, var(--card-bg), transparent);
+    }
+    .movers-wrap::after {
+      right: 0;
+      background: linear-gradient(270deg, var(--card-bg), transparent);
     }
     .movers {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(104px, 1fr));
-      gap: 5px;
-      max-height: 92px;
-      overflow-y: auto;
-      align-content: start;
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      overflow-y: hidden;
+      padding: 2px 20px 8px;
+      scroll-snap-type: x proximity;
+      -webkit-overflow-scrolling: touch;
       scrollbar-width: thin;
-      scrollbar-gutter: stable;
     }
     .pill {
-      min-width: 0;
-      overflow: hidden;
-      text-overflow: ellipsis;
+      flex: 0 0 auto;
+      scroll-snap-align: start;
+      border: 1px solid transparent;
       text-align: center;
       font-size: 10px;
       font-weight: 600;
-      padding: 3px 6px;
-      border-radius: 6px;
+      letter-spacing: 0.01em;
+      padding: 5px 10px;
+      border-radius: 999px;
       white-space: nowrap;
+      box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06);
     }
-    .pill.up { background: var(--pill-up-bg); color: var(--pill-up-fg); }
-    .pill.down { background: var(--pill-down-bg); color: var(--pill-down-fg); }
-    .pill.flat { background: var(--pill-flat-bg); color: var(--pill-flat-fg); }
+    .pill.up { background: var(--pill-up-bg); color: var(--pill-up-fg); border-color: rgba(34, 197, 94, 0.12); }
+    .pill.down { background: var(--pill-down-bg); color: var(--pill-down-fg); border-color: rgba(239, 68, 68, 0.12); }
+    .pill.flat { background: var(--pill-flat-bg); color: var(--pill-flat-fg); border-color: var(--border-strong); }
+    .pill:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(15, 23, 42, 0.11); }
     .ticker-section {
       padding: 48px 0;
       border-top: 1px solid var(--border);
@@ -881,10 +903,7 @@
         justify-content: center;
       }
       .header-ticker { font-size: 9px; }
-      .movers {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        max-height: 84px;
-      }
+      .movers { padding-left: 20px; padding-right: 20px; }
       .header { padding: 56px 20px 40px; }
     }
     @media (prefers-reduced-motion: reduce) {
@@ -974,12 +993,14 @@
   {% if movers_bar %}
   <section class="movers-bar" aria-label="Session movers">
     <div class="section-inner">
-      <div class="movers">
+      <div class="movers-wrap">
+      <div class="movers" role="list">
         {% for mover in movers_bar %}
-        <span class="pill {% if mover.is_positive == true %}up{% elif mover.is_positive == false %}down{% else %}flat{% endif %}">
-          {{ mover.display_symbol or mover.ticker }}{% if mover.exchange %} <span class="exchange-badge {{ mover.market|lower }}">{{ mover.exchange }}</span>{% endif %}{% if mover.change_pct is not none %} {% if mover.change_pct >= 0 %}+{% endif %}{{ "%.1f"|format(mover.change_pct) }}%{% endif %}
+        <span class="pill {% if mover.is_positive == true %}up{% elif mover.is_positive == false %}down{% else %}flat{% endif %}" role="listitem">
+          {{ mover.display_symbol or mover.ticker }}{% if mover.change_pct is not none %} {% if mover.change_pct >= 0 %}+{% endif %}{{ "%.1f"|format(mover.change_pct) }}%{% endif %}
         </span>
         {% endfor %}
+      </div>
       </div>
     </div>
   </section>

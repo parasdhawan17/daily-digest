@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Tickr Digest — 22 Aug 2026</title>
+  <title>Tickr Digest — 24 Aug 2026</title>
   <meta name="color-scheme" content="light dark">
   <script>
     (function () {
@@ -76,6 +76,23 @@
       --toggle-bg: rgba(15, 23, 42, 0.45);
       --toggle-border: rgba(255, 255, 255, 0.22);
       --toggle-fg: #f8fafc;
+    }
+    html[data-theme="dark"] .ai-briefing {
+      background: linear-gradient(135deg, #172554 0%, #1e1b4b 52%, #172554 100%);
+      border-color: #3730a3;
+    }
+    html[data-theme="dark"] .ai-briefing::before {
+      color: rgba(165, 180, 252, 0.18);
+    }
+    html[data-theme="dark"] .ai-briefing::after {
+      background: rgba(129, 140, 248, 0.12);
+    }
+    html[data-theme="dark"] .ai-briefing-label::before {
+      color: #a5b4fc;
+    }
+    html[data-theme="dark"] .ticker-ai-brief {
+      border-color: #818cf8;
+      background: #1e293b;
     }
     body {
       margin: 0;
@@ -386,24 +403,54 @@
     .movers-bar {
       background: var(--card-bg);
       border-bottom: 1px solid var(--border);
-      padding: 20px 0;
+      padding: 12px 0 14px;
+    }
+    .movers-wrap { position: relative; }
+    .movers-wrap::before,
+    .movers-wrap::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      bottom: 8px;
+      width: 28px;
+      z-index: 1;
+      pointer-events: none;
+    }
+    .movers-wrap::before {
+      left: 0;
+      background: linear-gradient(90deg, var(--card-bg), transparent);
+    }
+    .movers-wrap::after {
+      right: 0;
+      background: linear-gradient(270deg, var(--card-bg), transparent);
     }
     .movers {
       display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-      justify-content: center;
+      gap: 8px;
+      overflow-x: auto;
+      overflow-y: hidden;
+      padding: 2px 20px 8px;
+      scroll-snap-type: x proximity;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: thin;
     }
     .pill {
-      font-size: 11px;
+      flex: 0 0 auto;
+      scroll-snap-align: start;
+      border: 1px solid transparent;
+      text-align: center;
+      font-size: 10px;
       font-weight: 600;
-      padding: 4px 10px;
-      border-radius: 6px;
+      letter-spacing: 0.01em;
+      padding: 5px 10px;
+      border-radius: 999px;
       white-space: nowrap;
+      box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06);
     }
-    .pill.up { background: var(--pill-up-bg); color: var(--pill-up-fg); }
-    .pill.down { background: var(--pill-down-bg); color: var(--pill-down-fg); }
-    .pill.flat { background: var(--pill-flat-bg); color: var(--pill-flat-fg); }
+    .pill.up { background: var(--pill-up-bg); color: var(--pill-up-fg); border-color: rgba(34, 197, 94, 0.12); }
+    .pill.down { background: var(--pill-down-bg); color: var(--pill-down-fg); border-color: rgba(239, 68, 68, 0.12); }
+    .pill.flat { background: var(--pill-flat-bg); color: var(--pill-flat-fg); border-color: var(--border-strong); }
+    .pill:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(15, 23, 42, 0.11); }
     .ticker-section {
       padding: 48px 0;
       border-top: 1px solid var(--border);
@@ -413,6 +460,77 @@
       padding-top: 40px;
       border-top: none;
     }
+    .ai-briefing {
+      position: relative;
+      padding: 28px 0;
+      background: linear-gradient(135deg, #eef2ff 0%, #f5f3ff 52%, #eff6ff 100%);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      overflow: hidden;
+    }
+    .ai-briefing::before {
+      content: "✦";
+      position: absolute;
+      top: 10px;
+      right: 7%;
+      color: rgba(99, 102, 241, 0.18);
+      font-size: 72px;
+      line-height: 1;
+      transform: rotate(12deg);
+    }
+    .ai-briefing::after {
+      content: "";
+      position: absolute;
+      width: 260px;
+      height: 260px;
+      top: -160px;
+      left: 14%;
+      border-radius: 50%;
+      background: rgba(129, 140, 248, 0.14);
+      filter: blur(20px);
+    }
+    .ai-briefing-label {
+      margin: 0 0 10px;
+      font-size: 11px;
+      color: var(--text-label);
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+    .ai-briefing-context {
+      margin: 0;
+      max-width: 760px;
+      color: var(--text-strong);
+      font-size: 16px;
+      font-weight: 600;
+      line-height: 1.55;
+      position: relative;
+      z-index: 1;
+    }
+    .ai-briefing-note {
+      margin: 14px 0 0;
+      color: var(--text-muted);
+      font-size: 12px;
+      line-height: 1.45;
+      position: relative;
+      z-index: 1;
+    }
+    .ai-briefing-label::before {
+      content: "✦ ";
+      color: #6366f1;
+    }
+    .ticker-ai-brief {
+      margin: 18px 0 0;
+      padding: 12px 14px;
+      border-left: 3px solid #93c5fd;
+      border-radius: 0 6px 6px 0;
+      background: var(--muted-bg);
+      color: var(--text-secondary);
+      font-size: 14px;
+      line-height: 1.55;
+      box-shadow: 0 4px 14px rgba(79, 70, 229, 0.08);
+    }
+    .ticker-ai-brief strong { color: var(--text-strong); }
     .section-eyebrow {
       margin: 0 0 16px;
       font-size: 11px;
@@ -457,6 +575,32 @@
       color: var(--text-strong);
       letter-spacing: -0.02em;
       font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    }
+    .exchange-badge {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      vertical-align: middle;
+    }
+    .exchange-badge.us {
+      background: #dbeafe;
+      color: #1d4ed8;
+    }
+    .exchange-badge.in {
+      background: #ffedd5;
+      color: #c2410c;
+    }
+    html[data-theme="dark"] .exchange-badge.us {
+      background: #1e3a8a;
+      color: #93c5fd;
+    }
+    html[data-theme="dark"] .exchange-badge.in {
+      background: #7c2d12;
+      color: #fdba74;
     }
     .ticker-quote {
       display: flex;
@@ -759,6 +903,7 @@
         justify-content: center;
       }
       .header-ticker { font-size: 9px; }
+      .movers { padding-left: 20px; padding-right: 20px; }
       .header { padding: 56px 20px 40px; }
     }
     @media (prefers-reduced-motion: reduce) {
@@ -783,14 +928,14 @@
 </head>
 <body>
   <header class="header">
-        
+
         <a href="http://localhost:8765/" class="header-home-link" aria-label="Back to home">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M19 12H5M12 19l-7-7 7-7"></path>
           </svg>
           <span>Home</span>
         </a>
-        
+
         <button type="button" class="theme-toggle" id="theme-toggle" aria-label="Switch to dark mode" title="Toggle color theme">
           <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M21 14.5A8.5 8.5 0 1 1 9.5 3 7 7 0 0 0 21 14.5z"></path>
@@ -831,397 +976,413 @@
         <div class="header-content">
         <p class="eyebrow">Tickr Digest</p>
         <h1>Your stock news briefing</h1>
-        
+
         <p class="muted">Fetched at 9:15 AM ET · Aug 15, 2026</p>
-        
-        
+
+
         <p class="badge">Today's biggest move: <strong>US:NVDA +2.14%</strong></p>
-        
+
         <nav class="nav">
-          
+
         </nav>
         </div>
       </header>
 
-  
+
   <section class="movers-bar" aria-label="Session movers">
     <div class="section-inner">
-      <div class="movers">
-        
-        <span class="pill up">
+      <div class="movers-wrap">
+      <div class="movers" role="list">
+
+        <span class="pill up" role="listitem">
           NVDA +2.1%
         </span>
-        
-        <span class="pill up">
+
+        <span class="pill up" role="listitem">
           AAPL +1.2%
         </span>
-        
-        <span class="pill up">
+
+        <span class="pill up" role="listitem">
           TCS +0.8%
         </span>
-        
-        <span class="pill down">
+
+        <span class="pill down" role="listitem">
           RELIANCE -0.4%
         </span>
-        
+
+      </div>
       </div>
     </div>
   </section>
-  
 
-  
 
-  
 
-  
 
-  
-  
-  
-  
+
+
+
+
+
+
+
+
+
+
   <section class="ticker-section ticker-section-featured">
     <div class="section-inner">
-      
+
       <p class="section-eyebrow">Biggest mover</p>
-      
+
       <div class="ticker-head">
-        
+
         <img class="ticker-logo" src="https://static2.finnhub.io/file/publicdatany/finnhubimage/stock_logo/NVDA.png" alt="US:NVDA">
-        
+
         <div class="ticker-head-main">
           <div class="ticker-row">
             <span class="ticker-symbol">NVDA</span>
-            
+            <span class="exchange-badge us">US</span>
+
           </div>
-          
+
           <div class="ticker-quote">
             <span class="ticker-price">$142.50</span>
-            
+
             <span class="ticker-change up">
               +2.14%
             </span>
-            
+
           </div>
-          
+
         </div>
       </div>
 
-      
+
+
+
       <div class="story-list">
-        
-        
-  
+
+
+
   <article class="story has-thumb">
     <img class="story-thumb" src="https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=800&amp;h=400&amp;fit=crop&amp;sig=NVDA0" alt="">
     <div class="story-body">
       <h3 class="story-headline"><a href="https://example.com/nvda/0" target="_blank" rel="noopener">Nvidia announces next-gen chip roadmap ahead of earnings</a></h3>
-      
+
       <p class="summary">Analysts weigh supply constraints, guidance, and sector rotation as investors reposition ahead of the next earnings cycle.</p>
-      
+
       <p class="meta">
         Reuters
          · 2h ago
       </p>
     </div>
   </article>
-  
-  
-        
-        
-  
+
+
+
+
+
   <article class="story has-thumb">
     <img class="story-thumb" src="https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=800&amp;h=400&amp;fit=crop&amp;sig=NVDA1" alt="">
     <div class="story-body">
       <h3 class="story-headline"><a href="https://example.com/nvda/1" target="_blank" rel="noopener">Data center demand keeps Nvidia supply chain at full tilt</a></h3>
-      
+
       <p class="summary">Analysts weigh supply constraints, guidance, and sector rotation as investors reposition ahead of the next earnings cycle.</p>
-      
+
       <p class="meta">
         Bloomberg
          · 4h ago
       </p>
     </div>
   </article>
-  
-  
-        
-        
-  
+
+
+
+
+
   <article class="story">
     <div class="story-body">
       <h3 class="story-headline"><a href="https://example.com/nvda/2" target="_blank" rel="noopener">Wall Street raises price targets after AI infrastructure spend</a></h3>
-      
+
       <p class="summary">Analysts weigh supply constraints, guidance, and sector rotation as investors reposition ahead of the next earnings cycle.</p>
-      
+
       <p class="meta">
         CNBC
          · 6h ago
       </p>
     </div>
   </article>
-  
-  
-        
-        
+
+
+
+
         <details class="story-more">
           <summary>See 2 more stories</summary>
-          
-          
-  
+
+
+
   <article class="story has-thumb">
     <img class="story-thumb" src="https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=800&amp;h=400&amp;fit=crop&amp;sig=NVDA3" alt="">
     <div class="story-body">
       <h3 class="story-headline"><a href="https://example.com/nvda/3" target="_blank" rel="noopener">Partners line up for new accelerator platform launch</a></h3>
-      
+
       <p class="summary">Analysts weigh supply constraints, guidance, and sector rotation as investors reposition ahead of the next earnings cycle.</p>
-      
+
       <p class="meta">
         Reuters
          · 8h ago
       </p>
     </div>
   </article>
-  
-  
-          
-          
-  
+
+
+
+
+
   <article class="story">
     <div class="story-body">
       <h3 class="story-headline"><a href="https://example.com/nvda/4" target="_blank" rel="noopener">Semiconductor peers rally on Nvidia guidance optimism</a></h3>
-      
+
       <p class="summary">Analysts weigh supply constraints, guidance, and sector rotation as investors reposition ahead of the next earnings cycle.</p>
-      
+
       <p class="meta">
         MarketWatch
          · 10h ago
       </p>
     </div>
   </article>
-  
-  
-          
+
+
+
         </details>
-        
+
       </div>
-      
+
     </div>
   </section>
-  
-  
 
-  
-  
-  
-  
+
+
+
+
+
+
   <section class="ticker-section section-alt">
     <div class="section-inner">
-      
+
       <div class="ticker-head">
-        
+
         <img class="ticker-logo" src="https://static2.finnhub.io/file/publicdatany/finnhubimage/stock_logo/AAPL.png" alt="US:AAPL">
-        
+
         <div class="ticker-head-main">
           <div class="ticker-row">
             <span class="ticker-symbol">AAPL</span>
-            
+            <span class="exchange-badge us">US</span>
+
             <span class="mover-badge">Mover</span>
-            
+
           </div>
-          
+
           <div class="ticker-quote">
             <span class="ticker-price">$228.30</span>
-            
+
             <span class="ticker-change up">
               +1.18%
             </span>
-            
+
           </div>
-          
+
         </div>
       </div>
 
-      
+
+
+
       <div class="story-list">
-        
-        
-  
+
+
+
   <article class="story has-thumb">
     <img class="story-thumb" src="https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=800&amp;h=400&amp;fit=crop&amp;sig=AAPL0" alt="">
     <div class="story-body">
       <h3 class="story-headline"><a href="https://example.com/aapl/0" target="_blank" rel="noopener">Apple expands AI features across iOS developer preview</a></h3>
-      
+
       <p class="summary">Analysts weigh supply constraints, guidance, and sector rotation as investors reposition ahead of the next earnings cycle.</p>
-      
+
       <p class="meta">
         Bloomberg
          · 2h ago
       </p>
     </div>
   </article>
-  
-  
-        
-        
-  
+
+
+
+
+
   <article class="story">
     <div class="story-body">
       <h3 class="story-headline"><a href="https://example.com/aapl/1" target="_blank" rel="noopener">Services revenue momentum offsets hardware cycle concerns</a></h3>
-      
+
       <p class="summary">Analysts weigh supply constraints, guidance, and sector rotation as investors reposition ahead of the next earnings cycle.</p>
-      
+
       <p class="meta">
         Reuters
          · 5h ago
       </p>
     </div>
   </article>
-  
-  
-        
-        
+
+
+
+
       </div>
-      
+
     </div>
   </section>
-  
-  
-  
-  
-  
+
+
+
+
+
   <section class="ticker-section">
     <div class="section-inner">
-      
+
       <div class="ticker-head">
-        
+
         <div class="ticker-head-main">
           <div class="ticker-row">
             <span class="ticker-symbol">TCS</span>
-            
+            <span class="exchange-badge in">NSE</span>
+
             <span class="mover-badge">Mover</span>
-            
+
           </div>
-          
+
           <div class="ticker-quote">
             <span class="ticker-price">₹4125.75</span>
-            
+
             <span class="ticker-change up">
               +0.85%
             </span>
-            
+
           </div>
-          
+
         </div>
       </div>
 
-      
+
+
+
       <div class="story-list">
-        
-        
-  
+
+
+
   <article class="story has-thumb">
     <img class="story-thumb" src="https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=800&amp;h=400&amp;fit=crop&amp;sig=TCS0" alt="">
     <div class="story-body">
       <h3 class="story-headline"><a href="https://example.com/tcs/0" target="_blank" rel="noopener">TCS wins large deal in European banking sector</a></h3>
-      
+
       <p class="summary">Analysts weigh supply constraints, guidance, and sector rotation as investors reposition ahead of the next earnings cycle.</p>
-      
+
       <p class="meta">
         Business Standard
          · 1h ago
       </p>
     </div>
   </article>
-  
-  
-        
-        
+
+
+
+
       </div>
-      
+
     </div>
   </section>
-  
-  
-  
-  
-  
+
+
+
+
+
   <section class="ticker-section section-alt">
     <div class="section-inner">
-      
+
       <div class="ticker-head">
-        
+
         <div class="ticker-head-main">
           <div class="ticker-row">
             <span class="ticker-symbol">RELIANCE</span>
-            
+            <span class="exchange-badge in">NSE</span>
+
           </div>
-          
+
           <div class="ticker-quote">
             <span class="ticker-price">₹2856.40</span>
-            
+
             <span class="ticker-change down">
               -0.42%
             </span>
-            
+
           </div>
-          
+
         </div>
       </div>
 
-      
+
+
+
       <div class="story-list">
-        
-        
-  
+
+
+
   <article class="story has-thumb">
     <img class="story-thumb" src="https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=800&amp;h=400&amp;fit=crop&amp;sig=RELIANCE0" alt="">
     <div class="story-body">
       <h3 class="story-headline"><a href="https://example.com/reliance/0" target="_blank" rel="noopener">Reliance Industries reports steady refining margins</a></h3>
-      
+
       <p class="summary">Analysts weigh supply constraints, guidance, and sector rotation as investors reposition ahead of the next earnings cycle.</p>
-      
+
       <p class="meta">
         Economic Times
          · 2h ago
       </p>
     </div>
   </article>
-  
-  
-        
-        
-  
+
+
+
+
+
   <article class="story">
     <div class="story-body">
       <h3 class="story-headline"><a href="https://example.com/reliance/1" target="_blank" rel="noopener">Jio subscriber growth remains strong in quarterly update</a></h3>
-      
+
       <p class="summary">Analysts weigh supply constraints, guidance, and sector rotation as investors reposition ahead of the next earnings cycle.</p>
-      
+
       <p class="meta">
         Mint
          · 5h ago
       </p>
     </div>
   </article>
-  
-  
-        
-        
+
+
+
+
       </div>
-      
+
     </div>
   </section>
-  
-  
+
+
 
   <footer class="site-footer">
     <div class="section-inner">
       <p class="footer-brand">Tickr Digest</p>
       <p>Your personalized stock brief</p>
-      
+
     </div>
   </footer>
-  
+
   <script>
     (function () {
       var STORAGE_KEY = "daily-digest-theme";
