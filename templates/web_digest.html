@@ -425,14 +425,20 @@
       background: linear-gradient(270deg, var(--card-bg), transparent);
     }
     .movers {
-      display: flex;
-      gap: 8px;
-      overflow-x: auto;
-      overflow-y: hidden;
+      overflow: hidden;
       padding: 2px 20px 8px;
-      scroll-snap-type: x proximity;
-      -webkit-overflow-scrolling: touch;
-      scrollbar-width: thin;
+    }
+    .movers-track {
+      display: flex;
+      width: max-content;
+      gap: 8px;
+    }
+    .movers-track.is-looping {
+      animation: movers-marquee 28s linear infinite;
+    }
+    @keyframes movers-marquee {
+      from { transform: translateX(0); }
+      to { transform: translateX(calc(-50% - 4px)); }
     }
     .pill {
       flex: 0 0 auto;
@@ -912,6 +918,7 @@
       .chart-line-down,
       .chart-candle,
       .header-ticker,
+      .movers-track,
       .header-shimmer,
       .ticker-section {
         animation: none !important;
@@ -923,6 +930,24 @@
         stroke-dashoffset: 0;
       }
     }
+  </style>
+  <style>
+    .progressive-status { padding: 16px 0; background: var(--muted-bg); color: var(--text-secondary); font-size: 13px; }
+    .progressive-status.is-complete { max-height: 60px; opacity: 1; transition: max-height 500ms ease, opacity 500ms ease, padding 500ms ease; }
+    .progressive-status.is-complete.is-hidden { max-height: 0; opacity: 0; padding-top: 0; padding-bottom: 0; overflow: hidden; }
+    .progressive-status .section-inner { display: flex; align-items: center; gap: 9px; }
+    .status-spinner { width: 14px; height: 14px; border: 2px solid var(--border-strong); border-top-color: var(--link); border-radius: 50%; animation: spin 0.8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .progressive-placeholder { min-height: 230px; }
+    .skeleton { border-radius: 8px; background: linear-gradient(90deg, var(--muted-bg) 25%, var(--border-soft) 50%, var(--muted-bg) 75%); background-size: 200% 100%; animation: shimmer 1.4s ease-in-out infinite; }
+    .skeleton-title { width: 42%; height: 24px; margin: 10px 0 18px; }
+    .skeleton-price { width: 28%; height: 30px; margin-bottom: 34px; }
+    .skeleton-line { width: 88%; height: 14px; margin: 13px 0; }
+    .skeleton-line.short { width: 64%; }
+    @keyframes shimmer { to { background-position: -200% 0; } }
+    .progressive-section { animation: section-in 420ms var(--easing) both; }
+    @keyframes section-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    .progressive-ai { display: block; }
   </style>
   <link rel="stylesheet" href="/subscribe-form.css">
 </head>
@@ -990,16 +1015,34 @@
         </div>
       </header>
 
+  {% if progressive %}
+  <section class="progressive-status" id="progressive-status" aria-live="polite">
+    <div class="section-inner"><span class="status-spinner" aria-hidden="true"></span><span id="progressive-status-text">Loading your watchlist…</span></div>
+  </section>
+  <section class="movers-bar progressive-movers" id="progressive-movers" aria-label="Session movers" hidden>
+    <div class="section-inner"><div class="movers-wrap"><div class="movers" role="list"><div class="movers-track" id="progressive-movers-track"></div></div></div></div>
+  </section>
+  <section class="ai-briefing progressive-ai" id="progressive-ai" aria-label="AI briefing" hidden></section>
+  <main id="digest-sections" class="progressive-sections" data-token="{{ progressive_token or '' }}" data-tickers='{{ progressive_tickers|tojson }}'>
+    {% for ticker in progressive_tickers %}
+    <section class="ticker-section progressive-placeholder" data-ticker="{{ ticker }}" aria-label="Loading {{ ticker }}">
+      <div class="section-inner"><div class="skeleton skeleton-title"></div><div class="skeleton skeleton-price"></div><div class="skeleton skeleton-line"></div><div class="skeleton skeleton-line short"></div></div>
+    </section>
+    {% endfor %}
+  </main>
+  {% else %}
   {% if movers_bar %}
   <section class="movers-bar" aria-label="Session movers">
     <div class="section-inner">
       <div class="movers-wrap">
       <div class="movers" role="list">
+        <div class="movers-track">
         {% for mover in movers_bar %}
         <span class="pill {% if mover.is_positive == true %}up{% elif mover.is_positive == false %}down{% else %}flat{% endif %}" role="listitem">
           {{ mover.display_symbol or mover.ticker }}{% if mover.change_pct is not none %} {% if mover.change_pct >= 0 %}+{% endif %}{{ "%.1f"|format(mover.change_pct) }}%{% endif %}
         </span>
         {% endfor %}
+        </div>
       </div>
       </div>
     </div>
@@ -1120,6 +1163,7 @@
   {% for section in compact %}
   {{ render_section(section, is_highlight=loop.index <= 2, alt_bg=loop.index is odd) }}
   {% endfor %}
+  {% endif %}
 
   <footer class="site-footer">
     <div class="section-inner">
@@ -1147,6 +1191,131 @@
   </div>
   <script src="/subscribe-form.js" defer></script>
   {% endif %}
+  {% if progressive %}
+  <script>
+    (function () {
+      var container = document.getElementById("digest-sections");
+      var status = document.getElementById("progressive-status-text");
+      var token = container && container.getAttribute("data-token");
+      var tickers = container ? JSON.parse(container.getAttribute("data-tickers") || "[]") : [];
+      var loaded = [];
+
+      function esc(value) {
+        return String(value == null ? "" : value).replace(/[&<>\"]/g, function (char) {
+          return {"&":"&amp;", "<":"&lt;", ">":"&gt;", "\"":"&quot;"}[char];
+        });
+      }
+
+      function showMovers() {
+        var list = document.getElementById("progressive-movers-track");
+        var bar = document.getElementById("progressive-movers");
+        if (!list || !bar) return;
+        var movers = loaded.filter(function (item) { return item.quote && item.quote.change_pct != null; })
+          .sort(function (a, b) { return Math.abs(b.quote.change_pct) - Math.abs(a.quote.change_pct); });
+        if (!movers.length) return;
+        var content = movers.map(function (item) {
+          var change = Number(item.quote.change_pct);
+          var cls = change > 0 ? "up" : change < 0 ? "down" : "flat";
+          return '<span class="pill ' + cls + '" role="listitem">' + esc(item.display_symbol || item.ticker) + ' ' + (change >= 0 ? "+" : "") + change.toFixed(1) + '%</span>';
+        }).join("");
+        list.innerHTML = content;
+        if (window.setupMoverMarquee) setupMoverMarquee(list);
+        bar.hidden = false;
+      }
+
+      function addAiSummary(summary) {
+        var panel = document.getElementById("progressive-ai");
+        if (!panel || !summary || !summary.market_context) return;
+        panel.innerHTML = '<div class="section-inner"><p class="ai-briefing-label">AI briefing · the signal behind today’s headlines</p><p class="ai-briefing-context">' + esc(summary.market_context) + '</p><p class="ai-briefing-note">AI-generated from the linked headlines and excerpts. Not investment advice.</p></div>';
+        panel.hidden = false;
+        loaded.forEach(function (item) {
+          var brief = summary.ticker_summaries && summary.ticker_summaries[item.ticker];
+          var section = container.querySelector('[data-ticker="' + CSS.escape(item.ticker) + '"]');
+          if (brief && section) {
+            var node = document.createElement("p");
+            node.className = "ticker-ai-brief";
+            node.innerHTML = "<strong>✦ AI brief</strong> &nbsp; " + esc(brief);
+            section.querySelector(".section-inner").insertBefore(node, section.querySelector(".story-list, .empty"));
+          }
+        });
+      }
+
+      function loadTicker(ticker) {
+        return fetch("/api/digest-data?t=" + encodeURIComponent(token) + "&ticker=" + encodeURIComponent(ticker))
+          .then(function (response) { return response.json(); })
+          .then(function (result) {
+            var placeholder = container.querySelector('[data-ticker="' + CSS.escape(ticker) + '"]');
+            if (!result.ok || !placeholder) throw new Error(result.error || "Unable to load ticker");
+            placeholder.outerHTML = result.html;
+            loaded.push(result.section);
+            showMovers();
+            status.textContent = loaded.length + " of " + tickers.length + " tickers loaded";
+            return result.section;
+          })
+          .catch(function () {
+            var placeholder = container.querySelector('[data-ticker="' + CSS.escape(ticker) + '"]');
+            if (placeholder) placeholder.innerHTML = '<div class="section-inner"><p class="empty">Could not load ' + esc(ticker) + ' right now.</p></div>';
+            status.textContent = loaded.length + " of " + tickers.length + " tickers loaded";
+            return null;
+          });
+      }
+
+      Promise.all(tickers.map(loadTicker)).then(function () {
+        status.textContent = "Your digest is ready";
+        var aiPanel = document.getElementById("progressive-ai");
+        if (aiPanel) {
+          aiPanel.innerHTML = '<div class="section-inner"><p class="ai-briefing-label">Preparing your AI briefing…</p></div>';
+          aiPanel.hidden = false;
+        }
+        return fetch("/api/digest-ai?t=" + encodeURIComponent(token), {
+          method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({sections: loaded})
+        });
+      }).then(function (response) { return response ? response.json() : null; })
+        .then(function (result) {
+          if (result && result.ok) addAiSummary(result.ai_summary);
+          var statusBar = document.getElementById("progressive-status");
+          if (statusBar) {
+            statusBar.classList.add("is-complete");
+            window.setTimeout(function () { statusBar.classList.add("is-hidden"); }, 3500);
+          }
+        })
+        .catch(function () {
+          var panel = document.getElementById("progressive-ai");
+          if (panel) panel.hidden = true;
+          var statusBar = document.getElementById("progressive-status");
+          if (statusBar) {
+            statusBar.classList.add("is-complete");
+            window.setTimeout(function () { statusBar.classList.add("is-hidden"); }, 3500);
+          }
+        });
+    })();
+  </script>
+  {% endif %}
+  <script>
+    (function () {
+      window.setupMoverMarquee = function (track) {
+        if (!track) return;
+        track.classList.remove("is-looping");
+        track.querySelectorAll("[data-marquee-copy]").forEach(function (copy) { copy.remove(); });
+        window.requestAnimationFrame(function () {
+          var viewport = track.parentElement;
+          if (!viewport || track.scrollWidth <= viewport.clientWidth) return;
+          Array.prototype.slice.call(track.children).forEach(function (item) {
+            var copy = item.cloneNode(true);
+            copy.setAttribute("data-marquee-copy", "true");
+            copy.setAttribute("aria-hidden", "true");
+            track.appendChild(copy);
+          });
+          track.classList.add("is-looping");
+        });
+      };
+
+      document.querySelectorAll(".movers-track").forEach(window.setupMoverMarquee);
+      window.addEventListener("resize", function () {
+        document.querySelectorAll(".movers-track").forEach(window.setupMoverMarquee);
+      });
+    })();
+  </script>
   <script>
     (function () {
       var STORAGE_KEY = "daily-digest-theme";

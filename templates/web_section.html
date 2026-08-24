@@ -1,0 +1,26 @@
+{% macro change_class(quote) %}{% if quote and quote.change_pct is not none %}{% if quote.change_pct > 0 %}up{% elif quote.change_pct < 0 %}down{% else %}flat{% endif %}{% endif %}{% endmacro %}
+{% macro render_story(story) %}
+<article class="story{% if story.image %} has-thumb{% endif %}">
+  {% if story.image %}<img class="story-thumb" src="{{ story.image }}" alt="" loading="lazy">{% endif %}
+  <div class="story-body">
+    <h3 class="story-headline"><a href="{{ story.url }}" target="_blank" rel="noopener">{{ story.headline }}</a></h3>
+    {% if story.summary %}<p class="summary">{{ story.summary }}</p>{% endif %}
+    <p class="meta">{{ story.source }}{% if story.published_at %} · {{ story.published_at }}{% elif story.relative_time %} · {{ story.relative_time }}{% endif %}</p>
+  </div>
+</article>
+{% endmacro %}
+{% set quote = section.quote %}
+<section class="ticker-section progressive-section" data-ticker="{{ section.ticker }}">
+  <div class="section-inner">
+    <div class="ticker-head">
+      {% if section.logo %}<img class="ticker-logo" src="{{ section.logo }}" alt="{{ section.ticker }}" loading="lazy">{% endif %}
+      <div class="ticker-head-main">
+        <div class="ticker-row"><span class="ticker-symbol">{{ section.display_symbol or section.ticker }}</span>{% if section.exchange %}<span class="exchange-badge {{ section.market|lower }}">{{ section.exchange }}</span>{% endif %}</div>
+        {% if quote %}<div class="ticker-quote"><span class="ticker-price">{% if section.market == 'IN' %}₹{% else %}${% endif %}{{ "%.2f"|format(quote.price) }}</span>{% if quote.change_pct is not none %}<span class="ticker-change {{ change_class(quote) }}">{% if quote.change_pct >= 0 %}+{% endif %}{{ "%.2f"|format(quote.change_pct) }}%</span>{% endif %}</div>{% endif %}
+      </div>
+    </div>
+    {% if section.error %}<p class="empty">Could not fetch news for {{ section.display_symbol or section.ticker }}.</p>
+    {% elif section.web_stories %}<div class="story-list">{% for story in section.web_stories[:visible_story_count] %}{{ render_story(story) }}{% endfor %}{% if section.web_stories|length > visible_story_count %}<details class="story-more"><summary>See {{ section.web_stories|length - visible_story_count }} more stories</summary>{% for story in section.web_stories[visible_story_count:] %}{{ render_story(story) }}{% endfor %}</details>{% endif %}</div>
+    {% else %}<p class="empty">No major news for {{ section.display_symbol or section.ticker }} today.</p>{% endif %}
+  </div>
+</section>

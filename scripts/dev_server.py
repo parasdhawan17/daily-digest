@@ -67,9 +67,17 @@ class DevHandler(BaseHTTPRequestHandler):
         if path == "/digest":
             self._digest(query)
             return
+        if path == "/api/digest-data":
+            from api.digest import handle_data_get
+            handle_data_get(self)
+            return
         self._serve_static(path)
 
     def do_POST(self) -> None:
+        if urlparse(self.path).path == "/api/digest-ai":
+            from api.digest import handle_ai_post
+            handle_ai_post(self)
+            return
         if urlparse(self.path).path == "/api/subscribe":
             self._subscribe()
             return
@@ -203,6 +211,11 @@ class DevHandler(BaseHTTPRequestHandler):
             self._json(503, {"ok": False, "error": "Could not save your subscription right now."})
 
     def _digest(self, query: dict) -> None:
+        # Keep local behavior aligned with the Vercel progressive digest path.
+        from api.digest import handle_get
+        handle_get(self)
+        return
+
         token = (query.get("t") or [None])[0]
         if not token:
             html = build_digest_error(

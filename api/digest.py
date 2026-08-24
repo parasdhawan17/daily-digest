@@ -12,12 +12,12 @@ ROOT = Path(__file__).resolve().parent.parent
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from api._responses import send_html
+from api._responses import read_json, send_html, send_json
 from stock_news.ai_summary import generate_ai_summary
 from stock_news.digest import collect_digest_data, filter_sections
 from stock_news.formatting import format_fetched_at_label
 from stock_news.markets import market_of
-from stock_news.render import build_digest_error, build_web_digest
+from stock_news.render import build_digest_error, build_web_digest, build_web_section
 from stock_news.tokens import TokenError, verify_digest_token
 
 
@@ -30,6 +30,17 @@ def _missing_data_keys(tickers: list[str]) -> list[str]:
     if needs_in and not os.environ.get("INDIANAPI_API_KEY", "").strip():
         missing.append("INDIANAPI_API_KEY")
     return missing
+
+
+def _verify_token(handler: BaseHTTPRequestHandler) -> tuple[str | None, list[str] | None]:
+    query = parse_qs(urlparse(handler.path).query)
+    token = (query.get("t") or [None])[0]
+    if not token:
+        return None, None
+    try:
+        return token, verify_digest_token(token)
+    except TokenError:
+        return token, None
 
 
 def handle_get(handler: BaseHTTPRequestHandler) -> None:
@@ -72,33 +83,65 @@ def handle_get(handler: BaseHTTPRequestHandler) -> None:
         send_html(handler, 503, html)
         return
 
-    finnhub_key = os.environ.get("FINNHUB_API_KEY", "").strip()
-    indianapi_key = os.environ.get("INDIANAPI_API_KEY", "").strip()
+    # The page shell is intentionally rendered before any provider or AI call.
+    fetched_at = format_fetched_at_label(datetime.now().astimezone())
+    html = build_web_digest(
+        [],
+        tickers,
+        fetched_at_label=fetched_at,
+        progressive=True,
+        progressive_token=token,
+    )
+    send_html(handler, 200, html)
+
+
+def handle_data_get(handler: BaseHTTPRequestHandler) -> None:
+    """Return one ticker's data so the browser can progressively render it."""
+    token, tickers = _verify_token(handler)
+    query = parse_qs(urlparse(handler.path).query)
+    ticker = (query.get("ticker") or [""])[0].strip().upper()
+    if not token or not tickers:
+        send_json(handler, 403, {"ok": False, "error": "Invalid digest link."})
+        return
+    if ticker not in tickers:
+        send_json(handler, 400, {"ok": False, "error": "Ticker is not in this digest."})
+        return
+
+    missing = _missing_data_keys([ticker])
+    if missing:
+        send_json(handler, 503, {"ok": False, "error": "Missing: " + ", ".join(missing)})
+        return
 
     try:
         sections, _ = collect_digest_data(
-            tickers,
-            finnhub_key=finnhub_key,
-            indianapi_key=indianapi_key,
+            [ticker],
+            finnhub_key=os.environ.get("FINNHUB_API_KEY", "").strip(),
+            indianapi_key=os.environ.get("INDIANAPI_API_KEY", "").strip(),
         )
-        sections = filter_sections(sections, tickers)
-        ai_summary = generate_ai_summary(sections)
-        fetched_at = format_fetched_at_label(datetime.now().astimezone())
-        html = build_web_digest(
-            sections,
-            tickers,
-            fetched_at_label=fetched_at,
-            ai_summary=ai_summary,
-        )
-        send_html(handler, 200, html)
+        section = filter_sections(sections, [ticker])[0]
+        send_json(handler, 200, {"ok": True, "section": section, "html": build_web_section(section)})
     except Exception:
         traceback.print_exc()
-        html = build_digest_error(
-            "Something went wrong",
-            "We couldn't load your digest right now.",
-            detail="Please try again in a few minutes.",
-        )
-        send_html(handler, 503, html)
+        send_json(handler, 503, {"ok": False, "error": "Could not load this ticker right now."})
+
+
+def handle_ai_post(handler: BaseHTTPRequestHandler) -> None:
+    """Generate the optional AI briefing after the visible sections are loaded."""
+    _token, tickers = _verify_token(handler)
+    if not tickers:
+        send_json(handler, 403, {"ok": False, "error": "Invalid digest link."})
+        return
+    try:
+        payload = read_json(handler)
+        sections = payload.get("sections")
+        if not isinstance(sections, list):
+            raise ValueError("sections must be a list")
+        allowed = set(tickers)
+        safe_sections = [item for item in sections if isinstance(item, dict) and item.get("ticker") in allowed]
+        send_json(handler, 200, {"ok": True, "ai_summary": generate_ai_summary(safe_sections)})
+    except Exception:
+        traceback.print_exc()
+        send_json(handler, 200, {"ok": True, "ai_summary": None})
 
 
 class handler(BaseHTTPRequestHandler):

@@ -34,6 +34,8 @@ def build_web_digest(
     *,
     fetched_at_label: str | None = None,
     ai_summary: dict | None = None,
+    progressive: bool = False,
+    progressive_token: str | None = None,
 ) -> str:
     today_label = date.today().strftime("%d %b %Y")
     layout = prepare_email_layout(sections)
@@ -50,8 +52,17 @@ def build_web_digest(
         visible_story_count=HEADLINES_PER_TICKER,
         digest_heading=DIGEST_HEADING,
         subscribe_enabled=subscribe_enabled(),
+        progressive=progressive,
+        progressive_token=progressive_token,
+        progressive_tickers=tickers if progressive else [],
         **layout,
     )
+
+
+def build_web_section(section: dict) -> str:
+    env = get_jinja_env()
+    template = env.get_template("web_section.html")
+    return template.render(section=section, visible_story_count=HEADLINES_PER_TICKER)
 
 
 def build_email_digest(

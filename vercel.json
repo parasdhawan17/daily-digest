@@ -1,6 +1,8 @@
 {
   "rewrites": [
     { "source": "/digest", "destination": "/api/index?route=digest" },
+    { "source": "/api/digest-data", "destination": "/api/index?route=digest-data" },
+    { "source": "/api/digest-ai", "destination": "/api/index?route=digest-ai" },
     { "source": "/welcome", "destination": "/welcome.html" },
     { "source": "/api/tickers/search", "destination": "/api/index?route=search" },
     { "source": "/api/tickers/validate", "destination": "/api/index?route=validate" },
