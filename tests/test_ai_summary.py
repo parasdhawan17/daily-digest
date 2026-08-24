@@ -147,6 +147,12 @@ class AiSummaryTest(unittest.TestCase):
             },
         )
         self.assertIn("AI briefing", html)
+        self.assertIn("background-image: none !important", html)
+        self.assertIn("background-color: #312e81 !important", html)
+        self.assertIn('class="email-card mobile-section" bgcolor="#ffffff"', html)
+        self.assertIn('class="ai-briefing-panel"', html)
+        self.assertIn('bgcolor="#f5f3ff"', html)
+        self.assertNotIn("linear-gradient(135deg,#eef2ff", html)
         self.assertIn("View full digest", html)
         self.assertNotIn("AAPL moved high</h1>", html)
         self.assertIn("Apple summary.", html)

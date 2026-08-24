@@ -86,7 +86,13 @@
       }
       .ai-briefing-panel {
         background-color: #172554 !important;
+        background-image: none !important;
         border-color: #3730a3 !important;
+      }
+      .ai-briefing-kicker {
+        background-color: #312e81 !important;
+        border-color: #6366f1 !important;
+        color: #e9d5ff !important;
       }
       .ai-briefing-title,
       .ai-briefing-context {
@@ -103,7 +109,7 @@
     }
 
     .ai-briefing-panel {
-      background: linear-gradient(135deg, #eef2ff 0%, #f5f3ff 52%, #eff6ff 100%);
+      background-color: #f5f3ff;
       border: 1px solid #c7d2fe;
       border-radius: 14px;
       box-shadow: 0 8px 24px rgba(79, 70, 229, 0.10);
@@ -284,8 +290,8 @@
           {% if ai_summary %}
           <!-- AI briefing -->
           <tr>
-            <td class="mobile-section" style="padding:20px 24px 8px;background-color:#ffffff;">
-              <table role="presentation" class="ai-briefing-panel" width="100%" cellpadding="0" cellspacing="0" style="width:100%;background:linear-gradient(135deg,#eef2ff 0%,#f5f3ff 52%,#eff6ff 100%);border:1px solid #c7d2fe;border-radius:14px;box-shadow:0 8px 24px rgba(79,70,229,0.10);">
+            <td class="email-card mobile-section" bgcolor="#ffffff" style="padding:20px 24px 8px;background-color:#ffffff;">
+              <table role="presentation" class="ai-briefing-panel" width="100%" cellpadding="0" cellspacing="0" bgcolor="#f5f3ff" style="width:100%;background-color:#f5f3ff;border:1px solid #c7d2fe;border-radius:14px;box-shadow:0 8px 24px rgba(79,70,229,0.10);">
                 <tr>
                   <td style="padding:20px 20px 18px;">
                     <span class="ai-briefing-kicker" style="display:inline-block;padding:5px 10px;border:1px solid #c4b5fd;border-radius:999px;background:rgba(255,255,255,0.62);color:#5b21b6;font-size:10px;font-weight:800;letter-spacing:0.12em;text-transform:uppercase;">✦ AI briefing</span>
