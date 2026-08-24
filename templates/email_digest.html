@@ -133,6 +133,37 @@
       border-left: 3px solid #818cf8;
       background: rgba(255, 255, 255, 0.60);
     }
+
+    @media screen and (max-width: 600px) {
+      /* Use the phone width for content instead of stacking outer and inner margins. */
+      .email-outer {
+        padding: 0 !important;
+      }
+      .email-shell {
+        max-width: 640px !important;
+        border-radius: 0 !important;
+        box-shadow: none !important;
+      }
+      .email-shell > tbody > tr > td {
+        padding-left: 16px !important;
+        padding-right: 16px !important;
+      }
+      .email-shell .story-headline {
+        font-size: 18px !important;
+        line-height: 1.4 !important;
+      }
+      .email-shell .story-summary {
+        font-size: 16px !important;
+        line-height: 1.6 !important;
+      }
+      .email-shell .ai-briefing-context,
+      .email-shell .ai-ticker-brief {
+        font-size: 16px !important;
+      }
+      .email-shell .ai-briefing-note {
+        font-size: 13px !important;
+      }
+    }
   </style>
   <!--[if mso]>
   <style type="text/css">
@@ -210,9 +241,9 @@
           <img src="{{ story_image }}" alt="" width="552" style="display:block;width:100%;max-width:100%;height:160px;object-fit:cover;border-radius:8px;border:0;">
         </a>
         {% endif %}
-        <a href="{{ story.url }}" class="link-primary" style="display:block;font-size:{{ headline_size }}px;font-weight:600;color:#1d4ed8;text-decoration:none;line-height:1.45;">{{ story.headline }}</a>
+        <a href="{{ story.url }}" class="link-primary story-headline" style="display:block;font-size:{{ headline_size }}px;font-weight:600;color:#1d4ed8;text-decoration:none;line-height:1.45;">{{ story.headline }}</a>
         {% if story.summary %}
-        <p class="text-secondary" style="margin:8px 0 0;font-size:{% if headline_size >= 17 %}16{% else %}15{% endif %}px;color:#475569;line-height:1.65;">{{ story.summary }}</p>
+        <p class="text-secondary story-summary" style="margin:8px 0 0;font-size:{% if headline_size >= 17 %}16{% else %}15{% endif %}px;color:#475569;line-height:1.65;">{{ story.summary }}</p>
         {% endif %}
         <p class="text-muted" style="margin:8px 0 0;font-size:13px;color:#94a3b8;">{{ story.source }}{% if story.published_at %} · {{ story.published_at }}{% elif story.relative_time %} · {{ story.relative_time }}{% endif %}</p>
       </td>
@@ -223,7 +254,7 @@
   <table role="presentation" class="email-outer" width="100%" cellpadding="0" cellspacing="0" bgcolor="#eef1f5" style="background-color:#eef1f5;padding:24px 12px;">
     <tr>
       <td align="center">
-        <table role="presentation" class="email-card" width="600" cellpadding="0" cellspacing="0" bgcolor="#ffffff" style="max-width:600px;width:100%;background-color:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.08);">
+        <table role="presentation" class="email-card email-shell" width="600" cellpadding="0" cellspacing="0" bgcolor="#ffffff" style="max-width:600px;width:100%;background-color:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.08);">
 
           <!-- Movers strip -->
           {% if movers_bar %}
@@ -253,14 +284,14 @@
           {% if ai_summary %}
           <!-- AI briefing -->
           <tr>
-            <td style="padding:20px 24px 8px;background-color:#ffffff;">
+            <td class="mobile-section" style="padding:20px 24px 8px;background-color:#ffffff;">
               <table role="presentation" class="ai-briefing-panel" width="100%" cellpadding="0" cellspacing="0" style="width:100%;background:linear-gradient(135deg,#eef2ff 0%,#f5f3ff 52%,#eff6ff 100%);border:1px solid #c7d2fe;border-radius:14px;box-shadow:0 8px 24px rgba(79,70,229,0.10);">
                 <tr>
                   <td style="padding:20px 20px 18px;">
                     <span class="ai-briefing-kicker" style="display:inline-block;padding:5px 10px;border:1px solid #c4b5fd;border-radius:999px;background:rgba(255,255,255,0.62);color:#5b21b6;font-size:10px;font-weight:800;letter-spacing:0.12em;text-transform:uppercase;">✦ AI briefing</span>
                     <p class="ai-briefing-title" style="margin:14px 0 0;color:#1e1b4b;font-size:18px;font-weight:800;line-height:1.3;">The signal behind today’s headlines</p>
-                    <p class="ai-briefing-context" style="margin:8px 0 0;color:#312e81;font-size:15px;font-weight:600;line-height:1.55;">{{ ai_summary.market_context }}</p>
-                    <p class="ai-briefing-note" style="margin:14px 0 0;color:#64748b;font-size:12px;line-height:1.5;">AI-generated from the linked headlines and excerpts. Not investment advice.</p>
+                    <p class="ai-briefing-context" style="margin:8px 0 0;color:#312e81;font-size:16px;font-weight:600;line-height:1.55;">{{ ai_summary.market_context }}</p>
+                    <p class="ai-briefing-note" style="margin:14px 0 0;color:#64748b;font-size:13px;line-height:1.5;">AI-generated from the linked headlines and excerpts. Not investment advice.</p>
                   </td>
                 </tr>
               </table>
@@ -271,7 +302,7 @@
           {% if digest_url %}
           <!-- Full digest CTA -->
           <tr>
-            <td style="padding:4px 24px 18px;background-color:#ffffff;text-align:center;">
+            <td class="mobile-section" style="padding:4px 24px 18px;background-color:#ffffff;text-align:center;">
               <p class="text-muted" style="margin:0 0 10px;font-size:13px;color:#64748b;line-height:1.45;">Want the full interactive view?</p>
               <table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center">
                 <tr>
@@ -295,11 +326,11 @@
           <!-- Hero: top mover -->
           {% if hero %}
           <tr>
-            <td class="email-card" bgcolor="#ffffff" style="padding:32px 24px 8px;background-color:#ffffff;">
+            <td class="email-card mobile-section" bgcolor="#ffffff" style="padding:32px 24px 8px;background-color:#ffffff;">
               <p class="text-label" style="margin:0 0 16px;font-size:12px;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;color:#64748b;">Biggest mover</p>
               {% call render_ticker_card(hero, hero.quote, logo_size=48, symbol_size=24, price_size=18, badge_size=13) %}
               {% if ai_summary and ai_summary.ticker_summaries.get(hero.ticker) %}
-              <p class="section-muted ai-ticker-brief" style="margin:0 0 14px;padding:13px 14px;border-left:3px solid #818cf8;background-color:#f8fafc;color:#475569;font-size:15px;line-height:1.6;"><strong class="text-primary" style="color:#1e293b;">✦ AI brief</strong> &nbsp;{{ ai_summary.ticker_summaries.get(hero.ticker) }}</p>
+              <p class="section-muted ai-ticker-brief" style="margin:0 0 14px;padding:13px 14px;border-left:3px solid #818cf8;background-color:#f8fafc;color:#475569;font-size:16px;line-height:1.6;"><strong class="text-primary" style="color:#1e293b;">✦ AI brief</strong> &nbsp;{{ ai_summary.ticker_summaries.get(hero.ticker) }}</p>
               {% endif %}
               {% if hero.error %}
               <p class="text-muted" style="margin:0;font-size:15px;color:#718096;font-style:italic;">Could not fetch news for {{ hero.display_symbol or hero.ticker }}.</p>
@@ -318,16 +349,16 @@
           <!-- Compact list: remaining tickers -->
           {% if compact %}
           <tr>
-            <td class="email-card" bgcolor="#ffffff" style="padding:8px 24px 4px;background-color:#ffffff;border-top:1px solid #e8ecf0;">
+            <td class="email-card mobile-section" bgcolor="#ffffff" style="padding:8px 24px 4px;background-color:#ffffff;border-top:1px solid #e8ecf0;">
               <p class="text-label" style="margin:0 0 4px;font-size:12px;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;color:#64748b;">Other Movers</p>
             </td>
           </tr>
           {% for section in compact %}
           <tr>
-            <td class="email-card" bgcolor="#ffffff" style="padding:0 24px 12px;background-color:#ffffff;">
+            <td class="email-card mobile-section" bgcolor="#ffffff" style="padding:0 24px 12px;background-color:#ffffff;">
               {% call render_ticker_card(section, section.quote, logo_size=48, symbol_size=20, price_size=16, badge_size=12, head_padding='14px 16px', body_padding='0 16px 16px') %}
               {% if ai_summary and ai_summary.ticker_summaries.get(section.ticker) %}
-              <p class="section-muted ai-ticker-brief" style="margin:0 0 12px;padding:11px 12px;border-left:3px solid #818cf8;background-color:#f8fafc;color:#475569;font-size:14px;line-height:1.55;"><strong class="text-primary" style="color:#1e293b;">✦ AI brief</strong> &nbsp;{{ ai_summary.ticker_summaries.get(section.ticker) }}</p>
+              <p class="section-muted ai-ticker-brief" style="margin:0 0 12px;padding:11px 12px;border-left:3px solid #818cf8;background-color:#f8fafc;color:#475569;font-size:15px;line-height:1.55;"><strong class="text-primary" style="color:#1e293b;">✦ AI brief</strong> &nbsp;{{ ai_summary.ticker_summaries.get(section.ticker) }}</p>
               {% endif %}
               {% if section.error %}
               <p class="text-muted" style="margin:0;font-size:14px;color:#718096;font-style:italic;">Could not fetch news for {{ section.display_symbol or section.ticker }}.</p>
