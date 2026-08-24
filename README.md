@@ -69,9 +69,13 @@ python3 -m venv .venv
 | `OPENROUTER_MODEL` | Optional AI email briefing | Default `google/gemini-2.5-flash-lite`; choose a low-cost text model |
 | `OPENROUTER_SITE_URL` | Optional AI email briefing | Optional attribution URL; defaults to `SITE_URL` |
 | `OPENROUTER_APP_NAME` | Optional AI email briefing | Optional attribution name; defaults to `Tickr Digest` |
-| `AI_SUMMARY_TIMEOUT_SECONDS` | Optional AI email briefing | Default `15`; failed calls fall back silently |
-| `AI_SUMMARY_MAX_STORIES` | Optional AI email briefing | Default `30`; caps input size and spend per market run |
-| `AI_SUMMARY_MAX_OUTPUT_TOKENS` | Optional AI email briefing | Default `700`; caps completion size and spend per market run |
+| `AI_SUMMARY_TIMEOUT_SECONDS` | Optional AI email briefing | Default `45` seconds per batch; failed batches fall back silently |
+| `AI_SUMMARY_TICKERS_PER_BATCH` | Optional AI email briefing | Default `12`; bounds the number of ticker summaries per request |
+| `AI_SUMMARY_STORIES_PER_TICKER` | Optional AI email briefing | Default `2`; uses the highest-ranked selected stories |
+| `AI_SUMMARY_MAX_CONCURRENCY` | Optional AI email briefing | Default `4`; bounds parallel OpenRouter requests |
+| `AI_SUMMARY_RETRIES` | Optional AI email briefing | Default `2`; retries transient or unusable responses with backoff |
+| `AI_SUMMARY_MAX_OUTPUT_TOKENS` | Optional AI email briefing | Default `1800` per ticker batch |
+| `AI_SUMMARY_MARKET_MAX_OUTPUT_TOKENS` | Optional AI email briefing | Default `400` for final headline and market context |
 
 Copy from sibling `stock-news-bot/.env` via `./scripts/setup_vercel_env.sh`.
 

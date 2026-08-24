@@ -6,7 +6,9 @@ Add an optional AI briefing to email digests while preserving the existing deter
 
 ## Behavior
 
-- After shared news collection and relevance filtering, make at most one OpenRouter request per market/session.
+- After shared news collection and relevance filtering, split ticker summaries into bounded OpenRouter requests shared by the market/session.
+- Use up to two selected stories per ticker and 12 tickers per request.
+- Generate the shared headline and market context in one final synthesis request from successful batch themes.
 - Provide the model with selected headlines, short excerpts, sources, timestamps, and ticker IDs only.
 - Request JSON containing a broad market context and one concise summary per ticker.
 - Request one validated editorial headline for the email subject; keep the existing deterministic subject as fallback.
@@ -19,21 +21,21 @@ Add an optional AI briefing to email digests while preserving the existing deter
 
 ## Cost and safety controls
 
-- Limit input to `AI_SUMMARY_MAX_STORIES` stories.
-- Limit output with `AI_SUMMARY_MAX_OUTPUT_TOKENS`.
-- Use low temperature and no retries in Phase 1.
+- Limit each request with ticker, per-ticker story, concurrency, timeout, and output-token settings.
+- Use strict JSON Schema output with every batch ticker required and additional ticker keys rejected.
+- Use low temperature and bounded retries with exponential backoff.
 - Instruct the model to treat article text as untrusted data and not follow embedded instructions.
 - Do not send subscriber email addresses or full article bodies.
-- The web page uses the same single batch call and capped email-story input; it does not make per-section or per-story calls.
+- The web page uses the same bounded batch pipeline and capped email-story input; it does not make per-section or per-story calls.
 
 ## Configuration
 
-`OPENROUTER_API_KEY` enables the feature. `OPENROUTER_MODEL`, timeout, story cap, and output-token cap are configurable environment variables. The default is `google/gemini-2.5-flash-lite`, a low-cost text model, and is replaceable without code changes.
+`OPENROUTER_API_KEY` enables the feature. The model, timeout, tickers per batch, stories per ticker, concurrency, retries, and output-token caps are configurable environment variables. The default is `google/gemini-2.5-flash-lite`, a low-cost text model, and is replaceable without code changes.
 
 ## Tests and acceptance
 
-- Verify one request for a shared market run.
+- Verify ticker batches are bounded and one final market synthesis is generated.
 - Verify only exact requested tickers are accepted and rendered.
-- Verify provider failure and malformed responses return the normal digest.
+- Verify provider, malformed-response, and partial-batch failures degrade safely.
 - Verify HTML and plain-text output include the AI section when valid output exists.
 - Verify emails render unchanged when AI is disabled.

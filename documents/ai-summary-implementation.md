@@ -12,7 +12,9 @@ No Vercel or Railway deployment has been made. The OpenRouter key is currently s
 
 - The email cron collects the union of subscriber tickers once per market/session.
 - The web digest collects the token’s tickers once per page request.
-- After relevance filtering, one OpenRouter batch request is made for the complete set of selected ticker stories.
+- After relevance filtering, tickers are split into batches of 12 with up to two selected stories per ticker.
+- Up to four ticker batches run concurrently, and each response is required to contain the exact ticker keys requested for that batch.
+- One final synthesis request turns the successful batches' short themes into the shared headline and market context.
 - The request uses selected email stories only, not the full web story list.
 - The result is reused across all subscriber emails or all ticker sections on that web page.
 - There are no per-subscriber, per-section, or per-story AI requests.
@@ -52,13 +54,16 @@ Current defaults:
 | Setting | Default | Purpose |
 |---|---:|---|
 | `OPENROUTER_MODEL` | `google/gemini-2.5-flash-lite` | Low-cost text model |
-| `AI_SUMMARY_MAX_STORIES` | `30` | Caps input stories per request |
-| `AI_SUMMARY_MAX_OUTPUT_TOKENS` | `700` | Caps completion size |
-| `AI_SUMMARY_TIMEOUT_SECONDS` | `15` | Prevents AI from delaying delivery |
+| `AI_SUMMARY_TICKERS_PER_BATCH` | `12` | Bounds ticker summaries per request |
+| `AI_SUMMARY_STORIES_PER_TICKER` | `2` | Bounds source stories per ticker |
+| `AI_SUMMARY_MAX_CONCURRENCY` | `4` | Bounds parallel requests |
+| `AI_SUMMARY_RETRIES` | `2` | Retries transient or unusable responses with backoff |
+| `AI_SUMMARY_MAX_OUTPUT_TOKENS` | `1800` | Caps each ticker-batch completion |
+| `AI_SUMMARY_MARKET_MAX_OUTPUT_TOKENS` | `400` | Caps final market synthesis |
+| `AI_SUMMARY_TIMEOUT_SECONDS` | `45` | Limits each request's latency |
 | Temperature | `0.1` | Encourages concise, consistent output |
-| Retries | `0` | Avoids duplicate spend in Phase 1 |
 
-AI is disabled when `OPENROUTER_API_KEY` is absent. Any timeout, HTTP error, invalid JSON, missing required field, or unusable response returns `None` and leaves the normal digest unchanged.
+OpenRouter JSON Schema enforcement is requested with strict mode, exact required ticker keys, and provider routing restricted to endpoints that support the requested parameters. AI is disabled when `OPENROUTER_API_KEY` is absent. Failed ticker batches do not discard successful batches. If all ticker batches fail, the normal digest remains unchanged; if only final market synthesis fails, successful ticker summaries remain available and batch themes provide fallback context.
 
 ## Configuration
 
@@ -69,8 +74,12 @@ Optional variables are documented in [`README.md`](../README.md) and [`.env.exam
 - `OPENROUTER_SITE_URL`
 - `OPENROUTER_APP_NAME`
 - `AI_SUMMARY_TIMEOUT_SECONDS`
-- `AI_SUMMARY_MAX_STORIES`
+- `AI_SUMMARY_TICKERS_PER_BATCH`
+- `AI_SUMMARY_STORIES_PER_TICKER`
+- `AI_SUMMARY_MAX_CONCURRENCY`
+- `AI_SUMMARY_RETRIES`
 - `AI_SUMMARY_MAX_OUTPUT_TOKENS`
+- `AI_SUMMARY_MARKET_MAX_OUTPUT_TOKENS`
 
 The local key is kept in `.env.local`, which is ignored by Git. It must not be committed or copied into the repository. Production environments have not been configured yet.
 
@@ -85,12 +94,13 @@ The local key is kept in `.env.local`, which is ignored by Git. It must not be c
 
 ## Verification completed
 
-The test suite passes with 9 tests covering:
+The test suite covers:
 
-- One shared OpenRouter batch request.
-- Request token and temperature limits.
-- Provider failure fallback.
-- Strict response filtering.
+- Bounded 12-ticker batches and two stories per ticker.
+- Separate ticker and market-synthesis requests.
+- Strict JSON Schema request configuration.
+- Request token, temperature, concurrency, and retry controls.
+- Provider and partial-batch failure fallback.
 - Subscriber-specific ticker filtering.
 - Email HTML and plain-text rendering.
 - Web session and ticker rendering.

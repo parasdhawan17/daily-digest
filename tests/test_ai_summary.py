@@ -66,31 +66,50 @@ class FakeResponse:
         return self.body
 
 
+def completion(content: dict) -> FakeResponse:
+    return FakeResponse(
+        {"choices": [{"message": {"content": json.dumps(content)}}]}
+    )
+
+
+def many_sections(count: int, stories_per_ticker: int = 3) -> list[dict]:
+    sections: list[dict] = []
+    for index in range(count):
+        ticker = f"US:T{index:03d}"
+        stories = [
+            {
+                "headline": f"Headline {index}-{story_index}",
+                "summary": f"Summary {index}-{story_index}",
+                "source": "Example News",
+                "published_at": "1h ago",
+            }
+            for story_index in range(stories_per_ticker)
+        ]
+        sections.append({"ticker": ticker, "stories": stories})
+    return sections
+
+
 class AiSummaryTest(unittest.TestCase):
     @patch("stock_news.ai_summary.requests.post")
     @patch("stock_news.ai_summary.OPENROUTER_API_KEY", "test-key")
-    def test_one_batch_request_returns_shared_summary(self, post) -> None:
-        post.return_value = FakeResponse(
-            {
-                "choices": [
-                    {
-                        "message": {
-                            "content": json.dumps(
-                                {
-                                    "headline": "Cloud and services demand shape today’s market",
-                                    "market_context": "Technology news focused on cloud and services demand.",
-                                    "ticker_summaries": {
-                                        "US:AAPL": "Apple is expanding its services business.",
-                                        "US:MSFT": "Cloud demand remains a key Microsoft theme.",
-                                        "US:UNREQUESTED": "Should be ignored.",
-                                    },
-                                }
-                            )
-                        }
-                    }
-                ]
-            }
-        )
+    def test_ticker_batch_and_market_request_return_shared_summary(self, post) -> None:
+        post.side_effect = [
+            completion(
+                {
+                    "batch_theme": "Technology news focused on cloud and services demand.",
+                    "ticker_summaries": {
+                        "US:AAPL": "Apple is expanding its services business.",
+                        "US:MSFT": "Cloud demand remains a key Microsoft theme.",
+                    },
+                }
+            ),
+            completion(
+                {
+                    "headline": "Cloud and services demand shape today’s market",
+                    "market_context": "Technology news focused on cloud and services demand.",
+                }
+            ),
+        ]
 
         result = generate_ai_summary(sample_sections())
 
@@ -105,20 +124,200 @@ class AiSummaryTest(unittest.TestCase):
                 },
             },
         )
-        post.assert_called_once()
-        request = post.call_args.kwargs["json"]
-        self.assertEqual(request["max_tokens"], 700)
-        self.assertEqual(request["temperature"], 0.1)
-        prompt = request["messages"][1]["content"]
+        self.assertEqual(post.call_count, 2)
+        ticker_request = post.call_args_list[0].kwargs["json"]
+        self.assertEqual(ticker_request["max_tokens"], 1800)
+        self.assertEqual(ticker_request["temperature"], 0.1)
+        self.assertEqual(ticker_request["provider"], {"require_parameters": True})
+        ticker_schema = ticker_request["response_format"]["json_schema"]
+        self.assertTrue(ticker_schema["strict"])
+        self.assertEqual(
+            ticker_schema["schema"]["properties"]["ticker_summaries"]["required"],
+            ["US:AAPL", "US:MSFT"],
+        )
+        prompt = ticker_request["messages"][1]["content"]
         self.assertIn("between 35 and 55 words", prompt)
         self.assertIn("Write for a general reader using clear, natural English", prompt)
         self.assertIn("Style example (illustrative only", prompt)
         self.assertIn("Do not connect news to a stock-price move", prompt)
 
+        market_request = post.call_args_list[1].kwargs["json"]
+        self.assertEqual(market_request["max_tokens"], 400)
+        self.assertEqual(
+            market_request["response_format"]["json_schema"]["name"],
+            "market_news_briefing",
+        )
+
     @patch("stock_news.ai_summary.requests.post", side_effect=requests.Timeout)
     @patch("stock_news.ai_summary.OPENROUTER_API_KEY", "test-key")
+    @patch("stock_news.ai_summary.AI_SUMMARY_RETRIES", 0)
     def test_api_failure_returns_none(self, post) -> None:
         self.assertIsNone(generate_ai_summary(sample_sections()))
+
+    @patch("stock_news.ai_summary.requests.post")
+    @patch("stock_news.ai_summary.OPENROUTER_API_KEY", "test-key")
+    @patch("stock_news.ai_summary.AI_SUMMARY_RETRIES", 0)
+    def test_batch_with_missing_or_extra_ticker_keys_is_rejected(self, post) -> None:
+        post.return_value = completion(
+            {
+                "batch_theme": "Technology demand remained in focus.",
+                "ticker_summaries": {
+                    "US:AAPL": "Apple summary.",
+                    "US:UNREQUESTED": "Unrequested summary.",
+                },
+            }
+        )
+
+        self.assertIsNone(generate_ai_summary(sample_sections()))
+        post.assert_called_once()
+
+    @patch("stock_news.ai_summary.time.sleep")
+    @patch("stock_news.ai_summary.requests.post")
+    @patch("stock_news.ai_summary.OPENROUTER_API_KEY", "test-key")
+    @patch("stock_news.ai_summary.AI_SUMMARY_RETRIES", 1)
+    def test_transient_failure_retries_only_the_failed_request(self, post, sleep) -> None:
+        post.side_effect = [
+            requests.Timeout(),
+            completion(
+                {
+                    "batch_theme": "Technology demand remained in focus.",
+                    "ticker_summaries": {
+                        "US:AAPL": "Apple summary.",
+                        "US:MSFT": "Microsoft summary.",
+                    },
+                }
+            ),
+            completion(
+                {
+                    "headline": "Technology demand remains in focus",
+                    "market_context": "Technology demand remained in focus.",
+                }
+            ),
+        ]
+
+        result = generate_ai_summary(sample_sections())
+
+        self.assertIsNotNone(result)
+        self.assertEqual(post.call_count, 3)
+        sleep.assert_called_once()
+
+    @patch("stock_news.ai_summary._generate_market_briefing")
+    @patch("stock_news.ai_summary._generate_ticker_batch")
+    @patch("stock_news.ai_summary.OPENROUTER_API_KEY", "test-key")
+    def test_25_tickers_are_split_into_bounded_batches(
+        self,
+        ticker_batch,
+        market_briefing,
+    ) -> None:
+        observed_batches: list[list[dict]] = []
+
+        def summarize(batch: list[dict]) -> dict:
+            observed_batches.append(batch)
+            return {
+                "batch_theme": f"Theme for {len(batch)} tickers.",
+                "ticker_summaries": {
+                    item["ticker"]: f"Summary for {item['ticker']}." for item in batch
+                },
+            }
+
+        ticker_batch.side_effect = summarize
+        market_briefing.return_value = {
+            "headline": "A broad market headline",
+            "market_context": "A broad market context.",
+        }
+
+        result = generate_ai_summary(many_sections(25))
+
+        self.assertEqual(sorted(len(batch) for batch in observed_batches), [1, 12, 12])
+        self.assertTrue(
+            all(len(item["stories"]) == 2 for batch in observed_batches for item in batch)
+        )
+        self.assertEqual(len(result["ticker_summaries"]), 25)
+        self.assertEqual(len(market_briefing.call_args.args[0]), 3)
+
+    @patch("stock_news.ai_summary._generate_market_briefing")
+    @patch("stock_news.ai_summary._generate_ticker_batch")
+    @patch("stock_news.ai_summary.OPENROUTER_API_KEY", "test-key")
+    def test_400_tickers_create_34_bounded_batches(
+        self,
+        ticker_batch,
+        market_briefing,
+    ) -> None:
+        observed_sizes: list[int] = []
+
+        def summarize(batch: list[dict]) -> dict:
+            observed_sizes.append(len(batch))
+            return {
+                "batch_theme": "A batch theme.",
+                "ticker_summaries": {
+                    item["ticker"]: f"Summary for {item['ticker']}." for item in batch
+                },
+            }
+
+        ticker_batch.side_effect = summarize
+        market_briefing.return_value = {
+            "headline": "A broad market headline",
+            "market_context": "A broad market context.",
+        }
+
+        result = generate_ai_summary(many_sections(400))
+
+        self.assertEqual(len(observed_sizes), 34)
+        self.assertEqual(sum(observed_sizes), 400)
+        self.assertLessEqual(max(observed_sizes), 12)
+        self.assertEqual(len(result["ticker_summaries"]), 400)
+        self.assertEqual(len(market_briefing.call_args.args[0]), 34)
+
+    @patch("stock_news.ai_summary._generate_market_briefing")
+    @patch("stock_news.ai_summary._generate_ticker_batch")
+    @patch("stock_news.ai_summary.OPENROUTER_API_KEY", "test-key")
+    def test_failed_batch_does_not_discard_successful_ticker_summaries(
+        self,
+        ticker_batch,
+        market_briefing,
+    ) -> None:
+        def summarize(batch: list[dict]) -> dict | None:
+            if batch[0]["ticker"] == "US:T012":
+                return None
+            return {
+                "batch_theme": "A successful batch theme.",
+                "ticker_summaries": {
+                    item["ticker"]: f"Summary for {item['ticker']}." for item in batch
+                },
+            }
+
+        ticker_batch.side_effect = summarize
+        market_briefing.return_value = {
+            "headline": "A broad market headline",
+            "market_context": "A broad market context.",
+        }
+
+        result = generate_ai_summary(many_sections(13))
+
+        self.assertEqual(len(result["ticker_summaries"]), 12)
+        self.assertNotIn("US:T012", result["ticker_summaries"])
+
+    @patch("stock_news.ai_summary.requests.post")
+    @patch("stock_news.ai_summary.OPENROUTER_API_KEY", "test-key")
+    @patch("stock_news.ai_summary.AI_SUMMARY_RETRIES", 0)
+    def test_market_failure_uses_batch_theme_as_context(self, post) -> None:
+        post.side_effect = [
+            completion(
+                {
+                    "batch_theme": "Technology demand remained in focus.",
+                    "ticker_summaries": {
+                        "US:AAPL": "Apple summary.",
+                        "US:MSFT": "Microsoft summary.",
+                    },
+                }
+            ),
+            requests.Timeout(),
+        ]
+
+        result = generate_ai_summary(sample_sections())
+
+        self.assertEqual(result["headline"], "")
+        self.assertEqual(result["market_context"], "Technology demand remained in focus.")
 
     def test_filter_keeps_only_subscriber_tickers(self) -> None:
         summary = {

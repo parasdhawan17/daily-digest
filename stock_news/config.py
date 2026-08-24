@@ -80,10 +80,16 @@ OPENROUTER_MODEL = os.environ.get(
 ).strip()
 OPENROUTER_SITE_URL = os.environ.get("OPENROUTER_SITE_URL", SITE_URL).strip()
 OPENROUTER_APP_NAME = os.environ.get("OPENROUTER_APP_NAME", "Tickr Digest").strip()
-AI_SUMMARY_TIMEOUT_SECONDS = float(os.environ.get("AI_SUMMARY_TIMEOUT_SECONDS", "15"))
-AI_SUMMARY_MAX_STORIES = int(os.environ.get("AI_SUMMARY_MAX_STORIES", "30"))
+AI_SUMMARY_TIMEOUT_SECONDS = float(os.environ.get("AI_SUMMARY_TIMEOUT_SECONDS", "45"))
+AI_SUMMARY_TICKERS_PER_BATCH = int(os.environ.get("AI_SUMMARY_TICKERS_PER_BATCH", "12"))
+AI_SUMMARY_STORIES_PER_TICKER = int(os.environ.get("AI_SUMMARY_STORIES_PER_TICKER", "2"))
+AI_SUMMARY_MAX_CONCURRENCY = int(os.environ.get("AI_SUMMARY_MAX_CONCURRENCY", "4"))
+AI_SUMMARY_RETRIES = int(os.environ.get("AI_SUMMARY_RETRIES", "2"))
 AI_SUMMARY_MAX_OUTPUT_TOKENS = int(
-    os.environ.get("AI_SUMMARY_MAX_OUTPUT_TOKENS", "700")
+    os.environ.get("AI_SUMMARY_MAX_OUTPUT_TOKENS", "1800")
+)
+AI_SUMMARY_MARKET_MAX_OUTPUT_TOKENS = int(
+    os.environ.get("AI_SUMMARY_MARKET_MAX_OUTPUT_TOKENS", "400")
 )
 
 US_SYMBOL_TYPES = frozenset({"Common Stock", "ETF", "ETP", "ADR", "ETN", "ETC", "Closed-End Fund"})
