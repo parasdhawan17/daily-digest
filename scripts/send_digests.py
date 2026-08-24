@@ -39,6 +39,7 @@ def load_env_files() -> None:
 load_env_files()
 
 from stock_news.brevo import BrevoError, fetch_subscribers_with_tickers, send_transactional_email
+from stock_news.ai_summary import filter_ai_summary, generate_ai_summary
 from stock_news.config import (
     BREVO_API_KEY,
     BREVO_LIST_ID,
@@ -224,6 +225,14 @@ def send_for_market(
         finnhub_key=finnhub_key,
         indianapi_key=indianapi_key,
     )
+    ai_summary = generate_ai_summary(sections)
+    if ai_summary:
+        print(
+            f"[{market}] Generated AI briefing for "
+            f"{len(ai_summary['ticker_summaries'])} ticker(s)"
+        )
+    elif os.environ.get("OPENROUTER_API_KEY", "").strip():
+        print(f"[{market}] AI briefing unavailable; using standard digest content")
 
     print(f"[{market}] Email subject session: {session}")
     scheduled_at = scheduled_send_at_iso(session, market)
@@ -243,6 +252,7 @@ def send_for_market(
             continue
 
         user_sections = filter_sections(sections, user_tickers)
+        user_ai_summary = filter_ai_summary(ai_summary, user_tickers)
         user_story_count = count_email_stories(user_sections)
         digest_url = build_digest_url(user_tickers, site_url=site_url)
         html, text, subject = build_email_digest(
@@ -252,6 +262,7 @@ def send_for_market(
             session,
             digest_url=digest_url,
             update_tickers_url=update_tickers_url,
+            ai_summary=user_ai_summary,
         )
         print(
             f"Prepared email for {email} "

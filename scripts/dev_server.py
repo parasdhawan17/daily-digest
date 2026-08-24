@@ -31,6 +31,7 @@ load_dotenv(ROOT / ".env.local")
 load_dotenv(ROOT.parent / "stock-news-bot" / ".env")
 
 from stock_news.brevo import BrevoError, subscribe_or_update
+from stock_news.ai_summary import generate_ai_summary
 from stock_news.config import (
     BREVO_DOI_TEMPLATE_ID,
     BREVO_LIST_ID,
@@ -247,8 +248,14 @@ class DevHandler(BaseHTTPRequestHandler):
                 indianapi_key=indianapi_key,
             )
             sections = filter_sections(sections, tickers)
+            ai_summary = generate_ai_summary(sections)
             fetched_at = format_fetched_at_label(datetime.now().astimezone())
-            html = build_web_digest(sections, tickers, fetched_at_label=fetched_at)
+            html = build_web_digest(
+                sections,
+                tickers,
+                fetched_at_label=fetched_at,
+                ai_summary=ai_summary,
+            )
             self._html(200, html)
         except Exception:
             traceback.print_exc()

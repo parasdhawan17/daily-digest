@@ -247,7 +247,12 @@ def footer_text(
     return line
 
 
-def format_section_plain_text(section: dict, *, compact: bool = False) -> list[str]:
+def format_section_plain_text(
+    section: dict,
+    *,
+    compact: bool = False,
+    ai_summary_text: str | None = None,
+) -> list[str]:
     lines: list[str] = []
     ticker_line = display_symbol(section["ticker"])
     if section["quote"]:
@@ -259,6 +264,10 @@ def format_section_plain_text(section: dict, *, compact: bool = False) -> list[s
             ticker_line += f"  {sign}{quote['change_pct']:.2f}%"
     lines.append(ticker_line)
     lines.append("-" * len(ticker_line))
+
+    if ai_summary_text:
+        lines.append(f"AI brief: {ai_summary_text}")
+        lines.append("")
 
     if section["error"]:
         lines.append(f"Could not fetch news for {section['ticker']}.")
@@ -306,16 +315,40 @@ def build_plain_text(
         "",
     ]
 
+    ai_summary = layout.get("ai_summary")
+    if ai_summary:
+        lines.append("=== AI BRIEFING ===")
+        lines.append(ai_summary["market_context"])
+        lines.append("")
+        for ticker, summary_text in ai_summary.get("ticker_summaries", {}).items():
+            lines.append(f"{display_symbol(ticker)}: {summary_text}")
+        lines.append("")
+
     if layout["top_mover_label"]:
         lines.append(f"Today's biggest move: {layout['top_mover_label']}")
         lines.append("")
 
     if layout["hero"]:
         lines.append("=== BIGGEST MOVER ===")
-        lines.extend(format_section_plain_text(layout["hero"], compact=False))
+        hero_ticker = layout["hero"]["ticker"]
+        lines.extend(
+            format_section_plain_text(
+                layout["hero"],
+                compact=False,
+                ai_summary_text=(ai_summary or {}).get("ticker_summaries", {}).get(hero_ticker),
+            )
+        )
 
     for section in layout["compact"]:
-        lines.extend(format_section_plain_text(section, compact=True))
+        lines.extend(
+            format_section_plain_text(
+                section,
+                compact=True,
+                ai_summary_text=(ai_summary or {}).get("ticker_summaries", {}).get(
+                    section["ticker"]
+                ),
+            )
+        )
 
     lines.append(
         footer_text(
@@ -333,10 +366,13 @@ def build_email_content(
     tickers: list[str],
     total_stories: int,
     session: str,
+    ai_summary: dict | None = None,
 ) -> tuple[dict, str, str]:
     """Return layout, email_heading, and subject for an email digest."""
     layout = prepare_email_layout(sections)
+    layout["ai_summary"] = ai_summary
     today_label = date.today().strftime("%d %b %Y")
+    ai_headline = (ai_summary or {}).get("headline", "").strip()
     email_heading = format_email_heading(layout)
-    subject = format_email_subject(layout, today_label, session)
+    subject = ai_headline or format_email_subject(layout, today_label, session)
     return layout, email_heading, subject

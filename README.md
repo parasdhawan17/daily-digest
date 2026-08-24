@@ -65,6 +65,13 @@ python3 -m venv .venv
 | `BREVO_LIST_ID` | Subscribe form | Always `7` (Daily Digest - US). Setup scripts pin this. |
 | `BREVO_DOI_TEMPLATE_ID` | New subscribers | Double opt-in template ID from Brevo |
 | `BREVO_TICKERS_ATTRIBUTE` | Subscribe + email cron | Optional (default `US_TICKERS` — text, comma-separated) |
+| `OPENROUTER_API_KEY` | Optional AI email briefing | If unset, emails use the existing deterministic content only |
+| `OPENROUTER_MODEL` | Optional AI email briefing | Default `google/gemini-2.5-flash-lite`; choose a low-cost text model |
+| `OPENROUTER_SITE_URL` | Optional AI email briefing | Optional attribution URL; defaults to `SITE_URL` |
+| `OPENROUTER_APP_NAME` | Optional AI email briefing | Optional attribution name; defaults to `Tickr Digest` |
+| `AI_SUMMARY_TIMEOUT_SECONDS` | Optional AI email briefing | Default `15`; failed calls fall back silently |
+| `AI_SUMMARY_MAX_STORIES` | Optional AI email briefing | Default `30`; caps input size and spend per market run |
+| `AI_SUMMARY_MAX_OUTPUT_TOKENS` | Optional AI email briefing | Default `700`; caps completion size and spend per market run |
 
 Copy from sibling `stock-news-bot/.env` via `./scripts/setup_vercel_env.sh`.
 

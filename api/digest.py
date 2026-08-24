@@ -13,6 +13,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from api._responses import send_html
+from stock_news.ai_summary import generate_ai_summary
 from stock_news.digest import collect_digest_data, filter_sections
 from stock_news.formatting import format_fetched_at_label
 from stock_news.markets import market_of
@@ -81,8 +82,14 @@ def handle_get(handler: BaseHTTPRequestHandler) -> None:
             indianapi_key=indianapi_key,
         )
         sections = filter_sections(sections, tickers)
+        ai_summary = generate_ai_summary(sections)
         fetched_at = format_fetched_at_label(datetime.now().astimezone())
-        html = build_web_digest(sections, tickers, fetched_at_label=fetched_at)
+        html = build_web_digest(
+            sections,
+            tickers,
+            fetched_at_label=fetched_at,
+            ai_summary=ai_summary,
+        )
         send_html(handler, 200, html)
     except Exception:
         traceback.print_exc()

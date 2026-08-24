@@ -33,9 +33,11 @@ def build_web_digest(
     tickers: list[str],
     *,
     fetched_at_label: str | None = None,
+    ai_summary: dict | None = None,
 ) -> str:
     today_label = date.today().strftime("%d %b %Y")
     layout = prepare_email_layout(sections)
+    layout["ai_summary"] = ai_summary
     web_story_count = count_web_stories(sections)
     env = get_jinja_env()
     template = env.get_template("web_digest.html")
@@ -60,6 +62,7 @@ def build_email_digest(
     *,
     digest_url: str | None = None,
     update_tickers_url: str | None = None,
+    ai_summary: dict | None = None,
 ) -> tuple[str, str, str]:
     today_label = date.today().strftime("%d %b %Y")
     layout, email_heading, subject = build_email_content(
@@ -67,6 +70,7 @@ def build_email_digest(
         tickers,
         total_stories,
         session,
+        ai_summary,
     )
     env = get_jinja_env()
     template = env.get_template("email_digest.html")

@@ -72,5 +72,19 @@ BREVO_TICKERS_ATTRIBUTE = os.environ.get("BREVO_TICKERS_ATTRIBUTE", "US_TICKERS"
 EMAIL_FROM = os.environ.get("EMAIL_FROM", "").strip()
 EMAIL_FROM_NAME = os.environ.get("EMAIL_FROM_NAME", "Tickr Digest").strip()
 
+# Optional Phase 1 AI briefing. AI is disabled unless an OpenRouter key is set.
+OPENROUTER_API_KEY = os.environ.get("OPENROUTER_API_KEY", "").strip()
+OPENROUTER_MODEL = os.environ.get(
+    "OPENROUTER_MODEL",
+    "google/gemini-2.5-flash-lite",
+).strip()
+OPENROUTER_SITE_URL = os.environ.get("OPENROUTER_SITE_URL", SITE_URL).strip()
+OPENROUTER_APP_NAME = os.environ.get("OPENROUTER_APP_NAME", "Tickr Digest").strip()
+AI_SUMMARY_TIMEOUT_SECONDS = float(os.environ.get("AI_SUMMARY_TIMEOUT_SECONDS", "15"))
+AI_SUMMARY_MAX_STORIES = int(os.environ.get("AI_SUMMARY_MAX_STORIES", "30"))
+AI_SUMMARY_MAX_OUTPUT_TOKENS = int(
+    os.environ.get("AI_SUMMARY_MAX_OUTPUT_TOKENS", "700")
+)
+
 US_SYMBOL_TYPES = frozenset({"Common Stock", "ETF", "ETP", "ADR", "ETN", "ETC", "Closed-End Fund"})
 FOREIGN_SYMBOL_SUFFIXES = (".DE", ".L", ".TO", ".HK", ".SW", ".PA", ".AS", ".MI", ".AX", ".KS", ".TW")

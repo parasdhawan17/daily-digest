@@ -77,6 +77,23 @@
       --toggle-border: rgba(255, 255, 255, 0.22);
       --toggle-fg: #f8fafc;
     }
+    html[data-theme="dark"] .ai-briefing {
+      background: linear-gradient(135deg, #172554 0%, #1e1b4b 52%, #172554 100%);
+      border-color: #3730a3;
+    }
+    html[data-theme="dark"] .ai-briefing::before {
+      color: rgba(165, 180, 252, 0.18);
+    }
+    html[data-theme="dark"] .ai-briefing::after {
+      background: rgba(129, 140, 248, 0.12);
+    }
+    html[data-theme="dark"] .ai-briefing-label::before {
+      color: #a5b4fc;
+    }
+    html[data-theme="dark"] .ticker-ai-brief {
+      border-color: #818cf8;
+      background: #1e293b;
+    }
     body {
       margin: 0;
       padding: 0;
@@ -413,6 +430,77 @@
       padding-top: 40px;
       border-top: none;
     }
+    .ai-briefing {
+      position: relative;
+      padding: 28px 0;
+      background: linear-gradient(135deg, #eef2ff 0%, #f5f3ff 52%, #eff6ff 100%);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      overflow: hidden;
+    }
+    .ai-briefing::before {
+      content: "✦";
+      position: absolute;
+      top: 10px;
+      right: 7%;
+      color: rgba(99, 102, 241, 0.18);
+      font-size: 72px;
+      line-height: 1;
+      transform: rotate(12deg);
+    }
+    .ai-briefing::after {
+      content: "";
+      position: absolute;
+      width: 260px;
+      height: 260px;
+      top: -160px;
+      left: 14%;
+      border-radius: 50%;
+      background: rgba(129, 140, 248, 0.14);
+      filter: blur(20px);
+    }
+    .ai-briefing-label {
+      margin: 0 0 10px;
+      font-size: 11px;
+      color: var(--text-label);
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+    .ai-briefing-context {
+      margin: 0;
+      max-width: 760px;
+      color: var(--text-strong);
+      font-size: 16px;
+      font-weight: 600;
+      line-height: 1.55;
+      position: relative;
+      z-index: 1;
+    }
+    .ai-briefing-note {
+      margin: 14px 0 0;
+      color: var(--text-muted);
+      font-size: 12px;
+      line-height: 1.45;
+      position: relative;
+      z-index: 1;
+    }
+    .ai-briefing-label::before {
+      content: "✦ ";
+      color: #6366f1;
+    }
+    .ticker-ai-brief {
+      margin: 18px 0 0;
+      padding: 12px 14px;
+      border-left: 3px solid #93c5fd;
+      border-radius: 0 6px 6px 0;
+      background: var(--muted-bg);
+      color: var(--text-secondary);
+      font-size: 14px;
+      line-height: 1.55;
+      box-shadow: 0 4px 14px rgba(79, 70, 229, 0.08);
+    }
+    .ticker-ai-brief strong { color: var(--text-strong); }
     .section-eyebrow {
       margin: 0 0 16px;
       font-size: 11px;
@@ -885,6 +973,16 @@
   </section>
   {% endif %}
 
+  {% if ai_summary %}
+  <section class="ai-briefing" aria-label="AI briefing">
+    <div class="section-inner">
+      <p class="ai-briefing-label">AI briefing · the signal behind today’s headlines</p>
+      <p class="ai-briefing-context">{{ ai_summary.market_context }}</p>
+      <p class="ai-briefing-note">AI-generated from the linked headlines and excerpts. Not investment advice.</p>
+    </div>
+  </section>
+  {% endif %}
+
   {% macro change_class(quote) %}
     {%- if quote and quote.change_pct is not none -%}
       {%- if quote.change_pct > 0 -%}up{%- elif quote.change_pct < 0 -%}down{%- else -%}flat{%- endif -%}
@@ -954,6 +1052,10 @@
           {% endif %}
         </div>
       </div>
+
+      {% if ai_summary and ai_summary.ticker_summaries.get(section.ticker) %}
+      <p class="ticker-ai-brief"><strong>✦ AI brief</strong> &nbsp; {{ ai_summary.ticker_summaries.get(section.ticker) }}</p>
+      {% endif %}
 
       {% if section.error %}
       <p class="empty">Could not fetch news for {{ section.display_symbol or section.ticker }}.</p>
