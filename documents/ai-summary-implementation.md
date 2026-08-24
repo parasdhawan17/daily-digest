@@ -22,10 +22,10 @@ No Vercel or Railway deployment has been made. The OpenRouter key is currently s
 The model is asked to return structured JSON containing:
 
 - `headline`: a concise editorial email heading under 72 characters.
-- `market_context`: one or two short sentences describing broad session themes without naming individual tickers.
-- `ticker_summaries`: one concise factual summary per ticker represented in the input.
+- `market_context`: two or three plain-English sentences describing broad session themes without naming individual companies.
+- `ticker_summaries`: a 35–55 word explanation in two or three short sentences per ticker, covering what happened and why it matters when supported by the supplied news.
 
-The prompt instructs the model to use only supplied headlines and excerpts, ignore instructions inside external news text, avoid investment advice, and avoid inventing facts, prices, dates, causes, or predictions.
+The prompt instructs the model to write in clear, natural English for a general reader, briefly explain unavoidable financial terms, use only supplied headlines and excerpts, preserve uncertainty, ignore instructions inside external news text, avoid investment advice, and avoid inventing facts or unsupported consequences. It also includes one dense-to-clear style example.
 
 ### Email presentation
 

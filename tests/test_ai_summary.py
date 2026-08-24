@@ -109,6 +109,11 @@ class AiSummaryTest(unittest.TestCase):
         request = post.call_args.kwargs["json"]
         self.assertEqual(request["max_tokens"], 700)
         self.assertEqual(request["temperature"], 0.1)
+        prompt = request["messages"][1]["content"]
+        self.assertIn("between 35 and 55 words", prompt)
+        self.assertIn("Write for a general reader using clear, natural English", prompt)
+        self.assertIn("Style example (illustrative only", prompt)
+        self.assertIn("Do not connect news to a stock-price move", prompt)
 
     @patch("stock_news.ai_summary.requests.post", side_effect=requests.Timeout)
     @patch("stock_news.ai_summary.OPENROUTER_API_KEY", "test-key")
