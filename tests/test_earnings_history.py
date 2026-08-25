@@ -7,7 +7,7 @@ import requests
 
 from api.digest import handle_data_get
 from stock_news.digest import build_earnings_history, collect_digest_data
-from stock_news.finnhub import fetch_earnings_history
+from stock_news.finnhub import fetch_earnings_history, fetch_upcoming_earnings
 from stock_news.render import build_web_digest, build_web_section
 
 
@@ -60,6 +60,15 @@ def sample_section(history: dict | None = None) -> dict:
         "quote": {"price": 228.3, "change_pct": 1.18},
         "logo": None,
         "earnings_history": history,
+        "upcoming_earnings": {
+            "date": "2026-09-15",
+            "date_label": "15 Sep 2026",
+            "hour": "amc",
+            "eps_estimate": 2.14,
+            "eps_actual": None,
+            "revenue_estimate": 102000000000,
+            "revenue_actual": None,
+        },
         "stories": [],
         "web_stories": [
             {
@@ -155,6 +164,44 @@ class FinnhubEarningsTest(unittest.TestCase):
         get.return_value = response
         self.assertEqual(fetch_earnings_history("VOO", "key"), [])
 
+    @patch("stock_news.finnhub.requests.get")
+    def test_fetches_next_calendar_event_and_normalizes_values(self, get: Mock) -> None:
+        response = Mock()
+        response.json.return_value = {
+            "earningsCalendar": [
+                {"date": "2099-10-10", "hour": "amc", "epsEstimate": 3.2},
+                {
+                    "date": "2099-09-15",
+                    "hour": "bmo",
+                    "epsEstimate": 2.14,
+                    "epsActual": None,
+                    "revenueEstimate": 102000000000,
+                    "revenueActual": None,
+                },
+                {"date": "not-a-date"},
+            ]
+        }
+        get.return_value = response
+
+        result = fetch_upcoming_earnings("AAPL", "key", lookahead_days=90)
+
+        response.raise_for_status.assert_called_once_with()
+        call_params = get.call_args.kwargs["params"]
+        self.assertEqual(call_params["symbol"], "AAPL")
+        self.assertEqual(call_params["token"], "key")
+        self.assertEqual(result["date"], "2099-09-15")
+        self.assertEqual(result["date_label"], "15 Sep 2099")
+        self.assertEqual(result["eps_estimate"], 2.14)
+        self.assertIsNone(result["eps_actual"])
+        self.assertEqual(result["revenue_estimate"], 102000000000.0)
+
+    @patch("stock_news.finnhub.requests.get")
+    def test_calendar_without_events_is_unavailable(self, get: Mock) -> None:
+        response = Mock()
+        response.json.return_value = {"earningsCalendar": []}
+        get.return_value = response
+        self.assertIsNone(fetch_upcoming_earnings("AAPL", "key"))
+
 
 class EarningsCollectionTest(unittest.TestCase):
     def _collect(self, ticker: str, *, include_earnings: bool = False) -> list[dict]:
@@ -165,6 +212,15 @@ class EarningsCollectionTest(unittest.TestCase):
             patch("stock_news.digest.fetch_earnings_history", return_value=[
                 quarter("2026-06-30", 2026, 2, 0.33, 0.52, -36.4)
             ]) as earnings,
+            patch("stock_news.digest.fetch_upcoming_earnings", return_value={
+                "date": "2026-09-15",
+                "date_label": "15 Sep 2026",
+                "hour": "amc",
+                "eps_estimate": 2.14,
+                "eps_actual": None,
+                "revenue_estimate": 102000000000,
+                "revenue_actual": None,
+            }) as upcoming,
         ):
             sections, _ = collect_digest_data(
                 [ticker],
@@ -173,12 +229,15 @@ class EarningsCollectionTest(unittest.TestCase):
                 include_earnings=include_earnings,
             )
             self.earnings_mock = earnings
+            self.upcoming_mock = upcoming
             return sections
 
     def test_default_collection_does_not_fetch_earnings(self) -> None:
         sections = self._collect("US:AAPL")
         self.earnings_mock.assert_not_called()
+        self.upcoming_mock.assert_not_called()
         self.assertIsNone(sections[0]["earnings_history"])
+        self.assertIsNone(sections[0]["upcoming_earnings"])
 
     def test_web_collection_fetches_us_earnings(self) -> None:
         sections = self._collect("US:TSLA", include_earnings=True)
@@ -188,12 +247,20 @@ class EarningsCollectionTest(unittest.TestCase):
             indianapi_key="india-key",
             limit=4,
         )
+        self.upcoming_mock.assert_called_once_with(
+            "US:TSLA",
+            finnhub_key="finnhub-key",
+            indianapi_key="india-key",
+        )
         self.assertEqual(sections[0]["earnings_history"]["summary_label"], "1 miss")
+        self.assertEqual(sections[0]["upcoming_earnings"]["date"], "2026-09-15")
 
     def test_web_collection_skips_indian_tickers(self) -> None:
         sections = self._collect("IN:RELIANCE", include_earnings=True)
         self.earnings_mock.assert_not_called()
+        self.upcoming_mock.assert_not_called()
         self.assertIsNone(sections[0]["earnings_history"])
+        self.assertIsNone(sections[0]["upcoming_earnings"])
 
     def test_earnings_failure_does_not_fail_the_ticker(self) -> None:
         with (
@@ -204,6 +271,10 @@ class EarningsCollectionTest(unittest.TestCase):
                 "stock_news.digest.fetch_earnings_history",
                 side_effect=requests.RequestException("provider error"),
             ),
+            patch(
+                "stock_news.digest.fetch_upcoming_earnings",
+                side_effect=requests.RequestException("provider error"),
+            ),
         ):
             sections, _ = collect_digest_data(
                 ["US:AAPL"],
@@ -212,6 +283,7 @@ class EarningsCollectionTest(unittest.TestCase):
                 include_earnings=True,
             )
         self.assertIsNone(sections[0]["earnings_history"])
+        self.assertIsNone(sections[0]["upcoming_earnings"])
         self.assertIsNone(sections[0]["error"])
         self.assertEqual(sections[0]["quote"]["price"], 10)
 
@@ -221,6 +293,12 @@ class EarningsRenderTest(unittest.TestCase):
         html = build_web_section(sample_section(sample_history()))
 
         self.assertIn('<details class="earnings-history">', html)
+        self.assertIn("<span class=\"earnings-summary-title\">Earnings</span>", html)
+        self.assertIn("earnings-chart-row is-upcoming", html)
+        self.assertIn("earnings-result upcoming", html)
+        self.assertIn("15 Sep 2026", html)
+        self.assertNotIn("<th scope=\"row\">Revenue estimate</th>", html)
+        self.assertNotIn("<th scope=\"row\">Revenue actual</th>", html)
         self.assertNotIn('<details class="earnings-history" open', html)
         self.assertIn("3 beats · 1 miss", html)
         self.assertIn("EPS surprise vs consensus", html)
@@ -234,9 +312,13 @@ class EarningsRenderTest(unittest.TestCase):
         self.assertLess(html.index("earnings-history"), html.index("story-list"))
 
     def test_hides_panel_when_history_is_unavailable(self) -> None:
-        html = build_web_section(sample_section(None))
+        section = sample_section(None)
+        section["upcoming_earnings"] = None
+        html = build_web_section(section)
         self.assertNotIn("earnings-history", html)
         self.assertNotIn("Earnings history", html)
+        self.assertNotIn("Upcoming earnings", html)
+        self.assertNotIn("<span class=\"earnings-summary-title\">Earnings</span>", html)
 
     def test_progressive_shell_includes_earnings_skeleton(self) -> None:
         html = build_web_digest(

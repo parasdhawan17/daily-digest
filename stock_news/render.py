@@ -19,10 +19,12 @@ from stock_news.markets import Market
 
 
 def get_jinja_env() -> Environment:
-    return Environment(
+    env = Environment(
         loader=FileSystemLoader(TEMPLATES_PATH),
         autoescape=select_autoescape(["html"]),
     )
+    env.filters["format_number"] = lambda value: f"{value:,.0f}"
+    return env
 
 
 def subscribe_enabled() -> bool:

@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Tickr Digest — 25 Aug 2026</title>
+  <title>Tickr Digest — 26 Aug 2026</title>
   <meta name="color-scheme" content="light dark">
   <script>
     (function () {
@@ -729,12 +729,21 @@
       transform: rotate(225deg) translate(-1px, -1px);
     }
     .earnings-content {
+      display: block;
+      padding: 14px;
+      background: var(--card-bg);
+    }
+    .earnings-history-layout {
       display: grid;
       grid-template-columns: minmax(250px, .72fr) minmax(0, 1.28fr);
       align-items: start;
       gap: 14px;
-      padding: 14px;
-      background: var(--card-bg);
+    }
+    .earnings-history-heading {
+      margin: 0 0 8px;
+      color: var(--text-secondary);
+      font-size: 12px;
+      font-weight: 700;
     }
     .earnings-chart {
       padding: 1px 1px 0;
@@ -769,6 +778,7 @@
       border-radius: 7px;
     }
     .earnings-chart-row.is-latest { background: var(--earnings-latest-bg); }
+    .earnings-chart-row.is-upcoming { background: var(--muted-bg); border: 1px dashed var(--link); }
     .earnings-chart-quarter {
       color: var(--text-secondary);
       font-size: 11px;
@@ -782,6 +792,19 @@
       font-size: 8px;
       letter-spacing: 0.08em;
       text-transform: uppercase;
+    }
+    .earnings-chart-row.is-upcoming .earnings-chart-quarter,
+    .earnings-chart-value.upcoming { color: var(--link); }
+    .earnings-upcoming-track { border: 1px dashed var(--link); border-radius: 999px; }
+    .earnings-upcoming-marker {
+      position: absolute;
+      left: 50%;
+      width: 9px;
+      height: 9px;
+      border: 2px solid var(--card-bg);
+      border-radius: 50%;
+      background: var(--link);
+      transform: translateX(-50%);
     }
     .earnings-bar-track {
       position: relative;
@@ -895,6 +918,7 @@
     }
     .earnings-table thead th:first-child { z-index: 3; }
     .earnings-table .is-latest { background: var(--earnings-latest-bg); }
+    .earnings-table .is-upcoming { background: var(--muted-bg); color: var(--link); }
     .earnings-quarter-label,
     .earnings-period-label { display: block; }
     .earnings-period-label {
@@ -926,6 +950,7 @@
     .earnings-result.miss { background: var(--earnings-miss-soft); color: var(--earnings-miss); }
     .earnings-result.inline,
     .earnings-result.unavailable { background: var(--pill-flat-bg); color: var(--pill-flat-fg); }
+    .earnings-result.upcoming { background: var(--link); color: var(--card-bg); }
     .mover-badge {
       display: inline-block;
       padding: 3px 8px;
@@ -1197,6 +1222,7 @@
         display: block;
         padding: 12px;
       }
+      .earnings-history-layout { display: block; }
       .earnings-chart { padding-bottom: 12px; }
       .earnings-chart-row {
         grid-template-columns: 70px minmax(96px, 1fr) 49px;
@@ -1408,21 +1434,31 @@
 <details class="earnings-history">
   <summary class="earnings-summary">
     <span class="earnings-summary-copy">
-      <span class="earnings-summary-title">Earnings history</span>
-      <span class="earnings-summary-subtitle">Last 4 reported quarters</span>
+      <span class="earnings-summary-title">Earnings</span>
+      <span class="earnings-summary-subtitle">Next release</span>
     </span>
     <span class="earnings-summary-meta">
-      <span class="earnings-summary-score">3 beats · 1 miss</span>
+      <span class="earnings-summary-score">15 Sep 2026</span>
       <span class="earnings-chevron" aria-hidden="true"></span>
     </span>
   </summary>
   <div class="earnings-content">
+
+    <div class="earnings-history-heading">Last 4 reported quarters · 3 beats · 1 miss · next release highlighted</div>
+    <div class="earnings-history-layout">
     <div class="earnings-chart" aria-hidden="true">
       <div class="earnings-chart-heading">
         <span>EPS surprise vs consensus</span>
         <span class="earnings-chart-scale">±5% scale</span>
       </div>
       <div class="earnings-chart-rows">
+
+        <div class="earnings-chart-row is-upcoming">
+          <span class="earnings-chart-quarter">Next release<small>15 Sep 2026</small></span>
+          <span class="earnings-bar-track earnings-upcoming-track"><span class="earnings-upcoming-marker"></span></span>
+          <span class="earnings-chart-value upcoming">Upcoming</span>
+        </div>
+
 
         <div class="earnings-chart-row">
           <span class="earnings-chart-quarter">
@@ -1505,7 +1541,7 @@
 
     <div class="earnings-table-wrap" tabindex="0" aria-label="Scrollable four-quarter earnings comparison">
       <table class="earnings-table">
-        <caption class="visually-hidden">Reported and estimated earnings per share for the last four quarters</caption>
+        <caption class="visually-hidden">Reported and estimated earnings for the last four quarters and next release</caption>
         <thead>
           <tr>
             <th scope="col">Metric</th>
@@ -1534,16 +1570,25 @@
               <span class="earnings-latest-label">Latest</span>
             </th>
 
+
+            <th scope="col" class="is-upcoming">
+              <span class="earnings-quarter-label">Next release</span>
+              <span class="earnings-period-label">15 Sep 2026</span>
+              <span class="earnings-latest-label">After close</span>
+            </th>
+
           </tr>
         </thead>
         <tbody>
           <tr>
             <th scope="row">Reported EPS</th>
             <td>1.05</td><td>1.30</td><td>1.42</td><td class="is-latest">1.68</td>
+            <td class="is-upcoming">—</td>
           </tr>
           <tr>
             <th scope="row">Estimate</th>
             <td>1.01</td><td>1.26</td><td>1.45</td><td class="is-latest">1.61</td>
+            <td class="is-upcoming">1.68</td>
           </tr>
           <tr>
             <th scope="row">Surprise</th>
@@ -1556,6 +1601,7 @@
 
             <td class="earnings-surprise beat is-latest">+4.3%</td>
 
+            <td class="earnings-surprise upcoming is-upcoming">—</td>
           </tr>
           <tr>
             <th scope="row">Result</th>
@@ -1568,10 +1614,13 @@
 
             <td class="is-latest"><span class="earnings-result beat">Beat</span></td>
 
+            <td class="is-upcoming"><span class="earnings-result upcoming">Upcoming</span></td>
           </tr>
         </tbody>
       </table>
     </div>
+    </div>
+
   </div>
 </details>
 
@@ -1720,21 +1769,31 @@
 <details class="earnings-history">
   <summary class="earnings-summary">
     <span class="earnings-summary-copy">
-      <span class="earnings-summary-title">Earnings history</span>
-      <span class="earnings-summary-subtitle">Last 4 reported quarters</span>
+      <span class="earnings-summary-title">Earnings</span>
+      <span class="earnings-summary-subtitle">Next release</span>
     </span>
     <span class="earnings-summary-meta">
-      <span class="earnings-summary-score">3 beats · 1 miss</span>
+      <span class="earnings-summary-score">15 Sep 2026</span>
       <span class="earnings-chevron" aria-hidden="true"></span>
     </span>
   </summary>
   <div class="earnings-content">
+
+    <div class="earnings-history-heading">Last 4 reported quarters · 3 beats · 1 miss · next release highlighted</div>
+    <div class="earnings-history-layout">
     <div class="earnings-chart" aria-hidden="true">
       <div class="earnings-chart-heading">
         <span>EPS surprise vs consensus</span>
         <span class="earnings-chart-scale">±5% scale</span>
       </div>
       <div class="earnings-chart-rows">
+
+        <div class="earnings-chart-row is-upcoming">
+          <span class="earnings-chart-quarter">Next release<small>15 Sep 2026</small></span>
+          <span class="earnings-bar-track earnings-upcoming-track"><span class="earnings-upcoming-marker"></span></span>
+          <span class="earnings-chart-value upcoming">Upcoming</span>
+        </div>
+
 
         <div class="earnings-chart-row">
           <span class="earnings-chart-quarter">
@@ -1817,7 +1876,7 @@
 
     <div class="earnings-table-wrap" tabindex="0" aria-label="Scrollable four-quarter earnings comparison">
       <table class="earnings-table">
-        <caption class="visually-hidden">Reported and estimated earnings per share for the last four quarters</caption>
+        <caption class="visually-hidden">Reported and estimated earnings for the last four quarters and next release</caption>
         <thead>
           <tr>
             <th scope="col">Metric</th>
@@ -1846,16 +1905,25 @@
               <span class="earnings-latest-label">Latest</span>
             </th>
 
+
+            <th scope="col" class="is-upcoming">
+              <span class="earnings-quarter-label">Next release</span>
+              <span class="earnings-period-label">15 Sep 2026</span>
+              <span class="earnings-latest-label">Before open</span>
+            </th>
+
           </tr>
         </thead>
         <tbody>
           <tr>
             <th scope="row">Reported EPS</th>
             <td>1.85</td><td>2.84</td><td>2.01</td><td class="is-latest">1.91</td>
+            <td class="is-upcoming">—</td>
           </tr>
           <tr>
             <th scope="row">Estimate</th>
             <td>1.81</td><td>2.73</td><td>1.99</td><td class="is-latest">1.93</td>
+            <td class="is-upcoming">2.14</td>
           </tr>
           <tr>
             <th scope="row">Surprise</th>
@@ -1868,6 +1936,7 @@
 
             <td class="earnings-surprise miss is-latest">-1.0%</td>
 
+            <td class="earnings-surprise upcoming is-upcoming">—</td>
           </tr>
           <tr>
             <th scope="row">Result</th>
@@ -1880,10 +1949,13 @@
 
             <td class="is-latest"><span class="earnings-result miss">Miss</span></td>
 
+            <td class="is-upcoming"><span class="earnings-result upcoming">Upcoming</span></td>
           </tr>
         </tbody>
       </table>
     </div>
+    </div>
+
   </div>
 </details>
 

@@ -45,6 +45,18 @@ def earnings_quarter(period: str, year: int, quarter: int, actual: float, estima
     }
 
 
+def upcoming_earnings(date_label: str, hour: str, eps: float, revenue: float) -> dict:
+    return {
+        "date": "2026-09-15",
+        "date_label": date_label,
+        "hour": hour,
+        "eps_estimate": eps,
+        "eps_actual": None,
+        "revenue_estimate": revenue,
+        "revenue_actual": None,
+    }
+
+
 def main() -> None:
     sections = [
         {
@@ -62,6 +74,7 @@ def main() -> None:
                     earnings_quarter("2026-04-30", 2027, 1, 1.68, 1.61),
                 ]
             ),
+            "upcoming_earnings": upcoming_earnings("15 Sep 2026", "amc", 1.68, 52000000000),
             "web_stories": [
                 story(0, "NVDA", "Nvidia announces next-gen chip roadmap ahead of earnings"),
                 story(1, "NVDA", "Data center demand keeps Nvidia supply chain at full tilt", "Bloomberg", 3),
@@ -79,6 +92,7 @@ def main() -> None:
             "quote": {"price": 2856.40, "change_pct": -0.42},
             "logo": None,
             "earnings_history": None,
+            "upcoming_earnings": None,
             "web_stories": [
                 story(0, "RELIANCE", "Reliance Industries reports steady refining margins", "Economic Times", 2),
                 story(1, "RELIANCE", "Jio subscriber growth remains strong in quarterly update", "Mint", 4, False),
@@ -100,6 +114,7 @@ def main() -> None:
                     earnings_quarter("2026-06-30", 2026, 3, 1.91, 1.93),
                 ]
             ),
+            "upcoming_earnings": upcoming_earnings("15 Sep 2026", "bmo", 2.14, 102000000000),
             "web_stories": [
                 story(0, "AAPL", "Apple expands AI features across iOS developer preview", "Bloomberg", 2),
                 story(1, "AAPL", "Services revenue momentum offsets hardware cycle concerns", "Reuters", 4, False),
@@ -114,6 +129,7 @@ def main() -> None:
             "quote": {"price": 4125.75, "change_pct": 0.85},
             "logo": None,
             "earnings_history": None,
+            "upcoming_earnings": None,
             "web_stories": [
                 story(0, "TCS", "TCS wins large deal in European banking sector", "Business Standard", 1),
             ],

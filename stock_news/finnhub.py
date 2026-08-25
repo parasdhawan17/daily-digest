@@ -151,6 +151,57 @@ def fetch_earnings_history(symbol: str, api_key: str, limit: int = 4) -> list[di
     return ordered[-max(0, limit):] if limit > 0 else []
 
 
+def _normalize_calendar_item(item: object) -> dict | None:
+    if not isinstance(item, dict):
+        return None
+    event_date = str(item.get("date") or "").strip()
+    try:
+        parsed_date = date.fromisoformat(event_date)
+    except ValueError:
+        return None
+    return {
+        "date": event_date,
+        "date_label": parsed_date.strftime("%d %b %Y").lstrip("0"),
+        "hour": str(item.get("hour") or "").strip().lower() or None,
+        "eps_estimate": _finite_number(item.get("epsEstimate")),
+        "eps_actual": _finite_number(item.get("epsActual")),
+        "revenue_estimate": _finite_number(item.get("revenueEstimate")),
+        "revenue_actual": _finite_number(item.get("revenueActual")),
+    }
+
+
+def fetch_upcoming_earnings(
+    symbol: str,
+    api_key: str,
+    *,
+    lookahead_days: int = 90,
+) -> dict | None:
+    """Return the next earnings-calendar event on or after today."""
+    today = date.today()
+    response = requests.get(
+        "https://finnhub.io/api/v1/calendar/earnings",
+        params={
+            "from": today.isoformat(),
+            "to": (today + timedelta(days=max(1, lookahead_days))).isoformat(),
+            "symbol": symbol,
+            "token": api_key,
+        },
+        timeout=30,
+    )
+    response.raise_for_status()
+    payload = response.json()
+    items = payload.get("earningsCalendar") if isinstance(payload, dict) else None
+    if not isinstance(items, list):
+        return None
+
+    normalized = []
+    for item in items:
+        event = _normalize_calendar_item(item)
+        if event:
+            normalized.append(event)
+    return min(normalized, key=lambda event: event["date"]) if normalized else None
+
+
 def is_usable_article_image(url: str | None) -> bool:
     if not url:
         return False

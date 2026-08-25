@@ -1,23 +1,33 @@
-{% macro render_earnings(history) %}
-{% if history and history.quarters %}
+{% macro render_earnings(earnings, history) %}
+{% if earnings or (history and history.quarters) %}
 <details class="earnings-history">
   <summary class="earnings-summary">
     <span class="earnings-summary-copy">
-      <span class="earnings-summary-title">Earnings history</span>
-      <span class="earnings-summary-subtitle">Last 4 reported quarters</span>
+      <span class="earnings-summary-title">Earnings</span>
+      <span class="earnings-summary-subtitle">{% if earnings %}Next release{% else %}Last 4 reported quarters{% endif %}</span>
     </span>
     <span class="earnings-summary-meta">
-      <span class="earnings-summary-score">{{ history.summary_label }}</span>
+      <span class="earnings-summary-score">{% if earnings %}{{ earnings.date_label }}{% else %}{{ history.summary_label }}{% endif %}</span>
       <span class="earnings-chevron" aria-hidden="true"></span>
     </span>
   </summary>
   <div class="earnings-content">
+    {% if history and history.quarters %}
+    <div class="earnings-history-heading">Last 4 reported quarters · {{ history.summary_label }}{% if earnings %} · next release highlighted{% endif %}</div>
+    <div class="earnings-history-layout">
     <div class="earnings-chart" aria-hidden="true">
       <div class="earnings-chart-heading">
         <span>EPS surprise vs consensus</span>
         <span class="earnings-chart-scale">±{{ "%.0f"|format(history.chart_scale_pct) }}% scale</span>
       </div>
       <div class="earnings-chart-rows">
+        {% if earnings %}
+        <div class="earnings-chart-row is-upcoming">
+          <span class="earnings-chart-quarter">Next release<small>{{ earnings.date_label }}</small></span>
+          <span class="earnings-bar-track earnings-upcoming-track"><span class="earnings-upcoming-marker"></span></span>
+          <span class="earnings-chart-value upcoming">Upcoming</span>
+        </div>
+        {% endif %}
         {% for quarter in history.quarters %}
         <div class="earnings-chart-row{% if quarter.latest %} is-latest{% endif %}">
           <span class="earnings-chart-quarter">
@@ -43,7 +53,7 @@
 
     <div class="earnings-table-wrap" tabindex="0" aria-label="Scrollable four-quarter earnings comparison">
       <table class="earnings-table">
-        <caption class="visually-hidden">Reported and estimated earnings per share for the last four quarters</caption>
+        <caption class="visually-hidden">Reported and estimated earnings for the last four quarters and next release</caption>
         <thead>
           <tr>
             <th scope="col">Metric</th>
@@ -54,32 +64,45 @@
               {% if quarter.latest %}<span class="earnings-latest-label">Latest</span>{% endif %}
             </th>
             {% endfor %}
+            {% if earnings %}
+            <th scope="col" class="is-upcoming">
+              <span class="earnings-quarter-label">Next release</span>
+              <span class="earnings-period-label">{{ earnings.date_label }}</span>
+              <span class="earnings-latest-label">{% if earnings.hour == "bmo" %}Before open{% elif earnings.hour == "amc" %}After close{% elif earnings.hour == "dmh" %}Market hours{% else %}Timing TBD{% endif %}</span>
+            </th>
+            {% endif %}
           </tr>
         </thead>
         <tbody>
           <tr>
             <th scope="row">Reported EPS</th>
             {% for quarter in history.quarters %}<td{% if quarter.latest %} class="is-latest"{% endif %}>{% if quarter.actual is not none %}{{ "%.2f"|format(quarter.actual) }}{% else %}—{% endif %}</td>{% endfor %}
+            {% if earnings %}<td class="is-upcoming">—</td>{% endif %}
           </tr>
           <tr>
             <th scope="row">Estimate</th>
             {% for quarter in history.quarters %}<td{% if quarter.latest %} class="is-latest"{% endif %}>{% if quarter.estimate is not none %}{{ "%.2f"|format(quarter.estimate) }}{% else %}—{% endif %}</td>{% endfor %}
+            {% if earnings %}<td class="is-upcoming">{% if earnings.eps_estimate is not none %}{{ "%.2f"|format(earnings.eps_estimate) }}{% else %}—{% endif %}</td>{% endif %}
           </tr>
           <tr>
             <th scope="row">Surprise</th>
             {% for quarter in history.quarters %}
             <td class="earnings-surprise {{ quarter.result }}{% if quarter.latest %} is-latest{% endif %}">{% if quarter.surprise_pct is not none %}{% if quarter.surprise_pct > 0 %}+{% endif %}{{ "%.1f"|format(quarter.surprise_pct) }}%{% else %}—{% endif %}</td>
             {% endfor %}
+            {% if earnings %}<td class="earnings-surprise upcoming is-upcoming">—</td>{% endif %}
           </tr>
           <tr>
             <th scope="row">Result</th>
             {% for quarter in history.quarters %}
             <td{% if quarter.latest %} class="is-latest"{% endif %}><span class="earnings-result {{ quarter.result }}">{% if quarter.result == "beat" %}Beat{% elif quarter.result == "miss" %}Miss{% elif quarter.result == "inline" %}In line{% else %}No estimate{% endif %}</span></td>
             {% endfor %}
+            {% if earnings %}<td class="is-upcoming"><span class="earnings-result upcoming">Upcoming</span></td>{% endif %}
           </tr>
         </tbody>
       </table>
     </div>
+    </div>
+    {% endif %}
   </div>
 </details>
 {% endif %}

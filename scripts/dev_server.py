@@ -259,6 +259,7 @@ class DevHandler(BaseHTTPRequestHandler):
                 tickers,
                 finnhub_key=finnhub_key,
                 indianapi_key=indianapi_key,
+                include_earnings=True,
             )
             sections = filter_sections(sections, tickers)
             ai_summary = generate_ai_summary(sections)

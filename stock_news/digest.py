@@ -10,6 +10,7 @@ from stock_news.finnhub import story_dedupe_key
 from stock_news.market_data import (
     fetch_company_logo,
     fetch_earnings_history,
+    fetch_upcoming_earnings,
     fetch_news,
     fetch_quote,
 )
@@ -113,6 +114,7 @@ def collect_digest_data(
             "quote": None,
             "logo": None,
             "earnings_history": None,
+            "upcoming_earnings": None,
             "stories": [],
             "web_stories": [],
             "error": None,
@@ -145,6 +147,14 @@ def collect_digest_data(
                     limit=4,
                 )
                 section["earnings_history"] = build_earnings_history(earnings)
+            except (requests.RequestException, TypeError, ValueError):
+                pass
+            try:
+                section["upcoming_earnings"] = fetch_upcoming_earnings(
+                    ticker,
+                    finnhub_key=finnhub_key,
+                    indianapi_key=indianapi_key,
+                )
             except (requests.RequestException, TypeError, ValueError):
                 pass
 

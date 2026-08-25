@@ -71,6 +71,24 @@ def fetch_earnings_history(
     return []
 
 
+def fetch_upcoming_earnings(
+    prefixed_ticker: str,
+    *,
+    finnhub_key: str,
+    indianapi_key: str,
+    lookahead_days: int = 90,
+) -> dict | None:
+    """Return the next US earnings-calendar event; India is unsupported."""
+    market = _require_market(prefixed_ticker)
+    if market == "US":
+        return finnhub.fetch_upcoming_earnings(
+            _us_symbol(prefixed_ticker),
+            finnhub_key,
+            lookahead_days=lookahead_days,
+        )
+    return None
+
+
 def search_symbols(
     query: str,
     *,

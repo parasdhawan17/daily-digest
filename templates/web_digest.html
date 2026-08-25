@@ -729,12 +729,21 @@
       transform: rotate(225deg) translate(-1px, -1px);
     }
     .earnings-content {
+      display: block;
+      padding: 14px;
+      background: var(--card-bg);
+    }
+    .earnings-history-layout {
       display: grid;
       grid-template-columns: minmax(250px, .72fr) minmax(0, 1.28fr);
       align-items: start;
       gap: 14px;
-      padding: 14px;
-      background: var(--card-bg);
+    }
+    .earnings-history-heading {
+      margin: 0 0 8px;
+      color: var(--text-secondary);
+      font-size: 12px;
+      font-weight: 700;
     }
     .earnings-chart {
       padding: 1px 1px 0;
@@ -769,6 +778,7 @@
       border-radius: 7px;
     }
     .earnings-chart-row.is-latest { background: var(--earnings-latest-bg); }
+    .earnings-chart-row.is-upcoming { background: var(--muted-bg); border: 1px dashed var(--link); }
     .earnings-chart-quarter {
       color: var(--text-secondary);
       font-size: 11px;
@@ -782,6 +792,19 @@
       font-size: 8px;
       letter-spacing: 0.08em;
       text-transform: uppercase;
+    }
+    .earnings-chart-row.is-upcoming .earnings-chart-quarter,
+    .earnings-chart-value.upcoming { color: var(--link); }
+    .earnings-upcoming-track { border: 1px dashed var(--link); border-radius: 999px; }
+    .earnings-upcoming-marker {
+      position: absolute;
+      left: 50%;
+      width: 9px;
+      height: 9px;
+      border: 2px solid var(--card-bg);
+      border-radius: 50%;
+      background: var(--link);
+      transform: translateX(-50%);
     }
     .earnings-bar-track {
       position: relative;
@@ -895,6 +918,7 @@
     }
     .earnings-table thead th:first-child { z-index: 3; }
     .earnings-table .is-latest { background: var(--earnings-latest-bg); }
+    .earnings-table .is-upcoming { background: var(--muted-bg); color: var(--link); }
     .earnings-quarter-label,
     .earnings-period-label { display: block; }
     .earnings-period-label {
@@ -926,6 +950,7 @@
     .earnings-result.miss { background: var(--earnings-miss-soft); color: var(--earnings-miss); }
     .earnings-result.inline,
     .earnings-result.unavailable { background: var(--pill-flat-bg); color: var(--pill-flat-fg); }
+    .earnings-result.upcoming { background: var(--link); color: var(--card-bg); }
     .mover-badge {
       display: inline-block;
       padding: 3px 8px;
@@ -1197,6 +1222,7 @@
         display: block;
         padding: 12px;
       }
+      .earnings-history-layout { display: block; }
       .earnings-chart { padding-bottom: 12px; }
       .earnings-chart-row {
         grid-template-columns: 70px minmax(96px, 1fr) 49px;
@@ -1448,7 +1474,7 @@
         </div>
       </div>
 
-      {{ render_earnings(section.earnings_history) }}
+      {{ render_earnings(section.upcoming_earnings, section.earnings_history) }}
 
       {% if ai_summary and ai_summary.ticker_summaries.get(section.ticker) %}
       <p class="ticker-ai-brief"><strong>✦ AI brief</strong> &nbsp; {{ ai_summary.ticker_summaries.get(section.ticker) }}</p>
