@@ -13,6 +13,7 @@ import requests
 from stock_news.config import (
     FETCH_LIMIT_PER_TICKER,
     IN_ENTITIES_CACHE_PATH,
+    IN_NEWS_LOOKBACK_DAYS,
     INDIANAPI_BASE_URL,
 )
 from stock_news.markets import bare_symbol, format_prefixed
@@ -177,8 +178,7 @@ def _news_from_stock(payload: dict, limit: int) -> list[dict]:
     recent = payload.get("recentNews") or []
     if not isinstance(recent, list):
         return []
-    today = date.today()
-    yesterday = today - timedelta(days=1)
+    cutoff = date.today() - timedelta(days=IN_NEWS_LOOKBACK_DAYS)
     normalized: list[dict] = []
     for item in recent:
         if not isinstance(item, dict):
@@ -187,7 +187,7 @@ def _news_from_stock(payload: dict, limit: int) -> list[dict]:
         published = story.get("datetime")
         if published:
             pub_date = datetime.fromtimestamp(published, tz=timezone.utc).date()
-            if pub_date < yesterday:
+            if pub_date < cutoff:
                 continue
         normalized.append(story)
     return normalized[:limit]
