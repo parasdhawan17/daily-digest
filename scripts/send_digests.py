@@ -260,6 +260,7 @@ def send_for_market(
             user_tickers,
             user_story_count,
             session,
+            market=market,
             digest_url=digest_url,
             update_tickers_url=update_tickers_url,
             ai_summary=user_ai_summary,

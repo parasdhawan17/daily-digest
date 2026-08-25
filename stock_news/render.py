@@ -15,6 +15,7 @@ from stock_news.config import (
 )
 from stock_news.digest import count_web_stories, prepare_email_layout
 from stock_news.email import build_plain_text, build_email_content
+from stock_news.markets import Market
 
 
 def get_jinja_env() -> Environment:
@@ -70,6 +71,7 @@ def build_email_digest(
     tickers: list[str],
     total_stories: int,
     session: str,
+    market: Market = "US",
     *,
     digest_url: str | None = None,
     update_tickers_url: str | None = None,
@@ -82,6 +84,7 @@ def build_email_digest(
         total_stories,
         session,
         ai_summary,
+        market,
     )
     env = get_jinja_env()
     template = env.get_template("email_digest.html")

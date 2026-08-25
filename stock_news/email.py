@@ -213,20 +213,37 @@ def format_email_subject(layout: dict, date_label: str, session: str) -> str:
     return format_post_close_subject(layout, date_label)
 
 
-def format_email_heading(layout: dict) -> str:
+def market_session_label(market: Market, session: str) -> str:
+    market_label = "US" if market == "US" else "India"
+    session_label = "Pre-Market" if session == "pre_open" else "Post-Market"
+    return f"{market_label} {session_label}"
+
+
+def format_email_heading(
+    layout: dict,
+    market: Market = "US",
+    session: str = "pre_open",
+    ai_headline: str | None = None,
+) -> str:
+    context = market_session_label(market, session)
+    if ai_headline:
+        return f"{context} • {ai_headline}"
+
     hero = layout.get("hero")
     if not hero:
-        return DIGEST_HEADING
+        return f"{context} • {DIGEST_HEADING}"
     ticker = display_symbol(hero["ticker"])
     quote = hero.get("quote")
     if not quote or quote.get("change_pct") is None:
-        return DIGEST_HEADING
+        return f"{context} • {DIGEST_HEADING}"
     change_pct = quote["change_pct"]
     if change_pct > 0:
-        return f"{ticker} moved high"
-    if change_pct < 0:
-        return f"{ticker} moved low"
-    return f"{ticker} held steady"
+        heading = f"{ticker} moved high"
+    elif change_pct < 0:
+        heading = f"{ticker} moved low"
+    else:
+        heading = f"{ticker} held steady"
+    return f"{context} • {heading}"
 
 
 def footer_text(
@@ -367,12 +384,14 @@ def build_email_content(
     total_stories: int,
     session: str,
     ai_summary: dict | None = None,
+    market: Market = "US",
 ) -> tuple[dict, str, str]:
     """Return layout, email_heading, and subject for an email digest."""
     layout = prepare_email_layout(sections)
     layout["ai_summary"] = ai_summary
     today_label = date.today().strftime("%d %b %Y")
     ai_headline = (ai_summary or {}).get("headline", "").strip()
-    email_heading = format_email_heading(layout)
-    subject = ai_headline or format_email_subject(layout, today_label, session)
+    email_heading = format_email_heading(layout, market, session, ai_headline)
+    subject_body = ai_headline or format_email_subject(layout, today_label, session)
+    subject = f"{market_session_label(market, session)} • {subject_body}"
     return layout, email_heading, subject
