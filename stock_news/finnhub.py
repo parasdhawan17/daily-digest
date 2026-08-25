@@ -1,5 +1,6 @@
 """Finnhub API helpers."""
 
+import math
 from datetime import date, timedelta
 
 import requests
@@ -63,6 +64,91 @@ def fetch_company_logo(symbol: str, api_key: str) -> str | None:
     response.raise_for_status()
     logo = response.json().get("logo", "").strip()
     return logo or None
+
+
+def _finite_number(value: object) -> float | None:
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        return None
+    number = float(value)
+    return number if math.isfinite(number) else None
+
+
+def _positive_int(value: object) -> int | None:
+    if isinstance(value, bool):
+        return None
+    try:
+        number = int(value)
+    except (TypeError, ValueError):
+        return None
+    return number if number > 0 else None
+
+
+def _normalize_earnings_item(item: object) -> dict | None:
+    if not isinstance(item, dict):
+        return None
+
+    period = str(item.get("period") or "").strip()
+    year = _positive_int(item.get("year"))
+    quarter = _positive_int(item.get("quarter"))
+    if not period or year is None or quarter not in (1, 2, 3, 4):
+        return None
+
+    actual = _finite_number(item.get("actual"))
+    estimate = _finite_number(item.get("estimate"))
+    surprise = _finite_number(item.get("surprise"))
+    surprise_pct = _finite_number(item.get("surprisePercent"))
+
+    if surprise_pct is None:
+        result = "unavailable"
+    elif surprise_pct > 0:
+        result = "beat"
+    elif surprise_pct < 0:
+        result = "miss"
+    else:
+        result = "inline"
+
+    return {
+        "period": period,
+        "fiscal_year": year,
+        "fiscal_quarter": quarter,
+        "label": f"Q{quarter} FY{str(year)[-2:]}",
+        "actual": actual,
+        "estimate": estimate,
+        "surprise": surprise,
+        "surprise_pct": surprise_pct,
+        "result": result,
+    }
+
+
+def fetch_earnings_history(symbol: str, api_key: str, limit: int = 4) -> list[dict]:
+    """Return the latest reported quarters, normalized oldest to newest."""
+    response = requests.get(
+        "https://finnhub.io/api/v1/stock/earnings",
+        params={"symbol": symbol, "limit": limit, "token": api_key},
+        timeout=30,
+    )
+    response.raise_for_status()
+    payload = response.json()
+    if not isinstance(payload, list):
+        return []
+
+    normalized: dict[tuple[int, int, str], dict] = {}
+    for item in payload:
+        quarter = _normalize_earnings_item(item)
+        if not quarter:
+            continue
+        key = (
+            quarter["fiscal_year"],
+            quarter["fiscal_quarter"],
+            quarter["period"],
+        )
+        normalized[key] = quarter
+
+    ordered = sorted(
+        normalized.values(),
+        key=lambda item: (item["period"], item["fiscal_year"], item["fiscal_quarter"]),
+    )
+    return ordered[-max(0, limit):] if limit > 0 else []
 
 
 def is_usable_article_image(url: str | None) -> bool:

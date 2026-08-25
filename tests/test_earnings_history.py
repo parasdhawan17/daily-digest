@@ -1,0 +1,309 @@
+import io
+import json
+import unittest
+from unittest.mock import Mock, patch
+
+import requests
+
+from api.digest import handle_data_get
+from stock_news.digest import build_earnings_history, collect_digest_data
+from stock_news.finnhub import fetch_earnings_history
+from stock_news.render import build_web_digest, build_web_section
+
+
+def quarter(
+    period: str,
+    year: int,
+    fiscal_quarter: int,
+    actual: float | None,
+    estimate: float | None,
+    surprise_pct: float | None,
+) -> dict:
+    if surprise_pct is None:
+        result = "unavailable"
+    elif surprise_pct > 0:
+        result = "beat"
+    elif surprise_pct < 0:
+        result = "miss"
+    else:
+        result = "inline"
+    return {
+        "period": period,
+        "fiscal_year": year,
+        "fiscal_quarter": fiscal_quarter,
+        "label": f"Q{fiscal_quarter} FY{str(year)[-2:]}",
+        "actual": actual,
+        "estimate": estimate,
+        "surprise": None,
+        "surprise_pct": surprise_pct,
+        "result": result,
+    }
+
+
+def sample_history() -> dict:
+    return build_earnings_history(
+        [
+            quarter("2025-09-30", 2025, 4, 1.85, 1.81, 2.4),
+            quarter("2025-12-31", 2026, 1, 2.84, 2.73, 4.2),
+            quarter("2026-03-31", 2026, 2, 2.01, 1.99, 1.1),
+            quarter("2026-06-30", 2026, 3, 1.91, 1.93, -0.9),
+        ]
+    )
+
+
+def sample_section(history: dict | None = None) -> dict:
+    return {
+        "ticker": "US:AAPL",
+        "display_symbol": "AAPL",
+        "market": "US",
+        "exchange": "US",
+        "quote": {"price": 228.3, "change_pct": 1.18},
+        "logo": None,
+        "earnings_history": history,
+        "stories": [],
+        "web_stories": [
+            {
+                "headline": "Apple reports quarterly results",
+                "url": "https://example.com/apple",
+                "source": "Example",
+                "summary": "Results were released.",
+            }
+        ],
+        "error": None,
+    }
+
+
+class FinnhubEarningsTest(unittest.TestCase):
+    @patch("stock_news.finnhub.requests.get")
+    def test_fetches_and_normalizes_latest_four_quarters(self, get: Mock) -> None:
+        response = Mock()
+        response.json.return_value = [
+            {
+                "period": "2026-03-31",
+                "year": 2026,
+                "quarter": 1,
+                "actual": 1.2,
+                "estimate": 1.0,
+                "surprise": 0.2,
+                "surprisePercent": 20.0,
+            },
+            {"period": "", "year": 2025, "quarter": 4},
+            {
+                "period": "2025-06-30",
+                "year": 2025,
+                "quarter": 2,
+                "actual": 0,
+                "estimate": 0,
+                "surprise": 0,
+                "surprisePercent": 0,
+            },
+            {
+                "period": "2025-12-31",
+                "year": 2025,
+                "quarter": 4,
+                "actual": -0.4,
+                "estimate": -0.3,
+                "surprise": -0.1,
+                "surprisePercent": -33.3,
+            },
+            {
+                "period": "2025-03-31",
+                "year": 2025,
+                "quarter": 1,
+                "actual": 0.5,
+                "estimate": 0.4,
+                "surprisePercent": 25,
+            },
+            {
+                "period": "2025-09-30",
+                "year": 2025,
+                "quarter": 3,
+                "actual": 0.8,
+                "estimate": None,
+                "surprise": None,
+                "surprisePercent": None,
+            },
+            "malformed",
+        ]
+        get.return_value = response
+
+        result = fetch_earnings_history("AAPL", "key", limit=4)
+
+        response.raise_for_status.assert_called_once_with()
+        get.assert_called_once_with(
+            "https://finnhub.io/api/v1/stock/earnings",
+            params={"symbol": "AAPL", "limit": 4, "token": "key"},
+            timeout=30,
+        )
+        self.assertEqual([item["period"] for item in result], [
+            "2025-06-30",
+            "2025-09-30",
+            "2025-12-31",
+            "2026-03-31",
+        ])
+        self.assertEqual(result[0]["actual"], 0.0)
+        self.assertEqual(result[0]["estimate"], 0.0)
+        self.assertEqual(result[0]["result"], "inline")
+        self.assertEqual(result[1]["result"], "unavailable")
+        self.assertEqual(result[2]["result"], "miss")
+        self.assertEqual(result[3]["result"], "beat")
+
+    @patch("stock_news.finnhub.requests.get")
+    def test_non_list_response_is_unavailable(self, get: Mock) -> None:
+        response = Mock()
+        response.json.return_value = {"error": "not available"}
+        get.return_value = response
+        self.assertEqual(fetch_earnings_history("VOO", "key"), [])
+
+
+class EarningsCollectionTest(unittest.TestCase):
+    def _collect(self, ticker: str, *, include_earnings: bool = False) -> list[dict]:
+        with (
+            patch("stock_news.digest.fetch_quote", return_value=None),
+            patch("stock_news.digest.fetch_company_logo", return_value=None),
+            patch("stock_news.digest.fetch_news", return_value=[]),
+            patch("stock_news.digest.fetch_earnings_history", return_value=[
+                quarter("2026-06-30", 2026, 2, 0.33, 0.52, -36.4)
+            ]) as earnings,
+        ):
+            sections, _ = collect_digest_data(
+                [ticker],
+                finnhub_key="finnhub-key",
+                indianapi_key="india-key",
+                include_earnings=include_earnings,
+            )
+            self.earnings_mock = earnings
+            return sections
+
+    def test_default_collection_does_not_fetch_earnings(self) -> None:
+        sections = self._collect("US:AAPL")
+        self.earnings_mock.assert_not_called()
+        self.assertIsNone(sections[0]["earnings_history"])
+
+    def test_web_collection_fetches_us_earnings(self) -> None:
+        sections = self._collect("US:TSLA", include_earnings=True)
+        self.earnings_mock.assert_called_once_with(
+            "US:TSLA",
+            finnhub_key="finnhub-key",
+            indianapi_key="india-key",
+            limit=4,
+        )
+        self.assertEqual(sections[0]["earnings_history"]["summary_label"], "1 miss")
+
+    def test_web_collection_skips_indian_tickers(self) -> None:
+        sections = self._collect("IN:RELIANCE", include_earnings=True)
+        self.earnings_mock.assert_not_called()
+        self.assertIsNone(sections[0]["earnings_history"])
+
+    def test_earnings_failure_does_not_fail_the_ticker(self) -> None:
+        with (
+            patch("stock_news.digest.fetch_quote", return_value={"price": 10, "change_pct": 1}),
+            patch("stock_news.digest.fetch_company_logo", return_value=None),
+            patch("stock_news.digest.fetch_news", return_value=[]),
+            patch(
+                "stock_news.digest.fetch_earnings_history",
+                side_effect=requests.RequestException("provider error"),
+            ),
+        ):
+            sections, _ = collect_digest_data(
+                ["US:AAPL"],
+                finnhub_key="finnhub-key",
+                indianapi_key="india-key",
+                include_earnings=True,
+            )
+        self.assertIsNone(sections[0]["earnings_history"])
+        self.assertIsNone(sections[0]["error"])
+        self.assertEqual(sections[0]["quote"]["price"], 10)
+
+
+class EarningsRenderTest(unittest.TestCase):
+    def test_renders_collapsed_chart_and_comparison_table(self) -> None:
+        html = build_web_section(sample_section(sample_history()))
+
+        self.assertIn('<details class="earnings-history">', html)
+        self.assertNotIn('<details class="earnings-history" open', html)
+        self.assertIn("3 beats · 1 miss", html)
+        self.assertIn("EPS surprise vs consensus", html)
+        self.assertIn("Reported EPS", html)
+        self.assertIn("Estimate", html)
+        self.assertIn("Latest", html)
+        self.assertIn("+4.2%", html)
+        self.assertIn("-0.9%", html)
+        self.assertLess(html.index("Q4 FY25"), html.index("Q3 FY26"))
+        self.assertLess(html.index("ticker-head"), html.index("earnings-history"))
+        self.assertLess(html.index("earnings-history"), html.index("story-list"))
+
+    def test_hides_panel_when_history_is_unavailable(self) -> None:
+        html = build_web_section(sample_section(None))
+        self.assertNotIn("earnings-history", html)
+        self.assertNotIn("Earnings history", html)
+
+    def test_progressive_shell_includes_earnings_skeleton(self) -> None:
+        html = build_web_digest(
+            [],
+            ["US:AAPL"],
+            progressive=True,
+            progressive_token="token",
+        )
+        self.assertIn("skeleton-earnings", html)
+
+        india_html = build_web_digest(
+            [],
+            ["IN:RELIANCE"],
+            progressive=True,
+            progressive_token="token",
+        )
+        self.assertNotIn('<div class="skeleton skeleton-earnings">', india_html)
+
+
+class FakeHandler:
+    def __init__(self) -> None:
+        self.path = "/api/digest-data?t=token&ticker=US%3AAAPL"
+        self.headers = {}
+        self.wfile = io.BytesIO()
+        self.status = None
+        self.response_headers: dict[str, str] = {}
+
+    def send_response(self, status: int) -> None:
+        self.status = status
+
+    def send_header(self, name: str, value: str) -> None:
+        self.response_headers[name] = value
+
+    def end_headers(self) -> None:
+        pass
+
+
+class EarningsHandlerTest(unittest.TestCase):
+    @patch("api.digest.build_web_section", return_value="<section>Earnings</section>")
+    @patch("api.digest.collect_digest_data")
+    @patch("api.digest._missing_data_keys", return_value=[])
+    @patch("api.digest._verify_token", return_value=("token", ["US:AAPL"]))
+    def test_digest_data_enables_web_earnings(
+        self,
+        _verify: Mock,
+        _missing: Mock,
+        collect: Mock,
+        _render: Mock,
+    ) -> None:
+        section = sample_section(sample_history())
+        collect.return_value = ([section], 1)
+        handler = FakeHandler()
+
+        handle_data_get(handler)
+
+        self.assertEqual(handler.status, 200)
+        collect.assert_called_once_with(
+            ["US:AAPL"],
+            finnhub_key=unittest.mock.ANY,
+            indianapi_key=unittest.mock.ANY,
+            include_earnings=True,
+        )
+        payload = json.loads(handler.wfile.getvalue())
+        self.assertTrue(payload["ok"])
+        self.assertEqual(payload["section"]["earnings_history"]["summary_label"], "3 beats · 1 miss")
+        self.assertEqual(payload["html"], "<section>Earnings</section>")
+
+
+if __name__ == "__main__":
+    unittest.main()

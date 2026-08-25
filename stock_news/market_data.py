@@ -53,6 +53,24 @@ def fetch_company_logo(
     return indianapi.fetch_company_logo(_us_symbol(prefixed_ticker), indianapi_key)
 
 
+def fetch_earnings_history(
+    prefixed_ticker: str,
+    *,
+    finnhub_key: str,
+    indianapi_key: str,
+    limit: int = 4,
+) -> list[dict]:
+    """Return US earnings history; India support is intentionally out of scope."""
+    market = _require_market(prefixed_ticker)
+    if market == "US":
+        return finnhub.fetch_earnings_history(
+            _us_symbol(prefixed_ticker),
+            finnhub_key,
+            limit=limit,
+        )
+    return []
+
+
 def search_symbols(
     query: str,
     *,

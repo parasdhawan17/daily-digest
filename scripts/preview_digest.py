@@ -10,6 +10,7 @@ sys.path.insert(0, str(ROOT))
 
 os.environ.setdefault("SITE_URL", "http://localhost:8765")
 
+from stock_news.digest import build_earnings_history
 from stock_news.render import build_web_digest
 
 # Working stock-themed placeholder (Unsplash photo IDs must be valid — 404s show as broken images).
@@ -28,6 +29,22 @@ def story(i: int, ticker: str, headline: str, source: str = "Reuters", mins: int
     }
 
 
+def earnings_quarter(period: str, year: int, quarter: int, actual: float, estimate: float) -> dict:
+    surprise_pct = (actual - estimate) / abs(estimate) * 100 if estimate else 0.0
+    result = "beat" if surprise_pct > 0 else "miss" if surprise_pct < 0 else "inline"
+    return {
+        "period": period,
+        "fiscal_year": year,
+        "fiscal_quarter": quarter,
+        "label": f"Q{quarter} FY{str(year)[-2:]}",
+        "actual": actual,
+        "estimate": estimate,
+        "surprise": actual - estimate,
+        "surprise_pct": surprise_pct,
+        "result": result,
+    }
+
+
 def main() -> None:
     sections = [
         {
@@ -37,6 +54,14 @@ def main() -> None:
             "exchange": "US",
             "quote": {"price": 142.50, "change_pct": 2.14},
             "logo": "https://static2.finnhub.io/file/publicdatany/finnhubimage/stock_logo/NVDA.png",
+            "earnings_history": build_earnings_history(
+                [
+                    earnings_quarter("2025-07-31", 2026, 2, 1.05, 1.01),
+                    earnings_quarter("2025-10-31", 2026, 3, 1.30, 1.26),
+                    earnings_quarter("2026-01-31", 2026, 4, 1.42, 1.45),
+                    earnings_quarter("2026-04-30", 2027, 1, 1.68, 1.61),
+                ]
+            ),
             "web_stories": [
                 story(0, "NVDA", "Nvidia announces next-gen chip roadmap ahead of earnings"),
                 story(1, "NVDA", "Data center demand keeps Nvidia supply chain at full tilt", "Bloomberg", 3),
@@ -53,6 +78,7 @@ def main() -> None:
             "exchange": "NSE",
             "quote": {"price": 2856.40, "change_pct": -0.42},
             "logo": None,
+            "earnings_history": None,
             "web_stories": [
                 story(0, "RELIANCE", "Reliance Industries reports steady refining margins", "Economic Times", 2),
                 story(1, "RELIANCE", "Jio subscriber growth remains strong in quarterly update", "Mint", 4, False),
@@ -66,6 +92,14 @@ def main() -> None:
             "exchange": "US",
             "quote": {"price": 228.30, "change_pct": 1.18},
             "logo": "https://static2.finnhub.io/file/publicdatany/finnhubimage/stock_logo/AAPL.png",
+            "earnings_history": build_earnings_history(
+                [
+                    earnings_quarter("2025-09-30", 2025, 4, 1.85, 1.81),
+                    earnings_quarter("2025-12-31", 2026, 1, 2.84, 2.73),
+                    earnings_quarter("2026-03-31", 2026, 2, 2.01, 1.99),
+                    earnings_quarter("2026-06-30", 2026, 3, 1.91, 1.93),
+                ]
+            ),
             "web_stories": [
                 story(0, "AAPL", "Apple expands AI features across iOS developer preview", "Bloomberg", 2),
                 story(1, "AAPL", "Services revenue momentum offsets hardware cycle concerns", "Reuters", 4, False),
@@ -79,6 +113,7 @@ def main() -> None:
             "exchange": "NSE",
             "quote": {"price": 4125.75, "change_pct": 0.85},
             "logo": None,
+            "earnings_history": None,
             "web_stories": [
                 story(0, "TCS", "TCS wins large deal in European banking sector", "Business Standard", 1),
             ],
@@ -92,6 +127,7 @@ def main() -> None:
         tickers,
         fetched_at_label="Fetched at 9:15 AM ET · Aug 15, 2026",
     )
+    html = "\n".join(line.rstrip() for line in html.splitlines()) + "\n"
     out = ROOT / "public" / "preview-digest.html"
     out.write_text(html, encoding="utf-8")
     print(f"Wrote {out} ({len(html)} bytes)")

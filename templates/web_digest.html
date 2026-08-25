@@ -1,3 +1,4 @@
+{% from "web_earnings.html" import render_earnings %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -41,6 +42,12 @@
       --pill-flat-bg: #f1f5f9;
       --pill-flat-fg: #64748b;
       --mover-badge-bg: #e0e7ff;
+      --earnings-beat: #15803d;
+      --earnings-beat-soft: #dcfce7;
+      --earnings-miss: #b91c1c;
+      --earnings-miss-soft: #fee2e2;
+      --earnings-inline: #64748b;
+      --earnings-latest-bg: #eff6ff;
       --toggle-bg: rgba(255, 255, 255, 0.12);
       --toggle-border: rgba(255, 255, 255, 0.22);
       --toggle-fg: #f8fafc;
@@ -72,6 +79,12 @@
       --pill-flat-fg: #cbd5e1;
       --mover-badge-bg: #312e81;
       --mover-badge-fg: #c7d2fe;
+      --earnings-beat: #86efac;
+      --earnings-beat-soft: #14532d;
+      --earnings-miss: #fca5a5;
+      --earnings-miss-soft: #7f1d1d;
+      --earnings-inline: #cbd5e1;
+      --earnings-latest-bg: #172554;
       --modal-backdrop: rgba(2, 6, 23, 0.72);
       --toggle-bg: rgba(15, 23, 42, 0.45);
       --toggle-border: rgba(255, 255, 255, 0.22);
@@ -630,6 +643,285 @@
     .ticker-change.up { background: var(--pill-up-bg); color: var(--pill-up-fg); }
     .ticker-change.down { background: var(--pill-down-bg); color: var(--pill-down-fg); }
     .ticker-change.flat { background: var(--pill-flat-bg); color: var(--pill-flat-fg); }
+    .visually-hidden {
+      position: absolute !important;
+      width: 1px !important;
+      height: 1px !important;
+      padding: 0 !important;
+      margin: -1px !important;
+      overflow: hidden !important;
+      clip: rect(0, 0, 0, 0) !important;
+      white-space: nowrap !important;
+      border: 0 !important;
+    }
+    .earnings-history {
+      margin: 20px 0 10px;
+      border: 1px solid var(--border-strong);
+      border-radius: 12px;
+      background: var(--panel-bg);
+      overflow: hidden;
+      box-shadow: 0 4px 16px rgba(15, 23, 42, 0.04);
+    }
+    .earnings-summary {
+      min-height: 56px;
+      padding: 13px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      cursor: pointer;
+      list-style: none;
+      transition: background-color 0.15s ease;
+    }
+    .earnings-summary::-webkit-details-marker { display: none; }
+    .earnings-summary:hover { background: var(--muted-bg); }
+    .earnings-summary:focus-visible {
+      outline: 2px solid var(--link);
+      outline-offset: -3px;
+    }
+    .earnings-history[open] .earnings-summary {
+      border-bottom: 1px solid var(--border);
+      background: var(--muted-bg);
+    }
+    .earnings-summary-copy {
+      display: flex;
+      align-items: baseline;
+      flex-wrap: wrap;
+      gap: 4px 9px;
+      min-width: 0;
+    }
+    .earnings-summary-title {
+      color: var(--text-strong);
+      font-size: 14px;
+      font-weight: 700;
+    }
+    .earnings-summary-subtitle {
+      color: var(--text-label);
+      font-size: 12px;
+    }
+    .earnings-summary-meta {
+      display: inline-flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 12px;
+      flex-shrink: 0;
+    }
+    .earnings-summary-score {
+      padding: 4px 9px;
+      border: 1px solid var(--border-strong);
+      border-radius: 999px;
+      background: var(--card-bg);
+      color: var(--text-secondary);
+      font-size: 11px;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+    }
+    .earnings-chevron {
+      width: 8px;
+      height: 8px;
+      border-right: 2px solid var(--text-label);
+      border-bottom: 2px solid var(--text-label);
+      transform: rotate(45deg) translateY(-2px);
+      transition: transform 0.18s ease;
+    }
+    .earnings-history[open] .earnings-chevron {
+      transform: rotate(225deg) translate(-1px, -1px);
+    }
+    .earnings-content {
+      padding: 18px;
+      background: var(--card-bg);
+    }
+    .earnings-chart {
+      padding: 2px 2px 20px;
+    }
+    .earnings-chart-heading {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 12px;
+      color: var(--text-secondary);
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .earnings-chart-scale {
+      color: var(--text-muted);
+      font-size: 10px;
+      font-weight: 600;
+      font-variant-numeric: tabular-nums;
+    }
+    .earnings-chart-rows {
+      display: grid;
+      gap: 5px;
+    }
+    .earnings-chart-row {
+      display: grid;
+      grid-template-columns: 88px minmax(120px, 1fr) 58px;
+      align-items: center;
+      gap: 10px;
+      min-height: 34px;
+      padding: 5px 8px;
+      border-radius: 7px;
+    }
+    .earnings-chart-row.is-latest { background: var(--earnings-latest-bg); }
+    .earnings-chart-quarter {
+      color: var(--text-secondary);
+      font-size: 11px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+    .earnings-chart-quarter small {
+      display: block;
+      margin-top: 1px;
+      color: var(--link);
+      font-size: 8px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    .earnings-bar-track {
+      position: relative;
+      display: flex;
+      align-items: center;
+      min-width: 0;
+      height: 18px;
+    }
+    .earnings-bar-track::after {
+      content: "";
+      position: absolute;
+      top: 1px;
+      bottom: 1px;
+      left: 50%;
+      width: 1px;
+      background: var(--border-strong);
+    }
+    .earnings-bar-half {
+      width: 50%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+    }
+    .earnings-bar-half-left { justify-content: flex-end; }
+    .earnings-bar-half-right { justify-content: flex-start; }
+    .earnings-bar {
+      display: block;
+      min-width: 2px;
+      height: 8px;
+    }
+    .earnings-bar.beat {
+      background: var(--earnings-beat);
+      border-radius: 0 999px 999px 0;
+    }
+    .earnings-bar.miss {
+      background: var(--earnings-miss);
+      border-radius: 999px 0 0 999px;
+    }
+    .earnings-inline-marker {
+      position: absolute;
+      z-index: 1;
+      left: 50%;
+      top: 50%;
+      width: 7px;
+      height: 7px;
+      border: 2px solid var(--card-bg);
+      border-radius: 50%;
+      background: var(--earnings-inline);
+      transform: translate(-50%, -50%);
+    }
+    .earnings-chart-value {
+      text-align: right;
+      color: var(--text-label);
+      font-size: 11px;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+    }
+    .earnings-chart-value.beat,
+    .earnings-surprise.beat { color: var(--earnings-beat); }
+    .earnings-chart-value.miss,
+    .earnings-surprise.miss { color: var(--earnings-miss); }
+    .earnings-chart-value.inline,
+    .earnings-surprise.inline { color: var(--earnings-inline); }
+    .earnings-table-wrap {
+      overflow-x: auto;
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      scrollbar-width: thin;
+    }
+    .earnings-table-wrap:focus-visible {
+      outline: 2px solid var(--link);
+      outline-offset: 2px;
+    }
+    .earnings-table {
+      width: 100%;
+      min-width: 620px;
+      border-collapse: separate;
+      border-spacing: 0;
+      color: var(--text-secondary);
+      font-size: 12px;
+      font-variant-numeric: tabular-nums;
+    }
+    .earnings-table th,
+    .earnings-table td {
+      padding: 10px 12px;
+      border-right: 1px solid var(--border-soft);
+      border-bottom: 1px solid var(--border-soft);
+      text-align: center;
+      white-space: nowrap;
+      background: var(--card-bg);
+    }
+    .earnings-table tr:last-child th,
+    .earnings-table tr:last-child td { border-bottom: none; }
+    .earnings-table th:last-child,
+    .earnings-table td:last-child { border-right: none; }
+    .earnings-table thead th {
+      color: var(--text-strong);
+      font-weight: 700;
+      background: var(--muted-bg);
+    }
+    .earnings-table th:first-child {
+      position: sticky;
+      left: 0;
+      z-index: 2;
+      min-width: 116px;
+      text-align: left;
+      color: var(--text-label);
+      font-weight: 700;
+      background: var(--muted-bg);
+      box-shadow: 1px 0 0 var(--border-soft);
+    }
+    .earnings-table thead th:first-child { z-index: 3; }
+    .earnings-table .is-latest { background: var(--earnings-latest-bg); }
+    .earnings-quarter-label,
+    .earnings-period-label { display: block; }
+    .earnings-period-label {
+      margin-top: 2px;
+      color: var(--text-muted);
+      font-size: 9px;
+      font-weight: 500;
+    }
+    .earnings-latest-label {
+      display: inline-block;
+      margin-top: 5px;
+      padding: 2px 5px;
+      border-radius: 999px;
+      background: var(--link);
+      color: var(--card-bg);
+      font-size: 8px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+    .earnings-result {
+      display: inline-block;
+      min-width: 48px;
+      padding: 3px 7px;
+      border-radius: 999px;
+      font-size: 10px;
+      font-weight: 700;
+    }
+    .earnings-result.beat { background: var(--earnings-beat-soft); color: var(--earnings-beat); }
+    .earnings-result.miss { background: var(--earnings-miss-soft); color: var(--earnings-miss); }
+    .earnings-result.inline,
+    .earnings-result.unavailable { background: var(--pill-flat-bg); color: var(--pill-flat-fg); }
     .mover-badge {
       display: inline-block;
       padding: 3px 8px;
@@ -889,6 +1181,23 @@
         gap: 8px;
       }
       .ticker-quote { width: 100%; }
+      .earnings-summary {
+        align-items: flex-start;
+        gap: 10px;
+        padding: 13px 14px;
+      }
+      .earnings-summary-copy { flex-direction: column; align-items: flex-start; gap: 1px; }
+      .earnings-summary-meta { gap: 9px; }
+      .earnings-summary-score { padding: 3px 7px; font-size: 10px; }
+      .earnings-content { padding: 14px; }
+      .earnings-chart-row {
+        grid-template-columns: 70px minmax(96px, 1fr) 49px;
+        gap: 7px;
+        padding-left: 4px;
+        padding-right: 4px;
+      }
+      .earnings-chart-quarter small { display: none; }
+      .earnings-table { min-width: 590px; }
       .ticker-section {
         padding: 40px 0;
       }
@@ -920,6 +1229,7 @@
       .header-ticker,
       .movers-track,
       .header-shimmer,
+      .earnings-chevron,
       .ticker-section {
         animation: none !important;
         transition: none !important;
@@ -942,6 +1252,7 @@
     .skeleton { border-radius: 8px; background: linear-gradient(90deg, var(--muted-bg) 25%, var(--border-soft) 50%, var(--muted-bg) 75%); background-size: 200% 100%; animation: shimmer 1.4s ease-in-out infinite; }
     .skeleton-title { width: 42%; height: 24px; margin: 10px 0 18px; }
     .skeleton-price { width: 28%; height: 30px; margin-bottom: 34px; }
+    .skeleton-earnings { width: 100%; height: 56px; margin: 20px 0 18px; border: 1px solid var(--border); }
     .skeleton-line { width: 88%; height: 14px; margin: 13px 0; }
     .skeleton-line.short { width: 64%; }
     @keyframes shimmer { to { background-position: -200% 0; } }
@@ -1026,7 +1337,7 @@
   <main id="digest-sections" class="progressive-sections" data-token="{{ progressive_token or '' }}" data-tickers='{{ progressive_tickers|tojson }}'>
     {% for ticker in progressive_tickers %}
     <section class="ticker-section progressive-placeholder" data-ticker="{{ ticker }}" aria-label="Loading {{ ticker }}">
-      <div class="section-inner"><div class="skeleton skeleton-title"></div><div class="skeleton skeleton-price"></div><div class="skeleton skeleton-line"></div><div class="skeleton skeleton-line short"></div></div>
+      <div class="section-inner"><div class="skeleton skeleton-title"></div><div class="skeleton skeleton-price"></div>{% if ticker[:3] == 'US:' %}<div class="skeleton skeleton-earnings"></div>{% endif %}<div class="skeleton skeleton-line"></div><div class="skeleton skeleton-line short"></div></div>
     </section>
     {% endfor %}
   </main>
@@ -1128,6 +1439,8 @@
           {% endif %}
         </div>
       </div>
+
+      {{ render_earnings(section.earnings_history) }}
 
       {% if ai_summary and ai_summary.ticker_summaries.get(section.ticker) %}
       <p class="ticker-ai-brief"><strong>✦ AI brief</strong> &nbsp; {{ ai_summary.ticker_summaries.get(section.ticker) }}</p>
@@ -1291,6 +1604,19 @@
     })();
   </script>
   {% endif %}
+  <script>
+    (function () {
+      document.addEventListener("keydown", function (event) {
+        if (event.key !== "Enter" && event.key !== " " && event.key !== "Spacebar") return;
+        var target = event.target;
+        if (!target || !target.classList || !target.classList.contains("earnings-summary")) return;
+        var details = target.parentElement;
+        if (!details || details.tagName !== "DETAILS") return;
+        event.preventDefault();
+        details.open = !details.open;
+      });
+    })();
+  </script>
   <script>
     (function () {
       window.setupMoverMarquee = function (track) {

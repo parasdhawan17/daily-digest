@@ -1,10 +1,18 @@
 """Collect market data and prepare digest layout."""
 
+import math
+from datetime import date
+
 import requests
 
 from stock_news.config import HEADLINES_PER_TICKER, MIN_RELEVANCE_SCORE
 from stock_news.finnhub import story_dedupe_key
-from stock_news.market_data import fetch_company_logo, fetch_news, fetch_quote
+from stock_news.market_data import (
+    fetch_company_logo,
+    fetch_earnings_history,
+    fetch_news,
+    fetch_quote,
+)
 from stock_news.markets import display_symbol, market_badge, market_of
 from stock_news.relevance import relevance_score, select_stories, select_web_stories
 
@@ -14,11 +22,80 @@ def filter_sections(sections: list[dict], tickers: list[str]) -> list[dict]:
     return [section for section in sections if section["ticker"] in ticker_set]
 
 
+def _period_label(value: str) -> str:
+    try:
+        parsed = date.fromisoformat(value)
+    except (TypeError, ValueError):
+        return value
+    return parsed.strftime("%d %b %Y").lstrip("0")
+
+
+def build_earnings_history(quarters: list[dict]) -> dict | None:
+    """Build the comparison view model used by the web earnings panel."""
+    if not quarters:
+        return None
+
+    ordered = sorted(
+        (dict(item) for item in quarters if isinstance(item, dict)),
+        key=lambda item: (
+            str(item.get("period") or ""),
+            int(item.get("fiscal_year") or 0),
+            int(item.get("fiscal_quarter") or 0),
+        ),
+    )[-4:]
+    if not ordered:
+        return None
+
+    counts = {"beat": 0, "miss": 0, "inline": 0, "unavailable": 0}
+    surprise_values: list[float] = []
+    for item in ordered:
+        result = item.get("result")
+        if result not in counts:
+            result = "unavailable"
+            item["result"] = result
+        counts[result] += 1
+        surprise_pct = item.get("surprise_pct")
+        if isinstance(surprise_pct, (int, float)) and not isinstance(surprise_pct, bool):
+            surprise_values.append(abs(float(surprise_pct)))
+        item["period_label"] = _period_label(str(item.get("period") or ""))
+        item["latest"] = False
+
+    max_surprise = max(surprise_values, default=0.0)
+    chart_scale = max(5.0, math.ceil(max_surprise / 5.0) * 5.0)
+    for item in ordered:
+        surprise_pct = item.get("surprise_pct")
+        if isinstance(surprise_pct, (int, float)) and not isinstance(surprise_pct, bool):
+            item["chart_width_pct"] = min(100.0, abs(float(surprise_pct)) / chart_scale * 100.0)
+        else:
+            item["chart_width_pct"] = 0.0
+    ordered[-1]["latest"] = True
+
+    summary_parts: list[str] = []
+    if counts["beat"]:
+        summary_parts.append(f"{counts['beat']} {'beat' if counts['beat'] == 1 else 'beats'}")
+    if counts["miss"]:
+        summary_parts.append(f"{counts['miss']} {'miss' if counts['miss'] == 1 else 'misses'}")
+    if counts["inline"]:
+        summary_parts.append(f"{counts['inline']} in line")
+    if counts["unavailable"]:
+        summary_parts.append(f"{counts['unavailable']} unavailable")
+    if not summary_parts:
+        summary_parts.append(f"{len(ordered)} reported quarters")
+
+    return {
+        "quarters": ordered,
+        "counts": counts,
+        "summary_label": " · ".join(summary_parts),
+        "chart_scale_pct": chart_scale,
+    }
+
+
 def collect_digest_data(
     tickers: list[str],
     *,
     finnhub_key: str,
     indianapi_key: str,
+    include_earnings: bool = False,
 ) -> tuple[list[dict], int]:
     seen_stories: set[str] = set()
     sections: list[dict] = []
@@ -35,6 +112,7 @@ def collect_digest_data(
             "exchange": market_badge(market) if market else "",
             "quote": None,
             "logo": None,
+            "earnings_history": None,
             "stories": [],
             "web_stories": [],
             "error": None,
@@ -57,6 +135,18 @@ def collect_digest_data(
             )
         except requests.RequestException:
             pass
+
+        if include_earnings and market == "US":
+            try:
+                earnings = fetch_earnings_history(
+                    ticker,
+                    finnhub_key=finnhub_key,
+                    indianapi_key=indianapi_key,
+                    limit=4,
+                )
+                section["earnings_history"] = build_earnings_history(earnings)
+            except (requests.RequestException, TypeError, ValueError):
+                pass
 
         try:
             raw_news[ticker] = fetch_news(

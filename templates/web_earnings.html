@@ -1,0 +1,86 @@
+{% macro render_earnings(history) %}
+{% if history and history.quarters %}
+<details class="earnings-history">
+  <summary class="earnings-summary">
+    <span class="earnings-summary-copy">
+      <span class="earnings-summary-title">Earnings history</span>
+      <span class="earnings-summary-subtitle">Last 4 reported quarters</span>
+    </span>
+    <span class="earnings-summary-meta">
+      <span class="earnings-summary-score">{{ history.summary_label }}</span>
+      <span class="earnings-chevron" aria-hidden="true"></span>
+    </span>
+  </summary>
+  <div class="earnings-content">
+    <div class="earnings-chart" aria-hidden="true">
+      <div class="earnings-chart-heading">
+        <span>EPS surprise vs consensus</span>
+        <span class="earnings-chart-scale">±{{ "%.0f"|format(history.chart_scale_pct) }}% scale</span>
+      </div>
+      <div class="earnings-chart-rows">
+        {% for quarter in history.quarters %}
+        <div class="earnings-chart-row{% if quarter.latest %} is-latest{% endif %}">
+          <span class="earnings-chart-quarter">
+            {{ quarter.label }}
+            {% if quarter.latest %}<small>Latest</small>{% endif %}
+          </span>
+          <span class="earnings-bar-track">
+            <span class="earnings-bar-half earnings-bar-half-left">
+              {% if quarter.result == "miss" %}<span class="earnings-bar miss" style="width: {{ "%.2f"|format(quarter.chart_width_pct) }}%"></span>{% endif %}
+            </span>
+            <span class="earnings-bar-half earnings-bar-half-right">
+              {% if quarter.result == "beat" %}<span class="earnings-bar beat" style="width: {{ "%.2f"|format(quarter.chart_width_pct) }}%"></span>{% endif %}
+            </span>
+            {% if quarter.result == "inline" %}<span class="earnings-inline-marker"></span>{% endif %}
+          </span>
+          <span class="earnings-chart-value {{ quarter.result }}">
+            {% if quarter.surprise_pct is not none %}{% if quarter.surprise_pct > 0 %}+{% endif %}{{ "%.1f"|format(quarter.surprise_pct) }}%{% else %}—{% endif %}
+          </span>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="earnings-table-wrap" tabindex="0" aria-label="Scrollable four-quarter earnings comparison">
+      <table class="earnings-table">
+        <caption class="visually-hidden">Reported and estimated earnings per share for the last four quarters</caption>
+        <thead>
+          <tr>
+            <th scope="col">Metric</th>
+            {% for quarter in history.quarters %}
+            <th scope="col"{% if quarter.latest %} class="is-latest"{% endif %}>
+              <span class="earnings-quarter-label">{{ quarter.label }}</span>
+              <span class="earnings-period-label">{{ quarter.period_label }}</span>
+              {% if quarter.latest %}<span class="earnings-latest-label">Latest</span>{% endif %}
+            </th>
+            {% endfor %}
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row">Reported EPS</th>
+            {% for quarter in history.quarters %}<td{% if quarter.latest %} class="is-latest"{% endif %}>{% if quarter.actual is not none %}{{ "%.2f"|format(quarter.actual) }}{% else %}—{% endif %}</td>{% endfor %}
+          </tr>
+          <tr>
+            <th scope="row">Estimate</th>
+            {% for quarter in history.quarters %}<td{% if quarter.latest %} class="is-latest"{% endif %}>{% if quarter.estimate is not none %}{{ "%.2f"|format(quarter.estimate) }}{% else %}—{% endif %}</td>{% endfor %}
+          </tr>
+          <tr>
+            <th scope="row">Surprise</th>
+            {% for quarter in history.quarters %}
+            <td class="earnings-surprise {{ quarter.result }}{% if quarter.latest %} is-latest{% endif %}">{% if quarter.surprise_pct is not none %}{% if quarter.surprise_pct > 0 %}+{% endif %}{{ "%.1f"|format(quarter.surprise_pct) }}%{% else %}—{% endif %}</td>
+            {% endfor %}
+          </tr>
+          <tr>
+            <th scope="row">Result</th>
+            {% for quarter in history.quarters %}
+            <td{% if quarter.latest %} class="is-latest"{% endif %}><span class="earnings-result {{ quarter.result }}">{% if quarter.result == "beat" %}Beat{% elif quarter.result == "miss" %}Miss{% elif quarter.result == "inline" %}In line{% else %}No estimate{% endif %}</span></td>
+            {% endfor %}
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</details>
+{% endif %}
+{% endmacro %}
