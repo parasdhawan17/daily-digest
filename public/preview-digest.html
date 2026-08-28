@@ -1,10 +1,11 @@
 
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Tickr Digest — 26 Aug 2026</title>
+  <title>Tickr Digest — 28 Aug 2026</title>
   <meta name="color-scheme" content="light dark">
   <script>
     (function () {
@@ -643,6 +644,194 @@
     .ticker-change.up { background: var(--pill-up-bg); color: var(--pill-up-fg); }
     .ticker-change.down { background: var(--pill-down-bg); color: var(--pill-down-fg); }
     .ticker-change.flat { background: var(--pill-flat-bg); color: var(--pill-flat-fg); }
+    .price-ranges {
+      flex-basis: 100%;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 6px;
+      font-variant-numeric: tabular-nums;
+    }
+    .price-ranges-heading {
+      grid-column: 1 / -1;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      margin: 0 0 -2px;
+      color: var(--text-label);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.13em;
+      text-transform: uppercase;
+    }
+    .price-ranges-heading::before {
+      content: "";
+      width: 16px;
+      height: 1px;
+      background: currentColor;
+      opacity: 0.45;
+    }
+    .price-range-item {
+      position: relative;
+      display: block;
+      min-width: 0;
+      padding: 11px 12px 10px;
+      overflow: hidden;
+      border: 1px solid var(--border-strong);
+      border-radius: 11px;
+      background: linear-gradient(145deg, var(--card-bg), var(--muted-bg));
+      color: var(--text-secondary);
+      line-height: 1.2;
+      box-shadow: 0 3px 12px rgba(15, 23, 42, 0.04);
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+    .price-range-item:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 7px 18px rgba(15, 23, 42, 0.09);
+    }
+    .price-range-item::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 36px;
+      height: 36px;
+      border-radius: 0 0 0 36px;
+      background: var(--price-range-accent-soft);
+    }
+    .price-range-item.year-high {
+      --price-range-accent: #f59e0b;
+      --price-range-accent-soft: rgba(245, 158, 11, 0.12);
+    }
+    .price-range-item.all-time-high {
+      --price-range-accent: #6366f1;
+      --price-range-accent-soft: rgba(99, 102, 241, 0.12);
+    }
+    html[data-theme="dark"] .price-range-item.year-high {
+      --price-range-accent: #fbbf24;
+      --price-range-accent-soft: rgba(251, 191, 36, 0.14);
+    }
+    html[data-theme="dark"] .price-range-item.all-time-high {
+      --price-range-accent: #a5b4fc;
+      --price-range-accent-soft: rgba(165, 180, 252, 0.14);
+    }
+    .price-range-item.at-high {
+      --price-range-signal: #15803d;
+      --price-range-signal-soft: #dcfce7;
+    }
+    .price-range-item.near-high {
+      --price-range-signal: #65a30d;
+      --price-range-signal-soft: #ecfccb;
+    }
+    .price-range-item.below-high {
+      --price-range-signal: #ef4444;
+      --price-range-signal-soft: #fee2e2;
+    }
+    .price-range-item.far-below-high {
+      --price-range-signal: #b91c1c;
+      --price-range-signal-soft: #fecaca;
+    }
+    html[data-theme="dark"] .price-range-item.at-high {
+      --price-range-signal: #86efac;
+      --price-range-signal-soft: #14532d;
+    }
+    html[data-theme="dark"] .price-range-item.near-high {
+      --price-range-signal: #bef264;
+      --price-range-signal-soft: #365314;
+    }
+    html[data-theme="dark"] .price-range-item.below-high {
+      --price-range-signal: #f87171;
+      --price-range-signal-soft: #7f1d1d;
+    }
+    html[data-theme="dark"] .price-range-item.far-below-high {
+      --price-range-signal: #fca5a5;
+      --price-range-signal-soft: #450a0a;
+    }
+    .price-range-topline {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    .price-range-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--text-label);
+      min-width: 0;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.01em;
+      white-space: nowrap;
+    }
+    .price-range-label::before {
+      content: "";
+      width: 6px;
+      height: 6px;
+      flex: 0 0 auto;
+      border-radius: 50%;
+      background: var(--price-range-accent);
+      box-shadow: 0 0 0 3px var(--price-range-accent-soft);
+    }
+    .price-range-distance {
+      flex: 0 0 auto;
+      padding: 2px 5px;
+      border-radius: 999px;
+      background: var(--price-range-signal-soft);
+      color: var(--price-range-signal);
+      font-size: 9px;
+      font-weight: 700;
+      line-height: 1.25;
+      white-space: nowrap;
+    }
+    .price-range-value {
+      position: relative;
+      z-index: 1;
+      display: block;
+      margin-top: 5px;
+      color: var(--text-strong);
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+    }
+    .price-range-value-row {
+      position: relative;
+      z-index: 1;
+      display: block;
+    }
+    .price-range-value-row .price-range-value {
+      margin-top: 5px;
+    }
+    .price-range-value-row .price-range-distance {
+      display: inline-flex;
+      margin-top: 4px;
+    }
+    .price-range-track {
+      position: relative;
+      z-index: 1;
+      height: 4px;
+      margin-top: 9px;
+      overflow: hidden;
+      border-radius: 99px;
+      background: var(--border-soft);
+    }
+    .price-range-fill {
+      height: 100%;
+      min-width: 4px;
+      border-radius: inherit;
+      background: linear-gradient(90deg, var(--price-range-signal-soft), var(--price-range-signal));
+    }
+    .price-range-caption {
+      position: relative;
+      z-index: 1;
+      display: block;
+      margin-top: 5px;
+      color: var(--text-muted);
+      font-size: 9px;
+      font-weight: 600;
+    }
     .visually-hidden {
       position: absolute !important;
       width: 1px !important;
@@ -1210,6 +1399,8 @@
         gap: 8px;
       }
       .ticker-quote { width: 100%; }
+      .price-ranges { margin-top: 2px; }
+      .price-range-item { padding: 10px; }
       .earnings-summary {
         align-items: flex-start;
         gap: 10px;
@@ -1426,6 +1617,7 @@
 
           </div>
 
+
         </div>
       </div>
 
@@ -1446,6 +1638,7 @@
 
     <div class="earnings-history-heading">Last 4 reported quarters · 3 beats · 1 miss · next release highlighted</div>
     <div class="earnings-history-layout">
+
     <div class="earnings-chart" aria-hidden="true">
       <div class="earnings-chart-heading">
         <span>EPS surprise vs consensus</span>
@@ -1619,6 +1812,7 @@
         </tbody>
       </table>
     </div>
+
     </div>
 
   </div>
@@ -1761,6 +1955,7 @@
 
           </div>
 
+
         </div>
       </div>
 
@@ -1781,6 +1976,7 @@
 
     <div class="earnings-history-heading">Last 4 reported quarters · 3 beats · 1 miss · next release highlighted</div>
     <div class="earnings-history-layout">
+
     <div class="earnings-chart" aria-hidden="true">
       <div class="earnings-chart-heading">
         <span>EPS surprise vs consensus</span>
@@ -1954,6 +2150,7 @@
         </tbody>
       </table>
     </div>
+
     </div>
 
   </div>
@@ -2034,10 +2231,206 @@
 
           </div>
 
+
+<div class="price-ranges" aria-label="Price highs">
+  <p class="price-ranges-heading">Price landmarks</p>
+
+
+
+<div class="price-range-item year-high below-high">
+  <div class="price-range-topline">
+    <span class="price-range-label">52-week high</span>
+  </div>
+  <div class="price-range-value-row">
+    <strong class="price-range-value">₹4592.25</strong>
+    <span class="price-range-distance">10.2% below</span>
+  </div>
+  <div class="price-range-track" aria-hidden="true"><div class="price-range-fill" style="width: 89.84%;"></div></div>
+  <span class="price-range-caption">Current price → high</span>
+</div>
+
+
+
+
+<div class="price-range-item all-time-high below-high">
+  <div class="price-range-topline">
+    <span class="price-range-label">All-time high</span>
+  </div>
+  <div class="price-range-value-row">
+    <strong class="price-range-value">₹4592.25</strong>
+    <span class="price-range-distance">10.2% below</span>
+  </div>
+  <div class="price-range-track" aria-hidden="true"><div class="price-range-fill" style="width: 89.84%;"></div></div>
+  <span class="price-range-caption">Current price → high</span>
+</div>
+
+</div>
+
         </div>
       </div>
 
 
+
+<details class="earnings-history">
+  <summary class="earnings-summary">
+    <span class="earnings-summary-copy">
+      <span class="earnings-summary-title">Earnings</span>
+      <span class="earnings-summary-subtitle">Last 4 reported quarters</span>
+    </span>
+    <span class="earnings-summary-meta">
+      <span class="earnings-summary-score">Latest EPS ₹37.18</span>
+      <span class="earnings-chevron" aria-hidden="true"></span>
+    </span>
+  </summary>
+  <div class="earnings-content">
+
+    <div class="earnings-history-heading">Last 4 reported quarters · Latest EPS ₹37.18</div>
+    <div class="earnings-history-layout">
+
+    <div class="earnings-chart" aria-hidden="true">
+      <div class="earnings-chart-heading">
+        <span>Reported EPS trend</span>
+        <span class="earnings-chart-scale">₹37.18 scale</span>
+      </div>
+      <div class="earnings-chart-rows">
+
+        <div class="earnings-chart-row">
+          <span class="earnings-chart-quarter">
+            Q2 FY26
+
+          </span>
+          <span class="earnings-bar-track">
+            <span class="earnings-bar-half earnings-bar-half-left">
+
+            </span>
+            <span class="earnings-bar-half earnings-bar-half-right">
+              <span class="earnings-bar beat" style="width: 91.72%"></span>
+            </span>
+
+          </span>
+          <span class="earnings-chart-value beat">
+            ₹34.10
+          </span>
+        </div>
+
+        <div class="earnings-chart-row">
+          <span class="earnings-chart-quarter">
+            Q3 FY26
+
+          </span>
+          <span class="earnings-bar-track">
+            <span class="earnings-bar-half earnings-bar-half-left">
+
+            </span>
+            <span class="earnings-bar-half earnings-bar-half-right">
+              <span class="earnings-bar beat" style="width: 94.73%"></span>
+            </span>
+
+          </span>
+          <span class="earnings-chart-value beat">
+            ₹35.22
+          </span>
+        </div>
+
+        <div class="earnings-chart-row">
+          <span class="earnings-chart-quarter">
+            Q4 FY26
+
+          </span>
+          <span class="earnings-bar-track">
+            <span class="earnings-bar-half earnings-bar-half-left">
+
+            </span>
+            <span class="earnings-bar-half earnings-bar-half-right">
+              <span class="earnings-bar beat" style="width: 98.04%"></span>
+            </span>
+
+          </span>
+          <span class="earnings-chart-value beat">
+            ₹36.45
+          </span>
+        </div>
+
+        <div class="earnings-chart-row is-latest">
+          <span class="earnings-chart-quarter">
+            Q1 FY27
+            <small>Latest</small>
+          </span>
+          <span class="earnings-bar-track">
+            <span class="earnings-bar-half earnings-bar-half-left">
+
+            </span>
+            <span class="earnings-bar-half earnings-bar-half-right">
+              <span class="earnings-bar beat" style="width: 100.00%"></span>
+            </span>
+
+          </span>
+          <span class="earnings-chart-value beat">
+            ₹37.18
+          </span>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="earnings-table-wrap" tabindex="0" aria-label="Scrollable four-quarter reported results comparison">
+      <table class="earnings-table">
+        <caption class="visually-hidden">Reported financial results for the last four quarters</caption>
+        <thead>
+          <tr>
+            <th scope="col">Metric</th>
+
+            <th scope="col">
+              <span class="earnings-quarter-label">Q2 FY26</span>
+              <span class="earnings-period-label">Sep 2025</span>
+
+            </th>
+
+            <th scope="col">
+              <span class="earnings-quarter-label">Q3 FY26</span>
+              <span class="earnings-period-label">Dec 2025</span>
+
+            </th>
+
+            <th scope="col">
+              <span class="earnings-quarter-label">Q4 FY26</span>
+              <span class="earnings-period-label">Mar 2026</span>
+
+            </th>
+
+            <th scope="col" class="is-latest">
+              <span class="earnings-quarter-label">Q1 FY27</span>
+              <span class="earnings-period-label">Jun 2026</span>
+              <span class="earnings-latest-label">Latest</span>
+            </th>
+
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row">Sales (₹ cr)</th>
+            <td>65,799</td><td>67,586</td><td>69,340</td><td class="is-latest">71,220</td>
+          </tr>
+          <tr>
+            <th scope="row">Net profit (₹ cr)</th>
+            <td>12,075</td><td>12,480</td><td>12,910</td><td class="is-latest">13,285</td>
+          </tr>
+          <tr>
+            <th scope="row">EPS (₹)</th>
+            <td>34.10</td><td>35.22</td><td>36.45</td><td class="is-latest">37.18</td>
+          </tr>
+          <tr>
+            <th scope="row">OPM</th>
+            <td>24.6%</td><td>25.0%</td><td>25.3%</td><td class="is-latest">25.7%</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    </div>
+
+  </div>
+</details>
 
 
 
@@ -2095,10 +2488,206 @@
 
           </div>
 
+
+<div class="price-ranges" aria-label="Price highs">
+  <p class="price-ranges-heading">Price landmarks</p>
+
+
+
+<div class="price-range-item year-high below-high">
+  <div class="price-range-topline">
+    <span class="price-range-label">52-week high</span>
+  </div>
+  <div class="price-range-value-row">
+    <strong class="price-range-value">₹3217.60</strong>
+    <span class="price-range-distance">11.2% below</span>
+  </div>
+  <div class="price-range-track" aria-hidden="true"><div class="price-range-fill" style="width: 88.77%;"></div></div>
+  <span class="price-range-caption">Current price → high</span>
+</div>
+
+
+
+
+<div class="price-range-item all-time-high below-high">
+  <div class="price-range-topline">
+    <span class="price-range-label">All-time high</span>
+  </div>
+  <div class="price-range-value-row">
+    <strong class="price-range-value">₹3217.60</strong>
+    <span class="price-range-distance">11.2% below</span>
+  </div>
+  <div class="price-range-track" aria-hidden="true"><div class="price-range-fill" style="width: 88.77%;"></div></div>
+  <span class="price-range-caption">Current price → high</span>
+</div>
+
+</div>
+
         </div>
       </div>
 
 
+
+<details class="earnings-history">
+  <summary class="earnings-summary">
+    <span class="earnings-summary-copy">
+      <span class="earnings-summary-title">Earnings</span>
+      <span class="earnings-summary-subtitle">Last 4 reported quarters</span>
+    </span>
+    <span class="earnings-summary-meta">
+      <span class="earnings-summary-score">Latest EPS ₹32.44</span>
+      <span class="earnings-chevron" aria-hidden="true"></span>
+    </span>
+  </summary>
+  <div class="earnings-content">
+
+    <div class="earnings-history-heading">Last 4 reported quarters · Latest EPS ₹32.44</div>
+    <div class="earnings-history-layout">
+
+    <div class="earnings-chart" aria-hidden="true">
+      <div class="earnings-chart-heading">
+        <span>Reported EPS trend</span>
+        <span class="earnings-chart-scale">₹32.44 scale</span>
+      </div>
+      <div class="earnings-chart-rows">
+
+        <div class="earnings-chart-row">
+          <span class="earnings-chart-quarter">
+            Q2 FY26
+
+          </span>
+          <span class="earnings-bar-track">
+            <span class="earnings-bar-half earnings-bar-half-left">
+
+            </span>
+            <span class="earnings-bar-half earnings-bar-half-right">
+              <span class="earnings-bar beat" style="width: 83.66%"></span>
+            </span>
+
+          </span>
+          <span class="earnings-chart-value beat">
+            ₹27.14
+          </span>
+        </div>
+
+        <div class="earnings-chart-row">
+          <span class="earnings-chart-quarter">
+            Q3 FY26
+
+          </span>
+          <span class="earnings-bar-track">
+            <span class="earnings-bar-half earnings-bar-half-left">
+
+            </span>
+            <span class="earnings-bar-half earnings-bar-half-right">
+              <span class="earnings-bar beat" style="width: 90.38%"></span>
+            </span>
+
+          </span>
+          <span class="earnings-chart-value beat">
+            ₹29.32
+          </span>
+        </div>
+
+        <div class="earnings-chart-row">
+          <span class="earnings-chart-quarter">
+            Q4 FY26
+
+          </span>
+          <span class="earnings-bar-track">
+            <span class="earnings-bar-half earnings-bar-half-left">
+
+            </span>
+            <span class="earnings-bar-half earnings-bar-half-right">
+              <span class="earnings-bar beat" style="width: 95.81%"></span>
+            </span>
+
+          </span>
+          <span class="earnings-chart-value beat">
+            ₹31.08
+          </span>
+        </div>
+
+        <div class="earnings-chart-row is-latest">
+          <span class="earnings-chart-quarter">
+            Q1 FY27
+            <small>Latest</small>
+          </span>
+          <span class="earnings-bar-track">
+            <span class="earnings-bar-half earnings-bar-half-left">
+
+            </span>
+            <span class="earnings-bar-half earnings-bar-half-right">
+              <span class="earnings-bar beat" style="width: 100.00%"></span>
+            </span>
+
+          </span>
+          <span class="earnings-chart-value beat">
+            ₹32.44
+          </span>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="earnings-table-wrap" tabindex="0" aria-label="Scrollable four-quarter reported results comparison">
+      <table class="earnings-table">
+        <caption class="visually-hidden">Reported financial results for the last four quarters</caption>
+        <thead>
+          <tr>
+            <th scope="col">Metric</th>
+
+            <th scope="col">
+              <span class="earnings-quarter-label">Q2 FY26</span>
+              <span class="earnings-period-label">Sep 2025</span>
+
+            </th>
+
+            <th scope="col">
+              <span class="earnings-quarter-label">Q3 FY26</span>
+              <span class="earnings-period-label">Dec 2025</span>
+
+            </th>
+
+            <th scope="col">
+              <span class="earnings-quarter-label">Q4 FY26</span>
+              <span class="earnings-period-label">Mar 2026</span>
+
+            </th>
+
+            <th scope="col" class="is-latest">
+              <span class="earnings-quarter-label">Q1 FY27</span>
+              <span class="earnings-period-label">Jun 2026</span>
+              <span class="earnings-latest-label">Latest</span>
+            </th>
+
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row">Sales (₹ cr)</th>
+            <td>258,407</td><td>269,496</td><td>274,732</td><td class="is-latest">281,109</td>
+          </tr>
+          <tr>
+            <th scope="row">Net profit (₹ cr)</th>
+            <td>18,450</td><td>20,185</td><td>21,930</td><td class="is-latest">22,840</td>
+          </tr>
+          <tr>
+            <th scope="row">EPS (₹)</th>
+            <td>27.14</td><td>29.32</td><td>31.08</td><td class="is-latest">32.44</td>
+          </tr>
+          <tr>
+            <th scope="row">OPM</th>
+            <td>17.1%</td><td>17.6%</td><td>18.0%</td><td class="is-latest">18.3%</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    </div>
+
+  </div>
+</details>
 
 
 
