@@ -382,7 +382,7 @@ class EarningsRenderTest(unittest.TestCase):
         html = build_web_section(sample_section(sample_history()))
 
         self.assertIn('<details class="earnings-history">', html)
-        self.assertIn("<span class=\"earnings-summary-title\">Earnings</span>", html)
+        self.assertIn("<span class=\"earnings-summary-title\">Next earnings</span>", html)
         self.assertIn("earnings-chart-row is-upcoming", html)
         self.assertIn("earnings-result upcoming", html)
         self.assertIn("15 Sep 2026", html)

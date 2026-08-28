@@ -3,8 +3,8 @@
 <details class="earnings-history">
   <summary class="earnings-summary">
     <span class="earnings-summary-copy">
-      <span class="earnings-summary-title">Earnings</span>
-      <span class="earnings-summary-subtitle">{% if earnings %}Next release{% else %}Last 4 reported quarters{% endif %}</span>
+      <span class="earnings-summary-title">{% if earnings %}Next earnings{% else %}Earnings{% endif %}</span>
+      {% if not earnings %}<span class="earnings-summary-subtitle">Last 4 reported quarters</span>{% endif %}
     </span>
     <span class="earnings-summary-meta">
       <span class="earnings-summary-score">{% if earnings %}{{ earnings.date_label }}{% else %}{{ history.summary_label }}{% endif %}</span>

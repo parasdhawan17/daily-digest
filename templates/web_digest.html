@@ -42,7 +42,6 @@
       --pill-down-fg: #b91c1c;
       --pill-flat-bg: #f1f5f9;
       --pill-flat-fg: #64748b;
-      --mover-badge-bg: #e0e7ff;
       --earnings-beat: #15803d;
       --earnings-beat-soft: #dcfce7;
       --earnings-miss: #b91c1c;
@@ -78,8 +77,6 @@
       --pill-down-fg: #fca5a5;
       --pill-flat-bg: #334155;
       --pill-flat-fg: #cbd5e1;
-      --mover-badge-bg: #312e81;
-      --mover-badge-fg: #c7d2fe;
       --earnings-beat: #86efac;
       --earnings-beat-soft: #14532d;
       --earnings-miss: #fca5a5;
@@ -552,7 +549,7 @@
     }
     .ticker-ai-brief strong { color: var(--text-strong); }
     .section-eyebrow {
-      margin: 0 0 16px;
+      margin: 0 0 10px;
       font-size: 11px;
       color: var(--text-label);
       letter-spacing: 0.14em;
@@ -1142,64 +1139,64 @@
     .earnings-result.inline,
     .earnings-result.unavailable { background: var(--pill-flat-bg); color: var(--pill-flat-fg); }
     .earnings-result.upcoming { background: var(--link); color: var(--card-bg); }
-    .mover-badge {
-      display: inline-block;
-      padding: 3px 8px;
-      border-radius: 4px;
-      font-size: 10px;
-      font-weight: 700;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-      background: var(--mover-badge-bg);
-      color: var(--mover-badge-fg);
-      vertical-align: middle;
-    }
     .story-list {
-      margin-top: 8px;
+      margin-top: 6px;
     }
     .story {
-      padding: 20px 0;
+      padding: 12px 0;
       border-bottom: 1px solid var(--border-soft);
     }
     .story:last-child { border-bottom: none; }
     .story.has-thumb {
       display: flex;
-      gap: 16px;
+      align-items: flex-start;
+      gap: 12px;
     }
     .story-thumb {
-      width: 112px;
-      height: 72px;
+      width: 88px;
+      height: 60px;
       object-fit: cover;
-      border-radius: 8px;
+      border-radius: 7px;
       flex-shrink: 0;
     }
     .story-body { flex: 1; min-width: 0; }
     .story-headline {
       margin: 0;
-      font-size: clamp(1rem, 2.5vw, 1.0625rem);
+      display: -webkit-box;
+      overflow: hidden;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 2;
+      font-size: clamp(0.8125rem, 1.9vw, 0.875rem);
       font-weight: 600;
-      line-height: 1.45;
+      line-height: 1.32;
     }
     .story-headline a { color: var(--link); text-decoration: none; }
     .story-headline a:hover { text-decoration: underline; }
     .story .summary {
-      margin: 8px 0 0;
-      font-size: 15px;
+      margin: 5px 0 0;
+      display: -webkit-box;
+      overflow: hidden;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 1;
+      font-size: 12px;
       color: var(--text-secondary);
-      line-height: 1.6;
+      line-height: 1.35;
     }
     .story .meta {
-      margin: 8px 0 0;
-      font-size: 12px;
+      margin: 5px 0 0;
+      overflow: hidden;
+      font-size: 10px;
       color: var(--text-muted);
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
     .story-more {
       border-top: 1px solid var(--border-soft);
       margin-top: 4px;
     }
     .story-more summary {
-      padding: 16px 0;
-      font-size: 14px;
+      padding: 12px 0;
+      font-size: 13px;
       font-weight: 600;
       color: var(--link);
       cursor: pointer;
@@ -1384,45 +1381,81 @@
     @media (min-width: 768px) {
       .header { padding: 72px 24px 64px; }
       .ticker-section { padding: 56px 0; }
-      .story-thumb { width: 128px; height: 84px; }
+      .story-thumb { width: 96px; height: 64px; }
     }
     @media (max-width: 767px) {
       .section-inner { padding: 0 20px; }
       .story.has-thumb {
-        flex-direction: column;
+        gap: 10px;
       }
       .story-thumb {
-        width: 100%;
-        height: 160px;
+        width: 72px;
+        height: 52px;
       }
       .ticker-head-main {
+        flex-direction: column;
         flex-wrap: nowrap;
+        align-items: stretch;
+        justify-content: flex-start;
+        gap: 8px;
+      }
+      .ticker-head { align-items: flex-start; gap: 10px; }
+      .ticker-logo { width: 40px; height: 40px; padding: 5px; }
+      .ticker-row {
+        width: 100%;
+        flex: none;
+        flex-wrap: wrap;
         gap: 6px;
       }
-      .ticker-head { gap: 10px; }
-      .ticker-logo { width: 40px; height: 40px; padding: 5px; }
-      .ticker-row { flex: 1; gap: 6px; }
       .ticker-symbol {
         min-width: 0;
-        overflow: hidden;
+        flex-shrink: 0;
         font-size: 1rem;
-        text-overflow: ellipsis;
         white-space: nowrap;
       }
       .exchange-badge { flex-shrink: 0; padding: 3px 6px; font-size: 9px; }
-      .ticker-quote { width: auto; gap: 6px; }
+      .ticker-quote {
+        width: 100%;
+        flex-wrap: wrap;
+        gap: 6px;
+      }
       .ticker-price { font-size: 0.875rem; }
       .ticker-change { padding: 4px 7px; font-size: 11px; }
-      .price-ranges { margin-top: 2px; }
+      .price-ranges { margin-top: 12px; }
       .price-range-item { padding: 10px; }
-      .earnings-summary {
-        align-items: flex-start;
-        gap: 10px;
-        padding: 9px 12px;
+      .earnings-history {
+        margin: 12px 0 6px;
+        border-radius: 9px;
+        box-shadow: none;
       }
-      .earnings-summary-copy { flex-direction: column; align-items: flex-start; gap: 1px; }
-      .earnings-summary-meta { gap: 9px; }
-      .earnings-summary-score { padding: 3px 7px; font-size: 10px; }
+      .earnings-summary {
+        min-height: 42px;
+        align-items: center;
+        gap: 10px;
+        padding: 8px 10px;
+      }
+      .earnings-summary-copy {
+        flex: 1;
+        flex-direction: row;
+        align-items: baseline;
+        flex-wrap: nowrap;
+        gap: 6px;
+        overflow: hidden;
+      }
+      .earnings-summary-title { flex-shrink: 0; font-size: 12px; }
+      .earnings-summary-subtitle {
+        overflow: hidden;
+        font-size: 10px;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .earnings-summary-meta { gap: 8px; }
+      .earnings-summary-score {
+        padding: 0;
+        border: none;
+        background: transparent;
+        font-size: 11px;
+      }
       .earnings-content {
         display: block;
         padding: 12px;
@@ -1618,7 +1651,7 @@
   {% macro render_story(story) %}
   {% if story.image %}
   <article class="story has-thumb">
-    <img class="story-thumb" src="{{ story.image }}" alt="">
+    <img class="story-thumb" src="{{ story.image }}" alt="" loading="lazy" decoding="async">
     <div class="story-body">
       <h3 class="story-headline"><a href="{{ story.url }}" target="_blank" rel="noopener">{{ story.headline }}</a></h3>
       {% if story.summary %}
@@ -1651,8 +1684,8 @@
   {% set cls = change_class(sec_quote) %}
   <section class="ticker-section{% if is_hero %} ticker-section-featured{% endif %}{% if alt_bg %} section-alt{% endif %}">
     <div class="section-inner">
-      {% if is_hero %}
-      <p class="section-eyebrow">Biggest mover</p>
+      {% if is_hero or is_highlight %}
+      <p class="section-eyebrow">{% if is_hero %}Biggest mover{% else %}Notable mover{% endif %}</p>
       {% endif %}
       <div class="ticker-head">
         {% if section.logo %}
@@ -1662,9 +1695,6 @@
           <div class="ticker-row">
             <span class="ticker-symbol">{{ section.display_symbol or section.ticker }}</span>{% if section.exchange %}
             <span class="exchange-badge {{ section.market|lower }}">{{ section.exchange }}</span>{% endif %}
-            {% if is_highlight and not is_hero %}
-            <span class="mover-badge">Mover</span>
-            {% endif %}
           </div>
           {% if sec_quote %}
           <div class="ticker-quote">
@@ -1677,8 +1707,9 @@
           </div>
           {% endif %}
         </div>
-        {{ render_price_ranges(section) }}
       </div>
+
+      {{ render_price_ranges(section) }}
 
       {{ render_earnings(section.upcoming_earnings, section.earnings_history) }}
 
