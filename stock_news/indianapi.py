@@ -24,6 +24,7 @@ ENTITIES_CACHE_TTL_SECONDS = 24 * 3600
 _HTML_TAG_RE = re.compile(r"<[^>]+>")
 _ALLOWED_LOGO_CONTENT_TYPES = {"image/png", "image/jpeg", "image/webp", "image/gif"}
 _MAX_LOGO_BYTES = 2 * 1024 * 1024
+_FMP_LOGO_ROOT = "https://financialmodelingprep.com/image-stock"
 
 
 def _strip_html(text: str) -> str:
@@ -99,22 +100,43 @@ def _normalize_news_item(item: dict) -> dict:
     story_id = item.get("id")
     if story_id is None and url:
         story_id = url
+    image = _news_image(item)
     return {
         "id": story_id,
         "headline": headline or "News update",
         "summary": summary,
         "url": url,
-        "image": (
-            item.get("image")
-            or item.get("image_url")
-            or item.get("imageUrl")
-            or item.get("thumbnail_url")
-            or item.get("thumbnail")
-            or ""
-        ).strip() or None,
+        "image": image,
         "source": source,
         "datetime": published,
     }
+
+
+def _news_image(item: dict) -> str | None:
+    lead_media = item.get("leadMedia")
+    lead_images: dict = {}
+    if isinstance(lead_media, dict):
+        image = lead_media.get("image")
+        if isinstance(image, dict):
+            images = image.get("images")
+            if isinstance(images, dict):
+                lead_images = images
+
+    candidates = (
+        lead_images.get("bigImage"),
+        lead_images.get("thumbnailImage"),
+        item.get("listimage"),
+        item.get("thumbnailImage"),
+        item.get("image"),
+        item.get("image_url"),
+        item.get("imageUrl"),
+        item.get("thumbnail_url"),
+        item.get("thumbnail"),
+    )
+    for candidate in candidates:
+        if isinstance(candidate, str) and candidate.strip():
+            return candidate.strip()
+    return None
 
 
 def _load_entities_cache() -> list[dict]:
@@ -357,19 +379,21 @@ def fetch_news(
     *,
     base_url: str | None = None,
 ) -> list[dict]:
-    try:
-        response = requests.get(
-            f"{_api_root(base_url)}/company_news",
-            params={"stock_name": _stock_name_for_lookup(symbol)},
-            headers=_headers(api_key),
-            timeout=30,
-        )
-        response.raise_for_status()
-        richer_news = _normalize_news_items(_news_items(response.json()), limit)
-        if richer_news:
-            return richer_news
-    except (requests.RequestException, ValueError):
-        pass
+    api_root = _api_root(base_url)
+    if api_root != "https://stock.indianapi.in":
+        try:
+            response = requests.get(
+                f"{api_root}/company_news",
+                params={"stock_name": _stock_name_for_lookup(symbol)},
+                headers=_headers(api_key),
+                timeout=30,
+            )
+            response.raise_for_status()
+            richer_news = _normalize_news_items(_news_items(response.json()), limit)
+            if richer_news:
+                return richer_news
+        except (requests.RequestException, ValueError):
+            pass
 
     payload = _fetch_stock(_stock_name_for_lookup(symbol), api_key, base_url=base_url)
     if not payload:
@@ -430,17 +454,29 @@ def fetch_company_logo(
     *,
     base_url: str | None = None,
 ) -> str | None:
-    response = requests.get(
-        f"{_api_root(base_url)}/logo",
-        params={"stock_name": _stock_name_for_lookup(symbol)},
-        headers=_headers(api_key),
-        timeout=30,
-    )
-    response.raise_for_status()
-    payload = response.json()
+    api_root = _api_root(base_url)
+    if api_root != "https://stock.indianapi.in":
+        try:
+            response = requests.get(
+                f"{api_root}/logo",
+                params={"stock_name": _stock_name_for_lookup(symbol)},
+                headers=_headers(api_key),
+                timeout=30,
+            )
+            response.raise_for_status()
+            payload = response.json()
+            logo = _logo_data_url(payload)
+            if logo:
+                return logo
+        except (requests.RequestException, ValueError):
+            pass
+
+    return _fetch_public_nse_logo(symbol)
+
+
+def _logo_data_url(payload: object) -> str | None:
     if not isinstance(payload, dict):
         return None
-
     content_type = str(
         payload.get("content_type") or payload.get("contentType") or ""
     ).strip().lower().split(";", 1)[0]
@@ -456,6 +492,26 @@ def fetch_company_logo(
         return None
     if not decoded or len(decoded) > _MAX_LOGO_BYTES:
         return None
+    return f"data:{content_type};base64,{encoded}"
+
+
+def _fetch_public_nse_logo(symbol: str) -> str | None:
+    stock_symbol = _stock_name_for_lookup(symbol)
+    if not re.fullmatch(r"[A-Z0-9&-]+", stock_symbol):
+        return None
+    response = requests.get(
+        f"{_FMP_LOGO_ROOT}/{stock_symbol}.NS.png",
+        headers={"Accept": "image/png,image/jpeg,image/webp,image/gif"},
+        timeout=15,
+    )
+    response.raise_for_status()
+    content_type = response.headers.get("content-type", "").lower().split(";", 1)[0]
+    content = response.content
+    if content_type not in _ALLOWED_LOGO_CONTENT_TYPES:
+        return None
+    if not content or len(content) > _MAX_LOGO_BYTES:
+        return None
+    encoded = base64.b64encode(content).decode("ascii")
     return f"data:{content_type};base64,{encoded}"
 
 

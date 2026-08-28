@@ -21,11 +21,11 @@ class IndianMediaProviderTest(unittest.TestCase):
         }
         get.return_value = response
 
-        result = fetch_company_logo("TCS", "key")
+        result = fetch_company_logo("TCS", "key", base_url="https://dev.indianapi.in")
 
         self.assertEqual(result, f"data:image/png;base64,{encoded}")
         get.assert_called_once_with(
-            "https://stock.indianapi.in/logo",
+            "https://dev.indianapi.in/logo",
             params={"stock_name": "TCS"},
             headers={"Accept": "application/json", "x-api-key": "key"},
             timeout=30,
@@ -34,19 +34,40 @@ class IndianMediaProviderTest(unittest.TestCase):
     @patch("stock_news.indianapi.requests.get")
     def test_rejects_unsafe_or_invalid_logo_payload(self, get: Mock) -> None:
         response = Mock()
+        response.headers = {"content-type": "text/plain"}
+        response.content = b"not-an-image"
         get.return_value = response
 
         response.json.return_value = {
             "content_type": "image/svg+xml",
             "base64_image": base64.b64encode(b"<svg></svg>").decode("ascii"),
         }
-        self.assertIsNone(fetch_company_logo("TCS", "key"))
+        self.assertIsNone(fetch_company_logo("TCS", "key", base_url="https://dev.indianapi.in"))
 
         response.json.return_value = {
             "content_type": "image/png",
             "base64_image": "not-valid-base64!",
         }
-        self.assertIsNone(fetch_company_logo("TCS", "key"))
+        self.assertIsNone(fetch_company_logo("TCS", "key", base_url="https://dev.indianapi.in"))
+
+    @patch("stock_news.indianapi.requests.get")
+    def test_uses_public_nse_logo_on_current_stock_plan(self, get: Mock) -> None:
+        response = Mock()
+        response.headers = {"content-type": "image/png"}
+        response.content = b"nmdc-logo"
+        get.return_value = response
+
+        result = fetch_company_logo("NMDC", "key")
+
+        self.assertEqual(
+            result,
+            f"data:image/png;base64,{base64.b64encode(b'nmdc-logo').decode('ascii')}",
+        )
+        get.assert_called_once_with(
+            "https://financialmodelingprep.com/image-stock/NMDC.NS.png",
+            headers={"Accept": "image/png,image/jpeg,image/webp,image/gif"},
+            timeout=15,
+        )
 
     @patch("stock_news.indianapi.requests.get")
     def test_preserves_documented_news_image_and_timestamp_fields(self, get: Mock) -> None:
@@ -66,13 +87,13 @@ class IndianMediaProviderTest(unittest.TestCase):
         }
         get.return_value = response
 
-        result = fetch_news("TCS", "key")
+        result = fetch_news("TCS", "key", base_url="https://dev.indianapi.in")
 
         self.assertEqual(len(result), 1)
         self.assertEqual(result[0]["image"], "https://example.com/tcs-ai.jpg")
         self.assertEqual(result[0]["datetime"], int(published.timestamp()))
         get.assert_called_once_with(
-            "https://stock.indianapi.in/company_news",
+            "https://dev.indianapi.in/company_news",
             params={"stock_name": "TCS"},
             headers={"Accept": "application/json", "x-api-key": "key"},
             timeout=30,
@@ -92,11 +113,40 @@ class IndianMediaProviderTest(unittest.TestCase):
         }
         get.side_effect = [unavailable, fallback]
 
-        result = fetch_news("TCS", "key")
+        result = fetch_news("TCS", "key", base_url="https://dev.indianapi.in")
 
         self.assertEqual(len(result), 1)
         self.assertEqual(result[0]["image"], "https://example.com/tcs-results.jpg")
         self.assertEqual(get.call_count, 2)
+
+    @patch("stock_news.indianapi.requests.get")
+    def test_reads_stock_plan_lead_media_image(self, get: Mock) -> None:
+        response = Mock()
+        response.json.return_value = {
+            "recentNews": [{
+                "headline": "NMDC reports stronger production",
+                "url": "https://example.com/nmdc-production",
+                "listimage": "https://example.com/nmdc-small.jpg",
+                "leadMedia": {
+                    "image": {
+                        "images": {
+                            "bigImage": "https://example.com/nmdc-large.jpg",
+                        }
+                    }
+                },
+            }]
+        }
+        get.return_value = response
+
+        result = fetch_news("NMDC", "key")
+
+        self.assertEqual(result[0]["image"], "https://example.com/nmdc-large.jpg")
+        get.assert_called_once_with(
+            "https://stock.indianapi.in/stock",
+            params={"name": "NMDC"},
+            headers={"Accept": "application/json", "x-api-key": "key"},
+            timeout=30,
+        )
 
 
 class IndianMediaCollectionTest(unittest.TestCase):
