@@ -261,6 +261,7 @@ class DevHandler(BaseHTTPRequestHandler):
                 indianapi_key=indianapi_key,
                 include_earnings=True,
                 include_price_ranges=True,
+                include_indian_media=True,
             )
             sections = filter_sections(sections, tickers)
             ai_summary = generate_ai_summary(sections)

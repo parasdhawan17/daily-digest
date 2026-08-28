@@ -498,6 +498,7 @@ class EarningsHandlerTest(unittest.TestCase):
             indianapi_key=unittest.mock.ANY,
             include_earnings=True,
             include_price_ranges=True,
+            include_indian_media=True,
         )
         payload = json.loads(handler.wfile.getvalue())
         self.assertTrue(payload["ok"])

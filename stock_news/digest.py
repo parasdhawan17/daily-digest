@@ -175,6 +175,7 @@ def collect_digest_data(
     indianapi_key: str,
     include_earnings: bool = False,
     include_price_ranges: bool = False,
+    include_indian_media: bool = False,
 ) -> tuple[list[dict], int]:
     seen_stories: set[str] = set()
     sections: list[dict] = []
@@ -227,14 +228,15 @@ def collect_digest_data(
                 all_time_high=all_time_high,
             )
 
-        try:
-            section["logo"] = fetch_company_logo(
-                ticker,
-                finnhub_key=finnhub_key,
-                indianapi_key=indianapi_key,
-            )
-        except requests.RequestException:
-            pass
+        if market == "US" or include_indian_media:
+            try:
+                section["logo"] = fetch_company_logo(
+                    ticker,
+                    finnhub_key=finnhub_key,
+                    indianapi_key=indianapi_key,
+                )
+            except requests.RequestException:
+                pass
 
         if include_earnings:
             try:

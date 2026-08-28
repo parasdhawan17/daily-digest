@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import base64
+import binascii
 import json
 import re
 import time
@@ -20,6 +22,8 @@ from stock_news.markets import bare_symbol, format_prefixed
 
 ENTITIES_CACHE_TTL_SECONDS = 24 * 3600
 _HTML_TAG_RE = re.compile(r"<[^>]+>")
+_ALLOWED_LOGO_CONTENT_TYPES = {"image/png", "image/jpeg", "image/webp", "image/gif"}
+_MAX_LOGO_BYTES = 2 * 1024 * 1024
 
 
 def _strip_html(text: str) -> str:
@@ -87,6 +91,7 @@ def _normalize_news_item(item: dict) -> dict:
     source = (item.get("source") or item.get("publisher") or item.get("provider") or "News").strip()
     published = _parse_published_at(
         item.get("published_at")
+        or item.get("pub_date")
         or item.get("publishedDate")
         or item.get("date")
         or item.get("datetime")
@@ -99,7 +104,14 @@ def _normalize_news_item(item: dict) -> dict:
         "headline": headline or "News update",
         "summary": summary,
         "url": url,
-        "image": (item.get("image") or item.get("imageUrl") or "").strip() or None,
+        "image": (
+            item.get("image")
+            or item.get("image_url")
+            or item.get("imageUrl")
+            or item.get("thumbnail_url")
+            or item.get("thumbnail")
+            or ""
+        ).strip() or None,
         "source": source,
         "datetime": published,
     }
@@ -306,13 +318,22 @@ def _all_time_high_from_history(payload: object) -> float | None:
     return max(highs, default=None)
 
 
-def _news_from_stock(payload: dict, limit: int) -> list[dict]:
-    recent = payload.get("recentNews") or []
-    if not isinstance(recent, list):
+def _news_items(payload: object) -> list:
+    if isinstance(payload, list):
+        return payload
+    if not isinstance(payload, dict):
         return []
+    for key in ("recentNews", "news", "articles", "data", "results"):
+        items = payload.get(key)
+        if isinstance(items, list):
+            return items
+    return []
+
+
+def _normalize_news_items(items: list, limit: int) -> list[dict]:
     cutoff = date.today() - timedelta(days=IN_NEWS_LOOKBACK_DAYS)
     normalized: list[dict] = []
-    for item in recent:
+    for item in items:
         if not isinstance(item, dict):
             continue
         story = _normalize_news_item(item)
@@ -325,6 +346,10 @@ def _news_from_stock(payload: dict, limit: int) -> list[dict]:
     return normalized[:limit]
 
 
+def _news_from_stock(payload: dict, limit: int) -> list[dict]:
+    return _normalize_news_items(_news_items(payload), limit)
+
+
 def fetch_news(
     symbol: str,
     api_key: str,
@@ -332,6 +357,20 @@ def fetch_news(
     *,
     base_url: str | None = None,
 ) -> list[dict]:
+    try:
+        response = requests.get(
+            f"{_api_root(base_url)}/company_news",
+            params={"stock_name": _stock_name_for_lookup(symbol)},
+            headers=_headers(api_key),
+            timeout=30,
+        )
+        response.raise_for_status()
+        richer_news = _normalize_news_items(_news_items(response.json()), limit)
+        if richer_news:
+            return richer_news
+    except (requests.RequestException, ValueError):
+        pass
+
     payload = _fetch_stock(_stock_name_for_lookup(symbol), api_key, base_url=base_url)
     if not payload:
         return []
@@ -385,8 +424,39 @@ def fetch_earnings_history(
     return _earnings_from_historical_stats(response.json(), limit)
 
 
-def fetch_company_logo(symbol: str, api_key: str) -> str | None:
-    return None
+def fetch_company_logo(
+    symbol: str,
+    api_key: str,
+    *,
+    base_url: str | None = None,
+) -> str | None:
+    response = requests.get(
+        f"{_api_root(base_url)}/logo",
+        params={"stock_name": _stock_name_for_lookup(symbol)},
+        headers=_headers(api_key),
+        timeout=30,
+    )
+    response.raise_for_status()
+    payload = response.json()
+    if not isinstance(payload, dict):
+        return None
+
+    content_type = str(
+        payload.get("content_type") or payload.get("contentType") or ""
+    ).strip().lower().split(";", 1)[0]
+    encoded = str(
+        payload.get("base64_image") or payload.get("base64Image") or ""
+    ).strip()
+    encoded = re.sub(r"\s+", "", encoded)
+    if content_type not in _ALLOWED_LOGO_CONTENT_TYPES or not encoded:
+        return None
+    try:
+        decoded = base64.b64decode(encoded, validate=True)
+    except (binascii.Error, ValueError):
+        return None
+    if not decoded or len(decoded) > _MAX_LOGO_BYTES:
+        return None
+    return f"data:{content_type};base64,{encoded}"
 
 
 def _search_industry(

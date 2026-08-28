@@ -119,6 +119,7 @@ def handle_data_get(handler: BaseHTTPRequestHandler) -> None:
             indianapi_key=os.environ.get("INDIANAPI_API_KEY", "").strip(),
             include_earnings=True,
             include_price_ranges=True,
+            include_indian_media=True,
         )
         section = filter_sections(sections, [ticker])[0]
         send_json(handler, 200, {"ok": True, "section": section, "html": build_web_section(section)})
