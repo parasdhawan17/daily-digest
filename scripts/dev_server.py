@@ -6,7 +6,7 @@ import os
 import re
 import sys
 import traceback
-from datetime import datetime
+from datetime import datetime, timezone
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, urlparse
@@ -265,11 +265,13 @@ class DevHandler(BaseHTTPRequestHandler):
             )
             sections = filter_sections(sections, tickers)
             ai_summary = generate_ai_summary(sections)
-            fetched_at = format_fetched_at_label(datetime.now().astimezone())
+            fetched_at_instant = datetime.now(timezone.utc)
+            fetched_at = format_fetched_at_label(fetched_at_instant)
             html = build_web_digest(
                 sections,
                 tickers,
                 fetched_at_label=fetched_at,
+                fetched_at_iso=fetched_at_instant.isoformat(),
                 ai_summary=ai_summary,
             )
             self._html(200, html)

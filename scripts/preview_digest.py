@@ -181,10 +181,37 @@ def main() -> None:
     ]
 
     tickers = [section["ticker"] for section in sections]
+    ai_summary = {
+        "market_context": (
+            "AI infrastructure demand and resilient digital-services spending are driving the "
+            "stronger names, while investors weigh company-specific execution and margin trends."
+        ),
+        "ticker_summaries": {
+            "US:NVDA": (
+                "Product-roadmap momentum and sustained data-center demand remain the central "
+                "themes ahead of the next earnings update."
+            ),
+            "IN:RELIANCE": (
+                "Steady refining margins and continued Jio subscriber growth provide support "
+                "despite the modest share-price decline."
+            ),
+            "US:AAPL": (
+                "New AI features and services growth are helping offset investor concerns about "
+                "the pace of the hardware replacement cycle."
+            ),
+            "IN:TCS": (
+                "The latest European banking win reinforces demand for large transformation deals "
+                "and supports the stock's positive move."
+            ),
+        },
+    }
     html = build_web_digest(
         sections,
         tickers,
         fetched_at_label="Fetched at 9:15 AM ET · Aug 15, 2026",
+        fetched_at_iso="2026-08-15T13:15:00+00:00",
+        ai_summary=ai_summary,
+        subscribe_enabled_override=True,
     )
     html = "\n".join(line.rstrip() for line in html.splitlines()) + "\n"
     out = ROOT / "public" / "preview-digest.html"

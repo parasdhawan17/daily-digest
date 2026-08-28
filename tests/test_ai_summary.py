@@ -1,4 +1,5 @@
 import json
+import re
 import unittest
 from unittest.mock import patch
 
@@ -384,6 +385,52 @@ class AiSummaryTest(unittest.TestCase):
         self.assertEqual(html.count("✦ AI brief"), 2)
         self.assertIn("Apple summary.", html)
         self.assertIn("Microsoft summary.", html)
+
+    def test_web_ai_briefs_use_compact_text_sizes(self) -> None:
+        html = build_web_digest([], [])
+
+        self.assertRegex(
+            html,
+            re.compile(r"\.ai-briefing-context\s*\{.*?font-size:\s*11px;", re.DOTALL),
+        )
+        self.assertRegex(
+            html,
+            re.compile(r"\.ticker-ai-brief\s*\{.*?font-size:\s*12px;", re.DOTALL),
+        )
+
+    def test_web_fetched_at_is_localized_in_the_browser(self) -> None:
+        html = build_web_digest(
+            [],
+            [],
+            fetched_at_label="Fetched on 3:00 AM UTC",
+            fetched_at_iso="2026-08-28T03:00:00+00:00",
+        )
+
+        self.assertIn('id="fetched-at"', html)
+        self.assertIn('data-fetched-at="2026-08-28T03:00:00+00:00"', html)
+        self.assertIn("new Intl.DateTimeFormat", html)
+        self.assertIn("hour12: true", html)
+        self.assertIn('timeZoneName: "short"', html)
+
+    def test_web_places_ticker_edit_control_with_subscribed_tickers(self) -> None:
+        html = build_web_digest(
+            sample_sections(),
+            ["US:AAPL", "US:MSFT"],
+            subscribe_enabled_override=True,
+        )
+
+        self.assertIn('<p class="movers-label">Subscribed tickers</p>', html)
+        self.assertIn('class="movers-edit-btn"', html)
+        self.assertIn('aria-label="Edit subscribed tickers"', html)
+        self.assertNotIn('class="header-subscribe-btn"', html)
+
+    def test_web_defaults_to_dark_theme_without_overriding_saved_choice(self) -> None:
+        html = build_web_digest([], [])
+
+        self.assertIn('<html lang="en" data-theme="dark">', html)
+        self.assertIn('<meta name="color-scheme" content="dark light">', html)
+        self.assertIn('var stored = localStorage.getItem("daily-digest-theme")', html)
+        self.assertNotIn('prefers-color-scheme: dark', html)
 
 
 if __name__ == "__main__":

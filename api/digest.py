@@ -3,7 +3,7 @@
 import os
 import sys
 import traceback
-from datetime import datetime
+from datetime import datetime, timezone
 from http.server import BaseHTTPRequestHandler
 from pathlib import Path
 from urllib.parse import parse_qs, urlparse
@@ -84,11 +84,13 @@ def handle_get(handler: BaseHTTPRequestHandler) -> None:
         return
 
     # The page shell is intentionally rendered before any provider or AI call.
-    fetched_at = format_fetched_at_label(datetime.now().astimezone())
+    fetched_at_instant = datetime.now(timezone.utc)
+    fetched_at = format_fetched_at_label(fetched_at_instant)
     html = build_web_digest(
         [],
         tickers,
         fetched_at_label=fetched_at,
+        fetched_at_iso=fetched_at_instant.isoformat(),
         progressive=True,
         progressive_token=token,
     )

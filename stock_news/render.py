@@ -36,7 +36,9 @@ def build_web_digest(
     tickers: list[str],
     *,
     fetched_at_label: str | None = None,
+    fetched_at_iso: str | None = None,
     ai_summary: dict | None = None,
+    subscribe_enabled_override: bool | None = None,
     progressive: bool = False,
     progressive_token: str | None = None,
 ) -> str:
@@ -52,9 +54,14 @@ def build_web_digest(
         story_count=web_story_count,
         site_url=SITE_URL,
         fetched_at_label=fetched_at_label,
+        fetched_at_iso=fetched_at_iso,
         visible_story_count=HEADLINES_PER_TICKER,
         digest_heading=DIGEST_HEADING,
-        subscribe_enabled=subscribe_enabled(),
+        subscribe_enabled=(
+            subscribe_enabled()
+            if subscribe_enabled_override is None
+            else subscribe_enabled_override
+        ),
         progressive=progressive,
         progressive_token=progressive_token,
         progressive_tickers=tickers if progressive else [],

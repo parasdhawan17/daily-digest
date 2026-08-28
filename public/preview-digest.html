@@ -1,19 +1,19 @@
 
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Tickr Digest — 28 Aug 2026</title>
-  <meta name="color-scheme" content="light dark">
+  <meta name="color-scheme" content="dark light">
   <script>
     (function () {
       try {
         var stored = localStorage.getItem("daily-digest-theme");
         var theme = stored === "light" || stored === "dark"
           ? stored
-          : (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+          : "dark";
         document.documentElement.setAttribute("data-theme", theme);
         document.documentElement.style.colorScheme = theme;
       } catch (e) {}
@@ -355,9 +355,6 @@
       box-shadow: 0 2px 12px rgba(0, 0, 0, 0.35);
       text-shadow: 0 1px 6px rgba(0, 0, 0, 0.5);
     }
-    .header-content .header-subscribe-btn {
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.45), 0 4px 14px rgba(220, 38, 38, 0.4);
-    }
     .eyebrow {
       margin: 0 0 8px;
       font-size: 11px;
@@ -384,37 +381,49 @@
       font-size: 13px;
       color: #e2e8f0;
     }
-    .nav {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 12px;
-      justify-content: center;
-      margin-top: 16px;
-      font-size: 13px;
-    }
-    .nav a { color: #93c5fd; text-decoration: none; }
-    .nav a:hover { text-decoration: underline; }
-    .header-subscribe-btn {
-      padding: 8px 18px;
-      border: none;
-      border-radius: 999px;
-      background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-      color: #fff;
-      font-size: 13px;
-      font-weight: 600;
-      cursor: pointer;
-      box-shadow: 0 4px 14px rgba(220, 38, 38, 0.35);
-      transition: background 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
-    }
-    .header-subscribe-btn:hover {
-      background: linear-gradient(135deg, #f87171 0%, #b91c1c 100%);
-      box-shadow: 0 6px 18px rgba(220, 38, 38, 0.45);
-      transform: translateY(-1px);
-    }
     .movers-bar {
       background: var(--card-bg);
       border-bottom: 1px solid var(--border);
-      padding: 12px 0 14px;
+      padding: 10px 0 12px;
+    }
+    .movers-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 6px;
+    }
+    .movers-label {
+      margin: 0;
+      color: var(--text-muted);
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+    .movers-edit-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 9px;
+      border: 1px solid var(--border-strong);
+      border-radius: 999px;
+      background: var(--card-bg);
+      color: var(--link);
+      font: inherit;
+      font-size: 11px;
+      font-weight: 600;
+      line-height: 1;
+      cursor: pointer;
+      transition: background 0.15s ease, border-color 0.15s ease;
+    }
+    .movers-edit-btn:hover {
+      border-color: var(--link);
+      background: var(--muted-bg);
+    }
+    .movers-edit-btn svg {
+      width: 12px;
+      height: 12px;
     }
     .movers-wrap { position: relative; }
     .movers-wrap::before,
@@ -479,7 +488,7 @@
     }
     .ai-briefing {
       position: relative;
-      padding: 28px 0;
+      padding: 18px 0;
       background: linear-gradient(135deg, #eef2ff 0%, #f5f3ff 52%, #eff6ff 100%);
       border-top: 1px solid var(--border);
       border-bottom: 1px solid var(--border);
@@ -488,27 +497,27 @@
     .ai-briefing::before {
       content: "✦";
       position: absolute;
-      top: 10px;
+      top: 8px;
       right: 7%;
       color: rgba(99, 102, 241, 0.18);
-      font-size: 72px;
+      font-size: 48px;
       line-height: 1;
       transform: rotate(12deg);
     }
     .ai-briefing::after {
       content: "";
       position: absolute;
-      width: 260px;
-      height: 260px;
-      top: -160px;
+      width: 200px;
+      height: 200px;
+      top: -130px;
       left: 14%;
       border-radius: 50%;
       background: rgba(129, 140, 248, 0.14);
       filter: blur(20px);
     }
     .ai-briefing-label {
-      margin: 0 0 10px;
-      font-size: 11px;
+      margin: 0 0 6px;
+      font-size: 10px;
       color: var(--text-label);
       letter-spacing: 0.14em;
       text-transform: uppercase;
@@ -518,16 +527,16 @@
       margin: 0;
       max-width: 760px;
       color: var(--text-strong);
-      font-size: 16px;
+      font-size: 11px;
       font-weight: 600;
-      line-height: 1.55;
+      line-height: 1.45;
       position: relative;
       z-index: 1;
     }
     .ai-briefing-note {
-      margin: 14px 0 0;
+      margin: 8px 0 0;
       color: var(--text-muted);
-      font-size: 12px;
+      font-size: 10px;
       line-height: 1.45;
       position: relative;
       z-index: 1;
@@ -543,7 +552,7 @@
       border-radius: 0 6px 6px 0;
       background: var(--muted-bg);
       color: var(--text-secondary);
-      font-size: 14px;
+      font-size: 12px;
       line-height: 1.55;
       box-shadow: 0 4px 14px rgba(79, 70, 229, 0.08);
     }
@@ -1473,16 +1482,6 @@
       .ticker-section {
         padding: 40px 0;
       }
-      .nav {
-        flex-direction: column;
-        align-items: center;
-        gap: 10px;
-      }
-      .header-subscribe-btn {
-        width: 100%;
-        max-width: 280px;
-        min-height: 44px;
-      }
       .header-home-link span { display: none; }
       .header-home-link {
         width: 40px;
@@ -1585,21 +1584,27 @@
         <p class="eyebrow">Tickr Digest</p>
         <h1>Your stock news briefing</h1>
 
-        <p class="muted">Fetched at 9:15 AM ET · Aug 15, 2026</p>
+        <p class="muted"><time id="fetched-at" datetime="2026-08-15T13:15:00+00:00" data-fetched-at="2026-08-15T13:15:00+00:00">Fetched at 9:15 AM ET · Aug 15, 2026</time></p>
 
 
         <p class="badge">Today's biggest move: <strong>US:NVDA +2.14%</strong></p>
 
-        <nav class="nav">
-
-        </nav>
         </div>
       </header>
 
 
 
-  <section class="movers-bar" aria-label="Session movers">
+  <section class="movers-bar" aria-label="Subscribed tickers and session moves">
     <div class="section-inner">
+      <div class="movers-toolbar">
+        <p class="movers-label">Subscribed tickers</p>
+
+        <button type="button" class="movers-edit-btn" onclick="openSubscribeModal()" aria-label="Edit subscribed tickers">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"></path><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4Z"></path></svg>
+          <span>Edit</span>
+        </button>
+
+      </div>
       <div class="movers-wrap">
       <div class="movers" role="list">
         <div class="movers-track">
@@ -1627,6 +1632,14 @@
   </section>
 
 
+
+  <section class="ai-briefing" aria-label="AI briefing">
+    <div class="section-inner">
+      <p class="ai-briefing-label">AI briefing · the signal behind today’s headlines</p>
+      <p class="ai-briefing-context">AI infrastructure demand and resilient digital-services spending are driving the stronger names, while investors weigh company-specific execution and margin trends.</p>
+      <p class="ai-briefing-note">AI-generated from the linked headlines and excerpts. Not investment advice.</p>
+    </div>
+  </section>
 
 
 
@@ -1867,6 +1880,8 @@
 
 
 
+
+      <p class="ticker-ai-brief"><strong>✦ AI brief</strong> &nbsp; Product-roadmap momentum and sustained data-center demand remain the central themes ahead of the next earnings update.</p>
 
 
 
@@ -2206,6 +2221,8 @@
 
 
 
+      <p class="ticker-ai-brief"><strong>✦ AI brief</strong> &nbsp; New AI features and services growth are helping offset investor concerns about the pace of the hardware replacement cycle.</p>
+
 
 
       <div class="story-list">
@@ -2482,6 +2499,8 @@
 
 
 
+      <p class="ticker-ai-brief"><strong>✦ AI brief</strong> &nbsp; The latest European banking win reinforces demand for large transformation deals and supports the stock&#39;s positive move.</p>
+
 
 
       <div class="story-list">
@@ -2739,6 +2758,8 @@
 
 
 
+      <p class="ticker-ai-brief"><strong>✦ AI brief</strong> &nbsp; Steady refining margins and continued Jio subscriber growth provide support despite the modest share-price decline.</p>
+
 
 
       <div class="story-list">
@@ -2792,9 +2813,47 @@
       <p class="footer-brand">Tickr Digest</p>
       <p>Your personalized stock brief</p>
 
+      <p><button type="button" class="footer-link-btn" onclick="openSubscribeModal()">Update your tickers</button></p>
+
     </div>
   </footer>
 
+  <div class="subscribe-modal" id="subscribe-modal" hidden>
+    <div class="subscribe-modal-backdrop" onclick="closeSubscribeModal()"></div>
+    <div class="subscribe-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="subscribe-modal-title">
+      <div class="subscribe-modal-header">
+        <h2 id="subscribe-modal-title">Update your tickers</h2>
+        <button type="button" class="subscribe-modal-close" onclick="closeSubscribeModal()" aria-label="Close">&times;</button>
+      </div>
+      <div class="subscribe-modal-body" id="subscribe-modal-body"></div>
+      <div class="subscribe-success" id="subscribe-success" hidden>
+        <h3>You're in!</h3>
+        <p>Confirm your email if needed. Your ticker picks apply on the next digest run.</p>
+      </div>
+    </div>
+  </div>
+  <script src="/subscribe-form.js" defer></script>
+
+
+
+  <script>
+    (function () {
+      var element = document.getElementById("fetched-at");
+      if (!element) return;
+      var instant = new Date(element.getAttribute("data-fetched-at"));
+      if (Number.isNaN(instant.getTime())) return;
+      try {
+        var localTime = new Intl.DateTimeFormat(undefined, {
+          hour: "numeric",
+          minute: "2-digit",
+          hour12: true,
+          timeZoneName: "short"
+        }).format(instant);
+        element.textContent = "Fetched on " + localTime;
+        element.setAttribute("datetime", instant.toISOString());
+      } catch (error) {}
+    })();
+  </script>
 
   <script>
     (function () {
@@ -2870,7 +2929,7 @@
         applyTheme(
           stored === "light" || stored === "dark"
             ? stored
-            : (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light")
+            : "dark"
         );
       } else {
         syncToggle(currentTheme());
