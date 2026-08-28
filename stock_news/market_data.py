@@ -73,7 +73,7 @@ def fetch_earnings_history(
     indianapi_key: str,
     limit: int = 4,
 ) -> list[dict]:
-    """Return US earnings history; India support is intentionally out of scope."""
+    """Return normalized reported earnings history for the requested market."""
     market = _require_market(prefixed_ticker)
     if market == "US":
         return finnhub.fetch_earnings_history(
@@ -81,7 +81,11 @@ def fetch_earnings_history(
             finnhub_key,
             limit=limit,
         )
-    return []
+    return indianapi.fetch_earnings_history(
+        _us_symbol(prefixed_ticker),
+        indianapi_key,
+        limit=limit,
+    )
 
 
 def fetch_upcoming_earnings(

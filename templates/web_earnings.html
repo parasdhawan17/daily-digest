@@ -15,6 +15,72 @@
     {% if history and history.quarters %}
     <div class="earnings-history-heading">Last 4 reported quarters · {{ history.summary_label }}{% if earnings %} · next release highlighted{% endif %}</div>
     <div class="earnings-history-layout">
+    {% if history.mode == "reported" %}
+    <div class="earnings-chart" aria-hidden="true">
+      <div class="earnings-chart-heading">
+        <span>Reported EPS trend</span>
+        {% if history.chart_scale_value > 0 %}<span class="earnings-chart-scale">₹{{ "%.2f"|format(history.chart_scale_value) }} scale</span>{% endif %}
+      </div>
+      <div class="earnings-chart-rows">
+        {% for quarter in history.quarters %}
+        <div class="earnings-chart-row{% if quarter.latest %} is-latest{% endif %}">
+          <span class="earnings-chart-quarter">
+            {{ quarter.label }}
+            {% if quarter.latest %}<small>Latest</small>{% endif %}
+          </span>
+          <span class="earnings-bar-track">
+            <span class="earnings-bar-half earnings-bar-half-left">
+              {% if quarter.direction == "negative" %}<span class="earnings-bar miss" style="width: {{ "%.2f"|format(quarter.chart_width_pct) }}%"></span>{% endif %}
+            </span>
+            <span class="earnings-bar-half earnings-bar-half-right">
+              {% if quarter.direction == "positive" %}<span class="earnings-bar beat" style="width: {{ "%.2f"|format(quarter.chart_width_pct) }}%"></span>{% endif %}
+            </span>
+            {% if quarter.direction == "flat" %}<span class="earnings-inline-marker"></span>{% endif %}
+          </span>
+          <span class="earnings-chart-value {% if quarter.direction == 'positive' %}beat{% elif quarter.direction == 'negative' %}miss{% else %}inline{% endif %}">
+            {% if quarter.actual is not none %}₹{{ "%.2f"|format(quarter.actual) }}{% else %}—{% endif %}
+          </span>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="earnings-table-wrap" tabindex="0" aria-label="Scrollable four-quarter reported results comparison">
+      <table class="earnings-table">
+        <caption class="visually-hidden">Reported financial results for the last four quarters</caption>
+        <thead>
+          <tr>
+            <th scope="col">Metric</th>
+            {% for quarter in history.quarters %}
+            <th scope="col"{% if quarter.latest %} class="is-latest"{% endif %}>
+              <span class="earnings-quarter-label">{{ quarter.label }}</span>
+              <span class="earnings-period-label">{{ quarter.period_label }}</span>
+              {% if quarter.latest %}<span class="earnings-latest-label">Latest</span>{% endif %}
+            </th>
+            {% endfor %}
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row">Sales (₹ cr)</th>
+            {% for quarter in history.quarters %}<td{% if quarter.latest %} class="is-latest"{% endif %}>{% if quarter.sales is not none %}{{ quarter.sales|format_number }}{% else %}—{% endif %}</td>{% endfor %}
+          </tr>
+          <tr>
+            <th scope="row">Net profit (₹ cr)</th>
+            {% for quarter in history.quarters %}<td{% if quarter.latest %} class="is-latest"{% endif %}>{% if quarter.net_profit is not none %}{{ quarter.net_profit|format_number }}{% else %}—{% endif %}</td>{% endfor %}
+          </tr>
+          <tr>
+            <th scope="row">EPS (₹)</th>
+            {% for quarter in history.quarters %}<td{% if quarter.latest %} class="is-latest"{% endif %}>{% if quarter.actual is not none %}{{ "%.2f"|format(quarter.actual) }}{% else %}—{% endif %}</td>{% endfor %}
+          </tr>
+          <tr>
+            <th scope="row">OPM</th>
+            {% for quarter in history.quarters %}<td{% if quarter.latest %} class="is-latest"{% endif %}>{% if quarter.opm_pct is not none %}{{ "%.1f"|format(quarter.opm_pct) }}%{% else %}—{% endif %}</td>{% endfor %}
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    {% else %}
     <div class="earnings-chart" aria-hidden="true">
       <div class="earnings-chart-heading">
         <span>EPS surprise vs consensus</span>
@@ -101,6 +167,7 @@
         </tbody>
       </table>
     </div>
+    {% endif %}
     </div>
     {% endif %}
   </div>

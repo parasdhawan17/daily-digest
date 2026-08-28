@@ -6,8 +6,13 @@ from unittest.mock import Mock, patch
 import requests
 
 from api.digest import handle_data_get
-from stock_news.digest import build_earnings_history, collect_digest_data
+from stock_news.digest import (
+    build_earnings_history,
+    build_indian_earnings_history,
+    collect_digest_data,
+)
 from stock_news.finnhub import fetch_earnings_history, fetch_upcoming_earnings
+from stock_news.indianapi import fetch_earnings_history as fetch_indian_earnings_history
 from stock_news.render import build_web_digest, build_web_section
 
 
@@ -49,6 +54,27 @@ def sample_history() -> dict:
             quarter("2026-06-30", 2026, 3, 1.91, 1.93, -0.9),
         ]
     )
+
+
+def sample_indian_history() -> dict:
+    quarters = []
+    for period, period_label, label, eps, sales, net_profit, opm_pct in [
+        ("2025-09-01", "Sep 2025", "Q2 FY26", 30.26, 59381, 11120, 25),
+        ("2025-12-01", "Dec 2025", "Q3 FY26", 31.00, 59692, 11380, 26),
+        ("2026-03-01", "Mar 2026", "Q4 FY26", 30.56, 60583, 11097, 27),
+        ("2026-06-01", "Jun 2026", "Q1 FY27", 34.37, 61237, 12502, 28),
+    ]:
+        quarters.append({
+            "mode": "reported",
+            "period": period,
+            "period_label": period_label,
+            "label": label,
+            "actual": eps,
+            "sales": sales,
+            "net_profit": net_profit,
+            "opm_pct": opm_pct,
+        })
+    return build_indian_earnings_history(quarters)
 
 
 def sample_section(history: dict | None = None) -> dict:
@@ -203,6 +229,63 @@ class FinnhubEarningsTest(unittest.TestCase):
         self.assertIsNone(fetch_upcoming_earnings("AAPL", "key"))
 
 
+class IndianApiEarningsTest(unittest.TestCase):
+    @patch("stock_news.indianapi.requests.get")
+    def test_fetches_and_normalizes_latest_four_reported_quarters(self, get: Mock) -> None:
+        response = Mock()
+        response.json.return_value = {
+            "Sales": {
+                "Jun 2025": "58,100",
+                "Sep 2025": "59,381",
+                "Dec 2025": 59692,
+                "Mar 2026": 60583,
+                "Jun 2026": 61237,
+            },
+            "Net Profit": {
+                "Jun 2025": 10800,
+                "Sep 2025": 11120,
+                "Dec 2025": 11380,
+                "Mar 2026": 11097,
+                "Jun 2026": 12502,
+            },
+            "EPS in Rs": {
+                "Jun 2025": 29.10,
+                "Sep 2025": 30.26,
+                "Dec 2025": 31,
+                "Mar 2026": 30.56,
+                "Jun 2026": 34.37,
+            },
+            "OPM %": {
+                "Jun 2025": "24%",
+                "Sep 2025": 25,
+                "Dec 2025": 26,
+                "Mar 2026": 27,
+                "Jun 2026": 28,
+            },
+        }
+        get.return_value = response
+
+        result = fetch_indian_earnings_history("TCS", "key", limit=4)
+
+        response.raise_for_status.assert_called_once_with()
+        get.assert_called_once_with(
+            "https://stock.indianapi.in/historical_stats",
+            params={"stock_name": "TCS", "stats": "quarter_results"},
+            headers={"Accept": "application/json", "x-api-key": "key"},
+            timeout=30,
+        )
+        self.assertEqual([item["period_label"] for item in result], [
+            "Sep 2025", "Dec 2025", "Mar 2026", "Jun 2026"
+        ])
+        self.assertEqual([item["label"] for item in result], [
+            "Q2 FY26", "Q3 FY26", "Q4 FY26", "Q1 FY27"
+        ])
+        self.assertEqual(result[-1]["actual"], 34.37)
+        self.assertEqual(result[-1]["sales"], 61237.0)
+        self.assertEqual(result[-1]["net_profit"], 12502.0)
+        self.assertEqual(result[-1]["opm_pct"], 28.0)
+
+
 class EarningsCollectionTest(unittest.TestCase):
     def _collect(self, ticker: str, *, include_earnings: bool = False) -> list[dict]:
         with (
@@ -255,11 +338,17 @@ class EarningsCollectionTest(unittest.TestCase):
         self.assertEqual(sections[0]["earnings_history"]["summary_label"], "1 miss")
         self.assertEqual(sections[0]["upcoming_earnings"]["date"], "2026-09-15")
 
-    def test_web_collection_skips_indian_tickers(self) -> None:
+    def test_web_collection_fetches_indian_reported_earnings(self) -> None:
         sections = self._collect("IN:RELIANCE", include_earnings=True)
-        self.earnings_mock.assert_not_called()
+        self.earnings_mock.assert_called_once_with(
+            "IN:RELIANCE",
+            finnhub_key="finnhub-key",
+            indianapi_key="india-key",
+            limit=4,
+        )
         self.upcoming_mock.assert_not_called()
-        self.assertIsNone(sections[0]["earnings_history"])
+        self.assertEqual(sections[0]["earnings_history"]["mode"], "reported")
+        self.assertEqual(sections[0]["earnings_history"]["summary_label"], "Latest EPS ₹0.33")
         self.assertIsNone(sections[0]["upcoming_earnings"])
 
     def test_earnings_failure_does_not_fail_the_ticker(self) -> None:
@@ -335,7 +424,35 @@ class EarningsRenderTest(unittest.TestCase):
             progressive=True,
             progressive_token="token",
         )
-        self.assertNotIn('<div class="skeleton skeleton-earnings">', india_html)
+        self.assertIn('<div class="skeleton skeleton-earnings">', india_html)
+
+    def test_renders_indian_reported_results_in_us_panel_design(self) -> None:
+        section = sample_section(sample_indian_history())
+        section.update({
+            "ticker": "IN:TCS",
+            "display_symbol": "TCS",
+            "market": "IN",
+            "exchange": "NSE",
+            "upcoming_earnings": None,
+        })
+
+        html = build_web_section(section)
+
+        self.assertIn('<details class="earnings-history">', html)
+        self.assertNotIn('<details class="earnings-history" open', html)
+        self.assertIn("Last 4 reported quarters", html)
+        self.assertIn("Latest EPS ₹34.37", html)
+        self.assertIn("Reported EPS trend", html)
+        self.assertIn("Sales (₹ cr)", html)
+        self.assertIn("Net profit (₹ cr)", html)
+        self.assertIn("EPS (₹)", html)
+        self.assertIn("OPM", html)
+        self.assertIn("61,237", html)
+        self.assertIn("12,502", html)
+        self.assertIn("28.0%", html)
+        self.assertNotIn("EPS surprise vs consensus", html)
+        self.assertNotIn("Estimate", html)
+        self.assertLess(html.index("Q2 FY26"), html.index("Q1 FY27"))
 
 
 class FakeHandler:

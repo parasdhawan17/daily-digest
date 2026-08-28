@@ -92,6 +92,51 @@ def build_earnings_history(quarters: list[dict]) -> dict | None:
     }
 
 
+def build_indian_earnings_history(quarters: list[dict]) -> dict | None:
+    """Build the reported-results view model for Indian web ticker cards."""
+    ordered = sorted(
+        (dict(item) for item in quarters if isinstance(item, dict)),
+        key=lambda item: str(item.get("period") or ""),
+    )[-4:]
+    if not ordered:
+        return None
+
+    eps_values = [
+        abs(float(item["actual"]))
+        for item in ordered
+        if isinstance(item.get("actual"), (int, float))
+        and not isinstance(item.get("actual"), bool)
+    ]
+    chart_scale = max(eps_values, default=0.0)
+    for item in ordered:
+        actual = item.get("actual")
+        item["latest"] = False
+        if isinstance(actual, (int, float)) and not isinstance(actual, bool):
+            item["direction"] = "positive" if actual > 0 else "negative" if actual < 0 else "flat"
+            item["chart_width_pct"] = (
+                min(100.0, abs(float(actual)) / chart_scale * 100.0)
+                if chart_scale > 0
+                else 0.0
+            )
+        else:
+            item["direction"] = "unavailable"
+            item["chart_width_pct"] = 0.0
+    ordered[-1]["latest"] = True
+
+    latest_eps = ordered[-1].get("actual")
+    summary_label = (
+        f"Latest EPS ₹{float(latest_eps):.2f}"
+        if isinstance(latest_eps, (int, float)) and not isinstance(latest_eps, bool)
+        else f"{len(ordered)} reported quarters"
+    )
+    return {
+        "mode": "reported",
+        "quarters": ordered,
+        "summary_label": summary_label,
+        "chart_scale_value": chart_scale,
+    }
+
+
 def build_price_ranges(
     current_price: object,
     *,
@@ -191,7 +236,7 @@ def collect_digest_data(
         except requests.RequestException:
             pass
 
-        if include_earnings and market == "US":
+        if include_earnings:
             try:
                 earnings = fetch_earnings_history(
                     ticker,
@@ -199,17 +244,22 @@ def collect_digest_data(
                     indianapi_key=indianapi_key,
                     limit=4,
                 )
-                section["earnings_history"] = build_earnings_history(earnings)
-            except (requests.RequestException, TypeError, ValueError):
-                pass
-            try:
-                section["upcoming_earnings"] = fetch_upcoming_earnings(
-                    ticker,
-                    finnhub_key=finnhub_key,
-                    indianapi_key=indianapi_key,
+                section["earnings_history"] = (
+                    build_indian_earnings_history(earnings)
+                    if market == "IN"
+                    else build_earnings_history(earnings)
                 )
             except (requests.RequestException, TypeError, ValueError):
                 pass
+            if market == "US":
+                try:
+                    section["upcoming_earnings"] = fetch_upcoming_earnings(
+                        ticker,
+                        finnhub_key=finnhub_key,
+                        indianapi_key=indianapi_key,
+                    )
+                except (requests.RequestException, TypeError, ValueError):
+                    pass
 
         try:
             raw_news[ticker] = fetch_news(

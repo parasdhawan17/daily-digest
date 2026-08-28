@@ -10,7 +10,7 @@ sys.path.insert(0, str(ROOT))
 
 os.environ.setdefault("SITE_URL", "http://localhost:8765")
 
-from stock_news.digest import build_earnings_history
+from stock_news.digest import build_earnings_history, build_indian_earnings_history
 from stock_news.render import build_web_digest
 
 # Working stock-themed placeholder (Unsplash photo IDs must be valid — 404s show as broken images).
@@ -57,6 +57,27 @@ def upcoming_earnings(date_label: str, hour: str, eps: float, revenue: float) ->
     }
 
 
+def reported_quarter(
+    period: str,
+    period_label: str,
+    label: str,
+    eps: float,
+    sales: float,
+    net_profit: float,
+    opm_pct: float,
+) -> dict:
+    return {
+        "mode": "reported",
+        "period": period,
+        "period_label": period_label,
+        "label": label,
+        "actual": eps,
+        "sales": sales,
+        "net_profit": net_profit,
+        "opm_pct": opm_pct,
+    }
+
+
 def main() -> None:
     sections = [
         {
@@ -95,7 +116,14 @@ def main() -> None:
                 "all_time_high": {"value": 3217.60, "distance_pct": 11.23},
             },
             "logo": None,
-            "earnings_history": None,
+            "earnings_history": build_indian_earnings_history(
+                [
+                    reported_quarter("2025-09-01", "Sep 2025", "Q2 FY26", 27.14, 258407, 18450, 17.1),
+                    reported_quarter("2025-12-01", "Dec 2025", "Q3 FY26", 29.32, 269496, 20185, 17.6),
+                    reported_quarter("2026-03-01", "Mar 2026", "Q4 FY26", 31.08, 274732, 21930, 18.0),
+                    reported_quarter("2026-06-01", "Jun 2026", "Q1 FY27", 32.44, 281109, 22840, 18.3),
+                ]
+            ),
             "upcoming_earnings": None,
             "web_stories": [
                 story(0, "RELIANCE", "Reliance Industries reports steady refining margins", "Economic Times", 2),
@@ -136,7 +164,14 @@ def main() -> None:
                 "all_time_high": {"value": 4592.25, "distance_pct": 10.16},
             },
             "logo": None,
-            "earnings_history": None,
+            "earnings_history": build_indian_earnings_history(
+                [
+                    reported_quarter("2025-09-01", "Sep 2025", "Q2 FY26", 34.10, 65799, 12075, 24.6),
+                    reported_quarter("2025-12-01", "Dec 2025", "Q3 FY26", 35.22, 67586, 12480, 25.0),
+                    reported_quarter("2026-03-01", "Mar 2026", "Q4 FY26", 36.45, 69340, 12910, 25.3),
+                    reported_quarter("2026-06-01", "Jun 2026", "Q1 FY27", 37.18, 71220, 13285, 25.7),
+                ]
+            ),
             "upcoming_earnings": None,
             "web_stories": [
                 story(0, "TCS", "TCS wins large deal in European banking sector", "Business Standard", 1),

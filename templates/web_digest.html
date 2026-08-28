@@ -1409,7 +1409,7 @@
   <main id="digest-sections" class="progressive-sections" data-token="{{ progressive_token or '' }}" data-tickers='{{ progressive_tickers|tojson }}'>
     {% for ticker in progressive_tickers %}
     <section class="ticker-section progressive-placeholder" data-ticker="{{ ticker }}" aria-label="Loading {{ ticker }}">
-      <div class="section-inner"><div class="skeleton skeleton-title"></div><div class="skeleton skeleton-price"></div>{% if ticker[:3] == 'US:' %}<div class="skeleton skeleton-earnings"></div>{% endif %}<div class="skeleton skeleton-line"></div><div class="skeleton skeleton-line short"></div></div>
+      <div class="section-inner"><div class="skeleton skeleton-title"></div><div class="skeleton skeleton-price"></div><div class="skeleton skeleton-earnings"></div><div class="skeleton skeleton-line"></div><div class="skeleton skeleton-line short"></div></div>
     </section>
     {% endfor %}
   </main>

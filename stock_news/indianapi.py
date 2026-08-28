@@ -185,6 +185,100 @@ def _as_float(value: object) -> float | None:
     return number if number > 0 else None
 
 
+def _as_financial_float(value: object) -> float | None:
+    if isinstance(value, bool) or value in (None, "", "—", "-"):
+        return None
+    text = str(value).strip().replace(",", "").replace("%", "")
+    try:
+        return float(text)
+    except (TypeError, ValueError):
+        return None
+
+
+def _field_key(value: object) -> str:
+    return re.sub(r"[^a-z0-9]", "", str(value).lower())
+
+
+def _financial_series(payload: dict, *names: str) -> dict:
+    wanted = {_field_key(name) for name in names}
+    for key, value in payload.items():
+        if _field_key(key) in wanted and isinstance(value, dict):
+            return value
+    return {}
+
+
+def _series_value(series: dict, period_label: str) -> object:
+    for key, value in series.items():
+        if str(key).strip() == period_label:
+            return value
+    return None
+
+
+def _quarter_metadata(period_label: str) -> tuple[datetime | None, str, int, int]:
+    parsed = None
+    for date_format in ("%b %Y", "%B %Y"):
+        try:
+            parsed = datetime.strptime(period_label.strip(), date_format)
+            break
+        except ValueError:
+            continue
+    if parsed is None:
+        return None, period_label, 0, 0
+
+    quarter_by_month = {3: 4, 6: 1, 9: 2, 12: 3}
+    fiscal_quarter = quarter_by_month.get(parsed.month, 0)
+    fiscal_year = parsed.year + 1 if parsed.month >= 4 else parsed.year
+    label = (
+        f"Q{fiscal_quarter} FY{str(fiscal_year)[-2:]}"
+        if fiscal_quarter
+        else period_label
+    )
+    return parsed, label, fiscal_year, fiscal_quarter
+
+
+def _earnings_from_historical_stats(payload: object, limit: int) -> list[dict]:
+    if not isinstance(payload, dict):
+        return []
+    if isinstance(payload.get("data"), dict):
+        payload = payload["data"]
+
+    series = {
+        "sales": _financial_series(payload, "Sales", "Revenue"),
+        "expenses": _financial_series(payload, "Expenses"),
+        "operating_profit": _financial_series(payload, "Operating Profit"),
+        "opm_pct": _financial_series(payload, "OPM %", "Operating Profit Margin"),
+        "net_profit": _financial_series(payload, "Net Profit", "Net Income"),
+        "actual": _financial_series(payload, "EPS in Rs", "EPS", "Earnings Per Share"),
+    }
+    periods = {
+        str(period).strip()
+        for values in series.values()
+        for period in values
+        if str(period).strip()
+    }
+
+    quarters: list[dict] = []
+    for period_label in periods:
+        parsed, label, fiscal_year, fiscal_quarter = _quarter_metadata(period_label)
+        if parsed is None:
+            continue
+        quarter = {
+            "mode": "reported",
+            "period": parsed.strftime("%Y-%m-%d"),
+            "period_label": period_label,
+            "label": label,
+            "fiscal_year": fiscal_year,
+            "fiscal_quarter": fiscal_quarter,
+        }
+        for field, values in series.items():
+            quarter[field] = _as_financial_float(_series_value(values, period_label))
+        if any(quarter.get(field) is not None for field in series):
+            quarters.append(quarter)
+
+    quarters.sort(key=lambda item: item["period"])
+    return quarters[-max(1, limit):]
+
+
 def _all_time_high_from_history(payload: object) -> float | None:
     if not isinstance(payload, dict):
         return None
@@ -269,6 +363,26 @@ def fetch_all_time_high(
     )
     response.raise_for_status()
     return _all_time_high_from_history(response.json())
+
+
+def fetch_earnings_history(
+    symbol: str,
+    api_key: str,
+    limit: int = 4,
+    *,
+    base_url: str | None = None,
+) -> list[dict]:
+    response = requests.get(
+        f"{_api_root(base_url)}/historical_stats",
+        params={
+            "stock_name": _stock_name_for_lookup(symbol),
+            "stats": "quarter_results",
+        },
+        headers=_headers(api_key),
+        timeout=30,
+    )
+    response.raise_for_status()
+    return _earnings_from_historical_stats(response.json(), limit)
 
 
 def fetch_company_logo(symbol: str, api_key: str) -> str | None:
