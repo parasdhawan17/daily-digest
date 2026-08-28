@@ -561,6 +561,7 @@
     }
     .ticker-head {
       display: flex;
+      flex-wrap: wrap;
       align-items: center;
       gap: 14px;
       margin-bottom: 0;
@@ -646,6 +647,7 @@
     .ticker-change.flat { background: var(--pill-flat-bg); color: var(--pill-flat-fg); }
     .price-ranges {
       flex-basis: 100%;
+      width: 100%;
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 10px;
@@ -1394,11 +1396,23 @@
         height: 160px;
       }
       .ticker-head-main {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 8px;
+        flex-wrap: nowrap;
+        gap: 6px;
       }
-      .ticker-quote { width: 100%; }
+      .ticker-head { gap: 10px; }
+      .ticker-logo { width: 40px; height: 40px; padding: 5px; }
+      .ticker-row { flex: 1; gap: 6px; }
+      .ticker-symbol {
+        min-width: 0;
+        overflow: hidden;
+        font-size: 1rem;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .exchange-badge { flex-shrink: 0; padding: 3px 6px; font-size: 9px; }
+      .ticker-quote { width: auto; gap: 6px; }
+      .ticker-price { font-size: 0.875rem; }
+      .ticker-change { padding: 4px 7px; font-size: 11px; }
       .price-ranges { margin-top: 2px; }
       .price-range-item { padding: 10px; }
       .earnings-summary {
@@ -1617,8 +1631,8 @@
 
           </div>
 
-
         </div>
+
       </div>
 
 
@@ -1955,8 +1969,8 @@
 
           </div>
 
-
         </div>
+
       </div>
 
 
@@ -2231,6 +2245,7 @@
 
           </div>
 
+        </div>
 
 <div class="price-ranges" aria-label="Price highs">
   <p class="price-ranges-heading">Price landmarks</p>
@@ -2266,7 +2281,6 @@
 
 </div>
 
-        </div>
       </div>
 
 
@@ -2488,6 +2502,7 @@
 
           </div>
 
+        </div>
 
 <div class="price-ranges" aria-label="Price highs">
   <p class="price-ranges-heading">Price landmarks</p>
@@ -2523,7 +2538,6 @@
 
 </div>
 
-        </div>
       </div>
 
 

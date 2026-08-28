@@ -19,8 +19,8 @@
       <div class="ticker-head-main">
         <div class="ticker-row"><span class="ticker-symbol">{{ section.display_symbol or section.ticker }}</span>{% if section.exchange %}<span class="exchange-badge {{ section.market|lower }}">{{ section.exchange }}</span>{% endif %}</div>
         {% if quote %}<div class="ticker-quote"><span class="ticker-price">{% if section.market == 'IN' %}₹{% else %}${% endif %}{{ "%.2f"|format(quote.price) }}</span>{% if quote.change_pct is not none %}<span class="ticker-change {{ change_class(quote) }}">{% if quote.change_pct >= 0 %}+{% endif %}{{ "%.2f"|format(quote.change_pct) }}%</span>{% endif %}</div>{% endif %}
-        {{ render_price_ranges(section) }}
       </div>
+      {{ render_price_ranges(section) }}
     </div>
     {{ render_earnings(section.upcoming_earnings, section.earnings_history) }}
     {% if section.error %}<p class="empty">Could not fetch news for {{ section.display_symbol or section.ticker }}.</p>
