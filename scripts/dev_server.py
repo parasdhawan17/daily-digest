@@ -71,6 +71,10 @@ class DevHandler(BaseHTTPRequestHandler):
             from api.digest import handle_data_get
             handle_data_get(self)
             return
+        if path == "/api/subscription":
+            from api.digest import handle_subscription_get
+            handle_subscription_get(self)
+            return
         self._serve_static(path)
 
     def do_POST(self) -> None:

@@ -6,6 +6,7 @@ import hmac
 import json
 import os
 import time
+from dataclasses import dataclass
 
 from stock_news.config import SITE_URL
 from stock_news.relevance import parse_tickers
@@ -13,6 +14,12 @@ from stock_news.relevance import parse_tickers
 
 class TokenError(Exception):
     """Invalid or expired digest token."""
+
+
+@dataclass(frozen=True)
+class DigestTokenClaims:
+    tickers: list[str]
+    subscriber_id: int | None = None
 
 
 def _signing_secret() -> str:
@@ -28,7 +35,12 @@ def _b64_decode(data: str) -> bytes:
     return base64.urlsafe_b64decode(data + padding)
 
 
-def sign_digest_token(tickers: list[str], expires_days: int = 14) -> str:
+def sign_digest_token(
+    tickers: list[str],
+    expires_days: int = 14,
+    *,
+    subscriber_id: int | None = None,
+) -> str:
     secret = _signing_secret()
     if not secret:
         raise TokenError("DIGEST_SIGNING_SECRET is not configured")
@@ -42,12 +54,14 @@ def sign_digest_token(tickers: list[str], expires_days: int = 14) -> str:
         "exp": int(time.time()) + expires_days * 86400,
         "v": 1,
     }
+    if subscriber_id is not None:
+        payload["sub"] = int(subscriber_id)
     payload_b64 = _b64_encode(json.dumps(payload, separators=(",", ":")).encode("utf-8"))
     signature = hmac.new(secret.encode("utf-8"), payload_b64.encode("ascii"), hashlib.sha256).digest()
     return f"{payload_b64}.{_b64_encode(signature)}"
 
 
-def verify_digest_token(token: str) -> list[str]:
+def verify_digest_claims(token: str) -> DigestTokenClaims:
     secret = _signing_secret()
     if not secret:
         raise TokenError("DIGEST_SIGNING_SECRET is not configured")
@@ -81,12 +95,32 @@ def verify_digest_token(token: str) -> list[str]:
     if not tickers:
         raise TokenError("No tickers in token")
 
-    return tickers
+    raw_subscriber_id = payload.get("sub")
+    subscriber_id = None
+    if raw_subscriber_id is not None:
+        try:
+            subscriber_id = int(raw_subscriber_id)
+        except (TypeError, ValueError):
+            raise TokenError("Invalid subscriber")
+        if subscriber_id <= 0:
+            raise TokenError("Invalid subscriber")
+
+    return DigestTokenClaims(tickers=tickers, subscriber_id=subscriber_id)
 
 
-def build_digest_url(tickers: list[str], site_url: str | None = None) -> str:
+def verify_digest_token(token: str) -> list[str]:
+    """Verify a token and return its tickers (backward-compatible API)."""
+    return verify_digest_claims(token).tickers
+
+
+def build_digest_url(
+    tickers: list[str],
+    site_url: str | None = None,
+    *,
+    subscriber_id: int | None = None,
+) -> str:
     base = (site_url or SITE_URL or "").rstrip("/")
     if not base:
         raise ValueError("SITE_URL is not configured")
-    token = sign_digest_token(tickers)
+    token = sign_digest_token(tickers, subscriber_id=subscriber_id)
     return f"{base}/digest?t={token}"

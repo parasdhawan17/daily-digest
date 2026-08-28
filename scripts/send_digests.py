@@ -254,7 +254,11 @@ def send_for_market(
         user_sections = filter_sections(sections, user_tickers)
         user_ai_summary = filter_ai_summary(ai_summary, user_tickers)
         user_story_count = count_email_stories(user_sections)
-        digest_url = build_digest_url(user_tickers, site_url=site_url)
+        digest_url = build_digest_url(
+            user_tickers,
+            site_url=site_url,
+            subscriber_id=subscriber.get("id"),
+        )
         html, text, subject = build_email_digest(
             user_sections,
             user_tickers,

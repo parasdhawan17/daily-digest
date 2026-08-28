@@ -41,6 +41,7 @@ def build_web_digest(
     subscribe_enabled_override: bool | None = None,
     progressive: bool = False,
     progressive_token: str | None = None,
+    prefill_email: str | None = None,
 ) -> str:
     today_label = date.today().strftime("%d %b %Y")
     layout = prepare_email_layout(sections)
@@ -65,6 +66,8 @@ def build_web_digest(
         progressive=progressive,
         progressive_token=progressive_token,
         progressive_tickers=tickers if progressive else [],
+        prefill_email=prefill_email or "",
+        prefill_tickers=tickers,
         **layout,
     )
 

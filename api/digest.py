@@ -14,11 +14,14 @@ if str(ROOT) not in sys.path:
 
 from api._responses import read_json, send_html, send_json
 from stock_news.ai_summary import generate_ai_summary
+from stock_news.brevo import BrevoError, get_contact
+from stock_news.config import BREVO_TICKERS_ATTRIBUTE
 from stock_news.digest import collect_digest_data, filter_sections
 from stock_news.formatting import format_fetched_at_label
 from stock_news.markets import market_of
+from stock_news.relevance import parse_tickers
 from stock_news.render import build_digest_error, build_web_digest, build_web_section
-from stock_news.tokens import TokenError, verify_digest_token
+from stock_news.tokens import TokenError, verify_digest_claims, verify_digest_token
 
 
 def _missing_data_keys(tickers: list[str]) -> list[str]:
@@ -147,6 +150,59 @@ def handle_ai_post(handler: BaseHTTPRequestHandler) -> None:
     except Exception:
         traceback.print_exc()
         send_json(handler, 200, {"ok": True, "ai_summary": None})
+
+
+def handle_subscription_get(handler: BaseHTTPRequestHandler) -> None:
+    """Return the saved subscription associated with a signed digest link."""
+    query = parse_qs(urlparse(handler.path).query)
+    token = (query.get("t") or [None])[0]
+    api_key = os.environ.get("BREVO_API_KEY", "").strip()
+    if not token:
+        send_json(handler, 400, {"ok": False, "error": "Missing digest link."})
+        return
+    try:
+        claims = verify_digest_claims(token)
+    except TokenError:
+        send_json(handler, 403, {"ok": False, "error": "Invalid digest link."})
+        return
+
+    # Older links did not carry a contact identifier. They can still prefill the
+    # tickers embedded in the digest, while leaving email entry to the user.
+    if claims.subscriber_id is None:
+        send_json(handler, 200, {"ok": True, "email": "", "tickers": claims.tickers})
+        return
+    if not api_key:
+        send_json(handler, 503, {"ok": False, "error": "Subscription lookup is unavailable."})
+        return
+
+    try:
+        contact = get_contact(claims.subscriber_id, api_key)
+        if not contact or contact.get("emailBlacklisted"):
+            send_json(handler, 404, {"ok": False, "error": "Subscription not found."})
+            return
+        attributes = contact.get("attributes") or {}
+        raw_tickers = next(
+            (
+                value
+                for key, value in attributes.items()
+                if str(key).upper() == BREVO_TICKERS_ATTRIBUTE.upper()
+            ),
+            "",
+        )
+        send_json(
+            handler,
+            200,
+            {
+                "ok": True,
+                "email": str(contact.get("email") or "").strip().lower(),
+                "tickers": parse_tickers(raw_tickers) or claims.tickers,
+            },
+        )
+    except BrevoError:
+        send_json(handler, 503, {"ok": False, "error": "Could not load your subscription."})
+    except Exception:
+        traceback.print_exc()
+        send_json(handler, 503, {"ok": False, "error": "Could not load your subscription."})
 
 
 class handler(BaseHTTPRequestHandler):

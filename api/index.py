@@ -9,7 +9,12 @@ ROOT = Path(__file__).resolve().parent.parent
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from api.digest import handle_ai_post, handle_data_get, handle_get as handle_digest
+from api.digest import (
+    handle_ai_post,
+    handle_data_get,
+    handle_get as handle_digest,
+    handle_subscription_get,
+)
 from api.subscribe import handle_post as handle_subscribe
 from api.tickers_search import handle_get as handle_search
 from api.tickers_validate import handle_get as handle_validate_get, handle_post as handle_validate_post
@@ -33,7 +38,7 @@ def request_path(handler: BaseHTTPRequestHandler) -> str:
 def route(handler: BaseHTTPRequestHandler) -> str | None:
     query = parse_qs(urlparse(handler.path).query)
     explicit = (query.get("route") or [""])[0].strip().lower()
-    if explicit in ("digest", "digest-data", "digest-ai", "subscribe", "search", "validate"):
+    if explicit in ("digest", "digest-data", "digest-ai", "subscription", "subscribe", "search", "validate"):
         return explicit
 
     normalized = request_path(handler).rstrip("/") or "/"
@@ -43,6 +48,8 @@ def route(handler: BaseHTTPRequestHandler) -> str | None:
         return "digest-data"
     if normalized == "/api/digest-ai":
         return "digest-ai"
+    if normalized == "/api/subscription":
+        return "subscription"
     if normalized == "/api/subscribe":
         return "subscribe"
     if normalized in ("/api/tickers/search", "/api/tickers_search"):
@@ -59,6 +66,8 @@ class handler(BaseHTTPRequestHandler):
             handle_digest(self)
         elif matched == "digest-data":
             handle_data_get(self)
+        elif matched == "subscription":
+            handle_subscription_get(self)
         elif matched == "search":
             handle_search(self)
         elif matched == "validate":

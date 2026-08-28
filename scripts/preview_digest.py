@@ -212,6 +212,7 @@ def main() -> None:
         fetched_at_iso="2026-08-15T13:15:00+00:00",
         ai_summary=ai_summary,
         subscribe_enabled_override=True,
+        prefill_email="investor@example.com",
     )
     html = "\n".join(line.rstrip() for line in html.splitlines()) + "\n"
     out = ROOT / "public" / "preview-digest.html"

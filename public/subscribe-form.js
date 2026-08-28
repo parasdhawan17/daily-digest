@@ -19,8 +19,60 @@
   var currentSuggestions = [];
   var searchRequestId = 0;
   var validateRequestId = 0;
+  var savedSubscription = null;
+  var savedSubscriptionPromise = null;
+  var formDirty = false;
 
   var els = {};
+
+  function readPrefillTickers() {
+    try {
+      var values = JSON.parse(modal.getAttribute("data-prefill-tickers") || "[]");
+      return Array.isArray(values)
+        ? values.map(function (value) { return String(value).trim().toUpperCase(); }).filter(Boolean)
+        : [];
+    } catch (error) {
+      return [];
+    }
+  }
+
+  function loadSavedSubscription() {
+    var token = modal.getAttribute("data-subscription-token") || "";
+    if (!token) {
+      return Promise.resolve(null);
+    }
+    if (savedSubscriptionPromise) {
+      return savedSubscriptionPromise;
+    }
+    savedSubscriptionPromise = fetch("/api/subscription?t=" + encodeURIComponent(token))
+      .then(function (response) { return parseJsonResponse(response); })
+      .then(function (data) {
+        if (data && data.ok) {
+          savedSubscription = data;
+          return data;
+        }
+        return null;
+      })
+      .catch(function () { return null; });
+    return savedSubscriptionPromise;
+  }
+
+  function applyPrefill(data) {
+    if (!formMounted) {
+      return;
+    }
+    var email = data && data.email != null
+      ? data.email
+      : (modal.getAttribute("data-prefill-email") || "");
+    var tickers = data && Array.isArray(data.tickers)
+      ? data.tickers
+      : readPrefillTickers();
+    els.email.value = String(email || "");
+    selectedTickers = tickers
+      .map(function (value) { return String(value).trim().toUpperCase(); })
+      .filter(function (value, index, values) { return value && values.indexOf(value) === index; });
+    renderChips();
+  }
 
   function mountForm() {
     if (formMounted || !modalBody) {
@@ -56,6 +108,7 @@
     els.submit = document.getElementById("subscribe-submit");
 
     els.form.addEventListener("submit", onSubmit);
+    els.email.addEventListener("input", function () { formDirty = true; });
     els.tickerInput.addEventListener("input", onSearchInput);
     els.tickerInput.addEventListener("keydown", onTickerKeydown);
     els.tickerInput.addEventListener("blur", onTickerBlur);
@@ -161,6 +214,7 @@
       return false;
     }
     selectedTickers.push(upper);
+    formDirty = true;
     renderChips();
     hideSuggestions();
     if (els.tickerInput) {
@@ -176,6 +230,7 @@
     selectedTickers = selectedTickers.filter(function (item) {
       return item !== upper;
     });
+    formDirty = true;
     renderChips();
     showError("");
     setFieldStatus("neutral", "Search, pick a match, or press Enter to validate.");
@@ -548,13 +603,12 @@
   }
 
   function resetForm() {
+    formDirty = false;
     selectedTickers = [];
     searchRequestId += 1;
     validateRequestId += 1;
     hideSuggestions();
-    if (els.email) {
-      els.email.value = "";
-    }
+    applyPrefill(savedSubscription);
     if (els.tickerInput) {
       els.tickerInput.value = "";
     }
@@ -579,6 +633,11 @@
         els.email.focus();
       }, 50);
     }
+    loadSavedSubscription().then(function (data) {
+      if (data && !modal.hidden && !formDirty) {
+        applyPrefill(data);
+      }
+    });
   };
 
   window.closeSubscribeModal = function () {
@@ -602,4 +661,5 @@
 
   window.addEventListener("hashchange", openFromHash);
   openFromHash();
+  loadSavedSubscription();
 })();

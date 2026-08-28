@@ -35,9 +35,9 @@ def _get_contact_attribute(attributes: dict | None, name: str):
     return ""
 
 
-def get_contact(email: str, api_key: str) -> dict | None:
+def get_contact(identifier: str | int, api_key: str) -> dict | None:
     response = requests.get(
-        f"https://api.brevo.com/v3/contacts/{email}",
+        f"https://api.brevo.com/v3/contacts/{identifier}",
         headers=_headers(api_key),
         timeout=30,
     )
@@ -171,7 +171,9 @@ def fetch_subscribers_with_tickers(
             attributes = contact.get("attributes") or {}
             raw_tickers = _get_contact_attribute(attributes, attr_name)
             tickers = parse_tickers(raw_tickers)
-            subscribers.append({"email": email, "tickers": tickers})
+            subscribers.append(
+                {"id": contact.get("id"), "email": email, "tickers": tickers}
+            )
 
         if len(contacts) < limit:
             break

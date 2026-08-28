@@ -28,6 +28,7 @@ class MarketDigestLinkTest(unittest.TestCase):
             with self.subTest(market=market):
                 fetch_subscribers.return_value = [
                     {
+                        "id": 42,
                         "email": "both@example.com",
                         "tickers": ["US:AAPL", "IN:RELIANCE", "IN:TCS"],
                     }
@@ -54,6 +55,7 @@ class MarketDigestLinkTest(unittest.TestCase):
                 build_digest_url.assert_called_once_with(
                     expected_tickers,
                     site_url="https://example.com",
+                    subscriber_id=42,
                 )
                 build_digest_url.reset_mock()
 

@@ -2818,7 +2818,10 @@
     </div>
   </footer>
 
-  <div class="subscribe-modal" id="subscribe-modal" hidden>
+  <div class="subscribe-modal" id="subscribe-modal" hidden
+       data-subscription-token=""
+       data-prefill-email="investor@example.com"
+       data-prefill-tickers='["US:NVDA", "IN:RELIANCE", "US:AAPL", "IN:TCS"]'>
     <div class="subscribe-modal-backdrop" onclick="closeSubscribeModal()"></div>
     <div class="subscribe-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="subscribe-modal-title">
       <div class="subscribe-modal-header">
@@ -2832,7 +2835,7 @@
       </div>
     </div>
   </div>
-  <script src="/subscribe-form.js" defer></script>
+  <script src="/subscribe-form.js?v=20260828-prefill4" defer></script>
 
 
 
