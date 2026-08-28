@@ -53,6 +53,19 @@ def fetch_company_logo(
     return indianapi.fetch_company_logo(_us_symbol(prefixed_ticker), indianapi_key)
 
 
+def fetch_all_time_high(
+    prefixed_ticker: str,
+    *,
+    finnhub_key: str,
+    indianapi_key: str,
+) -> float | None:
+    """Return the highest available historical price for Indian stocks only."""
+    market = _require_market(prefixed_ticker)
+    if market == "IN":
+        return indianapi.fetch_all_time_high(_us_symbol(prefixed_ticker), indianapi_key)
+    return None
+
+
 def fetch_earnings_history(
     prefixed_ticker: str,
     *,

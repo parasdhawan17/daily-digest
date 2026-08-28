@@ -8,6 +8,7 @@ import requests
 from stock_news.config import HEADLINES_PER_TICKER, MIN_RELEVANCE_SCORE
 from stock_news.finnhub import story_dedupe_key
 from stock_news.market_data import (
+    fetch_all_time_high,
     fetch_company_logo,
     fetch_earnings_history,
     fetch_upcoming_earnings,
@@ -91,12 +92,44 @@ def build_earnings_history(quarters: list[dict]) -> dict | None:
     }
 
 
+def build_price_ranges(
+    current_price: object,
+    *,
+    year_high: object = None,
+    all_time_high: object = None,
+) -> dict | None:
+    """Build compact high-watermark metrics for an Indian web ticker card."""
+    if not isinstance(current_price, (int, float)) or isinstance(current_price, bool):
+        return None
+    current = float(current_price)
+    if current <= 0:
+        return None
+
+    def metric(value: object) -> dict | None:
+        if not isinstance(value, (int, float)) or isinstance(value, bool):
+            return None
+        high = max(current, float(value))
+        if high <= 0:
+            return None
+        return {
+            "value": high,
+            "distance_pct": max(0.0, (high - current) / high * 100.0),
+        }
+
+    result = {
+        "year_high": metric(year_high),
+        "all_time_high": metric(all_time_high),
+    }
+    return result if any(result.values()) else None
+
+
 def collect_digest_data(
     tickers: list[str],
     *,
     finnhub_key: str,
     indianapi_key: str,
     include_earnings: bool = False,
+    include_price_ranges: bool = False,
 ) -> tuple[list[dict], int]:
     seen_stories: set[str] = set()
     sections: list[dict] = []
@@ -115,6 +148,7 @@ def collect_digest_data(
             "logo": None,
             "earnings_history": None,
             "upcoming_earnings": None,
+            "price_ranges": None,
             "stories": [],
             "web_stories": [],
             "error": None,
@@ -128,6 +162,25 @@ def collect_digest_data(
             )
         except requests.RequestException:
             pass
+
+        if include_price_ranges and market == "IN" and section["quote"]:
+            quote = section["quote"]
+            current_price = quote.get("price")
+            year_high = quote.get("year_high")
+            all_time_high = None
+            try:
+                all_time_high = fetch_all_time_high(
+                    ticker,
+                    finnhub_key=finnhub_key,
+                    indianapi_key=indianapi_key,
+                )
+            except (requests.RequestException, TypeError, ValueError):
+                pass
+            section["price_ranges"] = build_price_ranges(
+                current_price,
+                year_high=year_high,
+                all_time_high=all_time_high,
+            )
 
         try:
             section["logo"] = fetch_company_logo(

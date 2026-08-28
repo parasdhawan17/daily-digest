@@ -90,6 +90,10 @@ def main() -> None:
             "market": "IN",
             "exchange": "NSE",
             "quote": {"price": 2856.40, "change_pct": -0.42},
+            "price_ranges": {
+                "year_high": {"value": 3217.60, "distance_pct": 11.23},
+                "all_time_high": {"value": 3217.60, "distance_pct": 11.23},
+            },
             "logo": None,
             "earnings_history": None,
             "upcoming_earnings": None,
@@ -127,6 +131,10 @@ def main() -> None:
             "market": "IN",
             "exchange": "NSE",
             "quote": {"price": 4125.75, "change_pct": 0.85},
+            "price_ranges": {
+                "year_high": {"value": 4592.25, "distance_pct": 10.16},
+                "all_time_high": {"value": 4592.25, "distance_pct": 10.16},
+            },
             "logo": None,
             "earnings_history": None,
             "upcoming_earnings": None,

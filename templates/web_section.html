@@ -1,4 +1,5 @@
 {% from "web_earnings.html" import render_earnings %}
+{% from "web_price_ranges.html" import render_price_ranges %}
 {% macro change_class(quote) %}{% if quote and quote.change_pct is not none %}{% if quote.change_pct > 0 %}up{% elif quote.change_pct < 0 %}down{% else %}flat{% endif %}{% endif %}{% endmacro %}
 {% macro render_story(story) %}
 <article class="story{% if story.image %} has-thumb{% endif %}">
@@ -18,6 +19,7 @@
       <div class="ticker-head-main">
         <div class="ticker-row"><span class="ticker-symbol">{{ section.display_symbol or section.ticker }}</span>{% if section.exchange %}<span class="exchange-badge {{ section.market|lower }}">{{ section.exchange }}</span>{% endif %}</div>
         {% if quote %}<div class="ticker-quote"><span class="ticker-price">{% if section.market == 'IN' %}₹{% else %}${% endif %}{{ "%.2f"|format(quote.price) }}</span>{% if quote.change_pct is not none %}<span class="ticker-change {{ change_class(quote) }}">{% if quote.change_pct >= 0 %}+{% endif %}{{ "%.2f"|format(quote.change_pct) }}%</span>{% endif %}</div>{% endif %}
+        {{ render_price_ranges(section) }}
       </div>
     </div>
     {{ render_earnings(section.upcoming_earnings, section.earnings_history) }}

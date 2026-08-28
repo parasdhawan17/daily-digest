@@ -171,7 +171,45 @@ def _quote_from_stock(payload: dict) -> dict | None:
     return {
         "price": float(price),
         "change_pct": float(change_pct) if change_pct is not None else None,
+        "year_high": _as_float(payload.get("yearHigh")),
     }
+
+
+def _as_float(value: object) -> float | None:
+    if isinstance(value, bool) or value in (None, ""):
+        return None
+    try:
+        number = float(str(value).replace(",", ""))
+    except (TypeError, ValueError):
+        return None
+    return number if number > 0 else None
+
+
+def _all_time_high_from_history(payload: object) -> float | None:
+    if not isinstance(payload, dict):
+        return None
+    datasets = payload.get("datasets")
+    if not isinstance(datasets, list):
+        return None
+
+    highs: list[float] = []
+    for dataset in datasets:
+        if not isinstance(dataset, dict):
+            continue
+        metric = str(dataset.get("metric") or "").strip().lower()
+        label = str(dataset.get("label") or "").strip().lower()
+        if metric != "price" and not label.startswith("price"):
+            continue
+        values = dataset.get("values")
+        if not isinstance(values, list):
+            continue
+        for row in values:
+            if not isinstance(row, (list, tuple)) or len(row) < 2:
+                continue
+            price = _as_float(row[1])
+            if price is not None:
+                highs.append(price)
+    return max(highs, default=None)
 
 
 def _news_from_stock(payload: dict, limit: int) -> list[dict]:
@@ -211,6 +249,26 @@ def fetch_quote(symbol: str, api_key: str, *, base_url: str | None = None) -> di
     if not payload:
         return None
     return _quote_from_stock(payload)
+
+
+def fetch_all_time_high(
+    symbol: str,
+    api_key: str,
+    *,
+    base_url: str | None = None,
+) -> float | None:
+    response = requests.get(
+        f"{_api_root(base_url)}/historical_data",
+        params={
+            "stock_name": _stock_name_for_lookup(symbol),
+            "period": "max",
+            "filter": "price",
+        },
+        headers=_headers(api_key),
+        timeout=30,
+    )
+    response.raise_for_status()
+    return _all_time_high_from_history(response.json())
 
 
 def fetch_company_logo(symbol: str, api_key: str) -> str | None:

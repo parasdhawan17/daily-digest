@@ -1,0 +1,18 @@
+{% macro render_range(label, metric) -%}
+{% if metric %}
+<span class="price-range-item">
+  <span class="price-range-label">{{ label }}</span>
+  <strong class="price-range-value">₹{{ "%.2f"|format(metric.value) }}</strong>
+  <span class="price-range-distance">{% if metric.distance_pct < 0.05 %}At high{% else %}{{ "%.1f"|format(metric.distance_pct) }}% below{% endif %}</span>
+</span>
+{% endif %}
+{%- endmacro %}
+
+{% macro render_price_ranges(section) -%}
+{% if section.market == 'IN' and section.price_ranges %}
+<div class="price-ranges" aria-label="Price highs">
+  {{ render_range("52W high", section.price_ranges.year_high) }}
+  {{ render_range("ATH", section.price_ranges.all_time_high) }}
+</div>
+{% endif %}
+{%- endmacro %}

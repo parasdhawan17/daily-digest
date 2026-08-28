@@ -1,4 +1,5 @@
 {% from "web_earnings.html" import render_earnings %}
+{% from "web_price_ranges.html" import render_price_ranges %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -643,6 +644,41 @@
     .ticker-change.up { background: var(--pill-up-bg); color: var(--pill-up-fg); }
     .ticker-change.down { background: var(--pill-down-bg); color: var(--pill-down-fg); }
     .ticker-change.flat { background: var(--pill-flat-bg); color: var(--pill-flat-fg); }
+    .price-ranges {
+      flex-basis: 100%;
+      display: flex;
+      justify-content: flex-end;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: -1px;
+      font-variant-numeric: tabular-nums;
+    }
+    .price-range-item {
+      display: inline-flex;
+      align-items: baseline;
+      gap: 5px;
+      min-width: 0;
+      padding: 4px 8px;
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      background: var(--muted-bg);
+      color: var(--text-secondary);
+      font-size: 11px;
+      line-height: 1.25;
+      white-space: nowrap;
+    }
+    .price-range-label {
+      color: var(--text-label);
+      font-weight: 600;
+    }
+    .price-range-value {
+      color: var(--text-strong);
+      font-weight: 750;
+    }
+    .price-range-distance {
+      color: var(--text-muted);
+      font-weight: 600;
+    }
     .visually-hidden {
       position: absolute !important;
       width: 1px !important;
@@ -1210,6 +1246,8 @@
         gap: 8px;
       }
       .ticker-quote { width: 100%; }
+      .price-ranges { justify-content: flex-start; margin-top: 0; }
+      .price-range-item { padding: 4px 7px; }
       .earnings-summary {
         align-items: flex-start;
         gap: 10px;
@@ -1471,6 +1509,7 @@
             {% endif %}
           </div>
           {% endif %}
+          {{ render_price_ranges(section) }}
         </div>
       </div>
 

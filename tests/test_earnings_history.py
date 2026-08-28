@@ -380,6 +380,7 @@ class EarningsHandlerTest(unittest.TestCase):
             finnhub_key=unittest.mock.ANY,
             indianapi_key=unittest.mock.ANY,
             include_earnings=True,
+            include_price_ranges=True,
         )
         payload = json.loads(handler.wfile.getvalue())
         self.assertTrue(payload["ok"])
