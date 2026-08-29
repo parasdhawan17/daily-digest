@@ -66,6 +66,19 @@ def fetch_company_logo(symbol: str, api_key: str) -> str | None:
     return logo or None
 
 
+def fetch_basic_financials(symbol: str, api_key: str) -> dict:
+    """Return Finnhub's current basic financial metrics for a US symbol."""
+    response = requests.get(
+        "https://finnhub.io/api/v1/stock/metric",
+        params={"symbol": symbol, "metric": "all", "token": api_key},
+        timeout=30,
+    )
+    response.raise_for_status()
+    payload = response.json()
+    metrics = payload.get("metric") if isinstance(payload, dict) else None
+    return metrics if isinstance(metrics, dict) else {}
+
+
 def _finite_number(value: object) -> float | None:
     if isinstance(value, bool) or not isinstance(value, (int, float)):
         return None

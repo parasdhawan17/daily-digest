@@ -2,6 +2,7 @@ import unittest
 from unittest.mock import Mock, patch
 
 from stock_news.digest import build_price_ranges, collect_digest_data
+from stock_news.finnhub import fetch_basic_financials
 from stock_news.indianapi import fetch_all_time_high, fetch_quote
 from stock_news.render import build_web_section
 
@@ -104,7 +105,7 @@ class IndianPriceRangeCollectionTest(unittest.TestCase):
             indianapi_key="india-key",
         )
 
-    def test_does_not_fetch_ranges_for_email_or_us_stocks(self) -> None:
+    def test_does_not_fetch_ranges_for_email_stocks(self) -> None:
         with (
             patch("stock_news.digest.fetch_quote", return_value={"price": 100.0, "change_pct": 1.0}),
             patch(
@@ -112,6 +113,7 @@ class IndianPriceRangeCollectionTest(unittest.TestCase):
                 return_value=({"price": 100.0, "change_pct": 1.0}, []),
             ),
             patch("stock_news.digest.fetch_all_time_high") as all_time,
+            patch("stock_news.digest.fetch_basic_financials") as financials,
             patch("stock_news.digest.fetch_company_logo", return_value=None),
             patch("stock_news.digest.fetch_news", return_value=[]),
         ):
@@ -120,16 +122,33 @@ class IndianPriceRangeCollectionTest(unittest.TestCase):
                 finnhub_key="finnhub-key",
                 indianapi_key="india-key",
             )
-            us, _ = collect_digest_data(
+        all_time.assert_not_called()
+        financials.assert_not_called()
+        self.assertIsNone(india[0]["price_ranges"])
+
+    def test_builds_us_52_week_high_for_web(self) -> None:
+        with (
+            patch("stock_news.digest.fetch_quote", return_value={"price": 180.0, "change_pct": 1.0}),
+            patch("stock_news.digest.fetch_basic_financials", return_value={"52WeekHigh": 200.0}) as financials,
+            patch("stock_news.digest.fetch_company_logo", return_value=None),
+            patch("stock_news.digest.fetch_news", return_value=[]),
+        ):
+            sections, _ = collect_digest_data(
                 ["US:AAPL"],
                 finnhub_key="finnhub-key",
                 indianapi_key="india-key",
                 include_price_ranges=True,
             )
 
-        all_time.assert_not_called()
-        self.assertIsNone(india[0]["price_ranges"])
-        self.assertIsNone(us[0]["price_ranges"])
+        ranges = sections[0]["price_ranges"]
+        self.assertAlmostEqual(ranges["year_high"]["value"], 200.0)
+        self.assertAlmostEqual(ranges["year_high"]["distance_pct"], 10.0)
+        self.assertIsNone(ranges["all_time_high"])
+        financials.assert_called_once_with(
+            "US:AAPL",
+            finnhub_key="finnhub-key",
+            indianapi_key="india-key",
+        )
 
     def test_stale_provider_highs_never_produce_negative_distance(self) -> None:
         ranges = build_price_ranges(110.0, year_high=100.0, all_time_high=105.0)
@@ -149,14 +168,25 @@ class IndianPriceRangeRenderTest(unittest.TestCase):
         self.assertIn("₹3500.00", html)
         self.assertIn("18.4% below", html)
 
-    def test_never_renders_high_chips_for_us_sections(self) -> None:
+    def test_renders_us_52_week_high_in_dollars(self) -> None:
         section = indian_section()
-        section.update({"ticker": "US:AAPL", "market": "US", "exchange": "US"})
+        section.update({
+            "ticker": "US:AAPL",
+            "display_symbol": "AAPL",
+            "market": "US",
+            "exchange": "NASDAQ",
+            "price_ranges": {
+                "year_high": {"value": 200.0, "distance_pct": 10.0},
+                "all_time_high": None,
+            },
+        })
 
         html = build_web_section(section)
 
-        self.assertNotIn('class="price-ranges"', html)
-        self.assertNotIn("52-week high", html)
+        self.assertIn('class="price-ranges"', html)
+        self.assertIn("52-week high", html)
+        self.assertIn("$200.00", html)
+        self.assertNotIn("All-time high", html)
 
 
 if __name__ == "__main__":

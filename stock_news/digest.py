@@ -9,6 +9,7 @@ from stock_news.config import HEADLINES_PER_TICKER, MIN_RELEVANCE_SCORE
 from stock_news.finnhub import story_dedupe_key
 from stock_news.market_data import (
     fetch_all_time_high,
+    fetch_basic_financials,
     fetch_company_logo,
     fetch_earnings_history,
     fetch_upcoming_earnings,
@@ -223,19 +224,30 @@ def collect_digest_data(
             except requests.RequestException:
                 pass
 
-        if include_price_ranges and market == "IN" and section["quote"]:
+        if include_price_ranges and section["quote"]:
             quote = section["quote"]
             current_price = quote.get("price")
             year_high = quote.get("year_high")
             all_time_high = None
-            try:
-                all_time_high = fetch_all_time_high(
-                    ticker,
-                    finnhub_key=finnhub_key,
-                    indianapi_key=indianapi_key,
-                )
-            except (requests.RequestException, TypeError, ValueError):
-                pass
+            if market == "IN":
+                try:
+                    all_time_high = fetch_all_time_high(
+                        ticker,
+                        finnhub_key=finnhub_key,
+                        indianapi_key=indianapi_key,
+                    )
+                except (requests.RequestException, TypeError, ValueError):
+                    pass
+            elif market == "US":
+                try:
+                    metrics = fetch_basic_financials(
+                        ticker,
+                        finnhub_key=finnhub_key,
+                        indianapi_key=indianapi_key,
+                    )
+                    year_high = metrics.get("52WeekHigh")
+                except (requests.RequestException, TypeError, ValueError):
+                    pass
             section["price_ranges"] = build_price_ranges(
                 current_price,
                 year_high=year_high,

@@ -67,6 +67,19 @@ def fetch_company_logo(
     return indianapi.fetch_company_logo(_us_symbol(prefixed_ticker), indianapi_key)
 
 
+def fetch_basic_financials(
+    prefixed_ticker: str,
+    *,
+    finnhub_key: str,
+    indianapi_key: str,
+) -> dict:
+    """Return provider-specific basic metrics where supported."""
+    market = _require_market(prefixed_ticker)
+    if market == "US":
+        return finnhub.fetch_basic_financials(_us_symbol(prefixed_ticker), finnhub_key)
+    return {}
+
+
 def fetch_all_time_high(
     prefixed_ticker: str,
     *,
