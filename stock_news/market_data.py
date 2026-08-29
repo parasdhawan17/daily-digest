@@ -41,6 +41,20 @@ def fetch_quote(
     return indianapi.fetch_quote(_us_symbol(prefixed_ticker), indianapi_key)
 
 
+def fetch_quote_and_news(
+    prefixed_ticker: str,
+    *,
+    finnhub_key: str,
+    indianapi_key: str,
+) -> tuple[dict | None, list[dict]]:
+    """Fetch quote and news together when the provider exposes one payload."""
+    market = _require_market(prefixed_ticker)
+    symbol = _us_symbol(prefixed_ticker)
+    if market == "US":
+        return finnhub.fetch_quote(symbol, finnhub_key), finnhub.fetch_news(symbol, finnhub_key)
+    return indianapi.fetch_quote_and_news(symbol, indianapi_key)
+
+
 def fetch_company_logo(
     prefixed_ticker: str,
     *,

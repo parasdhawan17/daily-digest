@@ -290,6 +290,7 @@ class EarningsCollectionTest(unittest.TestCase):
     def _collect(self, ticker: str, *, include_earnings: bool = False) -> list[dict]:
         with (
             patch("stock_news.digest.fetch_quote", return_value=None),
+            patch("stock_news.digest.fetch_quote_and_news", return_value=(None, [])),
             patch("stock_news.digest.fetch_company_logo", return_value=None),
             patch("stock_news.digest.fetch_news", return_value=[]),
             patch("stock_news.digest.fetch_earnings_history", return_value=[
@@ -354,6 +355,10 @@ class EarningsCollectionTest(unittest.TestCase):
     def test_earnings_failure_does_not_fail_the_ticker(self) -> None:
         with (
             patch("stock_news.digest.fetch_quote", return_value={"price": 10, "change_pct": 1}),
+            patch(
+                "stock_news.digest.fetch_quote_and_news",
+                return_value=({"price": 10, "change_pct": 1}, []),
+            ),
             patch("stock_news.digest.fetch_company_logo", return_value=None),
             patch("stock_news.digest.fetch_news", return_value=[]),
             patch(

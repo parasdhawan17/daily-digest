@@ -372,6 +372,20 @@ def _news_from_stock(payload: dict, limit: int) -> list[dict]:
     return _normalize_news_items(_news_items(payload), limit)
 
 
+def fetch_quote_and_news(
+    symbol: str,
+    api_key: str,
+    limit: int = FETCH_LIMIT_PER_TICKER,
+    *,
+    base_url: str | None = None,
+) -> tuple[dict | None, list[dict]]:
+    """Fetch and normalize the stock-plan payload with one API request."""
+    payload = _fetch_stock(_stock_name_for_lookup(symbol), api_key, base_url=base_url)
+    if not payload:
+        return None, []
+    return _quote_from_stock(payload), _news_from_stock(payload, limit)
+
+
 def fetch_news(
     symbol: str,
     api_key: str,

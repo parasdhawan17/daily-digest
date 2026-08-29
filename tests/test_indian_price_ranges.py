@@ -79,12 +79,14 @@ class IndianPriceRangeCollectionTest(unittest.TestCase):
     def test_builds_highs_and_percentage_below_for_web(self) -> None:
         with (
             patch(
-                "stock_news.digest.fetch_quote",
-                return_value={"price": 2856.40, "change_pct": -0.42, "year_high": 3217.60},
+                "stock_news.digest.fetch_quote_and_news",
+                return_value=(
+                    {"price": 2856.40, "change_pct": -0.42, "year_high": 3217.60},
+                    [],
+                ),
             ),
             patch("stock_news.digest.fetch_all_time_high", return_value=3500.00) as all_time,
             patch("stock_news.digest.fetch_company_logo", return_value=None),
-            patch("stock_news.digest.fetch_news", return_value=[]),
         ):
             sections, _ = collect_digest_data(
                 ["IN:RELIANCE"],
@@ -105,6 +107,10 @@ class IndianPriceRangeCollectionTest(unittest.TestCase):
     def test_does_not_fetch_ranges_for_email_or_us_stocks(self) -> None:
         with (
             patch("stock_news.digest.fetch_quote", return_value={"price": 100.0, "change_pct": 1.0}),
+            patch(
+                "stock_news.digest.fetch_quote_and_news",
+                return_value=({"price": 100.0, "change_pct": 1.0}, []),
+            ),
             patch("stock_news.digest.fetch_all_time_high") as all_time,
             patch("stock_news.digest.fetch_company_logo", return_value=None),
             patch("stock_news.digest.fetch_news", return_value=[]),

@@ -6,7 +6,7 @@ from unittest.mock import Mock, patch
 import requests
 
 from stock_news.digest import collect_digest_data
-from stock_news.indianapi import fetch_company_logo, fetch_news
+from stock_news.indianapi import fetch_company_logo, fetch_news, fetch_quote_and_news
 from stock_news.render import build_web_section
 
 
@@ -148,13 +148,37 @@ class IndianMediaProviderTest(unittest.TestCase):
             timeout=30,
         )
 
+    @patch("stock_news.indianapi.requests.get")
+    def test_fetches_stock_plan_quote_and_news_with_one_request(self, get: Mock) -> None:
+        response = Mock()
+        response.json.return_value = {
+            "currentPrice": {"NSE": 72.5},
+            "percentChange": 1.25,
+            "recentNews": [{
+                "headline": "NMDC reports stronger production",
+                "url": "https://example.com/nmdc-production",
+            }],
+        }
+        get.return_value = response
+
+        quote, news = fetch_quote_and_news("NMDC", "key")
+
+        self.assertEqual(quote["price"], 72.5)
+        self.assertEqual(quote["change_pct"], 1.25)
+        self.assertEqual(len(news), 1)
+        get.assert_called_once_with(
+            "https://stock.indianapi.in/stock",
+            params={"name": "NMDC"},
+            headers={"Accept": "application/json", "x-api-key": "key"},
+            timeout=30,
+        )
+
 
 class IndianMediaCollectionTest(unittest.TestCase):
     def test_fetches_indian_logo_only_for_web_media_requests(self) -> None:
         logo = "data:image/png;base64,ZXhhbXBsZQ=="
         with (
-            patch("stock_news.digest.fetch_quote", return_value=None),
-            patch("stock_news.digest.fetch_news", return_value=[]),
+            patch("stock_news.digest.fetch_quote_and_news", return_value=(None, [])),
             patch("stock_news.digest.fetch_company_logo", return_value=logo) as fetch_logo,
         ):
             email_sections, _ = collect_digest_data(

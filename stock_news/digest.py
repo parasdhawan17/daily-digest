@@ -14,6 +14,7 @@ from stock_news.market_data import (
     fetch_upcoming_earnings,
     fetch_news,
     fetch_quote,
+    fetch_quote_and_news,
 )
 from stock_news.markets import display_symbol, market_badge, market_of
 from stock_news.relevance import relevance_score, select_stories, select_web_stories
@@ -200,14 +201,27 @@ def collect_digest_data(
             "error": None,
         }
 
-        try:
-            section["quote"] = fetch_quote(
-                ticker,
-                finnhub_key=finnhub_key,
-                indianapi_key=indianapi_key,
-            )
-        except requests.RequestException:
-            pass
+        news_loaded = False
+        if market == "IN":
+            try:
+                section["quote"], raw_news[ticker] = fetch_quote_and_news(
+                    ticker,
+                    finnhub_key=finnhub_key,
+                    indianapi_key=indianapi_key,
+                )
+            except requests.RequestException as exc:
+                section["error"] = str(exc)
+                raw_news[ticker] = []
+            news_loaded = True
+        else:
+            try:
+                section["quote"] = fetch_quote(
+                    ticker,
+                    finnhub_key=finnhub_key,
+                    indianapi_key=indianapi_key,
+                )
+            except requests.RequestException:
+                pass
 
         if include_price_ranges and market == "IN" and section["quote"]:
             quote = section["quote"]
@@ -263,15 +277,16 @@ def collect_digest_data(
                 except (requests.RequestException, TypeError, ValueError):
                     pass
 
-        try:
-            raw_news[ticker] = fetch_news(
-                ticker,
-                finnhub_key=finnhub_key,
-                indianapi_key=indianapi_key,
-            )
-        except requests.RequestException as exc:
-            section["error"] = str(exc)
-            raw_news[ticker] = []
+        if not news_loaded:
+            try:
+                raw_news[ticker] = fetch_news(
+                    ticker,
+                    finnhub_key=finnhub_key,
+                    indianapi_key=indianapi_key,
+                )
+            except requests.RequestException as exc:
+                section["error"] = str(exc)
+                raw_news[ticker] = []
 
         sections.append(section)
 
