@@ -117,6 +117,10 @@ p {
   width:181px;
   height:38px;
   object-fit:contain}
+.brand-icon {
+  display:block;
+  width:33px;
+  height:33px}
 .nav-links {
   display:flex;
   gap:30px;
@@ -778,6 +782,9 @@ p {
   .brand-logo {
     width:145px;
     height:30px}
+  .brand-icon {
+    width:28px;
+    height:28px}
   .nav {
     gap:12px}
   .nav-actions {
