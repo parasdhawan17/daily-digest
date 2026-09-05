@@ -1,0 +1,222 @@
+/* Subscribe modal form — uses page CSS variables */
+.subscribe-form {
+  padding: 20px;
+}
+
+.subscribe-form label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-label);
+}
+
+.subscribe-form input[type="email"] {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--border-strong);
+  border-radius: 8px;
+  background: var(--card-bg);
+  color: var(--text-strong);
+  font-size: 15px;
+  margin-bottom: 16px;
+}
+
+.subscribe-form input[type="email"]:focus {
+  outline: 2px solid var(--link);
+  outline-offset: 1px;
+}
+
+.subscribe-ticker-field {
+  position: relative;
+  margin-bottom: 12px;
+}
+
+.subscribe-ticker-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.subscribe-ticker-row .subscribe-ticker-input {
+  flex: 1;
+  min-width: 0;
+}
+
+.subscribe-add-btn {
+  flex-shrink: 0;
+  padding: 10px 14px;
+  border: 1px solid var(--border-strong);
+  border-radius: 8px;
+  background: var(--muted-bg);
+  color: var(--text-strong);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.subscribe-add-btn:hover:not(:disabled) {
+  background: var(--border-soft);
+}
+
+.subscribe-add-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.subscribe-field-status {
+  margin: 8px 0 0;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.subscribe-field-status.is-loading {
+  color: var(--text-label);
+}
+
+.subscribe-field-status.is-error {
+  color: var(--pill-down-fg);
+}
+
+.subscribe-field-status.is-success {
+  color: var(--pill-up-fg);
+}
+
+.subscribe-ticker-input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--border-strong);
+  border-radius: 8px;
+  background: var(--card-bg);
+  color: var(--text-strong);
+  font-size: 15px;
+}
+
+.subscribe-ticker-input:focus {
+  outline: 2px solid var(--link);
+  outline-offset: 1px;
+}
+
+.subscribe-ticker-input:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.subscribe-suggestions {
+  position: absolute;
+  z-index: 5;
+  left: 0;
+  right: 0;
+  top: calc(100% + 4px);
+  max-height: 220px;
+  overflow-y: auto;
+  border: 1px solid var(--border-strong);
+  border-radius: 8px;
+  background: var(--card-bg);
+  box-shadow: var(--shadow);
+  list-style: none;
+  margin: 0;
+  padding: 4px 0;
+}
+
+.subscribe-suggestions[hidden] {
+  display: none;
+}
+
+.subscribe-suggestion {
+  padding: 10px 12px;
+  font-size: 14px;
+  color: var(--text-strong);
+  cursor: pointer;
+}
+
+.subscribe-suggestion:hover,
+.subscribe-suggestion.is-active {
+  background: var(--muted-bg);
+}
+
+.subscribe-suggestion strong {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-weight: 700;
+}
+
+.subscribe-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+  min-height: 8px;
+}
+
+.subscribe-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  background: var(--pill-flat-bg);
+  color: var(--pill-flat-fg);
+  font-size: 12px;
+  font-weight: 700;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+.subscribe-chip-remove {
+  border: 0;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 16px;
+  line-height: 1;
+  padding: 0;
+  cursor: pointer;
+}
+
+.subscribe-chip-remove:hover {
+  color: var(--text-strong);
+}
+
+.subscribe-hint {
+  margin: 0 0 16px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.subscribe-error {
+  margin: 0 0 12px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: var(--pill-down-bg);
+  color: var(--pill-down-fg);
+  font-size: 13px;
+}
+
+.subscribe-error[hidden] {
+  display: none;
+}
+
+.subscribe-form .btn-subscribe {
+  width: 100%;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(220, 38, 38, 0.35);
+}
+
+.subscribe-form .btn-subscribe:hover:not(:disabled) {
+  background: linear-gradient(135deg, #f87171 0%, #b91c1c 100%);
+}
+
+.subscribe-form .btn-subscribe:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.subscribe-modal-body {
+  overflow-y: auto;
+  max-height: calc(100vh - 180px);
+}

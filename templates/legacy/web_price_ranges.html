@@ -1,0 +1,27 @@
+{% macro render_range(label, metric, market) -%}
+{% if metric %}
+{% set is_year_high = label == '52-week high' %}
+{% set distance_class = 'at-high' if metric.distance_pct < 5 else ('near-high' if metric.distance_pct < 10 else ('below-high' if metric.distance_pct < 20 else 'far-below-high')) %}
+<div class="price-range-item {% if is_year_high %}year-high{% else %}all-time-high{% endif %} {{ distance_class }}">
+  <div class="price-range-topline">
+    <span class="price-range-label">{{ label }}</span>
+  </div>
+  <div class="price-range-value-row">
+    <strong class="price-range-value">{% if market == 'US' %}${% else %}₹{% endif %}{{ "%.2f"|format(metric.value) }}</strong>
+    <span class="price-range-distance">{% if metric.distance_pct < 0.05 %}At high{% else %}{{ "%.1f"|format(metric.distance_pct) }}% below{% endif %}</span>
+  </div>
+  <div class="price-range-track" aria-hidden="true"><div class="price-range-fill" style="width: {{ [100 - metric.distance_pct, 0]|max }}%;"></div></div>
+  <span class="price-range-caption">Current price → high</span>
+</div>
+{% endif %}
+{%- endmacro %}
+
+{% macro render_price_ranges(section) -%}
+{% if section.price_ranges %}
+<div class="price-ranges" aria-label="Price highs">
+  <p class="price-ranges-heading">Price landmarks</p>
+  {{ render_range("52-week high", section.price_ranges.year_high, section.market) }}
+  {{ render_range("All-time high", section.price_ranges.all_time_high, section.market) }}
+</div>
+{% endif %}
+{%- endmacro %}

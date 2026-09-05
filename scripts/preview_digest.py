@@ -11,6 +11,7 @@ sys.path.insert(0, str(ROOT))
 os.environ.setdefault("SITE_URL", "http://localhost:8765")
 
 from stock_news.digest import build_earnings_history, build_indian_earnings_history
+from stock_news.design import resolve_design
 from stock_news.render import build_web_digest
 
 # Working stock-themed placeholder (Unsplash photo IDs must be valid — 404s show as broken images).
@@ -215,10 +216,12 @@ def main() -> None:
         prefill_email="investor@example.com",
     )
     html = "\n".join(line.rstrip() for line in html.splitlines()) + "\n"
-    out = ROOT / "public" / "preview-digest.html"
+    output_dir = ROOT / "public" / ("legacy" if resolve_design() == "legacy" else "")
+    output_dir.mkdir(parents=True, exist_ok=True)
+    out = output_dir / "preview-digest.html"
     out.write_text(html, encoding="utf-8")
     print(f"Wrote {out} ({len(html)} bytes)")
-    print("Open http://localhost:8765/preview-digest.html")
+    print(f"Open http://localhost:8765/{out.relative_to(ROOT / 'public').as_posix()}")
 
 
 if __name__ == "__main__":

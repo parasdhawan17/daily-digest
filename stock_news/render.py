@@ -16,11 +16,14 @@ from stock_news.config import (
 from stock_news.digest import count_web_stories, prepare_email_layout
 from stock_news.email import build_plain_text, build_email_content
 from stock_news.markets import Market
+from stock_news.design import resolve_design, design_url
+from stock_news.legacy_email import build_plain_text as build_legacy_plain_text
 
 
-def get_jinja_env() -> Environment:
+def get_jinja_env(design: str | None = None) -> Environment:
+    variant = resolve_design(design)
     env = Environment(
-        loader=FileSystemLoader(TEMPLATES_PATH),
+        loader=FileSystemLoader(TEMPLATES_PATH / "legacy" if variant == "legacy" else TEMPLATES_PATH),
         autoescape=select_autoescape(["html"]),
     )
     env.filters["format_number"] = lambda value: f"{value:,.0f}"
@@ -42,14 +45,16 @@ def build_web_digest(
     progressive: bool = False,
     progressive_token: str | None = None,
     prefill_email: str | None = None,
+    design: str | None = None,
 ) -> str:
     today_label = date.today().strftime("%d %b %Y")
     layout = prepare_email_layout(sections)
     layout["ai_summary"] = ai_summary
     web_story_count = count_web_stories(sections)
-    env = get_jinja_env()
+    variant = resolve_design(design)
+    env = get_jinja_env(variant)
     template = env.get_template("web_digest.html")
-    return template.render(
+    html = template.render(
         date_label=today_label,
         ticker_count=len(tickers),
         story_count=web_story_count,
@@ -71,9 +76,14 @@ def build_web_digest(
         **layout,
     )
 
+    if variant == "legacy":
+        html = html.replace('/subscribe-form.css', '/legacy/subscribe-form.css').replace('/subscribe-form.js', '/legacy/subscribe-form.js')
+    # Fragment requests must use the shell's variant, even after a rollout change.
+    return html.replace('"/api/digest-data?t="', '"/api/digest-data?design=' + variant + '&t="')
 
-def build_web_section(section: dict) -> str:
-    env = get_jinja_env()
+
+def build_web_section(section: dict, *, design: str | None = None) -> str:
+    env = get_jinja_env(design)
     template = env.get_template("web_section.html")
     return template.render(section=section, visible_story_count=HEADLINES_PER_TICKER)
 
@@ -88,6 +98,7 @@ def build_email_digest(
     digest_url: str | None = None,
     update_tickers_url: str | None = None,
     ai_summary: dict | None = None,
+    design: str | None = None,
 ) -> tuple[str, str, str]:
     today_label = date.today().strftime("%d %b %Y")
     layout, email_heading, subject = build_email_content(
@@ -98,7 +109,9 @@ def build_email_digest(
         ai_summary,
         market,
     )
-    env = get_jinja_env()
+    variant = resolve_design(design)
+    digest_url = design_url(digest_url, variant)
+    env = get_jinja_env(variant)
     template = env.get_template("email_digest.html")
     html = template.render(
         date_label=today_label,
@@ -106,11 +119,14 @@ def build_email_digest(
         story_count=total_stories,
         site_url=SITE_URL,
         email_heading=email_heading,
+        briefing_title="Your opening briefing" if session == "pre_open" else "Your closing briefing",
+        market_label="India" if market == "IN" else "US",
         digest_url=digest_url,
         update_tickers_url=update_tickers_url,
         **layout,
     )
-    text = build_plain_text(
+    text_renderer = build_legacy_plain_text if variant == "legacy" else build_plain_text
+    text = text_renderer(
         layout,
         today_label,
         len(tickers),

@@ -5,397 +5,106 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="color-scheme" content="light dark">
   <meta name="supported-color-schemes" content="light dark">
-  <title>{{ email_heading }} · Tickr Digest</title>
-  <style type="text/css">
-    :root {
-      color-scheme: light dark;
-      supported-color-schemes: light dark;
-    }
-
-    /* Gmail-only: keep light header text from being inverted to dark */
-    u + .body .gmail-blend {
-      background: #000000;
-      mix-blend-mode: screen;
-    }
-    u + .body .gmail-blend-inner {
-      background: #000000;
-      mix-blend-mode: difference;
-    }
-
+  <title>{{ briefing_title }} · Tickr Digest</title>
+  <style>
+    body { margin: 0; padding: 0; }
+    a:focus-visible { outline: 3px solid #487964; outline-offset: 4px; }
     @media (prefers-color-scheme: dark) {
-      .email-body,
-      .email-outer {
-        background-color: #0b1220 !important;
-      }
-      .email-card {
-        background-color: #111827 !important;
-      }
-      .section-muted,
-      .footer-bg,
-      .movers-bg {
-        background-color: #1e293b !important;
-        border-color: #334155 !important;
-      }
-      .story-block {
-        border-color: #1f2937 !important;
-      }
-      .hero-panel {
-        background-color: #1e293b !important;
-      }
-      .ticker-card {
-        border-color: #334155 !important;
-      }
-      .text-primary {
-        color: #f8fafc !important;
-      }
-      .text-secondary {
-        color: #cbd5e1 !important;
-      }
-      .text-muted {
-        color: #94a3b8 !important;
-      }
-      .text-label {
-        color: #94a3b8 !important;
-      }
-      .link-primary {
-        color: #93c5fd !important;
-      }
-      .badge-up {
-        background-color: #14532d !important;
-        color: #86efac !important;
-      }
-      .badge-down {
-        background-color: #7f1d1d !important;
-        color: #fca5a5 !important;
-      }
-      .badge-flat {
-        background-color: #334155 !important;
-        color: #cbd5e1 !important;
-      }
-      .price-up {
-        color: #4ade80 !important;
-      }
-      .price-down {
-        color: #f87171 !important;
-      }
-      .price-flat {
-        color: #94a3b8 !important;
-      }
-      .footer-link {
-        color: #94a3b8 !important;
-      }
-      .ai-briefing-panel {
-        background-color: #172554 !important;
-        background-image: none !important;
-        border-color: #3730a3 !important;
-      }
-      .ai-briefing-kicker {
-        background-color: #312e81 !important;
-        border-color: #6366f1 !important;
-        color: #e9d5ff !important;
-      }
-      .ai-briefing-title,
-      .ai-briefing-context {
-        color: #eef2ff !important;
-      }
-      .ai-briefing-note,
-      .ai-ticker-brief {
-        color: #c7d2fe !important;
-      }
-      .ai-ticker-brief {
-        background-color: #1e293b !important;
-        border-color: #818cf8 !important;
-      }
+      .email-body, .email-outer { background-color: #0d1723 !important; }
+      .email-card { background-color: #142130 !important; }
+      .text-primary { color: #f2f6fa !important; }
+      .text-secondary { color: #b4c1cf !important; }
+      .text-muted { color: #a1b0c2 !important; }
+      .link-primary { color: #a8edca !important; }
+      .ai-panel { background-color: #1b352e !important; border-color: #74be98 !important; }
+      .ai-copy { color: #d2e7dc !important; }
+      .ai-label { color: #a8edca !important; }
+      .story-block, .footer-panel { border-color: #354457 !important; }
+      .market-label { color: #b4c1cf !important; background-color: #26394b !important; }
     }
-
-    .ai-briefing-panel {
-      background-color: #f5f3ff;
-      border: 1px solid #c7d2fe;
-      border-radius: 14px;
-      box-shadow: 0 8px 24px rgba(79, 70, 229, 0.10);
-    }
-    .ai-briefing-kicker {
-      display: inline-block;
-      padding: 5px 10px;
-      border: 1px solid #c4b5fd;
-      border-radius: 999px;
-      background: rgba(255, 255, 255, 0.62);
-      color: #5b21b6;
-      font-size: 10px;
-      font-weight: 800;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-    }
-    .ai-briefing-title {
-      color: #1e1b4b;
-    }
-    .ai-briefing-context {
-      color: #312e81;
-    }
-    .ai-briefing-note {
-      color: #64748b;
-    }
-    .ai-ticker-brief {
-      border-left: 3px solid #818cf8;
-      background: rgba(255, 255, 255, 0.60);
-    }
-
     @media screen and (max-width: 600px) {
-      /* Use the phone width for content instead of stacking outer and inner margins. */
-      .email-outer {
-        padding: 0 !important;
-      }
-      .email-shell {
-        max-width: 640px !important;
-        border-radius: 0 !important;
-        box-shadow: none !important;
-      }
-      .email-shell > tbody > tr > td {
-        padding-left: 16px !important;
-        padding-right: 16px !important;
-      }
-      .email-shell .story-headline {
-        font-size: 18px !important;
-        line-height: 1.4 !important;
-      }
-      .email-shell .story-summary {
-        font-size: 16px !important;
-        line-height: 1.6 !important;
-      }
-      .email-shell .ai-briefing-context,
-      .email-shell .ai-ticker-brief {
-        font-size: 16px !important;
-      }
-      .email-shell .ai-briefing-note {
-        font-size: 13px !important;
-      }
+      .email-outer { padding: 0 !important; }
+      .email-shell { border-radius: 0 !important; }
+      .mobile-section { padding-left: 18px !important; padding-right: 18px !important; }
+      .email-heading { font-size:24px !important; }
     }
   </style>
-  <!--[if mso]>
-  <style type="text/css">
-    body, table, td { font-family: Arial, Helvetica, sans-serif !important; }
-  </style>
-  <![endif]-->
+  <!--[if mso]><style>body, table, td { font-family: Arial, Helvetica, sans-serif !important; }</style><![endif]-->
 </head>
-<body class="body email-body" style="margin:0;padding:0;background-color:#eef1f5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#1a1a2e;">
+<body class="email-body" style="margin:0;padding:0;background-color:#f7f8fa;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#142334;">
+  <div style="display:none;font-size:1px;color:#f7f8fa;line-height:1px;max-height:0;max-width:0;opacity:0;overflow:hidden;">{% if ai_summary %}Your watchlist’s AI briefing and company news.{% else %}Company news for your watchlist.{% endif %} Open the full digest for prices, earnings, and more.</div>
 
-  {% macro change_class(quote) -%}
-    {%- if quote and quote.change_pct is not none -%}
-      {%- if quote.change_pct > 0 -%}up{%- elif quote.change_pct < 0 -%}down{%- else -%}flat{%- endif -%}
-    {%- endif -%}
-  {%- endmacro %}
-
-  {% macro accent_border_color(quote) -%}
-    {%- set cls = change_class(quote) -%}
-    {%- if cls == 'up' -%}#16a34a{%- elif cls == 'down' -%}#dc2626{%- else -%}#94a3b8{%- endif -%}
-  {%- endmacro %}
-
-  {% macro render_ticker_card(section, quote, logo_size=48, symbol_size=24, price_size=18, badge_size=13, head_padding='20px 20px 16px', body_padding='0 20px 20px') %}
-  <table role="presentation" class="ticker-card" width="100%" cellpadding="0" cellspacing="0" style="border-radius:12px;overflow:hidden;border:1px solid #e2e8f0;border-left:4px solid {{ accent_border_color(quote) }};">
-    <tr>
-      <td class="hero-panel" bgcolor="#fafbfc" style="padding:{{ head_padding }};background-color:#fafbfc;">
-        {{ render_ticker_head(section, quote, logo_size, symbol_size, price_size, badge_size) }}
-      </td>
-    </tr>
-    <tr>
-      <td class="email-card" bgcolor="#ffffff" style="padding:{{ body_padding }};background-color:#ffffff;">
-        {{ caller() }}
-      </td>
-    </tr>
-  </table>
+  {% macro render_company(section, stories) %}
+  <tr>
+    <td class="email-card mobile-section" bgcolor="#ffffff" style="padding:6px 26px 14px;background-color:#ffffff;">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="width:100%;">
+        <tr><td class="story-block" style="border-top:1px solid #dce3e9;padding:16px 0 6px;">
+          <h2 class="text-primary" style="margin:0;font-size:17px;line-height:1.4;letter-spacing:-0.5px;color:#142334;">{{ section.display_symbol or section.ticker }}{% if section.exchange %} <span class="market-label" style="display:inline-block;vertical-align:middle;margin-left:8px;padding:3px 7px;border-radius:4px;font-size:10px;font-weight:600;letter-spacing:0.5px;background-color:#eef2f6;color:#536174;">{{ section.exchange }}</span>{% endif %}</h2>
+        </td></tr>
+        {% if ai_summary and ai_summary.ticker_summaries.get(section.ticker) %}
+        <tr><td style="padding:4px 0 8px;">
+          <p class="text-secondary" style="margin:0;font-size:13px;line-height:1.55;color:#536174;"><strong class="text-primary" style="color:#142334;">AI brief</strong> &nbsp;{{ ai_summary.ticker_summaries.get(section.ticker) }}</p>
+        </td></tr>
+        {% endif %}
+        {% if section.error %}
+        <tr><td><p class="text-muted" style="margin:8px 0;font-size:13px;line-height:1.6;color:#637185;">We couldn’t load company news for {{ section.display_symbol or section.ticker }}. Check your full digest for the latest available information.</p></td></tr>
+        {% elif stories %}
+        {% for story in stories %}
+        <tr><td style="padding:8px 0;">
+          <a class="link-primary" href="{{ story.url }}" style="color:#17634f;font-size:14px;font-weight:650;line-height:1.5;text-decoration:none;">{{ story.headline }}</a>
+          {% if story.summary %}<p class="text-secondary" style="margin:8px 0 0;color:#536174;font-size:13px;line-height:1.55;">{{ story.summary }}</p>{% endif %}
+          <p class="text-muted" style="margin:8px 0 0;color:#637185;font-size:12px;line-height:1.6;">{{ story.source }}{% if story.published_at %} · {{ story.published_at }}{% elif story.relative_time %} · {{ story.relative_time }}{% endif %}</p>
+        </td></tr>
+        {% endfor %}
+        {% else %}
+        <tr><td><p class="text-muted" style="margin:8px 0;color:#637185;font-size:13px;line-height:1.6;">No new company coverage for {{ section.display_symbol or section.ticker }} in this briefing.</p></td></tr>
+        {% endif %}
+      </table>
+    </td>
+  </tr>
   {% endmacro %}
 
-  {% macro render_ticker_head(section, quote, logo_size=48, symbol_size=24, price_size=18, badge_size=13) %}
-  {% set cls = change_class(quote) %}
-  <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
-    <tr>
-      {% if section.logo %}
-      <td width="{{ logo_size }}" valign="top" style="vertical-align:top;padding-right:14px;">
-        <img src="{{ section.logo }}" alt="{{ section.ticker }}" width="{{ logo_size }}" height="{{ logo_size }}" style="display:block;width:{{ logo_size }}px;height:{{ logo_size }}px;object-fit:contain;border-radius:10px;background-color:#f8fafc;padding:6px;">
-      </td>
-      {% endif %}
-      <td valign="top" style="vertical-align:top;">
-        <p class="text-primary" style="margin:0;font-size:{{ symbol_size }}px;font-weight:800;color:#0f172a;letter-spacing:-0.5px;line-height:1.2;font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;">
-          <span style="vertical-align:middle;">{{ section.display_symbol or section.ticker }}</span>{% if section.exchange %}
-          <span style="display:inline-block;font-size:{{ (symbol_size * 0.45)|round|int }}px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;padding:2px 8px;border-radius:4px;margin-left:8px;vertical-align:middle;{% if section.market == 'IN' %}background-color:#ffedd5;color:#c2410c;{% else %}background-color:#dbeafe;color:#1d4ed8;{% endif %}">{{ section.exchange }}</span>{% endif %}
-        </p>
-        {% if quote %}
-        <p style="margin:8px 0 0;font-size:0;line-height:1.4;">
-          <span class="text-primary" style="font-size:{{ price_size }}px;font-weight:700;color:#1e293b;vertical-align:middle;">{% if section.market == 'IN' %}₹{% else %}${% endif %}{{ "%.2f"|format(quote.price) }}</span>
-          {% if quote.change_pct is not none %}
-          <span class="{% if cls == 'up' %}badge-up{% elif cls == 'down' %}badge-down{% else %}badge-flat{% endif %}" style="display:inline-block;font-size:{{ badge_size }}px;font-weight:700;margin-left:10px;padding:4px 10px;border-radius:6px;vertical-align:middle;
-            {% if cls == 'up' %}background-color:#dcfce7;color:#15803d;
-            {% elif cls == 'down' %}background-color:#fee2e2;color:#b91c1c;
-            {% else %}background-color:#f1f5f9;color:#64748b;{% endif %}">
-            {% if quote.change_pct >= 0 %}+{% endif %}{{ "%.2f"|format(quote.change_pct) }}%
-          </span>
-          {% endif %}
-        </p>
+  <table role="presentation" class="email-outer" width="100%" cellpadding="0" cellspacing="0" bgcolor="#f7f8fa" style="background-color:#f7f8fa;padding:32px 12px;">
+    <tr><td align="center">
+      <table role="presentation" class="email-shell email-card" width="600" cellpadding="0" cellspacing="0" bgcolor="#ffffff" style="width:100%;max-width:600px;background-color:#ffffff;border-radius:12px;overflow:hidden;">
+        <tr><td class="mobile-section" bgcolor="#101e2d" style="padding:22px 26px;background-color:#101e2d;">
+          <p style="margin:0 0 18px;font-size:17px;font-weight:750;letter-spacing:-0.7px;color:#f5f8fa;">tickr digest<span style="color:#a8edca;">.</span></p>
+          <p style="margin:0 0 12px;font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#a8edca;">{{ market_label }} · {{ date_label }}</p>
+          <h1 class="email-heading" style="margin:0;color:#f5f8fa;font-size:26px;font-weight:600;line-height:1.2;letter-spacing:-1px;">{{ briefing_title }}</h1>
+          <p style="margin:12px 0 0;color:#b9c7d5;font-size:13px;line-height:1.55;">{% if ai_summary %}Your AI briefing and company news, in one quick read.{% else %}Company news for your watchlist, in one quick read.{% endif %}</p>
+        </td></tr>
+        {% if ai_summary %}
+        <tr><td class="email-card mobile-section" bgcolor="#ffffff" style="padding:18px 26px 6px;background-color:#ffffff;">
+          <table role="presentation" class="ai-panel" width="100%" cellpadding="0" cellspacing="0" bgcolor="#eaf2ee" style="width:100%;background-color:#eaf2ee;border-left:3px solid #487964;border-radius:0 7px 7px 0;">
+            <tr><td style="padding:16px;">
+              <h2 class="ai-label" style="margin:0 0 10px;color:#24533e;font-size:12px;font-weight:750;letter-spacing:1px;text-transform:uppercase;">AI briefing · Your watchlist in context</h2>
+              <p class="ai-copy" style="margin:0;color:#354d42;font-size:13px;line-height:1.55;">{{ ai_summary.market_context }}</p>
+              <p class="text-muted" style="margin:14px 0 0;color:#536174;font-size:11px;line-height:1.6;">AI-generated from linked headlines and excerpts. Not investment advice.</p>
+            </td></tr>
+          </table>
+        </td></tr>
         {% endif %}
-      </td>
-    </tr>
-  </table>
-  {% endmacro %}
-
-  {% macro render_story(story, is_first=false, hero_image=none, headline_size=17, show_divider=true) %}
-  {% set story_image = hero_image if is_first and hero_image else story.image %}
-  <table role="presentation" class="story-block" width="100%" cellpadding="0" cellspacing="0" style="width:100%;{% if show_divider %}border-top:1px solid #f1f5f9;{% endif %}">
-    <tr>
-      <td style="padding:{% if show_divider %}20{% else %}16{% endif %}px 0 0;">
-        {% if story_image %}
-        <a href="{{ story.url }}" style="text-decoration:none;display:block;margin:0 0 14px;">
-          <img src="{{ story_image }}" alt="" width="552" style="display:block;width:100%;max-width:100%;height:160px;object-fit:cover;border-radius:8px;border:0;">
-        </a>
+        <tr><td class="email-card mobile-section" bgcolor="#ffffff" style="padding:18px 26px 0;background-color:#ffffff;">
+          <p class="text-muted" style="margin:0;font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#637185;">Company news · Your selected stocks</p>
+        </td></tr>
+        {% if hero %}{{ render_company(hero, hero.stories) }}{% endif %}
+        {% for section in compact %}{{ render_company(section, section.stories[:1]) }}{% endfor %}
+        {% if digest_url %}
+        <tr><td class="mobile-section" bgcolor="#132a2b" style="padding:22px 26px;background-color:#132a2b;text-align:center;">
+          <h2 style="margin:0 0 12px;color:#f0faf6;font-family:Georgia,serif;font-size:22px;font-weight:400;line-height:1.2;">The bigger picture awaits.</h2>
+          <p style="margin:0 0 22px;color:#b7cfc7;font-size:13px;line-height:1.55;">Explore price moves, 1-year highs, earnings dates and results, and more in your full digest.</p>
+          <table role="presentation" cellpadding="0" cellspacing="0" align="center"><tr><td bgcolor="#a8edca" style="background-color:#a8edca;border-radius:6px;">
+            <!--[if mso]><v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="{{ digest_url }}" style="height:48px;v-text-anchor:middle;width:250px;" arcsize="12%" strokecolor="#a8edca" fillcolor="#a8edca"><w:anchorlock/><center style="color:#102c23;font-family:Arial,sans-serif;font-size:13px;font-weight:bold;">Open my full digest</center></v:roundrect><![endif]-->
+            <!--[if !mso]><!--><a href="{{ digest_url }}" style="display:inline-block;padding:15px 26px;color:#102c23;font-size:13px;font-weight:700;line-height:1.3;text-decoration:none;border-radius:6px;">Open my full digest &rarr;</a><!--<![endif]-->
+          </td></tr></table>
+        </td></tr>
         {% endif %}
-        <a href="{{ story.url }}" class="link-primary story-headline" style="display:block;font-size:{{ headline_size }}px;font-weight:600;color:#1d4ed8;text-decoration:none;line-height:1.45;">{{ story.headline }}</a>
-        {% if story.summary %}
-        <p class="text-secondary story-summary" style="margin:8px 0 0;font-size:{% if headline_size >= 17 %}16{% else %}15{% endif %}px;color:#475569;line-height:1.65;">{{ story.summary }}</p>
-        {% endif %}
-        <p class="text-muted" style="margin:8px 0 0;font-size:13px;color:#94a3b8;">{{ story.source }}{% if story.published_at %} · {{ story.published_at }}{% elif story.relative_time %} · {{ story.relative_time }}{% endif %}</p>
-      </td>
-    </tr>
-  </table>
-  {% endmacro %}
-
-  <table role="presentation" class="email-outer" width="100%" cellpadding="0" cellspacing="0" bgcolor="#eef1f5" style="background-color:#eef1f5;padding:24px 12px;">
-    <tr>
-      <td align="center">
-        <table role="presentation" class="email-card email-shell" width="600" cellpadding="0" cellspacing="0" bgcolor="#ffffff" style="max-width:600px;width:100%;background-color:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.08);">
-
-          <!-- Movers strip -->
-          {% if movers_bar %}
-          <tr>
-            <td class="movers-bg" bgcolor="#f8fafc" style="padding:16px 20px;background-color:#f8fafc;border-bottom:1px solid #e8ecf0;">
-              <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
-                <tr>
-                  {% for mover in movers_bar %}
-                  <td style="padding:3px;">
-                    <span class="{% if mover.is_positive == true %}badge-up{% elif mover.is_positive == false %}badge-down{% else %}badge-flat{% endif %}" style="display:inline-block;font-size:11px;font-weight:600;padding:5px 10px;border-radius:6px;white-space:nowrap;
-                      {% if mover.is_positive == true %}background-color:#dcfce7;color:#15803d;
-                      {% elif mover.is_positive == false %}background-color:#fee2e2;color:#b91c1c;
-                      {% else %}background-color:#f1f5f9;color:#64748b;{% endif %}">
-                      {{ mover.display_symbol or mover.ticker }}{% if mover.exchange %} <span style="font-size:9px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;opacity:0.85;">{{ mover.exchange }}</span>{% endif %}{% if mover.change_pct is not none %} {% if mover.change_pct >= 0 %}+{% endif %}{{ "%.1f"|format(mover.change_pct) }}%{% endif %}
-                    </span>
-                  </td>
-                  {% if loop.index % 4 == 0 and not loop.last %}
-                </tr><tr>
-                  {% endif %}
-                  {% endfor %}
-                </tr>
-              </table>
-            </td>
-          </tr>
-          {% endif %}
-
-          {% if ai_summary %}
-          <!-- AI briefing -->
-          <tr>
-            <td class="email-card mobile-section" bgcolor="#ffffff" style="padding:20px 24px 8px;background-color:#ffffff;">
-              <table role="presentation" class="ai-briefing-panel" width="100%" cellpadding="0" cellspacing="0" bgcolor="#f5f3ff" style="width:100%;background-color:#f5f3ff;border:1px solid #c7d2fe;border-radius:14px;box-shadow:0 8px 24px rgba(79,70,229,0.10);">
-                <tr>
-                  <td style="padding:20px 20px 18px;">
-                    <span class="ai-briefing-kicker" style="display:inline-block;padding:5px 10px;border:1px solid #c4b5fd;border-radius:999px;background:rgba(255,255,255,0.62);color:#5b21b6;font-size:10px;font-weight:800;letter-spacing:0.12em;text-transform:uppercase;">✦ AI briefing</span>
-                    <p class="ai-briefing-title" style="margin:14px 0 0;color:#1e1b4b;font-size:18px;font-weight:800;line-height:1.3;">The signal behind today’s headlines</p>
-                    <p class="ai-briefing-context" style="margin:8px 0 0;color:#312e81;font-size:16px;font-weight:600;line-height:1.55;">{{ ai_summary.market_context }}</p>
-                    <p class="ai-briefing-note" style="margin:14px 0 0;color:#64748b;font-size:13px;line-height:1.5;">AI-generated from the linked headlines and excerpts. Not investment advice.</p>
-                  </td>
-                </tr>
-              </table>
-            </td>
-          </tr>
-          {% endif %}
-
-          {% if digest_url %}
-          <!-- Full digest CTA -->
-          <tr>
-            <td class="mobile-section" style="padding:4px 24px 18px;background-color:#ffffff;text-align:center;">
-              <p class="text-muted" style="margin:0 0 10px;font-size:13px;color:#64748b;line-height:1.45;">Want the full interactive view?</p>
-              <table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center">
-                <tr>
-                  <td align="center" bgcolor="#2563eb" style="border-radius:999px;background-color:#2563eb;background:linear-gradient(135deg,#3b82f6 0%,#2563eb 100%);box-shadow:0 5px 16px rgba(37,99,235,0.30);">
-                    <!--[if mso]>
-                    <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="{{ digest_url }}" style="height:44px;v-text-anchor:middle;width:238px;" arcsize="50%" strokecolor="#2563eb" fillcolor="#2563eb">
-                    <w:anchorlock/>
-                    <center style="color:#ffffff;font-family:Arial,Helvetica,sans-serif;font-size:15px;font-weight:700;">View full digest</center>
-                    </v:roundrect>
-                    <![endif]-->
-                    <!--[if !mso]><!-->
-                    <a href="{{ digest_url }}" class="cta-button" style="display:inline-block;padding:12px 28px;font-size:15px;font-weight:700;color:#ffffff;text-decoration:none;border-radius:999px;line-height:1.2;letter-spacing:0.01em;">View full digest &rarr;</a>
-                    <!--<![endif]-->
-                  </td>
-                </tr>
-              </table>
-            </td>
-          </tr>
-          {% endif %}
-
-          <!-- Hero: top mover -->
-          {% if hero %}
-          <tr>
-            <td class="email-card mobile-section" bgcolor="#ffffff" style="padding:32px 24px 8px;background-color:#ffffff;">
-              <p class="text-label" style="margin:0 0 16px;font-size:12px;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;color:#64748b;">Biggest mover</p>
-              {% call render_ticker_card(hero, hero.quote, logo_size=48, symbol_size=24, price_size=18, badge_size=13) %}
-              {% if ai_summary and ai_summary.ticker_summaries.get(hero.ticker) %}
-              <p class="section-muted ai-ticker-brief" style="margin:0 0 14px;padding:13px 14px;border-left:3px solid #818cf8;background-color:#f8fafc;color:#475569;font-size:16px;line-height:1.6;"><strong class="text-primary" style="color:#1e293b;">✦ AI brief</strong> &nbsp;{{ ai_summary.ticker_summaries.get(hero.ticker) }}</p>
-              {% endif %}
-              {% if hero.error %}
-              <p class="text-muted" style="margin:0;font-size:15px;color:#718096;font-style:italic;">Could not fetch news for {{ hero.display_symbol or hero.ticker }}.</p>
-              {% elif hero.stories %}
-              {% for story in hero.stories %}
-              {{ render_story(story, is_first=loop.first, hero_image=hero.hero_image, headline_size=17, show_divider=not loop.first) }}
-              {% endfor %}
-              {% else %}
-              <p class="text-muted" style="margin:0;font-size:14px;color:#718096;font-style:italic;">No major news for {{ hero.display_symbol or hero.ticker }} today.</p>
-              {% endif %}
-              {% endcall %}
-            </td>
-          </tr>
-          {% endif %}
-
-          <!-- Compact list: remaining tickers -->
-          {% if compact %}
-          <tr>
-            <td class="email-card mobile-section" bgcolor="#ffffff" style="padding:8px 24px 4px;background-color:#ffffff;border-top:1px solid #e8ecf0;">
-              <p class="text-label" style="margin:0 0 4px;font-size:12px;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;color:#64748b;">Other Movers</p>
-            </td>
-          </tr>
-          {% for section in compact %}
-          <tr>
-            <td class="email-card mobile-section" bgcolor="#ffffff" style="padding:0 24px 12px;background-color:#ffffff;">
-              {% call render_ticker_card(section, section.quote, logo_size=48, symbol_size=20, price_size=16, badge_size=12, head_padding='14px 16px', body_padding='0 16px 16px') %}
-              {% if ai_summary and ai_summary.ticker_summaries.get(section.ticker) %}
-              <p class="section-muted ai-ticker-brief" style="margin:0 0 12px;padding:11px 12px;border-left:3px solid #818cf8;background-color:#f8fafc;color:#475569;font-size:15px;line-height:1.55;"><strong class="text-primary" style="color:#1e293b;">✦ AI brief</strong> &nbsp;{{ ai_summary.ticker_summaries.get(section.ticker) }}</p>
-              {% endif %}
-              {% if section.error %}
-              <p class="text-muted" style="margin:0;font-size:14px;color:#718096;font-style:italic;">Could not fetch news for {{ section.display_symbol or section.ticker }}.</p>
-              {% elif section.stories %}
-              {% set story = section.stories[0] %}
-              {{ render_story(story, headline_size=16, show_divider=false) }}
-              {% else %}
-              <p class="text-muted" style="margin:0;font-size:13px;color:#718096;font-style:italic;">No major news for {{ section.display_symbol or section.ticker }} today.</p>
-              {% endif %}
-              {% endcall %}
-            </td>
-          </tr>
-          {% endfor %}
-          {% endif %}
-
-          <!-- Footer -->
-          <tr>
-            <td class="footer-bg" bgcolor="#f8fafc" style="padding:24px 28px;background-color:#f8fafc;border-top:1px solid #e8ecf0;text-align:center;">
-              <p class="text-muted" style="margin:0;font-size:12px;color:#94a3b8;">Tickr Digest · your personalized stock brief</p>
-              {% if digest_url %}
-              <p style="margin:8px 0 0;font-size:12px;"><a href="{{ digest_url }}" class="footer-link" style="color:#64748b;text-decoration:none;">See the full digest online</a></p>
-              {% endif %}
-              {% if update_tickers_url %}
-              <p style="margin:8px 0 0;font-size:12px;"><a href="{{ update_tickers_url }}" class="footer-link" style="color:#64748b;text-decoration:none;">Update your tickers</a></p>
-              {% endif %}
-            </td>
-          </tr>
-
-        </table>
-      </td>
-    </tr>
+        <tr><td class="email-card mobile-section footer-panel" bgcolor="#ffffff" style="padding:20px 26px;background-color:#ffffff;text-align:center;border-top:1px solid #dce3e9;">
+          <p class="text-muted" style="margin:0;color:#637185;font-size:12px;line-height:1.55;">Tickr Digest · A broader view of your stocks.<br>For information, not investment advice.</p>
+          {% if update_tickers_url %}<p style="margin:12px 0 0;"><a class="link-primary" href="{{ update_tickers_url }}" style="color:#17634f;font-size:12px;line-height:1.8;">Update your tickers</a></p>{% endif %}
+        </td></tr>
+      </table>
+    </td></tr>
   </table>
 </body>
 </html>

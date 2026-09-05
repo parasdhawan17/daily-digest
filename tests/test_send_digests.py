@@ -52,6 +52,8 @@ class MarketDigestLinkTest(unittest.TestCase):
                 )
 
                 self.assertEqual(sent, 1)
+                self.assertIn("design=", _build_email_digest.call_args.kwargs["digest_url"])
+                self.assertIn(_build_email_digest.call_args.kwargs["design"], ("legacy", "modern"))
                 build_digest_url.assert_called_once_with(
                     expected_tickers,
                     site_url="https://example.com",

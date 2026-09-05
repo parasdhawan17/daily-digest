@@ -1,0 +1,176 @@
+{% macro render_earnings(earnings, history) %}
+{% if earnings or (history and history.quarters) %}
+<details class="earnings-history">
+  <summary class="earnings-summary">
+    <span class="earnings-summary-copy">
+      <span class="earnings-summary-title">{% if earnings %}Next earnings{% else %}Earnings{% endif %}</span>
+      {% if not earnings %}<span class="earnings-summary-subtitle">Last 4 reported quarters</span>{% endif %}
+    </span>
+    <span class="earnings-summary-meta">
+      <span class="earnings-summary-score">{% if earnings %}{{ earnings.date_label }}{% else %}{{ history.summary_label }}{% endif %}</span>
+      <span class="earnings-chevron" aria-hidden="true"></span>
+    </span>
+  </summary>
+  <div class="earnings-content">
+    {% if history and history.quarters %}
+    <div class="earnings-history-heading">Last 4 reported quarters · {{ history.summary_label }}{% if earnings %} · next release highlighted{% endif %}</div>
+    <div class="earnings-history-layout">
+    {% if history.mode == "reported" %}
+    <div class="earnings-chart" aria-hidden="true">
+      <div class="earnings-chart-heading">
+        <span>Reported EPS trend</span>
+        {% if history.chart_scale_value > 0 %}<span class="earnings-chart-scale">₹{{ "%.2f"|format(history.chart_scale_value) }} scale</span>{% endif %}
+      </div>
+      <div class="earnings-chart-rows">
+        {% for quarter in history.quarters %}
+        <div class="earnings-chart-row{% if quarter.latest %} is-latest{% endif %}">
+          <span class="earnings-chart-quarter">
+            {{ quarter.label }}
+            {% if quarter.latest %}<small>Latest</small>{% endif %}
+          </span>
+          <span class="earnings-bar-track">
+            <span class="earnings-bar-half earnings-bar-half-left">
+              {% if quarter.direction == "negative" %}<span class="earnings-bar miss" style="width: {{ "%.2f"|format(quarter.chart_width_pct) }}%"></span>{% endif %}
+            </span>
+            <span class="earnings-bar-half earnings-bar-half-right">
+              {% if quarter.direction == "positive" %}<span class="earnings-bar beat" style="width: {{ "%.2f"|format(quarter.chart_width_pct) }}%"></span>{% endif %}
+            </span>
+            {% if quarter.direction == "flat" %}<span class="earnings-inline-marker"></span>{% endif %}
+          </span>
+          <span class="earnings-chart-value {% if quarter.direction == 'positive' %}beat{% elif quarter.direction == 'negative' %}miss{% else %}inline{% endif %}">
+            {% if quarter.actual is not none %}₹{{ "%.2f"|format(quarter.actual) }}{% else %}—{% endif %}
+          </span>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="earnings-table-wrap" tabindex="0" aria-label="Scrollable four-quarter reported results comparison">
+      <table class="earnings-table">
+        <caption class="visually-hidden">Reported financial results for the last four quarters</caption>
+        <thead>
+          <tr>
+            <th scope="col">Metric</th>
+            {% for quarter in history.quarters %}
+            <th scope="col"{% if quarter.latest %} class="is-latest"{% endif %}>
+              <span class="earnings-quarter-label">{{ quarter.label }}</span>
+              <span class="earnings-period-label">{{ quarter.period_label }}</span>
+              {% if quarter.latest %}<span class="earnings-latest-label">Latest</span>{% endif %}
+            </th>
+            {% endfor %}
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row">Sales (₹ cr)</th>
+            {% for quarter in history.quarters %}<td{% if quarter.latest %} class="is-latest"{% endif %}>{% if quarter.sales is not none %}{{ quarter.sales|format_number }}{% else %}—{% endif %}</td>{% endfor %}
+          </tr>
+          <tr>
+            <th scope="row">Net profit (₹ cr)</th>
+            {% for quarter in history.quarters %}<td{% if quarter.latest %} class="is-latest"{% endif %}>{% if quarter.net_profit is not none %}{{ quarter.net_profit|format_number }}{% else %}—{% endif %}</td>{% endfor %}
+          </tr>
+          <tr>
+            <th scope="row">EPS (₹)</th>
+            {% for quarter in history.quarters %}<td{% if quarter.latest %} class="is-latest"{% endif %}>{% if quarter.actual is not none %}{{ "%.2f"|format(quarter.actual) }}{% else %}—{% endif %}</td>{% endfor %}
+          </tr>
+          <tr>
+            <th scope="row">OPM</th>
+            {% for quarter in history.quarters %}<td{% if quarter.latest %} class="is-latest"{% endif %}>{% if quarter.opm_pct is not none %}{{ "%.1f"|format(quarter.opm_pct) }}%{% else %}—{% endif %}</td>{% endfor %}
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="earnings-chart" aria-hidden="true">
+      <div class="earnings-chart-heading">
+        <span>EPS surprise vs consensus</span>
+        <span class="earnings-chart-scale">±{{ "%.0f"|format(history.chart_scale_pct) }}% scale</span>
+      </div>
+      <div class="earnings-chart-rows">
+        {% if earnings %}
+        <div class="earnings-chart-row is-upcoming">
+          <span class="earnings-chart-quarter">Next release<small>{{ earnings.date_label }}</small></span>
+          <span class="earnings-bar-track earnings-upcoming-track"><span class="earnings-upcoming-marker"></span></span>
+          <span class="earnings-chart-value upcoming">Upcoming</span>
+        </div>
+        {% endif %}
+        {% for quarter in history.quarters %}
+        <div class="earnings-chart-row{% if quarter.latest %} is-latest{% endif %}">
+          <span class="earnings-chart-quarter">
+            {{ quarter.label }}
+            {% if quarter.latest %}<small>Latest</small>{% endif %}
+          </span>
+          <span class="earnings-bar-track">
+            <span class="earnings-bar-half earnings-bar-half-left">
+              {% if quarter.result == "miss" %}<span class="earnings-bar miss" style="width: {{ "%.2f"|format(quarter.chart_width_pct) }}%"></span>{% endif %}
+            </span>
+            <span class="earnings-bar-half earnings-bar-half-right">
+              {% if quarter.result == "beat" %}<span class="earnings-bar beat" style="width: {{ "%.2f"|format(quarter.chart_width_pct) }}%"></span>{% endif %}
+            </span>
+            {% if quarter.result == "inline" %}<span class="earnings-inline-marker"></span>{% endif %}
+          </span>
+          <span class="earnings-chart-value {{ quarter.result }}">
+            {% if quarter.surprise_pct is not none %}{% if quarter.surprise_pct > 0 %}+{% endif %}{{ "%.1f"|format(quarter.surprise_pct) }}%{% else %}—{% endif %}
+          </span>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="earnings-table-wrap" tabindex="0" aria-label="Scrollable four-quarter earnings comparison">
+      <table class="earnings-table">
+        <caption class="visually-hidden">Reported and estimated earnings for the last four quarters and next release</caption>
+        <thead>
+          <tr>
+            <th scope="col">Metric</th>
+            {% for quarter in history.quarters %}
+            <th scope="col"{% if quarter.latest %} class="is-latest"{% endif %}>
+              <span class="earnings-quarter-label">{{ quarter.label }}</span>
+              <span class="earnings-period-label">{{ quarter.period_label }}</span>
+              {% if quarter.latest %}<span class="earnings-latest-label">Latest</span>{% endif %}
+            </th>
+            {% endfor %}
+            {% if earnings %}
+            <th scope="col" class="is-upcoming">
+              <span class="earnings-quarter-label">Next release</span>
+              <span class="earnings-period-label">{{ earnings.date_label }}</span>
+              <span class="earnings-latest-label">{% if earnings.hour == "bmo" %}Before open{% elif earnings.hour == "amc" %}After close{% elif earnings.hour == "dmh" %}Market hours{% else %}Timing TBD{% endif %}</span>
+            </th>
+            {% endif %}
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row">Reported EPS</th>
+            {% for quarter in history.quarters %}<td{% if quarter.latest %} class="is-latest"{% endif %}>{% if quarter.actual is not none %}{{ "%.2f"|format(quarter.actual) }}{% else %}—{% endif %}</td>{% endfor %}
+            {% if earnings %}<td class="is-upcoming">—</td>{% endif %}
+          </tr>
+          <tr>
+            <th scope="row">Estimate</th>
+            {% for quarter in history.quarters %}<td{% if quarter.latest %} class="is-latest"{% endif %}>{% if quarter.estimate is not none %}{{ "%.2f"|format(quarter.estimate) }}{% else %}—{% endif %}</td>{% endfor %}
+            {% if earnings %}<td class="is-upcoming">{% if earnings.eps_estimate is not none %}{{ "%.2f"|format(earnings.eps_estimate) }}{% else %}—{% endif %}</td>{% endif %}
+          </tr>
+          <tr>
+            <th scope="row">Surprise</th>
+            {% for quarter in history.quarters %}
+            <td class="earnings-surprise {{ quarter.result }}{% if quarter.latest %} is-latest{% endif %}">{% if quarter.surprise_pct is not none %}{% if quarter.surprise_pct > 0 %}+{% endif %}{{ "%.1f"|format(quarter.surprise_pct) }}%{% else %}—{% endif %}</td>
+            {% endfor %}
+            {% if earnings %}<td class="earnings-surprise upcoming is-upcoming">—</td>{% endif %}
+          </tr>
+          <tr>
+            <th scope="row">Result</th>
+            {% for quarter in history.quarters %}
+            <td{% if quarter.latest %} class="is-latest"{% endif %}><span class="earnings-result {{ quarter.result }}">{% if quarter.result == "beat" %}Beat{% elif quarter.result == "miss" %}Miss{% elif quarter.result == "inline" %}In line{% else %}No estimate{% endif %}</span></td>
+            {% endfor %}
+            {% if earnings %}<td class="is-upcoming"><span class="earnings-result upcoming">Upcoming</span></td>{% endif %}
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    {% endif %}
+    </div>
+    {% endif %}
+  </div>
+</details>
+{% endif %}
+{% endmacro %}

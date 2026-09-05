@@ -61,6 +61,7 @@ from stock_news.in_market_calendar import in_trading_day_skip_reason
 from stock_news.market_calendar import trading_day_skip_reason
 from stock_news.markets import Market, market_of
 from stock_news.render import build_email_digest
+from stock_news.design import design_for_recipient, design_url
 from stock_news.tokens import build_digest_url
 
 
@@ -246,6 +247,7 @@ def send_for_market(
 
     for subscriber in subscribers:
         email = subscriber["email"]
+        variant = design_for_recipient(email)
         user_tickers = subscriber["tickers"]
         if not user_tickers:
             print(f"Skipped {email}: no valid tickers")
@@ -259,6 +261,7 @@ def send_for_market(
             site_url=site_url,
             subscriber_id=subscriber.get("id"),
         )
+        digest_url = design_url(digest_url, variant)
         html, text, subject = build_email_digest(
             user_sections,
             user_tickers,
@@ -268,6 +271,7 @@ def send_for_market(
             digest_url=digest_url,
             update_tickers_url=update_tickers_url,
             ai_summary=user_ai_summary,
+            design=variant,
         )
         print(
             f"Prepared email for {email} "

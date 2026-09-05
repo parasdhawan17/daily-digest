@@ -1532,7 +1532,6 @@
     .progressive-ai { display: block; }
   </style>
   <link rel="stylesheet" href="/subscribe-form.css">
-  <style>{% include "web_digest_design.css" %}</style>
 </head>
 <body>
   <header class="header">
@@ -1553,10 +1552,37 @@
             <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"></path>
           </svg>
         </button>
+        <div class="header-bg" aria-hidden="true">
+          <div class="header-grid"></div>
+          <svg class="header-chart" viewBox="0 0 800 140" preserveAspectRatio="none">
+            <line class="chart-grid-line" x1="0" y1="35" x2="800" y2="35" />
+            <line class="chart-grid-line" x1="0" y1="70" x2="800" y2="70" />
+            <line class="chart-grid-line" x1="0" y1="105" x2="800" y2="105" />
+            <rect class="chart-candle up" x="60" y="82" width="8" height="22" rx="1" />
+            <rect class="chart-candle down" x="140" y="48" width="8" height="18" rx="1" />
+            <rect class="chart-candle up" x="220" y="72" width="8" height="28" rx="1" />
+            <rect class="chart-candle up" x="300" y="58" width="8" height="35" rx="1" />
+            <rect class="chart-candle down" x="380" y="42" width="8" height="20" rx="1" />
+            <rect class="chart-candle up" x="460" y="65" width="8" height="30" rx="1" />
+            <rect class="chart-candle down" x="540" y="50" width="8" height="16" rx="1" />
+            <rect class="chart-candle up" x="620" y="70" width="8" height="26" rx="1" />
+            <rect class="chart-candle up" x="700" y="55" width="8" height="32" rx="1" />
+            <path class="chart-line chart-line-up" d="M0,108 L50,100 L100,104 L150,88 L200,92 L250,76 L300,82 L350,68 L400,74 L450,58 L500,64 L550,50 L600,56 L650,42 L700,48 L750,36 L800,40" />
+            <path class="chart-line chart-line-down" d="M0,52 L50,58 L100,54 L150,64 L200,60 L250,70 L300,66 L350,76 L400,72 L450,82 L500,78 L550,88 L600,84 L650,94 L700,90 L750,98 L800,95" />
+          </svg>
+          <div class="header-tickers">
+            <span class="header-ticker up">AAPL +1.2%</span>
+            <span class="header-ticker down">TSLA -0.6%</span>
+            <span class="header-ticker up">NVDA +2.1%</span>
+            <span class="header-ticker down">META -0.3%</span>
+            <span class="header-ticker up">MSFT +0.8%</span>
+            <span class="header-ticker up">VOO +0.4%</span>
+          </div>
+          <div class="header-shimmer"></div>
+        </div>
         <div class="header-content">
-        <p class="eyebrow">tickr digest.</p>
-        <h1>Your stocks. The bigger picture.</h1>
-        <p class="digest-intro">Your AI briefing, price landmarks, earnings, and company coverage — together in one place.</p>
+        <p class="eyebrow">Tickr Digest</p>
+        <h1>{{ digest_heading }}</h1>
         {% if fetched_at_label %}
         <p class="muted"><time id="fetched-at"{% if fetched_at_iso %} datetime="{{ fetched_at_iso }}" data-fetched-at="{{ fetched_at_iso }}"{% endif %}>{{ fetched_at_label }}</time></p>
         {% endif %}
@@ -1573,7 +1599,7 @@
   <section class="movers-bar progressive-movers" id="progressive-movers" aria-label="Subscribed tickers and session moves" hidden>
     <div class="section-inner">
       <div class="movers-toolbar">
-        <p class="movers-label">Your watchlist</p>
+        <p class="movers-label">Subscribed tickers</p>
         {% if subscribe_enabled %}
         <button type="button" class="movers-edit-btn" onclick="openSubscribeModal()" aria-label="Edit subscribed tickers">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"></path><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4Z"></path></svg>
@@ -1597,7 +1623,7 @@
   <section class="movers-bar" aria-label="Subscribed tickers and session moves">
     <div class="section-inner">
       <div class="movers-toolbar">
-        <p class="movers-label">Your watchlist</p>
+        <p class="movers-label">Subscribed tickers</p>
         {% if subscribe_enabled %}
         <button type="button" class="movers-edit-btn" onclick="openSubscribeModal()" aria-label="Edit subscribed tickers">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"></path><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4Z"></path></svg>
@@ -1623,7 +1649,7 @@
   {% if ai_summary %}
   <section class="ai-briefing" aria-label="AI briefing">
     <div class="section-inner">
-      <p class="ai-briefing-label">AI briefing · Your watchlist in context</p>
+      <p class="ai-briefing-label">AI briefing · the signal behind today’s headlines</p>
       <p class="ai-briefing-context">{{ ai_summary.market_context }}</p>
       <p class="ai-briefing-note">AI-generated from the linked headlines and excerpts. Not investment advice.</p>
     </div>
@@ -1702,14 +1728,13 @@
       {{ render_earnings(section.upcoming_earnings, section.earnings_history) }}
 
       {% if ai_summary and ai_summary.ticker_summaries.get(section.ticker) %}
-      <p class="ticker-ai-brief"><strong>AI brief</strong> &nbsp; {{ ai_summary.ticker_summaries.get(section.ticker) }}</p>
+      <p class="ticker-ai-brief"><strong>✦ AI brief</strong> &nbsp; {{ ai_summary.ticker_summaries.get(section.ticker) }}</p>
       {% endif %}
 
       {% if section.error %}
       <p class="empty">Could not fetch news for {{ section.display_symbol or section.ticker }}.</p>
       {% elif section.web_stories %}
       <div class="story-list">
-        <h2 class="coverage-heading">Company coverage</h2>
         {% for story in section.web_stories[:visible_story_count] %}
         {{ render_story(story) }}
         {% endfor %}
@@ -1729,7 +1754,6 @@
   </section>
   {% endmacro %}
 
-  <main id="full-digest">
   {% if hero %}
   {{ render_section(hero, is_hero=true) }}
   {% endif %}
@@ -1737,13 +1761,12 @@
   {% for section in compact %}
   {{ render_section(section, is_highlight=loop.index <= 2, alt_bg=loop.index is odd) }}
   {% endfor %}
-  </main>
   {% endif %}
 
   <footer class="site-footer">
     <div class="section-inner">
       <p class="footer-brand">Tickr Digest</p>
-      <p>A broader view of your stocks. For information, not investment advice.</p>
+      <p>Your personalized stock brief</p>
       {% if subscribe_enabled %}
       <p><button type="button" class="footer-link-btn" onclick="openSubscribeModal()">Update your tickers</button></p>
       {% endif %}
@@ -1804,7 +1827,7 @@
       function addAiSummary(summary) {
         var panel = document.getElementById("progressive-ai");
         if (!panel || !summary || !summary.market_context) return;
-        panel.innerHTML = '<div class="section-inner"><p class="ai-briefing-label">AI briefing · Your watchlist in context</p><p class="ai-briefing-context">' + esc(summary.market_context) + '</p><p class="ai-briefing-note">AI-generated from the linked headlines and excerpts. Not investment advice.</p></div>';
+        panel.innerHTML = '<div class="section-inner"><p class="ai-briefing-label">AI briefing · the signal behind today’s headlines</p><p class="ai-briefing-context">' + esc(summary.market_context) + '</p><p class="ai-briefing-note">AI-generated from the linked headlines and excerpts. Not investment advice.</p></div>';
         panel.hidden = false;
         loaded.forEach(function (item) {
           var brief = summary.ticker_summaries && summary.ticker_summaries[item.ticker];
@@ -1812,7 +1835,7 @@
           if (brief && section) {
             var node = document.createElement("p");
             node.className = "ticker-ai-brief";
-            node.innerHTML = "<strong>AI brief</strong> &nbsp; " + esc(brief);
+            node.innerHTML = "<strong>✦ AI brief</strong> &nbsp; " + esc(brief);
             section.querySelector(".section-inner").insertBefore(node, section.querySelector(".story-list, .empty"));
           }
         });
@@ -1908,7 +1931,17 @@
         if (!track) return;
         track.classList.remove("is-looping");
         track.querySelectorAll("[data-marquee-copy]").forEach(function (copy) { copy.remove(); });
-
+        window.requestAnimationFrame(function () {
+          var viewport = track.parentElement;
+          if (!viewport || track.scrollWidth <= viewport.clientWidth) return;
+          Array.prototype.slice.call(track.children).forEach(function (item) {
+            var copy = item.cloneNode(true);
+            copy.setAttribute("data-marquee-copy", "true");
+            copy.setAttribute("aria-hidden", "true");
+            track.appendChild(copy);
+          });
+          track.classList.add("is-looping");
+        });
       };
 
       document.querySelectorAll(".movers-track").forEach(window.setupMoverMarquee);

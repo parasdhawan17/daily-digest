@@ -272,13 +272,6 @@ def format_section_plain_text(
 ) -> list[str]:
     lines: list[str] = []
     ticker_line = display_symbol(section["ticker"])
-    if section["quote"]:
-        quote = section["quote"]
-        currency = "₹" if section.get("market") == "IN" else "$"
-        ticker_line += f"  {currency}{quote['price']:.2f}"
-        if quote["change_pct"] is not None:
-            sign = "+" if quote["change_pct"] >= 0 else ""
-            ticker_line += f"  {sign}{quote['change_pct']:.2f}%"
     lines.append(ticker_line)
     lines.append("-" * len(ticker_line))
 
@@ -323,12 +316,10 @@ def build_plain_text(
     digest_url: str | None = None,
     update_tickers_url: str | None = None,
 ) -> str:
-    summary = layout["market_summary"]
     title = email_heading or f"Tickr Digest · {date_label}"
     lines = [
         title,
         f"{date_label} · {ticker_count} tickers · {story_count} stories",
-        f"{summary['gainers']} up · {summary['losers']} down · {summary['flat']} flat",
         "",
     ]
 
@@ -337,16 +328,11 @@ def build_plain_text(
         lines.append("=== AI BRIEFING ===")
         lines.append(ai_summary["market_context"])
         lines.append("")
-        for ticker, summary_text in ai_summary.get("ticker_summaries", {}).items():
-            lines.append(f"{display_symbol(ticker)}: {summary_text}")
+        lines.append("AI-generated from linked headlines and excerpts. Not investment advice.")
         lines.append("")
 
-    if layout["top_mover_label"]:
-        lines.append(f"Today's biggest move: {layout['top_mover_label']}")
-        lines.append("")
-
+    lines.append("=== COMPANY NEWS ===")
     if layout["hero"]:
-        lines.append("=== BIGGEST MOVER ===")
         hero_ticker = layout["hero"]["ticker"]
         lines.extend(
             format_section_plain_text(

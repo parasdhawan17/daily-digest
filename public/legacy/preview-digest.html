@@ -1,11 +1,11 @@
-{% from "web_earnings.html" import render_earnings %}
-{% from "web_price_ranges.html" import render_price_ranges %}
+
+
 <!DOCTYPE html>
 <html lang="en" data-theme="dark">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Tickr Digest — {{ date_label }}</title>
+  <title>Tickr Digest — 06 Sep 2026</title>
   <meta name="color-scheme" content="dark light">
   <script>
     (function () {
@@ -1531,19 +1531,18 @@
     @keyframes section-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     .progressive-ai { display: block; }
   </style>
-  <link rel="stylesheet" href="/subscribe-form.css">
-  <style>{% include "web_digest_design.css" %}</style>
+  <link rel="stylesheet" href="/legacy/subscribe-form.css">
 </head>
 <body>
   <header class="header">
-        {% if site_url %}
-        <a href="{{ site_url }}/" class="header-home-link" aria-label="Back to home">
+
+        <a href="http://localhost:8765/" class="header-home-link" aria-label="Back to home">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M19 12H5M12 19l-7-7 7-7"></path>
           </svg>
           <span>Home</span>
         </a>
-        {% endif %}
+
         <button type="button" class="theme-toggle" id="theme-toggle" aria-label="Switch to dark mode" title="Toggle color theme">
           <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M21 14.5A8.5 8.5 0 1 1 9.5 3 7 7 0 0 0 21 14.5z"></path>
@@ -1553,207 +1552,1276 @@
             <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"></path>
           </svg>
         </button>
+        <div class="header-bg" aria-hidden="true">
+          <div class="header-grid"></div>
+          <svg class="header-chart" viewBox="0 0 800 140" preserveAspectRatio="none">
+            <line class="chart-grid-line" x1="0" y1="35" x2="800" y2="35" />
+            <line class="chart-grid-line" x1="0" y1="70" x2="800" y2="70" />
+            <line class="chart-grid-line" x1="0" y1="105" x2="800" y2="105" />
+            <rect class="chart-candle up" x="60" y="82" width="8" height="22" rx="1" />
+            <rect class="chart-candle down" x="140" y="48" width="8" height="18" rx="1" />
+            <rect class="chart-candle up" x="220" y="72" width="8" height="28" rx="1" />
+            <rect class="chart-candle up" x="300" y="58" width="8" height="35" rx="1" />
+            <rect class="chart-candle down" x="380" y="42" width="8" height="20" rx="1" />
+            <rect class="chart-candle up" x="460" y="65" width="8" height="30" rx="1" />
+            <rect class="chart-candle down" x="540" y="50" width="8" height="16" rx="1" />
+            <rect class="chart-candle up" x="620" y="70" width="8" height="26" rx="1" />
+            <rect class="chart-candle up" x="700" y="55" width="8" height="32" rx="1" />
+            <path class="chart-line chart-line-up" d="M0,108 L50,100 L100,104 L150,88 L200,92 L250,76 L300,82 L350,68 L400,74 L450,58 L500,64 L550,50 L600,56 L650,42 L700,48 L750,36 L800,40" />
+            <path class="chart-line chart-line-down" d="M0,52 L50,58 L100,54 L150,64 L200,60 L250,70 L300,66 L350,76 L400,72 L450,82 L500,78 L550,88 L600,84 L650,94 L700,90 L750,98 L800,95" />
+          </svg>
+          <div class="header-tickers">
+            <span class="header-ticker up">AAPL +1.2%</span>
+            <span class="header-ticker down">TSLA -0.6%</span>
+            <span class="header-ticker up">NVDA +2.1%</span>
+            <span class="header-ticker down">META -0.3%</span>
+            <span class="header-ticker up">MSFT +0.8%</span>
+            <span class="header-ticker up">VOO +0.4%</span>
+          </div>
+          <div class="header-shimmer"></div>
+        </div>
         <div class="header-content">
-        <p class="eyebrow">tickr digest.</p>
-        <h1>Your stocks. The bigger picture.</h1>
-        <p class="digest-intro">Your AI briefing, price landmarks, earnings, and company coverage — together in one place.</p>
-        {% if fetched_at_label %}
-        <p class="muted"><time id="fetched-at"{% if fetched_at_iso %} datetime="{{ fetched_at_iso }}" data-fetched-at="{{ fetched_at_iso }}"{% endif %}>{{ fetched_at_label }}</time></p>
-        {% endif %}
-        {% if top_mover_label %}
-        <p class="badge">Today's biggest move: <strong>{{ top_mover_label }}</strong></p>
-        {% endif %}
+        <p class="eyebrow">Tickr Digest</p>
+        <h1>Your stock news briefing</h1>
+
+        <p class="muted"><time id="fetched-at" datetime="2026-08-15T13:15:00+00:00" data-fetched-at="2026-08-15T13:15:00+00:00">Fetched at 9:15 AM ET · Aug 15, 2026</time></p>
+
+
+        <p class="badge">Today's biggest move: <strong>US:NVDA +2.14%</strong></p>
+
         </div>
       </header>
 
-  {% if progressive %}
-  <section class="progressive-status" id="progressive-status" aria-live="polite">
-    <div class="section-inner"><span class="status-spinner" aria-hidden="true"></span><span id="progressive-status-text">Loading your watchlist…</span></div>
-  </section>
-  <section class="movers-bar progressive-movers" id="progressive-movers" aria-label="Subscribed tickers and session moves" hidden>
-    <div class="section-inner">
-      <div class="movers-toolbar">
-        <p class="movers-label">Your watchlist</p>
-        {% if subscribe_enabled %}
-        <button type="button" class="movers-edit-btn" onclick="openSubscribeModal()" aria-label="Edit subscribed tickers">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"></path><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4Z"></path></svg>
-          <span>Edit</span>
-        </button>
-        {% endif %}
-      </div>
-      <div class="movers-wrap"><div class="movers" role="list"><div class="movers-track" id="progressive-movers-track"></div></div></div>
-    </div>
-  </section>
-  <section class="ai-briefing progressive-ai" id="progressive-ai" aria-label="AI briefing" hidden></section>
-  <main id="digest-sections" class="progressive-sections" data-token="{{ progressive_token or '' }}" data-tickers='{{ progressive_tickers|tojson }}'>
-    {% for ticker in progressive_tickers %}
-    <section class="ticker-section progressive-placeholder" data-ticker="{{ ticker }}" aria-label="Loading {{ ticker }}">
-      <div class="section-inner"><div class="skeleton skeleton-title"></div><div class="skeleton skeleton-price"></div><div class="skeleton skeleton-earnings"></div><div class="skeleton skeleton-line"></div><div class="skeleton skeleton-line short"></div></div>
-    </section>
-    {% endfor %}
-  </main>
-  {% else %}
-  {% if movers_bar %}
+
+
   <section class="movers-bar" aria-label="Subscribed tickers and session moves">
     <div class="section-inner">
       <div class="movers-toolbar">
-        <p class="movers-label">Your watchlist</p>
-        {% if subscribe_enabled %}
+        <p class="movers-label">Subscribed tickers</p>
+
         <button type="button" class="movers-edit-btn" onclick="openSubscribeModal()" aria-label="Edit subscribed tickers">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"></path><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4Z"></path></svg>
           <span>Edit</span>
         </button>
-        {% endif %}
+
       </div>
       <div class="movers-wrap">
       <div class="movers" role="list">
         <div class="movers-track">
-        {% for mover in movers_bar %}
-        <span class="pill {% if mover.is_positive == true %}up{% elif mover.is_positive == false %}down{% else %}flat{% endif %}" role="listitem">
-          {{ mover.display_symbol or mover.ticker }}{% if mover.change_pct is not none %} {% if mover.change_pct >= 0 %}+{% endif %}{{ "%.1f"|format(mover.change_pct) }}%{% endif %}
+
+        <span class="pill up" role="listitem">
+          NVDA +2.1%
         </span>
-        {% endfor %}
+
+        <span class="pill up" role="listitem">
+          AAPL +1.2%
+        </span>
+
+        <span class="pill up" role="listitem">
+          TCS +0.8%
+        </span>
+
+        <span class="pill down" role="listitem">
+          RELIANCE -0.4%
+        </span>
+
         </div>
       </div>
       </div>
     </div>
   </section>
-  {% endif %}
 
-  {% if ai_summary %}
+
+
   <section class="ai-briefing" aria-label="AI briefing">
     <div class="section-inner">
-      <p class="ai-briefing-label">AI briefing · Your watchlist in context</p>
-      <p class="ai-briefing-context">{{ ai_summary.market_context }}</p>
+      <p class="ai-briefing-label">AI briefing · the signal behind today’s headlines</p>
+      <p class="ai-briefing-context">AI infrastructure demand and resilient digital-services spending are driving the stronger names, while investors weigh company-specific execution and margin trends.</p>
       <p class="ai-briefing-note">AI-generated from the linked headlines and excerpts. Not investment advice.</p>
     </div>
   </section>
-  {% endif %}
 
-  {% macro change_class(quote) %}
-    {%- if quote and quote.change_pct is not none -%}
-      {%- if quote.change_pct > 0 -%}up{%- elif quote.change_pct < 0 -%}down{%- else -%}flat{%- endif -%}
-    {%- endif -%}
-  {% endmacro %}
 
-  {% macro render_story(story) %}
-  {% if story.image %}
-  <article class="story has-thumb">
-    <img class="story-thumb" src="{{ story.image }}" alt="" loading="lazy" decoding="async">
-    <div class="story-body">
-      <h3 class="story-headline"><a href="{{ story.url }}" target="_blank" rel="noopener">{{ story.headline }}</a></h3>
-      {% if story.summary %}
-      <p class="summary">{{ story.summary }}</p>
-      {% endif %}
-      <p class="meta">
-        {{ story.source }}
-        {% if story.published_at %} · {{ story.published_at }}{% elif story.relative_time %} · {{ story.relative_time }}{% endif %}
-      </p>
-    </div>
-  </article>
-  {% else %}
-  <article class="story">
-    <div class="story-body">
-      <h3 class="story-headline"><a href="{{ story.url }}" target="_blank" rel="noopener">{{ story.headline }}</a></h3>
-      {% if story.summary %}
-      <p class="summary">{{ story.summary }}</p>
-      {% endif %}
-      <p class="meta">
-        {{ story.source }}
-        {% if story.published_at %} · {{ story.published_at }}{% elif story.relative_time %} · {{ story.relative_time }}{% endif %}
-      </p>
-    </div>
-  </article>
-  {% endif %}
-  {% endmacro %}
 
-  {% macro render_section(section, is_hero=false, is_highlight=false, alt_bg=false) %}
-  {% set sec_quote = section.quote %}
-  {% set cls = change_class(sec_quote) %}
-  <section class="ticker-section{% if is_hero %} ticker-section-featured{% endif %}{% if alt_bg %} section-alt{% endif %}">
+
+
+
+
+
+
+
+
+
+  <section class="ticker-section ticker-section-featured">
     <div class="section-inner">
-      {% if is_hero or is_highlight %}
-      <p class="section-eyebrow">{% if is_hero %}Biggest mover{% else %}Notable mover{% endif %}</p>
-      {% endif %}
+
+      <p class="section-eyebrow">Biggest mover</p>
+
       <div class="ticker-head">
-        {% if section.logo %}
-        <img class="ticker-logo" src="{{ section.logo }}" alt="{{ section.ticker }}">
-        {% endif %}
+
+        <img class="ticker-logo" src="https://static2.finnhub.io/file/publicdatany/finnhubimage/stock_logo/NVDA.png" alt="US:NVDA">
+
         <div class="ticker-head-main">
           <div class="ticker-row">
-            <span class="ticker-symbol">{{ section.display_symbol or section.ticker }}</span>{% if section.exchange %}
-            <span class="exchange-badge {{ section.market|lower }}">{{ section.exchange }}</span>{% endif %}
+            <span class="ticker-symbol">NVDA</span>
+            <span class="exchange-badge us">US</span>
           </div>
-          {% if sec_quote %}
+
           <div class="ticker-quote">
-            <span class="ticker-price">{% if section.market == 'IN' %}₹{% else %}${% endif %}{{ "%.2f"|format(sec_quote.price) }}</span>
-            {% if sec_quote.change_pct is not none %}
-            <span class="ticker-change {{ cls }}">
-              {% if sec_quote.change_pct >= 0 %}+{% endif %}{{ "%.2f"|format(sec_quote.change_pct) }}%
+            <span class="ticker-price">$142.50</span>
+
+            <span class="ticker-change up">
+              +2.14%
             </span>
-            {% endif %}
+
           </div>
-          {% endif %}
+
         </div>
       </div>
 
-      {{ render_price_ranges(section) }}
 
-      {{ render_earnings(section.upcoming_earnings, section.earnings_history) }}
 
-      {% if ai_summary and ai_summary.ticker_summaries.get(section.ticker) %}
-      <p class="ticker-ai-brief"><strong>AI brief</strong> &nbsp; {{ ai_summary.ticker_summaries.get(section.ticker) }}</p>
-      {% endif %}
 
-      {% if section.error %}
-      <p class="empty">Could not fetch news for {{ section.display_symbol or section.ticker }}.</p>
-      {% elif section.web_stories %}
-      <div class="story-list">
-        <h2 class="coverage-heading">Company coverage</h2>
-        {% for story in section.web_stories[:visible_story_count] %}
-        {{ render_story(story) }}
-        {% endfor %}
-        {% if section.web_stories|length > visible_story_count %}
-        <details class="story-more">
-          <summary>See {{ section.web_stories|length - visible_story_count }} more stories</summary>
-          {% for story in section.web_stories[visible_story_count:] %}
-          {{ render_story(story) }}
-          {% endfor %}
-        </details>
-        {% endif %}
+
+<details class="earnings-history">
+  <summary class="earnings-summary">
+    <span class="earnings-summary-copy">
+      <span class="earnings-summary-title">Next earnings</span>
+
+    </span>
+    <span class="earnings-summary-meta">
+      <span class="earnings-summary-score">15 Sep 2026</span>
+      <span class="earnings-chevron" aria-hidden="true"></span>
+    </span>
+  </summary>
+  <div class="earnings-content">
+
+    <div class="earnings-history-heading">Last 4 reported quarters · 3 beats · 1 miss · next release highlighted</div>
+    <div class="earnings-history-layout">
+
+    <div class="earnings-chart" aria-hidden="true">
+      <div class="earnings-chart-heading">
+        <span>EPS surprise vs consensus</span>
+        <span class="earnings-chart-scale">±5% scale</span>
       </div>
-      {% else %}
-      <p class="empty">No major news for {{ section.display_symbol or section.ticker }} today.</p>
-      {% endif %}
+      <div class="earnings-chart-rows">
+
+        <div class="earnings-chart-row is-upcoming">
+          <span class="earnings-chart-quarter">Next release<small>15 Sep 2026</small></span>
+          <span class="earnings-bar-track earnings-upcoming-track"><span class="earnings-upcoming-marker"></span></span>
+          <span class="earnings-chart-value upcoming">Upcoming</span>
+        </div>
+
+
+        <div class="earnings-chart-row">
+          <span class="earnings-chart-quarter">
+            Q2 FY26
+
+          </span>
+          <span class="earnings-bar-track">
+            <span class="earnings-bar-half earnings-bar-half-left">
+
+            </span>
+            <span class="earnings-bar-half earnings-bar-half-right">
+              <span class="earnings-bar beat" style="width: 79.21%"></span>
+            </span>
+
+          </span>
+          <span class="earnings-chart-value beat">
+            +4.0%
+          </span>
+        </div>
+
+        <div class="earnings-chart-row">
+          <span class="earnings-chart-quarter">
+            Q3 FY26
+
+          </span>
+          <span class="earnings-bar-track">
+            <span class="earnings-bar-half earnings-bar-half-left">
+
+            </span>
+            <span class="earnings-bar-half earnings-bar-half-right">
+              <span class="earnings-bar beat" style="width: 63.49%"></span>
+            </span>
+
+          </span>
+          <span class="earnings-chart-value beat">
+            +3.2%
+          </span>
+        </div>
+
+        <div class="earnings-chart-row">
+          <span class="earnings-chart-quarter">
+            Q4 FY26
+
+          </span>
+          <span class="earnings-bar-track">
+            <span class="earnings-bar-half earnings-bar-half-left">
+              <span class="earnings-bar miss" style="width: 41.38%"></span>
+            </span>
+            <span class="earnings-bar-half earnings-bar-half-right">
+
+            </span>
+
+          </span>
+          <span class="earnings-chart-value miss">
+            -2.1%
+          </span>
+        </div>
+
+        <div class="earnings-chart-row is-latest">
+          <span class="earnings-chart-quarter">
+            Q1 FY27
+            <small>Latest</small>
+          </span>
+          <span class="earnings-bar-track">
+            <span class="earnings-bar-half earnings-bar-half-left">
+
+            </span>
+            <span class="earnings-bar-half earnings-bar-half-right">
+              <span class="earnings-bar beat" style="width: 86.96%"></span>
+            </span>
+
+          </span>
+          <span class="earnings-chart-value beat">
+            +4.3%
+          </span>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="earnings-table-wrap" tabindex="0" aria-label="Scrollable four-quarter earnings comparison">
+      <table class="earnings-table">
+        <caption class="visually-hidden">Reported and estimated earnings for the last four quarters and next release</caption>
+        <thead>
+          <tr>
+            <th scope="col">Metric</th>
+
+            <th scope="col">
+              <span class="earnings-quarter-label">Q2 FY26</span>
+              <span class="earnings-period-label">31 Jul 2025</span>
+
+            </th>
+
+            <th scope="col">
+              <span class="earnings-quarter-label">Q3 FY26</span>
+              <span class="earnings-period-label">31 Oct 2025</span>
+
+            </th>
+
+            <th scope="col">
+              <span class="earnings-quarter-label">Q4 FY26</span>
+              <span class="earnings-period-label">31 Jan 2026</span>
+
+            </th>
+
+            <th scope="col" class="is-latest">
+              <span class="earnings-quarter-label">Q1 FY27</span>
+              <span class="earnings-period-label">30 Apr 2026</span>
+              <span class="earnings-latest-label">Latest</span>
+            </th>
+
+
+            <th scope="col" class="is-upcoming">
+              <span class="earnings-quarter-label">Next release</span>
+              <span class="earnings-period-label">15 Sep 2026</span>
+              <span class="earnings-latest-label">After close</span>
+            </th>
+
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row">Reported EPS</th>
+            <td>1.05</td><td>1.30</td><td>1.42</td><td class="is-latest">1.68</td>
+            <td class="is-upcoming">—</td>
+          </tr>
+          <tr>
+            <th scope="row">Estimate</th>
+            <td>1.01</td><td>1.26</td><td>1.45</td><td class="is-latest">1.61</td>
+            <td class="is-upcoming">1.68</td>
+          </tr>
+          <tr>
+            <th scope="row">Surprise</th>
+
+            <td class="earnings-surprise beat">+4.0%</td>
+
+            <td class="earnings-surprise beat">+3.2%</td>
+
+            <td class="earnings-surprise miss">-2.1%</td>
+
+            <td class="earnings-surprise beat is-latest">+4.3%</td>
+
+            <td class="earnings-surprise upcoming is-upcoming">—</td>
+          </tr>
+          <tr>
+            <th scope="row">Result</th>
+
+            <td><span class="earnings-result beat">Beat</span></td>
+
+            <td><span class="earnings-result beat">Beat</span></td>
+
+            <td><span class="earnings-result miss">Miss</span></td>
+
+            <td class="is-latest"><span class="earnings-result beat">Beat</span></td>
+
+            <td class="is-upcoming"><span class="earnings-result upcoming">Upcoming</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    </div>
+
+  </div>
+</details>
+
+
+
+
+      <p class="ticker-ai-brief"><strong>✦ AI brief</strong> &nbsp; Product-roadmap momentum and sustained data-center demand remain the central themes ahead of the next earnings update.</p>
+
+
+
+      <div class="story-list">
+
+
+
+  <article class="story has-thumb">
+    <img class="story-thumb" src="https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=800&amp;h=400&amp;fit=crop&amp;sig=NVDA0" alt="" loading="lazy" decoding="async">
+    <div class="story-body">
+      <h3 class="story-headline"><a href="https://example.com/nvda/0" target="_blank" rel="noopener">Nvidia announces next-gen chip roadmap ahead of earnings</a></h3>
+
+      <p class="summary">Analysts weigh supply constraints, guidance, and sector rotation as investors reposition ahead of the next earnings cycle.</p>
+
+      <p class="meta">
+        Reuters
+         · 2h ago
+      </p>
+    </div>
+  </article>
+
+
+
+
+
+  <article class="story has-thumb">
+    <img class="story-thumb" src="https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=800&amp;h=400&amp;fit=crop&amp;sig=NVDA1" alt="" loading="lazy" decoding="async">
+    <div class="story-body">
+      <h3 class="story-headline"><a href="https://example.com/nvda/1" target="_blank" rel="noopener">Data center demand keeps Nvidia supply chain at full tilt</a></h3>
+
+      <p class="summary">Analysts weigh supply constraints, guidance, and sector rotation as investors reposition ahead of the next earnings cycle.</p>
+
+      <p class="meta">
+        Bloomberg
+         · 4h ago
+      </p>
+    </div>
+  </article>
+
+
+
+
+
+  <article class="story">
+    <div class="story-body">
+      <h3 class="story-headline"><a href="https://example.com/nvda/2" target="_blank" rel="noopener">Wall Street raises price targets after AI infrastructure spend</a></h3>
+
+      <p class="summary">Analysts weigh supply constraints, guidance, and sector rotation as investors reposition ahead of the next earnings cycle.</p>
+
+      <p class="meta">
+        CNBC
+         · 6h ago
+      </p>
+    </div>
+  </article>
+
+
+
+
+        <details class="story-more">
+          <summary>See 2 more stories</summary>
+
+
+
+  <article class="story has-thumb">
+    <img class="story-thumb" src="https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=800&amp;h=400&amp;fit=crop&amp;sig=NVDA3" alt="" loading="lazy" decoding="async">
+    <div class="story-body">
+      <h3 class="story-headline"><a href="https://example.com/nvda/3" target="_blank" rel="noopener">Partners line up for new accelerator platform launch</a></h3>
+
+      <p class="summary">Analysts weigh supply constraints, guidance, and sector rotation as investors reposition ahead of the next earnings cycle.</p>
+
+      <p class="meta">
+        Reuters
+         · 8h ago
+      </p>
+    </div>
+  </article>
+
+
+
+
+
+  <article class="story">
+    <div class="story-body">
+      <h3 class="story-headline"><a href="https://example.com/nvda/4" target="_blank" rel="noopener">Semiconductor peers rally on Nvidia guidance optimism</a></h3>
+
+      <p class="summary">Analysts weigh supply constraints, guidance, and sector rotation as investors reposition ahead of the next earnings cycle.</p>
+
+      <p class="meta">
+        MarketWatch
+         · 10h ago
+      </p>
+    </div>
+  </article>
+
+
+
+        </details>
+
+      </div>
+
     </div>
   </section>
-  {% endmacro %}
 
-  <main id="full-digest">
-  {% if hero %}
-  {{ render_section(hero, is_hero=true) }}
-  {% endif %}
 
-  {% for section in compact %}
-  {{ render_section(section, is_highlight=loop.index <= 2, alt_bg=loop.index is odd) }}
-  {% endfor %}
-  </main>
-  {% endif %}
+
+
+
+
+
+  <section class="ticker-section section-alt">
+    <div class="section-inner">
+
+      <p class="section-eyebrow">Notable mover</p>
+
+      <div class="ticker-head">
+
+        <img class="ticker-logo" src="https://static2.finnhub.io/file/publicdatany/finnhubimage/stock_logo/AAPL.png" alt="US:AAPL">
+
+        <div class="ticker-head-main">
+          <div class="ticker-row">
+            <span class="ticker-symbol">AAPL</span>
+            <span class="exchange-badge us">US</span>
+          </div>
+
+          <div class="ticker-quote">
+            <span class="ticker-price">$228.30</span>
+
+            <span class="ticker-change up">
+              +1.18%
+            </span>
+
+          </div>
+
+        </div>
+      </div>
+
+
+
+
+
+<details class="earnings-history">
+  <summary class="earnings-summary">
+    <span class="earnings-summary-copy">
+      <span class="earnings-summary-title">Next earnings</span>
+
+    </span>
+    <span class="earnings-summary-meta">
+      <span class="earnings-summary-score">15 Sep 2026</span>
+      <span class="earnings-chevron" aria-hidden="true"></span>
+    </span>
+  </summary>
+  <div class="earnings-content">
+
+    <div class="earnings-history-heading">Last 4 reported quarters · 3 beats · 1 miss · next release highlighted</div>
+    <div class="earnings-history-layout">
+
+    <div class="earnings-chart" aria-hidden="true">
+      <div class="earnings-chart-heading">
+        <span>EPS surprise vs consensus</span>
+        <span class="earnings-chart-scale">±5% scale</span>
+      </div>
+      <div class="earnings-chart-rows">
+
+        <div class="earnings-chart-row is-upcoming">
+          <span class="earnings-chart-quarter">Next release<small>15 Sep 2026</small></span>
+          <span class="earnings-bar-track earnings-upcoming-track"><span class="earnings-upcoming-marker"></span></span>
+          <span class="earnings-chart-value upcoming">Upcoming</span>
+        </div>
+
+
+        <div class="earnings-chart-row">
+          <span class="earnings-chart-quarter">
+            Q4 FY25
+
+          </span>
+          <span class="earnings-bar-track">
+            <span class="earnings-bar-half earnings-bar-half-left">
+
+            </span>
+            <span class="earnings-bar-half earnings-bar-half-right">
+              <span class="earnings-bar beat" style="width: 44.20%"></span>
+            </span>
+
+          </span>
+          <span class="earnings-chart-value beat">
+            +2.2%
+          </span>
+        </div>
+
+        <div class="earnings-chart-row">
+          <span class="earnings-chart-quarter">
+            Q1 FY26
+
+          </span>
+          <span class="earnings-bar-track">
+            <span class="earnings-bar-half earnings-bar-half-left">
+
+            </span>
+            <span class="earnings-bar-half earnings-bar-half-right">
+              <span class="earnings-bar beat" style="width: 80.59%"></span>
+            </span>
+
+          </span>
+          <span class="earnings-chart-value beat">
+            +4.0%
+          </span>
+        </div>
+
+        <div class="earnings-chart-row">
+          <span class="earnings-chart-quarter">
+            Q2 FY26
+
+          </span>
+          <span class="earnings-bar-track">
+            <span class="earnings-bar-half earnings-bar-half-left">
+
+            </span>
+            <span class="earnings-bar-half earnings-bar-half-right">
+              <span class="earnings-bar beat" style="width: 20.10%"></span>
+            </span>
+
+          </span>
+          <span class="earnings-chart-value beat">
+            +1.0%
+          </span>
+        </div>
+
+        <div class="earnings-chart-row is-latest">
+          <span class="earnings-chart-quarter">
+            Q3 FY26
+            <small>Latest</small>
+          </span>
+          <span class="earnings-bar-track">
+            <span class="earnings-bar-half earnings-bar-half-left">
+              <span class="earnings-bar miss" style="width: 20.73%"></span>
+            </span>
+            <span class="earnings-bar-half earnings-bar-half-right">
+
+            </span>
+
+          </span>
+          <span class="earnings-chart-value miss">
+            -1.0%
+          </span>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="earnings-table-wrap" tabindex="0" aria-label="Scrollable four-quarter earnings comparison">
+      <table class="earnings-table">
+        <caption class="visually-hidden">Reported and estimated earnings for the last four quarters and next release</caption>
+        <thead>
+          <tr>
+            <th scope="col">Metric</th>
+
+            <th scope="col">
+              <span class="earnings-quarter-label">Q4 FY25</span>
+              <span class="earnings-period-label">30 Sep 2025</span>
+
+            </th>
+
+            <th scope="col">
+              <span class="earnings-quarter-label">Q1 FY26</span>
+              <span class="earnings-period-label">31 Dec 2025</span>
+
+            </th>
+
+            <th scope="col">
+              <span class="earnings-quarter-label">Q2 FY26</span>
+              <span class="earnings-period-label">31 Mar 2026</span>
+
+            </th>
+
+            <th scope="col" class="is-latest">
+              <span class="earnings-quarter-label">Q3 FY26</span>
+              <span class="earnings-period-label">30 Jun 2026</span>
+              <span class="earnings-latest-label">Latest</span>
+            </th>
+
+
+            <th scope="col" class="is-upcoming">
+              <span class="earnings-quarter-label">Next release</span>
+              <span class="earnings-period-label">15 Sep 2026</span>
+              <span class="earnings-latest-label">Before open</span>
+            </th>
+
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row">Reported EPS</th>
+            <td>1.85</td><td>2.84</td><td>2.01</td><td class="is-latest">1.91</td>
+            <td class="is-upcoming">—</td>
+          </tr>
+          <tr>
+            <th scope="row">Estimate</th>
+            <td>1.81</td><td>2.73</td><td>1.99</td><td class="is-latest">1.93</td>
+            <td class="is-upcoming">2.14</td>
+          </tr>
+          <tr>
+            <th scope="row">Surprise</th>
+
+            <td class="earnings-surprise beat">+2.2%</td>
+
+            <td class="earnings-surprise beat">+4.0%</td>
+
+            <td class="earnings-surprise beat">+1.0%</td>
+
+            <td class="earnings-surprise miss is-latest">-1.0%</td>
+
+            <td class="earnings-surprise upcoming is-upcoming">—</td>
+          </tr>
+          <tr>
+            <th scope="row">Result</th>
+
+            <td><span class="earnings-result beat">Beat</span></td>
+
+            <td><span class="earnings-result beat">Beat</span></td>
+
+            <td><span class="earnings-result beat">Beat</span></td>
+
+            <td class="is-latest"><span class="earnings-result miss">Miss</span></td>
+
+            <td class="is-upcoming"><span class="earnings-result upcoming">Upcoming</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    </div>
+
+  </div>
+</details>
+
+
+
+
+      <p class="ticker-ai-brief"><strong>✦ AI brief</strong> &nbsp; New AI features and services growth are helping offset investor concerns about the pace of the hardware replacement cycle.</p>
+
+
+
+      <div class="story-list">
+
+
+
+  <article class="story has-thumb">
+    <img class="story-thumb" src="https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=800&amp;h=400&amp;fit=crop&amp;sig=AAPL0" alt="" loading="lazy" decoding="async">
+    <div class="story-body">
+      <h3 class="story-headline"><a href="https://example.com/aapl/0" target="_blank" rel="noopener">Apple expands AI features across iOS developer preview</a></h3>
+
+      <p class="summary">Analysts weigh supply constraints, guidance, and sector rotation as investors reposition ahead of the next earnings cycle.</p>
+
+      <p class="meta">
+        Bloomberg
+         · 2h ago
+      </p>
+    </div>
+  </article>
+
+
+
+
+
+  <article class="story">
+    <div class="story-body">
+      <h3 class="story-headline"><a href="https://example.com/aapl/1" target="_blank" rel="noopener">Services revenue momentum offsets hardware cycle concerns</a></h3>
+
+      <p class="summary">Analysts weigh supply constraints, guidance, and sector rotation as investors reposition ahead of the next earnings cycle.</p>
+
+      <p class="meta">
+        Reuters
+         · 5h ago
+      </p>
+    </div>
+  </article>
+
+
+
+
+      </div>
+
+    </div>
+  </section>
+
+
+
+
+
+  <section class="ticker-section">
+    <div class="section-inner">
+
+      <p class="section-eyebrow">Notable mover</p>
+
+      <div class="ticker-head">
+
+        <div class="ticker-head-main">
+          <div class="ticker-row">
+            <span class="ticker-symbol">TCS</span>
+            <span class="exchange-badge in">NSE</span>
+          </div>
+
+          <div class="ticker-quote">
+            <span class="ticker-price">₹4125.75</span>
+
+            <span class="ticker-change up">
+              +0.85%
+            </span>
+
+          </div>
+
+        </div>
+      </div>
+
+
+<div class="price-ranges" aria-label="Price highs">
+  <p class="price-ranges-heading">Price landmarks</p>
+
+
+
+<div class="price-range-item year-high below-high">
+  <div class="price-range-topline">
+    <span class="price-range-label">52-week high</span>
+  </div>
+  <div class="price-range-value-row">
+    <strong class="price-range-value">₹4592.25</strong>
+    <span class="price-range-distance">10.2% below</span>
+  </div>
+  <div class="price-range-track" aria-hidden="true"><div class="price-range-fill" style="width: 89.84%;"></div></div>
+  <span class="price-range-caption">Current price → high</span>
+</div>
+
+
+
+
+<div class="price-range-item all-time-high below-high">
+  <div class="price-range-topline">
+    <span class="price-range-label">All-time high</span>
+  </div>
+  <div class="price-range-value-row">
+    <strong class="price-range-value">₹4592.25</strong>
+    <span class="price-range-distance">10.2% below</span>
+  </div>
+  <div class="price-range-track" aria-hidden="true"><div class="price-range-fill" style="width: 89.84%;"></div></div>
+  <span class="price-range-caption">Current price → high</span>
+</div>
+
+</div>
+
+
+
+
+<details class="earnings-history">
+  <summary class="earnings-summary">
+    <span class="earnings-summary-copy">
+      <span class="earnings-summary-title">Earnings</span>
+      <span class="earnings-summary-subtitle">Last 4 reported quarters</span>
+    </span>
+    <span class="earnings-summary-meta">
+      <span class="earnings-summary-score">Latest EPS ₹37.18</span>
+      <span class="earnings-chevron" aria-hidden="true"></span>
+    </span>
+  </summary>
+  <div class="earnings-content">
+
+    <div class="earnings-history-heading">Last 4 reported quarters · Latest EPS ₹37.18</div>
+    <div class="earnings-history-layout">
+
+    <div class="earnings-chart" aria-hidden="true">
+      <div class="earnings-chart-heading">
+        <span>Reported EPS trend</span>
+        <span class="earnings-chart-scale">₹37.18 scale</span>
+      </div>
+      <div class="earnings-chart-rows">
+
+        <div class="earnings-chart-row">
+          <span class="earnings-chart-quarter">
+            Q2 FY26
+
+          </span>
+          <span class="earnings-bar-track">
+            <span class="earnings-bar-half earnings-bar-half-left">
+
+            </span>
+            <span class="earnings-bar-half earnings-bar-half-right">
+              <span class="earnings-bar beat" style="width: 91.72%"></span>
+            </span>
+
+          </span>
+          <span class="earnings-chart-value beat">
+            ₹34.10
+          </span>
+        </div>
+
+        <div class="earnings-chart-row">
+          <span class="earnings-chart-quarter">
+            Q3 FY26
+
+          </span>
+          <span class="earnings-bar-track">
+            <span class="earnings-bar-half earnings-bar-half-left">
+
+            </span>
+            <span class="earnings-bar-half earnings-bar-half-right">
+              <span class="earnings-bar beat" style="width: 94.73%"></span>
+            </span>
+
+          </span>
+          <span class="earnings-chart-value beat">
+            ₹35.22
+          </span>
+        </div>
+
+        <div class="earnings-chart-row">
+          <span class="earnings-chart-quarter">
+            Q4 FY26
+
+          </span>
+          <span class="earnings-bar-track">
+            <span class="earnings-bar-half earnings-bar-half-left">
+
+            </span>
+            <span class="earnings-bar-half earnings-bar-half-right">
+              <span class="earnings-bar beat" style="width: 98.04%"></span>
+            </span>
+
+          </span>
+          <span class="earnings-chart-value beat">
+            ₹36.45
+          </span>
+        </div>
+
+        <div class="earnings-chart-row is-latest">
+          <span class="earnings-chart-quarter">
+            Q1 FY27
+            <small>Latest</small>
+          </span>
+          <span class="earnings-bar-track">
+            <span class="earnings-bar-half earnings-bar-half-left">
+
+            </span>
+            <span class="earnings-bar-half earnings-bar-half-right">
+              <span class="earnings-bar beat" style="width: 100.00%"></span>
+            </span>
+
+          </span>
+          <span class="earnings-chart-value beat">
+            ₹37.18
+          </span>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="earnings-table-wrap" tabindex="0" aria-label="Scrollable four-quarter reported results comparison">
+      <table class="earnings-table">
+        <caption class="visually-hidden">Reported financial results for the last four quarters</caption>
+        <thead>
+          <tr>
+            <th scope="col">Metric</th>
+
+            <th scope="col">
+              <span class="earnings-quarter-label">Q2 FY26</span>
+              <span class="earnings-period-label">Sep 2025</span>
+
+            </th>
+
+            <th scope="col">
+              <span class="earnings-quarter-label">Q3 FY26</span>
+              <span class="earnings-period-label">Dec 2025</span>
+
+            </th>
+
+            <th scope="col">
+              <span class="earnings-quarter-label">Q4 FY26</span>
+              <span class="earnings-period-label">Mar 2026</span>
+
+            </th>
+
+            <th scope="col" class="is-latest">
+              <span class="earnings-quarter-label">Q1 FY27</span>
+              <span class="earnings-period-label">Jun 2026</span>
+              <span class="earnings-latest-label">Latest</span>
+            </th>
+
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row">Sales (₹ cr)</th>
+            <td>65,799</td><td>67,586</td><td>69,340</td><td class="is-latest">71,220</td>
+          </tr>
+          <tr>
+            <th scope="row">Net profit (₹ cr)</th>
+            <td>12,075</td><td>12,480</td><td>12,910</td><td class="is-latest">13,285</td>
+          </tr>
+          <tr>
+            <th scope="row">EPS (₹)</th>
+            <td>34.10</td><td>35.22</td><td>36.45</td><td class="is-latest">37.18</td>
+          </tr>
+          <tr>
+            <th scope="row">OPM</th>
+            <td>24.6%</td><td>25.0%</td><td>25.3%</td><td class="is-latest">25.7%</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    </div>
+
+  </div>
+</details>
+
+
+
+
+      <p class="ticker-ai-brief"><strong>✦ AI brief</strong> &nbsp; The latest European banking win reinforces demand for large transformation deals and supports the stock&#39;s positive move.</p>
+
+
+
+      <div class="story-list">
+
+
+
+  <article class="story has-thumb">
+    <img class="story-thumb" src="https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=800&amp;h=400&amp;fit=crop&amp;sig=TCS0" alt="" loading="lazy" decoding="async">
+    <div class="story-body">
+      <h3 class="story-headline"><a href="https://example.com/tcs/0" target="_blank" rel="noopener">TCS wins large deal in European banking sector</a></h3>
+
+      <p class="summary">Analysts weigh supply constraints, guidance, and sector rotation as investors reposition ahead of the next earnings cycle.</p>
+
+      <p class="meta">
+        Business Standard
+         · 1h ago
+      </p>
+    </div>
+  </article>
+
+
+
+
+      </div>
+
+    </div>
+  </section>
+
+
+
+
+
+  <section class="ticker-section section-alt">
+    <div class="section-inner">
+
+      <div class="ticker-head">
+
+        <div class="ticker-head-main">
+          <div class="ticker-row">
+            <span class="ticker-symbol">RELIANCE</span>
+            <span class="exchange-badge in">NSE</span>
+          </div>
+
+          <div class="ticker-quote">
+            <span class="ticker-price">₹2856.40</span>
+
+            <span class="ticker-change down">
+              -0.42%
+            </span>
+
+          </div>
+
+        </div>
+      </div>
+
+
+<div class="price-ranges" aria-label="Price highs">
+  <p class="price-ranges-heading">Price landmarks</p>
+
+
+
+<div class="price-range-item year-high below-high">
+  <div class="price-range-topline">
+    <span class="price-range-label">52-week high</span>
+  </div>
+  <div class="price-range-value-row">
+    <strong class="price-range-value">₹3217.60</strong>
+    <span class="price-range-distance">11.2% below</span>
+  </div>
+  <div class="price-range-track" aria-hidden="true"><div class="price-range-fill" style="width: 88.77%;"></div></div>
+  <span class="price-range-caption">Current price → high</span>
+</div>
+
+
+
+
+<div class="price-range-item all-time-high below-high">
+  <div class="price-range-topline">
+    <span class="price-range-label">All-time high</span>
+  </div>
+  <div class="price-range-value-row">
+    <strong class="price-range-value">₹3217.60</strong>
+    <span class="price-range-distance">11.2% below</span>
+  </div>
+  <div class="price-range-track" aria-hidden="true"><div class="price-range-fill" style="width: 88.77%;"></div></div>
+  <span class="price-range-caption">Current price → high</span>
+</div>
+
+</div>
+
+
+
+
+<details class="earnings-history">
+  <summary class="earnings-summary">
+    <span class="earnings-summary-copy">
+      <span class="earnings-summary-title">Earnings</span>
+      <span class="earnings-summary-subtitle">Last 4 reported quarters</span>
+    </span>
+    <span class="earnings-summary-meta">
+      <span class="earnings-summary-score">Latest EPS ₹32.44</span>
+      <span class="earnings-chevron" aria-hidden="true"></span>
+    </span>
+  </summary>
+  <div class="earnings-content">
+
+    <div class="earnings-history-heading">Last 4 reported quarters · Latest EPS ₹32.44</div>
+    <div class="earnings-history-layout">
+
+    <div class="earnings-chart" aria-hidden="true">
+      <div class="earnings-chart-heading">
+        <span>Reported EPS trend</span>
+        <span class="earnings-chart-scale">₹32.44 scale</span>
+      </div>
+      <div class="earnings-chart-rows">
+
+        <div class="earnings-chart-row">
+          <span class="earnings-chart-quarter">
+            Q2 FY26
+
+          </span>
+          <span class="earnings-bar-track">
+            <span class="earnings-bar-half earnings-bar-half-left">
+
+            </span>
+            <span class="earnings-bar-half earnings-bar-half-right">
+              <span class="earnings-bar beat" style="width: 83.66%"></span>
+            </span>
+
+          </span>
+          <span class="earnings-chart-value beat">
+            ₹27.14
+          </span>
+        </div>
+
+        <div class="earnings-chart-row">
+          <span class="earnings-chart-quarter">
+            Q3 FY26
+
+          </span>
+          <span class="earnings-bar-track">
+            <span class="earnings-bar-half earnings-bar-half-left">
+
+            </span>
+            <span class="earnings-bar-half earnings-bar-half-right">
+              <span class="earnings-bar beat" style="width: 90.38%"></span>
+            </span>
+
+          </span>
+          <span class="earnings-chart-value beat">
+            ₹29.32
+          </span>
+        </div>
+
+        <div class="earnings-chart-row">
+          <span class="earnings-chart-quarter">
+            Q4 FY26
+
+          </span>
+          <span class="earnings-bar-track">
+            <span class="earnings-bar-half earnings-bar-half-left">
+
+            </span>
+            <span class="earnings-bar-half earnings-bar-half-right">
+              <span class="earnings-bar beat" style="width: 95.81%"></span>
+            </span>
+
+          </span>
+          <span class="earnings-chart-value beat">
+            ₹31.08
+          </span>
+        </div>
+
+        <div class="earnings-chart-row is-latest">
+          <span class="earnings-chart-quarter">
+            Q1 FY27
+            <small>Latest</small>
+          </span>
+          <span class="earnings-bar-track">
+            <span class="earnings-bar-half earnings-bar-half-left">
+
+            </span>
+            <span class="earnings-bar-half earnings-bar-half-right">
+              <span class="earnings-bar beat" style="width: 100.00%"></span>
+            </span>
+
+          </span>
+          <span class="earnings-chart-value beat">
+            ₹32.44
+          </span>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="earnings-table-wrap" tabindex="0" aria-label="Scrollable four-quarter reported results comparison">
+      <table class="earnings-table">
+        <caption class="visually-hidden">Reported financial results for the last four quarters</caption>
+        <thead>
+          <tr>
+            <th scope="col">Metric</th>
+
+            <th scope="col">
+              <span class="earnings-quarter-label">Q2 FY26</span>
+              <span class="earnings-period-label">Sep 2025</span>
+
+            </th>
+
+            <th scope="col">
+              <span class="earnings-quarter-label">Q3 FY26</span>
+              <span class="earnings-period-label">Dec 2025</span>
+
+            </th>
+
+            <th scope="col">
+              <span class="earnings-quarter-label">Q4 FY26</span>
+              <span class="earnings-period-label">Mar 2026</span>
+
+            </th>
+
+            <th scope="col" class="is-latest">
+              <span class="earnings-quarter-label">Q1 FY27</span>
+              <span class="earnings-period-label">Jun 2026</span>
+              <span class="earnings-latest-label">Latest</span>
+            </th>
+
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row">Sales (₹ cr)</th>
+            <td>258,407</td><td>269,496</td><td>274,732</td><td class="is-latest">281,109</td>
+          </tr>
+          <tr>
+            <th scope="row">Net profit (₹ cr)</th>
+            <td>18,450</td><td>20,185</td><td>21,930</td><td class="is-latest">22,840</td>
+          </tr>
+          <tr>
+            <th scope="row">EPS (₹)</th>
+            <td>27.14</td><td>29.32</td><td>31.08</td><td class="is-latest">32.44</td>
+          </tr>
+          <tr>
+            <th scope="row">OPM</th>
+            <td>17.1%</td><td>17.6%</td><td>18.0%</td><td class="is-latest">18.3%</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    </div>
+
+  </div>
+</details>
+
+
+
+
+      <p class="ticker-ai-brief"><strong>✦ AI brief</strong> &nbsp; Steady refining margins and continued Jio subscriber growth provide support despite the modest share-price decline.</p>
+
+
+
+      <div class="story-list">
+
+
+
+  <article class="story has-thumb">
+    <img class="story-thumb" src="https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=800&amp;h=400&amp;fit=crop&amp;sig=RELIANCE0" alt="" loading="lazy" decoding="async">
+    <div class="story-body">
+      <h3 class="story-headline"><a href="https://example.com/reliance/0" target="_blank" rel="noopener">Reliance Industries reports steady refining margins</a></h3>
+
+      <p class="summary">Analysts weigh supply constraints, guidance, and sector rotation as investors reposition ahead of the next earnings cycle.</p>
+
+      <p class="meta">
+        Economic Times
+         · 2h ago
+      </p>
+    </div>
+  </article>
+
+
+
+
+
+  <article class="story">
+    <div class="story-body">
+      <h3 class="story-headline"><a href="https://example.com/reliance/1" target="_blank" rel="noopener">Jio subscriber growth remains strong in quarterly update</a></h3>
+
+      <p class="summary">Analysts weigh supply constraints, guidance, and sector rotation as investors reposition ahead of the next earnings cycle.</p>
+
+      <p class="meta">
+        Mint
+         · 5h ago
+      </p>
+    </div>
+  </article>
+
+
+
+
+      </div>
+
+    </div>
+  </section>
+
+
+
 
   <footer class="site-footer">
     <div class="section-inner">
       <p class="footer-brand">Tickr Digest</p>
-      <p>A broader view of your stocks. For information, not investment advice.</p>
-      {% if subscribe_enabled %}
+      <p>Your personalized stock brief</p>
+
       <p><button type="button" class="footer-link-btn" onclick="openSubscribeModal()">Update your tickers</button></p>
-      {% endif %}
+
     </div>
   </footer>
-  {% if subscribe_enabled %}
+
   <div class="subscribe-modal" id="subscribe-modal" hidden
-       data-subscription-token="{{ progressive_token or '' }}"
-       data-prefill-email="{{ prefill_email }}"
-       data-prefill-tickers='{{ prefill_tickers|tojson }}'>
+       data-subscription-token=""
+       data-prefill-email="investor@example.com"
+       data-prefill-tickers='["US:NVDA", "IN:RELIANCE", "US:AAPL", "IN:TCS"]'>
     <div class="subscribe-modal-backdrop" onclick="closeSubscribeModal()"></div>
     <div class="subscribe-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="subscribe-modal-title">
       <div class="subscribe-modal-header">
@@ -1767,109 +2835,10 @@
       </div>
     </div>
   </div>
-  <script src="/subscribe-form.js?v=20260828-prefill4" defer></script>
-  {% endif %}
-  {% if progressive %}
-  <script>
-    (function () {
-      var container = document.getElementById("digest-sections");
-      var status = document.getElementById("progressive-status-text");
-      var token = container && container.getAttribute("data-token");
-      var tickers = container ? JSON.parse(container.getAttribute("data-tickers") || "[]") : [];
-      var loaded = [];
+  <script src="/legacy/subscribe-form.js?v=20260828-prefill4" defer></script>
 
-      function esc(value) {
-        return String(value == null ? "" : value).replace(/[&<>\"]/g, function (char) {
-          return {"&":"&amp;", "<":"&lt;", ">":"&gt;", "\"":"&quot;"}[char];
-        });
-      }
 
-      function showMovers() {
-        var list = document.getElementById("progressive-movers-track");
-        var bar = document.getElementById("progressive-movers");
-        if (!list || !bar) return;
-        var movers = loaded.filter(function (item) { return item.quote && item.quote.change_pct != null; })
-          .sort(function (a, b) { return Math.abs(b.quote.change_pct) - Math.abs(a.quote.change_pct); });
-        if (!movers.length) return;
-        var content = movers.map(function (item) {
-          var change = Number(item.quote.change_pct);
-          var cls = change > 0 ? "up" : change < 0 ? "down" : "flat";
-          return '<span class="pill ' + cls + '" role="listitem">' + esc(item.display_symbol || item.ticker) + ' ' + (change >= 0 ? "+" : "") + change.toFixed(1) + '%</span>';
-        }).join("");
-        list.innerHTML = content;
-        if (window.setupMoverMarquee) setupMoverMarquee(list);
-        bar.hidden = false;
-      }
 
-      function addAiSummary(summary) {
-        var panel = document.getElementById("progressive-ai");
-        if (!panel || !summary || !summary.market_context) return;
-        panel.innerHTML = '<div class="section-inner"><p class="ai-briefing-label">AI briefing · Your watchlist in context</p><p class="ai-briefing-context">' + esc(summary.market_context) + '</p><p class="ai-briefing-note">AI-generated from the linked headlines and excerpts. Not investment advice.</p></div>';
-        panel.hidden = false;
-        loaded.forEach(function (item) {
-          var brief = summary.ticker_summaries && summary.ticker_summaries[item.ticker];
-          var section = container.querySelector('[data-ticker="' + CSS.escape(item.ticker) + '"]');
-          if (brief && section) {
-            var node = document.createElement("p");
-            node.className = "ticker-ai-brief";
-            node.innerHTML = "<strong>AI brief</strong> &nbsp; " + esc(brief);
-            section.querySelector(".section-inner").insertBefore(node, section.querySelector(".story-list, .empty"));
-          }
-        });
-      }
-
-      function loadTicker(ticker) {
-        return fetch("/api/digest-data?t=" + encodeURIComponent(token) + "&ticker=" + encodeURIComponent(ticker))
-          .then(function (response) { return response.json(); })
-          .then(function (result) {
-            var placeholder = container.querySelector('[data-ticker="' + CSS.escape(ticker) + '"]');
-            if (!result.ok || !placeholder) throw new Error(result.error || "Unable to load ticker");
-            placeholder.outerHTML = result.html;
-            loaded.push(result.section);
-            showMovers();
-            status.textContent = loaded.length + " of " + tickers.length + " tickers loaded";
-            return result.section;
-          })
-          .catch(function () {
-            var placeholder = container.querySelector('[data-ticker="' + CSS.escape(ticker) + '"]');
-            if (placeholder) placeholder.innerHTML = '<div class="section-inner"><p class="empty">Could not load ' + esc(ticker) + ' right now.</p></div>';
-            status.textContent = loaded.length + " of " + tickers.length + " tickers loaded";
-            return null;
-          });
-      }
-
-      Promise.all(tickers.map(loadTicker)).then(function () {
-        status.textContent = "Your digest is ready";
-        var aiPanel = document.getElementById("progressive-ai");
-        if (aiPanel) {
-          aiPanel.innerHTML = '<div class="section-inner"><p class="ai-briefing-label">Preparing your AI briefing…</p></div>';
-          aiPanel.hidden = false;
-        }
-        return fetch("/api/digest-ai?t=" + encodeURIComponent(token), {
-          method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({sections: loaded})
-        });
-      }).then(function (response) { return response ? response.json() : null; })
-        .then(function (result) {
-          if (result && result.ok) addAiSummary(result.ai_summary);
-          var statusBar = document.getElementById("progressive-status");
-          if (statusBar) {
-            statusBar.classList.add("is-complete");
-            window.setTimeout(function () { statusBar.classList.add("is-hidden"); }, 3500);
-          }
-        })
-        .catch(function () {
-          var panel = document.getElementById("progressive-ai");
-          if (panel) panel.hidden = true;
-          var statusBar = document.getElementById("progressive-status");
-          if (statusBar) {
-            statusBar.classList.add("is-complete");
-            window.setTimeout(function () { statusBar.classList.add("is-hidden"); }, 3500);
-          }
-        });
-    })();
-  </script>
-  {% endif %}
-  {% if fetched_at_iso %}
   <script>
     (function () {
       var element = document.getElementById("fetched-at");
@@ -1888,7 +2857,7 @@
       } catch (error) {}
     })();
   </script>
-  {% endif %}
+
   <script>
     (function () {
       document.addEventListener("keydown", function (event) {
@@ -1908,7 +2877,17 @@
         if (!track) return;
         track.classList.remove("is-looping");
         track.querySelectorAll("[data-marquee-copy]").forEach(function (copy) { copy.remove(); });
-
+        window.requestAnimationFrame(function () {
+          var viewport = track.parentElement;
+          if (!viewport || track.scrollWidth <= viewport.clientWidth) return;
+          Array.prototype.slice.call(track.children).forEach(function (item) {
+            var copy = item.cloneNode(true);
+            copy.setAttribute("data-marquee-copy", "true");
+            copy.setAttribute("aria-hidden", "true");
+            track.appendChild(copy);
+          });
+          track.classList.add("is-looping");
+        });
       };
 
       document.querySelectorAll(".movers-track").forEach(window.setupMoverMarquee);

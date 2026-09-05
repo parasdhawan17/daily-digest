@@ -352,18 +352,17 @@ class AiSummaryTest(unittest.TestCase):
             },
         )
         self.assertIn("AI briefing", html)
-        self.assertIn("background-image: none !important", html)
-        self.assertIn("background-color: #312e81 !important", html)
-        self.assertIn('class="email-card mobile-section" bgcolor="#ffffff"', html)
-        self.assertIn('class="ai-briefing-panel"', html)
-        self.assertIn('bgcolor="#f5f3ff"', html)
-        self.assertNotIn("linear-gradient(135deg,#eef2ff", html)
-        self.assertIn("View full digest", html)
-        self.assertNotIn("AAPL moved high</h1>", html)
+        self.assertIn('class="ai-panel"', html)
+        self.assertIn('bgcolor="#eaf2ee"', html)
+        self.assertIn("Open my full digest", html)
+        self.assertIn("Your closing briefing", html)
+        self.assertLess(html.index("Shared context."), html.index("Apple expands services offering"))
+        self.assertNotIn("$200.00", html)
+        self.assertNotIn("$200.00", text)
         self.assertIn("Apple summary.", html)
         self.assertIn("=== AI BRIEFING ===", text)
-        self.assertIn("AAPL: Apple summary.", text)
-        self.assertEqual(subject, "Cloud and services demand shape today’s market")
+        self.assertIn("AI brief: Apple summary.", text)
+        self.assertEqual(subject, "US Post-Market • Cloud and services demand shape today’s market")
 
     def test_web_render_includes_session_and_ticker_ai_briefs(self) -> None:
         sections = sample_sections()
@@ -382,7 +381,7 @@ class AiSummaryTest(unittest.TestCase):
         )
         self.assertIn('aria-label="AI briefing"', html)
         self.assertIn("Shared context.", html)
-        self.assertEqual(html.count("✦ AI brief"), 2)
+        self.assertEqual(html.count("<strong>AI brief</strong>"), 2)
         self.assertIn("Apple summary.", html)
         self.assertIn("Microsoft summary.", html)
 
@@ -419,7 +418,7 @@ class AiSummaryTest(unittest.TestCase):
             subscribe_enabled_override=True,
         )
 
-        self.assertIn('<p class="movers-label">Subscribed tickers</p>', html)
+        self.assertIn('<p class="movers-label">Your watchlist</p>', html)
         self.assertIn('class="movers-edit-btn"', html)
         self.assertIn('aria-label="Edit subscribed tickers"', html)
         self.assertNotIn('class="header-subscribe-btn"', html)

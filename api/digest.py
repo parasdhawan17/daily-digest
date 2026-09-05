@@ -96,6 +96,7 @@ def handle_get(handler: BaseHTTPRequestHandler) -> None:
         fetched_at_iso=fetched_at_instant.isoformat(),
         progressive=True,
         progressive_token=token,
+        design=(query.get("design") or [None])[0],
     )
     send_html(handler, 200, html)
 
@@ -127,7 +128,7 @@ def handle_data_get(handler: BaseHTTPRequestHandler) -> None:
             include_indian_media=True,
         )
         section = filter_sections(sections, [ticker])[0]
-        send_json(handler, 200, {"ok": True, "section": section, "html": build_web_section(section)})
+        send_json(handler, 200, {"ok": True, "section": section, "html": build_web_section(section, design=(query.get("design") or [None])[0])})
     except Exception:
         traceback.print_exc()
         send_json(handler, 503, {"ok": False, "error": "Could not load this ticker right now."})
