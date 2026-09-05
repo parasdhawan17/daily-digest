@@ -36,6 +36,7 @@ body { line-height: 1.55; }
 .header-content { max-width: 1112px; margin: auto; }
 .header-content::before { display: none; }
 .header .eyebrow { color: #a8edca; font-size: 16px; font-weight: 750; letter-spacing: -.5px; text-transform: none; text-shadow: none; }
+.digest-brand-logo { display:block; width:181px; height:38px; object-fit:contain; }
 .header h1 { font-size: clamp(28px, 3.5vw, 40px); letter-spacing: -1.3px; font-weight: 600; line-height: 1.12; text-shadow: none; margin: 16px 0; }
 .header .digest-intro { color: #b9c7d5; font-size: 14px; max-width: 620px; margin: 0 0 22px; }
 .header .muted { color: #b9c7d5; font-size: 12px; text-shadow: none; }
