@@ -37,8 +37,8 @@ class DesignVariantsTest(unittest.TestCase):
                 self.assertIn('Apple expands services offering', html)
                 self.assertIn('design=' + variant, html)
                 self.assertIn('design=' + variant, text)
-                self.assertEqual('$200.00' in html, variant == 'legacy')
-                self.assertEqual('$200.00' in text, variant == 'legacy')
+                self.assertIn('$200.00', html)
+                self.assertIn('$200.00', text)
 
     def test_shell_and_fragment_use_same_variant(self):
         section = sample_sections()[0]

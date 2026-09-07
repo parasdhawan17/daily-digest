@@ -17,8 +17,12 @@
       .text-muted { color: #a1b0c2 !important; }
       .link-primary { color: #a8edca !important; }
       .ai-panel { background-color: #1b352e !important; border-color: #74be98 !important; }
+      .ticker-ai-panel { background-color: #192d2a !important; border-color: #487964 !important; }
       .ai-copy { color: #d2e7dc !important; }
       .ai-label { color: #a8edca !important; }
+      .price-up { color: #78d9a6 !important; }
+      .price-down { color: #ff9a9a !important; }
+      .price-flat { color: #b4c1cf !important; }
       .story-block, .footer-panel { border-color: #354457 !important; }
       .market-label { color: #b4c1cf !important; background-color: #26394b !important; }
     }
@@ -40,10 +44,21 @@
     <tr><td align="center">
       <table role="presentation" class="email-shell email-card" width="600" cellpadding="0" cellspacing="0" bgcolor="#ffffff" style="width:100%;max-width:600px;background-color:#ffffff;border-radius:12px;overflow:hidden;">
         <tr><td class="mobile-section" bgcolor="#101e2d" style="padding:22px 26px;background-color:#101e2d;">
-          <p style="margin:0 0 18px;"><img src="/assets/tickr-digest-logo.png" alt="tickr digest." width="181" height="38" style="display:block;width:181px;height:38px;object-fit:contain;"></p>
-          <p style="margin:0 0 12px;font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#a8edca;">US · 06 Sep 2026</p>
+          <table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 0 18px;">
+            <tr>
+              <td valign="middle" style="padding:0 10px 0 0;"><img src="http://localhost:8765/assets/tickr-digest-icon.svg" alt="" width="38" height="38" style="display:block;width:38px;height:38px;border:0;"></td>
+              <td valign="middle" style="color:#f5f8fa;font-size:17px;font-weight:750;letter-spacing:-0.7px;line-height:20px;white-space:nowrap;">tickr digest<span style="color:#a8edca;">.</span></td>
+            </tr>
+          </table>
+          <p style="margin:0 0 12px;font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#a8edca;">US · 07 Sep 2026</p>
           <h1 class="email-heading" style="margin:0;color:#f5f8fa;font-size:26px;font-weight:600;line-height:1.2;letter-spacing:-1px;">Your closing briefing</h1>
           <p style="margin:12px 0 0;color:#b9c7d5;font-size:13px;line-height:1.55;">Your AI briefing and company news, in one quick read.</p>
+
+          <table role="presentation" cellpadding="0" cellspacing="0" style="margin-top:18px;"><tr><td bgcolor="#a8edca" style="background-color:#a8edca;border-radius:6px;">
+            <!--[if mso]><v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="http://localhost:8765/sample-digest.html?design=modern" style="height:42px;v-text-anchor:middle;width:180px;" arcsize="14%" strokecolor="#a8edca" fillcolor="#a8edca"><w:anchorlock/><center style="color:#102c23;font-family:Arial,sans-serif;font-size:12px;font-weight:bold;">Open full digest</center></v:roundrect><![endif]-->
+            <!--[if !mso]><!--><a href="http://localhost:8765/sample-digest.html?design=modern" style="display:inline-block;padding:12px 18px;color:#102c23;font-size:12px;font-weight:700;line-height:1.3;text-decoration:none;border-radius:6px;">Open full digest &rarr;</a><!--<![endif]-->
+          </td></tr></table>
+
         </td></tr>
 
         <tr><td class="email-card mobile-section" bgcolor="#ffffff" style="padding:18px 26px 6px;background-color:#ffffff;">
@@ -63,12 +78,29 @@
   <tr>
     <td class="email-card mobile-section" bgcolor="#ffffff" style="padding:6px 26px 14px;background-color:#ffffff;">
       <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="width:100%;">
-        <tr><td class="story-block" style="border-top:1px solid #dce3e9;padding:16px 0 6px;">
-          <h2 class="text-primary" style="margin:0;font-size:17px;line-height:1.4;letter-spacing:-0.5px;color:#142334;">NVDA <span class="market-label" style="display:inline-block;vertical-align:middle;margin-left:8px;padding:3px 7px;border-radius:4px;font-size:10px;font-weight:600;letter-spacing:0.5px;background-color:#eef2f6;color:#536174;">US</span></h2>
+        <tr><td class="story-block" style="border-top:1px solid #dce3e9;padding:16px 0 8px;">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="width:100%;">
+            <tr>
+              <td valign="middle">
+                <h2 class="text-primary" style="margin:0;font-size:17px;line-height:1.4;letter-spacing:-0.5px;color:#142334;">NVDA <span class="market-label" style="display:inline-block;vertical-align:middle;margin-left:8px;padding:3px 7px;border-radius:4px;font-size:10px;font-weight:600;letter-spacing:0.5px;background-color:#eef2f6;color:#536174;">US</span></h2>
+              </td>
+
+              <td valign="middle" align="right" style="padding-left:12px;white-space:nowrap;">
+                <p class="text-primary" style="margin:0;color:#142334;font-size:14px;font-weight:700;line-height:1.25;">$142.50</p>
+                <p class="price-up" style="margin:3px 0 0;color:#17634f;font-size:11px;font-weight:700;line-height:1.25;">+4.82% today</p>
+              </td>
+
+            </tr>
+          </table>
         </td></tr>
 
-        <tr><td style="padding:4px 0 8px;">
-          <p class="text-secondary" style="margin:0;font-size:13px;line-height:1.55;color:#536174;"><strong class="text-primary" style="color:#142334;">AI brief</strong> &nbsp;Chip demand and the next earnings update are in focus in the linked coverage.</p>
+        <tr><td style="padding:4px 0 10px;">
+          <table role="presentation" class="ticker-ai-panel" width="100%" cellpadding="0" cellspacing="0" bgcolor="#f2f7f4" style="width:100%;background-color:#f2f7f4;border-left:3px solid #76a58f;border-radius:0 6px 6px 0;">
+            <tr><td style="padding:11px 12px;">
+              <p class="ai-label" style="margin:0 0 4px;color:#24533e;font-size:10px;font-weight:750;letter-spacing:1px;line-height:1.3;text-transform:uppercase;">AI brief</p>
+              <p class="text-secondary" style="margin:0;font-size:13px;line-height:1.55;color:#536174;">Chip demand and the next earnings update are in focus in the linked coverage.</p>
+            </td></tr>
+          </table>
         </td></tr>
 
 
@@ -100,8 +132,20 @@
   <tr>
     <td class="email-card mobile-section" bgcolor="#ffffff" style="padding:6px 26px 14px;background-color:#ffffff;">
       <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="width:100%;">
-        <tr><td class="story-block" style="border-top:1px solid #dce3e9;padding:16px 0 6px;">
-          <h2 class="text-primary" style="margin:0;font-size:17px;line-height:1.4;letter-spacing:-0.5px;color:#142334;">TSLA <span class="market-label" style="display:inline-block;vertical-align:middle;margin-left:8px;padding:3px 7px;border-radius:4px;font-size:10px;font-weight:600;letter-spacing:0.5px;background-color:#eef2f6;color:#536174;">US</span></h2>
+        <tr><td class="story-block" style="border-top:1px solid #dce3e9;padding:16px 0 8px;">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="width:100%;">
+            <tr>
+              <td valign="middle">
+                <h2 class="text-primary" style="margin:0;font-size:17px;line-height:1.4;letter-spacing:-0.5px;color:#142334;">TSLA <span class="market-label" style="display:inline-block;vertical-align:middle;margin-left:8px;padding:3px 7px;border-radius:4px;font-size:10px;font-weight:600;letter-spacing:0.5px;background-color:#eef2f6;color:#536174;">US</span></h2>
+              </td>
+
+              <td valign="middle" align="right" style="padding-left:12px;white-space:nowrap;">
+                <p class="text-primary" style="margin:0;color:#142334;font-size:14px;font-weight:700;line-height:1.25;">$345.13</p>
+                <p class="price-down" style="margin:3px 0 0;color:#b64242;font-size:11px;font-weight:700;line-height:1.25;">-1.71% today</p>
+              </td>
+
+            </tr>
+          </table>
         </td></tr>
 
 
@@ -120,8 +164,20 @@
   <tr>
     <td class="email-card mobile-section" bgcolor="#ffffff" style="padding:6px 26px 14px;background-color:#ffffff;">
       <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="width:100%;">
-        <tr><td class="story-block" style="border-top:1px solid #dce3e9;padding:16px 0 6px;">
-          <h2 class="text-primary" style="margin:0;font-size:17px;line-height:1.4;letter-spacing:-0.5px;color:#142334;">AAPL <span class="market-label" style="display:inline-block;vertical-align:middle;margin-left:8px;padding:3px 7px;border-radius:4px;font-size:10px;font-weight:600;letter-spacing:0.5px;background-color:#eef2f6;color:#536174;">US</span></h2>
+        <tr><td class="story-block" style="border-top:1px solid #dce3e9;padding:16px 0 8px;">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="width:100%;">
+            <tr>
+              <td valign="middle">
+                <h2 class="text-primary" style="margin:0;font-size:17px;line-height:1.4;letter-spacing:-0.5px;color:#142334;">AAPL <span class="market-label" style="display:inline-block;vertical-align:middle;margin-left:8px;padding:3px 7px;border-radius:4px;font-size:10px;font-weight:600;letter-spacing:0.5px;background-color:#eef2f6;color:#536174;">US</span></h2>
+              </td>
+
+              <td valign="middle" align="right" style="padding-left:12px;white-space:nowrap;">
+                <p class="text-primary" style="margin:0;color:#142334;font-size:14px;font-weight:700;line-height:1.25;">$228.30</p>
+                <p class="price-up" style="margin:3px 0 0;color:#17634f;font-size:11px;font-weight:700;line-height:1.25;">+1.18% today</p>
+              </td>
+
+            </tr>
+          </table>
         </td></tr>
 
 
@@ -140,8 +196,20 @@
   <tr>
     <td class="email-card mobile-section" bgcolor="#ffffff" style="padding:6px 26px 14px;background-color:#ffffff;">
       <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="width:100%;">
-        <tr><td class="story-block" style="border-top:1px solid #dce3e9;padding:16px 0 6px;">
-          <h2 class="text-primary" style="margin:0;font-size:17px;line-height:1.4;letter-spacing:-0.5px;color:#142334;">AMZN <span class="market-label" style="display:inline-block;vertical-align:middle;margin-left:8px;padding:3px 7px;border-radius:4px;font-size:10px;font-weight:600;letter-spacing:0.5px;background-color:#eef2f6;color:#536174;">US</span></h2>
+        <tr><td class="story-block" style="border-top:1px solid #dce3e9;padding:16px 0 8px;">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="width:100%;">
+            <tr>
+              <td valign="middle">
+                <h2 class="text-primary" style="margin:0;font-size:17px;line-height:1.4;letter-spacing:-0.5px;color:#142334;">AMZN <span class="market-label" style="display:inline-block;vertical-align:middle;margin-left:8px;padding:3px 7px;border-radius:4px;font-size:10px;font-weight:600;letter-spacing:0.5px;background-color:#eef2f6;color:#536174;">US</span></h2>
+              </td>
+
+              <td valign="middle" align="right" style="padding-left:12px;white-space:nowrap;">
+                <p class="text-primary" style="margin:0;color:#142334;font-size:14px;font-weight:700;line-height:1.25;">$198.75</p>
+                <p class="price-down" style="margin:3px 0 0;color:#b64242;font-size:11px;font-weight:700;line-height:1.25;">-0.92% today</p>
+              </td>
+
+            </tr>
+          </table>
         </td></tr>
 
 
@@ -160,8 +228,20 @@
   <tr>
     <td class="email-card mobile-section" bgcolor="#ffffff" style="padding:6px 26px 14px;background-color:#ffffff;">
       <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="width:100%;">
-        <tr><td class="story-block" style="border-top:1px solid #dce3e9;padding:16px 0 6px;">
-          <h2 class="text-primary" style="margin:0;font-size:17px;line-height:1.4;letter-spacing:-0.5px;color:#142334;">MSFT <span class="market-label" style="display:inline-block;vertical-align:middle;margin-left:8px;padding:3px 7px;border-radius:4px;font-size:10px;font-weight:600;letter-spacing:0.5px;background-color:#eef2f6;color:#536174;">US</span></h2>
+        <tr><td class="story-block" style="border-top:1px solid #dce3e9;padding:16px 0 8px;">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="width:100%;">
+            <tr>
+              <td valign="middle">
+                <h2 class="text-primary" style="margin:0;font-size:17px;line-height:1.4;letter-spacing:-0.5px;color:#142334;">MSFT <span class="market-label" style="display:inline-block;vertical-align:middle;margin-left:8px;padding:3px 7px;border-radius:4px;font-size:10px;font-weight:600;letter-spacing:0.5px;background-color:#eef2f6;color:#536174;">US</span></h2>
+              </td>
+
+              <td valign="middle" align="right" style="padding-left:12px;white-space:nowrap;">
+                <p class="text-primary" style="margin:0;color:#142334;font-size:14px;font-weight:700;line-height:1.25;">$415.20</p>
+                <p class="price-up" style="margin:3px 0 0;color:#17634f;font-size:11px;font-weight:700;line-height:1.25;">+0.82% today</p>
+              </td>
+
+            </tr>
+          </table>
         </td></tr>
 
 
@@ -180,8 +260,20 @@
   <tr>
     <td class="email-card mobile-section" bgcolor="#ffffff" style="padding:6px 26px 14px;background-color:#ffffff;">
       <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="width:100%;">
-        <tr><td class="story-block" style="border-top:1px solid #dce3e9;padding:16px 0 6px;">
-          <h2 class="text-primary" style="margin:0;font-size:17px;line-height:1.4;letter-spacing:-0.5px;color:#142334;">RELIANCE <span class="market-label" style="display:inline-block;vertical-align:middle;margin-left:8px;padding:3px 7px;border-radius:4px;font-size:10px;font-weight:600;letter-spacing:0.5px;background-color:#eef2f6;color:#536174;">NSE</span></h2>
+        <tr><td class="story-block" style="border-top:1px solid #dce3e9;padding:16px 0 8px;">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="width:100%;">
+            <tr>
+              <td valign="middle">
+                <h2 class="text-primary" style="margin:0;font-size:17px;line-height:1.4;letter-spacing:-0.5px;color:#142334;">RELIANCE <span class="market-label" style="display:inline-block;vertical-align:middle;margin-left:8px;padding:3px 7px;border-radius:4px;font-size:10px;font-weight:600;letter-spacing:0.5px;background-color:#eef2f6;color:#536174;">NSE</span></h2>
+              </td>
+
+              <td valign="middle" align="right" style="padding-left:12px;white-space:nowrap;">
+                <p class="text-primary" style="margin:0;color:#142334;font-size:14px;font-weight:700;line-height:1.25;">₹2,856.40</p>
+                <p class="price-down" style="margin:3px 0 0;color:#b64242;font-size:11px;font-weight:700;line-height:1.25;">-0.42% today</p>
+              </td>
+
+            </tr>
+          </table>
         </td></tr>
 
 
@@ -200,8 +292,20 @@
   <tr>
     <td class="email-card mobile-section" bgcolor="#ffffff" style="padding:6px 26px 14px;background-color:#ffffff;">
       <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="width:100%;">
-        <tr><td class="story-block" style="border-top:1px solid #dce3e9;padding:16px 0 6px;">
-          <h2 class="text-primary" style="margin:0;font-size:17px;line-height:1.4;letter-spacing:-0.5px;color:#142334;">GOOGL <span class="market-label" style="display:inline-block;vertical-align:middle;margin-left:8px;padding:3px 7px;border-radius:4px;font-size:10px;font-weight:600;letter-spacing:0.5px;background-color:#eef2f6;color:#536174;">US</span></h2>
+        <tr><td class="story-block" style="border-top:1px solid #dce3e9;padding:16px 0 8px;">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="width:100%;">
+            <tr>
+              <td valign="middle">
+                <h2 class="text-primary" style="margin:0;font-size:17px;line-height:1.4;letter-spacing:-0.5px;color:#142334;">GOOGL <span class="market-label" style="display:inline-block;vertical-align:middle;margin-left:8px;padding:3px 7px;border-radius:4px;font-size:10px;font-weight:600;letter-spacing:0.5px;background-color:#eef2f6;color:#536174;">US</span></h2>
+              </td>
+
+              <td valign="middle" align="right" style="padding-left:12px;white-space:nowrap;">
+                <p class="text-primary" style="margin:0;color:#142334;font-size:14px;font-weight:700;line-height:1.25;">$178.20</p>
+                <p class="price-down" style="margin:3px 0 0;color:#b64242;font-size:11px;font-weight:700;line-height:1.25;">-0.35% today</p>
+              </td>
+
+            </tr>
+          </table>
         </td></tr>
 
 
@@ -220,8 +324,20 @@
   <tr>
     <td class="email-card mobile-section" bgcolor="#ffffff" style="padding:6px 26px 14px;background-color:#ffffff;">
       <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="width:100%;">
-        <tr><td class="story-block" style="border-top:1px solid #dce3e9;padding:16px 0 6px;">
-          <h2 class="text-primary" style="margin:0;font-size:17px;line-height:1.4;letter-spacing:-0.5px;color:#142334;">META <span class="market-label" style="display:inline-block;vertical-align:middle;margin-left:8px;padding:3px 7px;border-radius:4px;font-size:10px;font-weight:600;letter-spacing:0.5px;background-color:#eef2f6;color:#536174;">US</span></h2>
+        <tr><td class="story-block" style="border-top:1px solid #dce3e9;padding:16px 0 8px;">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="width:100%;">
+            <tr>
+              <td valign="middle">
+                <h2 class="text-primary" style="margin:0;font-size:17px;line-height:1.4;letter-spacing:-0.5px;color:#142334;">META <span class="market-label" style="display:inline-block;vertical-align:middle;margin-left:8px;padding:3px 7px;border-radius:4px;font-size:10px;font-weight:600;letter-spacing:0.5px;background-color:#eef2f6;color:#536174;">US</span></h2>
+              </td>
+
+              <td valign="middle" align="right" style="padding-left:12px;white-space:nowrap;">
+                <p class="text-primary" style="margin:0;color:#142334;font-size:14px;font-weight:700;line-height:1.25;">$545.83</p>
+                <p class="price-down" style="margin:3px 0 0;color:#b64242;font-size:11px;font-weight:700;line-height:1.25;">-0.04% today</p>
+              </td>
+
+            </tr>
+          </table>
         </td></tr>
 
 
@@ -240,8 +356,20 @@
   <tr>
     <td class="email-card mobile-section" bgcolor="#ffffff" style="padding:6px 26px 14px;background-color:#ffffff;">
       <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="width:100%;">
-        <tr><td class="story-block" style="border-top:1px solid #dce3e9;padding:16px 0 6px;">
-          <h2 class="text-primary" style="margin:0;font-size:17px;line-height:1.4;letter-spacing:-0.5px;color:#142334;">AMD <span class="market-label" style="display:inline-block;vertical-align:middle;margin-left:8px;padding:3px 7px;border-radius:4px;font-size:10px;font-weight:600;letter-spacing:0.5px;background-color:#eef2f6;color:#536174;">US</span></h2>
+        <tr><td class="story-block" style="border-top:1px solid #dce3e9;padding:16px 0 8px;">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="width:100%;">
+            <tr>
+              <td valign="middle">
+                <h2 class="text-primary" style="margin:0;font-size:17px;line-height:1.4;letter-spacing:-0.5px;color:#142334;">AMD <span class="market-label" style="display:inline-block;vertical-align:middle;margin-left:8px;padding:3px 7px;border-radius:4px;font-size:10px;font-weight:600;letter-spacing:0.5px;background-color:#eef2f6;color:#536174;">US</span></h2>
+              </td>
+
+              <td valign="middle" align="right" style="padding-left:12px;white-space:nowrap;">
+                <p class="text-primary" style="margin:0;color:#142334;font-size:14px;font-weight:700;line-height:1.25;">$162.40</p>
+                <p class="price-flat" style="margin:3px 0 0;color:#637185;font-size:11px;font-weight:700;line-height:1.25;">0.00% today</p>
+              </td>
+
+            </tr>
+          </table>
         </td></tr>
 
 

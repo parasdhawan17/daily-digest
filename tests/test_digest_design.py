@@ -16,8 +16,9 @@ class DigestDesignTest(unittest.TestCase):
         self.assertIn('Apple expands services offering', html)
         self.assertIn('https://example.com/digest?t=signed-token', html)
         self.assertIn('https://example.com/#update-tickers', html)
-        self.assertNotIn('$200.00', html)
-        self.assertNotIn('$200.00', text)
+        self.assertIn('$200.00', html)
+        self.assertIn('+1.20% today', html)
+        self.assertIn('$200.00  +1.20% today', text)
 
     def test_progressive_digest_keeps_loading_hooks_and_company_coverage(self):
         html = build_web_digest([], ['US:AAPL'], progressive=True, progressive_token='test-token')

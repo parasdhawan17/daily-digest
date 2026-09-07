@@ -1,5 +1,5 @@
 US Post-Market • NVDA moved high
-06 Sep 2026 · 9 tickers · 11 stories
+07 Sep 2026 · 9 tickers · 11 stories
 
 === AI BRIEFING ===
 AI investment and cloud demand are key themes across this sample watchlist, while investors weigh upcoming earnings and company spending plans.
@@ -7,8 +7,8 @@ AI investment and cloud demand are key themes across this sample watchlist, whil
 AI-generated from linked headlines and excerpts. Not investment advice.
 
 === COMPANY NEWS ===
-NVDA
-----
+NVDA  $142.50  +4.82% today
+---------------------------
 AI brief: Chip demand and the next earnings update are in focus in the linked coverage.
 
 1. Nvidia Blackwell shipments accelerate as hyperscalers lock in multi-year AI capacity deals
@@ -27,43 +27,43 @@ AI brief: Chip demand and the next earnings update are in focus in the linked co
    https://example.com/nvda/price-targets
 
 
-TSLA
-----
+TSLA  $345.13  -1.71% today
+---------------------------
 • JPMorgan Says Tesla Is Confident of Scaling Cybercab Operations, Touts Future Models Based on Platform—FSD V15 a ‘Step-Change’ From Previous Versions
   https://example.com/tsla/jpm-cybercab
 
-AAPL
-----
+AAPL  $228.30  +1.18% today
+---------------------------
 • Apple Intelligence rollout expands to more regions as developers adopt on-device APIs
   https://example.com/aapl/intelligence-rollout
 
-AMZN
-----
+AMZN  $198.75  -0.92% today
+---------------------------
 • Amazon Web Services wins large federal cloud contract, expanding AI-ready regions
   https://example.com/amzn/aws-federal
 
-MSFT
-----
+MSFT  $415.20  +0.82% today
+---------------------------
 • Microsoft Azure AI bookings remain ahead of plan, Copilot seat growth steady in enterprise
   https://example.com/msft/azure-ai
 
-RELIANCE
---------
+RELIANCE  ₹2,856.40  -0.42% today
+---------------------------------
 • Reliance Industries reports steady refining margins in quarterly update
   https://example.com/reliance/refining
 
-GOOGL
------
+GOOGL  $178.20  -0.35% today
+----------------------------
 • Alphabet search share holds steady as Gemini integrations roll out across core products
   https://example.com/googl/gemini-search
 
-META
-----
+META  $545.83  -0.04% today
+---------------------------
 • Meta Platforms: H2 2026 May Disappoint - Value Trap Risks Meet Rich Rebound Prospects
   https://example.com/meta/h2-outlook
 
-AMD
----
+AMD  $162.40  0.00% today
+-------------------------
 • AMD MI350 ramp on track, but investors await clearer hyperscaler mix shift
   https://example.com/amd/mi350-ramp
 

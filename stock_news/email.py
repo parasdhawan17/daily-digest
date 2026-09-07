@@ -272,6 +272,18 @@ def format_section_plain_text(
 ) -> list[str]:
     lines: list[str] = []
     ticker_line = display_symbol(section["ticker"])
+    quote = section.get("quote") or {}
+    price = quote.get("price")
+    change_pct = quote.get("change_pct")
+    quote_parts: list[str] = []
+    if price is not None:
+        currency = "₹" if section.get("market") == "IN" else "$"
+        quote_parts.append(f"{currency}{price:,.2f}")
+    if change_pct is not None:
+        formatted_change = "0.00%" if change_pct == 0 else f"{change_pct:+.2f}%"
+        quote_parts.append(f"{formatted_change} today")
+    if quote_parts:
+        ticker_line += "  " + "  ".join(quote_parts)
     lines.append(ticker_line)
     lines.append("-" * len(ticker_line))
 

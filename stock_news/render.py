@@ -27,6 +27,10 @@ def get_jinja_env(design: str | None = None) -> Environment:
         autoescape=select_autoescape(["html"]),
     )
     env.filters["format_number"] = lambda value: f"{value:,.0f}"
+    env.filters["format_price"] = lambda value: f"{value:,.2f}"
+    env.filters["format_change_pct"] = (
+        lambda value: "0.00%" if value == 0 else f"{value:+.2f}%"
+    )
     return env
 
 
