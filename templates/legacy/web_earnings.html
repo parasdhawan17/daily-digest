@@ -7,7 +7,13 @@
       {% if not earnings %}<span class="earnings-summary-subtitle">Last 4 reported quarters</span>{% endif %}
     </span>
     <span class="earnings-summary-meta">
-      <span class="earnings-summary-score">{% if earnings %}{{ earnings.date_label }}{% else %}{{ history.summary_label }}{% endif %}</span>
+      {% if earnings %}<span class="earnings-summary-score">{{ earnings.date_label }}</span>{% endif %}
+      {% if history and history.quarters and history.mode != "reported" %}
+      <span class="earnings-summary-results" aria-label="Last four quarters: {{ history.counts.beat }} {% if history.counts.beat == 1 %}beat{% else %}beats{% endif %} and {{ history.counts.miss }} {% if history.counts.miss == 1 %}miss{% else %}misses{% endif %}">
+        <span class="earnings-summary-result beat">{{ history.counts.beat }} {% if history.counts.beat == 1 %}beat{% else %}beats{% endif %}</span>
+        <span class="earnings-summary-result miss">{{ history.counts.miss }} {% if history.counts.miss == 1 %}miss{% else %}misses{% endif %}</span>
+      </span>
+      {% elif not earnings %}<span class="earnings-summary-score">{{ history.summary_label }}</span>{% endif %}
       <span class="earnings-chevron" aria-hidden="true"></span>
     </span>
   </summary>

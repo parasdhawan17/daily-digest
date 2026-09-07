@@ -888,6 +888,28 @@
       font-variant-numeric: tabular-nums;
       white-space: nowrap;
     }
+    .earnings-summary-results {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .earnings-summary-result {
+      padding: 4px 9px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 800;
+      font-variant-numeric: tabular-nums;
+      line-height: 1.2;
+      white-space: nowrap;
+    }
+    .earnings-summary-result.beat {
+      background: var(--earnings-beat-soft);
+      color: var(--earnings-beat);
+    }
+    .earnings-summary-result.miss {
+      background: var(--earnings-miss-soft);
+      color: var(--earnings-miss);
+    }
     .earnings-chevron {
       width: 8px;
       height: 8px;
@@ -1439,6 +1461,8 @@
         background: transparent;
         font-size: 11px;
       }
+      .earnings-summary-results { gap: 4px; }
+      .earnings-summary-result { padding: 3px 6px; font-size: 10px; }
       .earnings-content {
         display: block;
         padding: 12px;
