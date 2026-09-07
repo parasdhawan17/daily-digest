@@ -3,17 +3,19 @@
 <details class="earnings-history">
   <summary class="earnings-summary">
     <span class="earnings-summary-copy">
-      <span class="earnings-summary-title">{% if earnings %}Next earnings{% else %}Earnings{% endif %}</span>
+      <svg class="earnings-summary-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M4 19V9"></path><path d="M10 19V5"></path><path d="M16 19v-7"></path><path d="M22 19H2"></path>
+      </svg>
+      <span class="earnings-summary-title">Earnings</span>
       {% if not earnings %}<span class="earnings-summary-subtitle">Last 4 reported quarters</span>{% endif %}
     </span>
     <span class="earnings-summary-meta">
-      {% if earnings %}<span class="earnings-summary-score">{{ earnings.date_label }}</span>{% endif %}
       {% if history and history.quarters and history.mode != "reported" %}
       <span class="earnings-summary-results" aria-label="Last four quarters: {{ history.counts.beat }} {% if history.counts.beat == 1 %}beat{% else %}beats{% endif %} and {{ history.counts.miss }} {% if history.counts.miss == 1 %}miss{% else %}misses{% endif %}">
         <span class="earnings-summary-result beat">{{ history.counts.beat }} {% if history.counts.beat == 1 %}beat{% else %}beats{% endif %}</span>
         <span class="earnings-summary-result miss">{{ history.counts.miss }} {% if history.counts.miss == 1 %}miss{% else %}misses{% endif %}</span>
       </span>
-      {% elif not earnings %}<span class="earnings-summary-score">{{ history.summary_label }}</span>{% endif %}
+      {% elif history %}<span class="earnings-summary-score">{{ history.summary_label }}</span>{% endif %}
       <span class="earnings-chevron" aria-hidden="true"></span>
     </span>
   </summary>

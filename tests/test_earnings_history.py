@@ -387,11 +387,14 @@ class EarningsRenderTest(unittest.TestCase):
         html = build_web_section(sample_section(sample_history()))
 
         self.assertIn('<details class="earnings-history">', html)
-        self.assertIn("<span class=\"earnings-summary-title\">Next earnings</span>", html)
+        self.assertIn('<svg class="earnings-summary-icon"', html)
+        self.assertIn("<span class=\"earnings-summary-title\">Earnings</span>", html)
         self.assertIn("earnings-chart-row is-upcoming", html)
         self.assertIn("earnings-result upcoming", html)
         self.assertIn("15 Sep 2026", html)
         summary = html[html.index('<summary class="earnings-summary">'):html.index("</summary>")]
+        self.assertNotIn("Next earnings", summary)
+        self.assertNotIn("15 Sep 2026", summary)
         self.assertIn('<span class="earnings-summary-result beat">3 beats</span>', summary)
         self.assertIn('<span class="earnings-summary-result miss">1 miss</span>', summary)
         self.assertNotIn("<th scope=\"row\">Revenue estimate</th>", html)
