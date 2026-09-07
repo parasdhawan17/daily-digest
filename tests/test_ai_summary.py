@@ -421,7 +421,7 @@ class AiSummaryTest(unittest.TestCase):
             subscribe_enabled_override=True,
         )
 
-        self.assertIn('<p class="movers-label">Your watchlist</p>', html)
+        self.assertIn('<p class="movers-label">Your watchlist <span class="watchlist-count" aria-label="2 tickers">2</span></p>', html)
         self.assertIn('class="movers-edit-btn"', html)
         self.assertIn('aria-label="Edit subscribed tickers"', html)
         self.assertNotIn('class="header-subscribe-btn"', html)

@@ -161,12 +161,14 @@ class IndianPriceRangeRenderTest(unittest.TestCase):
         html = build_web_section(indian_section())
 
         self.assertIn('class="price-ranges"', html)
-        self.assertIn("52-week high", html)
+        self.assertIn("1-year high", html)
         self.assertIn("₹3217.60", html)
         self.assertIn("11.2% below", html)
         self.assertIn("All-time high", html)
         self.assertIn("₹3500.00", html)
         self.assertIn("18.4% below", html)
+        self.assertNotIn("price-range-track", html)
+        self.assertNotIn("Current price → high", html)
 
     def test_renders_us_52_week_high_in_dollars(self) -> None:
         section = indian_section()
@@ -184,7 +186,7 @@ class IndianPriceRangeRenderTest(unittest.TestCase):
         html = build_web_section(section)
 
         self.assertIn('class="price-ranges"', html)
-        self.assertIn("52-week high", html)
+        self.assertIn("1-year high", html)
         self.assertIn("$200.00", html)
         self.assertNotIn("All-time high", html)
 
