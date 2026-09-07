@@ -1,4 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="76" height="76" viewBox="0 0 76 76" role="img" aria-label="tickr digest icon">
   <rect width="76" height="76" rx="21" fill="#a8edca"/>
-  <path d="M21 48 32 37l9 7 15-20M45 24h11v11" fill="none" stroke="#10291f" stroke-width="4" stroke-linecap="square" stroke-linejoin="miter"/>
+  <path d="M21 48 32 37l9 7 13.5-18" fill="none" stroke="#10291f" stroke-width="4" stroke-linecap="square" stroke-linejoin="miter"/>
+  <path d="M59 20 55.8 32.6 47.8 26.6Z" fill="#10291f"/>
 </svg>
