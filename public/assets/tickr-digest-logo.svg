@@ -3,7 +3,7 @@
   <desc id="desc">Mint rounded square with an upward market chart arrow followed by the tickr digest wordmark.</desc>
   <rect width="76" height="76" rx="21" fill="#a8edca"/>
   <path d="M21 48 32 37l9 7 13.5-18" fill="none" stroke="#10291f" stroke-width="4" stroke-linecap="square" stroke-linejoin="miter"/>
-  <path d="M59 20 55.8 32.6 47.8 26.6Z" fill="#10291f"/>
+  <path d="M59 20 55.6 36.2 44.4 27.8Z" fill="#10291f"/>
   <text x="98" y="54" fill="#f5f8fa" font-family="Arial, Helvetica, sans-serif" font-size="43" font-weight="700" letter-spacing="-2.6">tickr digest</text>
   <circle cx="356" cy="58" r="4" fill="#a8edca"/>
 </svg>

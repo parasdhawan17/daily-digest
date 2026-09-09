@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Tickr Digest capture rig</title>
+  <style>
+    html, body { width: 100%; height: 100%; margin: 0; overflow: hidden; background: #071a14; }
+    iframe {
+      display: block;
+      width: 360px;
+      height: 640px;
+      border: 0;
+      background: #071a14;
+      transform: scale(3);
+      transform-origin: 0 0;
+    }
+  </style>
+</head>
+<body>
+  <iframe id="page" title="Tickr Digest capture source"></iframe>
+  <script>
+    const scenes = {
+      landing: { src: '../../public/index.html', selector: 'body', block: 'start' },
+      landingPreview: { src: '../../public/index.html', selector: '#preview', block: 'start' },
+      email: { src: '../../public/preview-email-digest.html', selector: 'body', block: 'start' },
+      emailStories: { src: '../../public/preview-email-digest.html', selector: '.company-news, table', block: 'center' },
+      webHero: { src: '../../public/preview-digest.html', selector: 'body', block: 'start' },
+      earnings: { src: '../../public/preview-digest.html', selector: '.earnings-history', block: 'center' },
+      earningsOpen: { src: '../../public/preview-digest.html', selector: '.earnings-history', block: 'center', open: true },
+      news: { src: '../../public/preview-digest.html', selector: '.story', block: 'center' }
+    };
+
+    const params = new URLSearchParams(location.search);
+    const scene = scenes[params.get('scene')] || scenes.landing;
+    const frame = document.querySelector('#page');
+    frame.src = scene.src;
+    frame.addEventListener('load', async () => {
+      const doc = frame.contentDocument;
+      const reloads = [];
+      for (const link of doc.querySelectorAll('link[href^="/"]')) {
+        reloads.push(new Promise(resolve => {
+          link.addEventListener('load', resolve, { once: true });
+          link.addEventListener('error', resolve, { once: true });
+          link.href = new URL(`../../public${new URL(link.href).pathname}`, location.href).href;
+        }));
+      }
+      for (const image of doc.querySelectorAll('img[src]')) {
+        const source = new URL(image.src);
+        if (image.getAttribute('src').startsWith('/') || source.hostname === 'localhost') {
+          image.src = new URL(`../../public${source.pathname}`, location.href).href;
+          reloads.push(image.decode().catch(() => {}));
+        }
+      }
+      await Promise.all(reloads);
+      doc.documentElement.dataset.theme = 'dark';
+      const style = doc.createElement('style');
+      style.textContent = '* { caret-color: transparent !important; } html { scroll-behavior: auto !important; } ::-webkit-scrollbar { display: none !important; }';
+      doc.head.appendChild(style);
+      if (doc.fonts && doc.fonts.ready) await doc.fonts.ready;
+      if (scene.open) {
+        const details = doc.querySelector(scene.selector);
+        if (details) details.open = true;
+      }
+      const target = doc.querySelector(scene.selector);
+      if (target) target.scrollIntoView({ block: scene.block, inline: 'nearest' });
+      frame.contentWindow.scrollBy(0, Number(params.get('offset') || 0));
+      document.body.dataset.ready = 'true';
+    });
+  </script>
+</body>
+</html>

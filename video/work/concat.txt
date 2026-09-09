@@ -1,0 +1,8 @@
+file '/Users/parasdhawan/Documents/Projects/daily-digest/video/work/shot-01-logo.mp4'
+file '/Users/parasdhawan/Documents/Projects/daily-digest/video/work/shot-02-landing.mp4'
+file '/Users/parasdhawan/Documents/Projects/daily-digest/video/work/shot-03-inbox.mp4'
+file '/Users/parasdhawan/Documents/Projects/daily-digest/video/work/shot-04-price.mp4'
+file '/Users/parasdhawan/Documents/Projects/daily-digest/video/work/shot-05-transition.mp4'
+file '/Users/parasdhawan/Documents/Projects/daily-digest/video/work/shot-06-earnings.mp4'
+file '/Users/parasdhawan/Documents/Projects/daily-digest/video/work/shot-07-news.mp4'
+file '/Users/parasdhawan/Documents/Projects/daily-digest/video/work/shot-08-end-card.mp4'

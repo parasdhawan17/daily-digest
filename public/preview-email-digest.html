@@ -7,8 +7,18 @@
   <meta name="supported-color-schemes" content="light dark">
   <title>Your closing briefing · Tickr Digest</title>
   <style>
+    :root { color-scheme: light dark; supported-color-schemes: light dark; }
     body { margin: 0; padding: 0; }
     a:focus-visible { outline: 3px solid #487964; outline-offset: 4px; }
+    /* Gmail ignores prefers-color-scheme and may invert light text on dark panels.
+       Keep gradients and blends together in Gmail-only CSS so clients that strip
+       styles can adjust both foreground and background. Only white copy belongs
+       inside these wrappers; images and the mint buttons must stay outside.
+       https://www.hteumeuleu.com/2021/fixing-gmail-dark-mode-css-blend-modes/ */
+    u + .email-body .email-header { background-image: linear-gradient(#101e2d, #101e2d); }
+    u + .email-body .email-cta { background-image: linear-gradient(#132a2b, #132a2b); }
+    u + .email-body .gmail-blend-screen { background: #000000; mix-blend-mode: screen; }
+    u + .email-body .gmail-blend-difference { background: #000000; mix-blend-mode: difference; }
     @media (prefers-color-scheme: dark) {
       .email-body, .email-outer { background-color: #0d1723 !important; }
       .email-card { background-color: #142130 !important; }
@@ -43,16 +53,15 @@
   <p style="text-align:center;font:12px/1.6 system-ui;color:#637185;padding:12px;">Design preview · Illustrative AI summaries and company news, not live data.</p><table role="presentation" class="email-outer" width="100%" cellpadding="0" cellspacing="0" bgcolor="#f7f8fa" style="background-color:#f7f8fa;padding:32px 12px;">
     <tr><td align="center">
       <table role="presentation" class="email-shell email-card" width="600" cellpadding="0" cellspacing="0" bgcolor="#ffffff" style="width:100%;max-width:600px;background-color:#ffffff;border-radius:12px;overflow:hidden;">
-        <tr><td class="mobile-section" bgcolor="#101e2d" style="padding:22px 26px;background-color:#101e2d;">
+        <tr><td class="email-header mobile-section" bgcolor="#101e2d" style="padding:22px 26px;background-color:#101e2d;">
           <table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 0 18px;">
-            <tr>
-              <td valign="middle" style="padding:0 10px 0 0;"><img src="http://localhost:8765/assets/tickr-digest-icon.svg" alt="" width="38" height="38" style="display:block;width:38px;height:38px;border:0;"></td>
-              <td valign="middle" style="color:#f5f8fa;font-size:17px;font-weight:750;letter-spacing:-0.7px;line-height:20px;white-space:nowrap;">tickr digest<span style="color:#a8edca;">.</span></td>
-            </tr>
+            <tr><td valign="middle"><img src="http://localhost:8765/assets/tickr-digest-logo.png" alt="Tickr Digest" width="181" height="38" style="display:block;width:181px;height:38px;border:0;outline:none;text-decoration:none;"></td></tr>
           </table>
-          <p style="margin:0 0 12px;font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#a8edca;">US · 07 Sep 2026</p>
-          <h1 class="email-heading" style="margin:0;color:#f5f8fa;font-size:26px;font-weight:600;line-height:1.2;letter-spacing:-1px;">Your closing briefing</h1>
-          <p style="margin:12px 0 0;color:#b9c7d5;font-size:13px;line-height:1.55;">Your AI briefing and company news, in one quick read.</p>
+          <div class="gmail-blend-screen"><div class="gmail-blend-difference">
+            <p style="margin:0 0 12px;font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#ffffff;">US · 07 Sep 2026</p>
+            <h1 class="email-heading" style="margin:0;color:#ffffff;font-size:26px;font-weight:600;line-height:1.2;letter-spacing:-1px;">Your closing briefing</h1>
+            <p style="margin:12px 0 0;color:#ffffff;font-size:13px;line-height:1.55;">Your AI briefing and company news, in one quick read.</p>
+          </div></div>
 
           <table role="presentation" cellpadding="0" cellspacing="0" style="margin-top:18px;"><tr><td bgcolor="#a8edca" style="background-color:#a8edca;border-radius:6px;">
             <!--[if mso]><v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="http://localhost:8765/sample-digest.html?design=modern" style="height:42px;v-text-anchor:middle;width:180px;" arcsize="14%" strokecolor="#a8edca" fillcolor="#a8edca"><w:anchorlock/><center style="color:#102c23;font-family:Arial,sans-serif;font-size:12px;font-weight:bold;">Open full digest</center></v:roundrect><![endif]-->
@@ -386,9 +395,11 @@
   </tr>
 
 
-        <tr><td class="mobile-section" bgcolor="#132a2b" style="padding:22px 26px;background-color:#132a2b;text-align:center;">
-          <h2 style="margin:0 0 12px;color:#f0faf6;font-family:Georgia,serif;font-size:22px;font-weight:400;line-height:1.2;">The bigger picture awaits.</h2>
-          <p style="margin:0 0 22px;color:#b7cfc7;font-size:13px;line-height:1.55;">Explore price moves, 1-year highs, earnings dates and results, and more in your full digest.</p>
+        <tr><td class="email-cta mobile-section" bgcolor="#132a2b" style="padding:22px 26px;background-color:#132a2b;text-align:center;">
+          <div class="gmail-blend-screen"><div class="gmail-blend-difference">
+            <h2 style="margin:0 0 12px;color:#ffffff;font-family:Georgia,serif;font-size:22px;font-weight:400;line-height:1.2;">The bigger picture awaits.</h2>
+            <p style="margin:0 0 22px;color:#ffffff;font-size:13px;line-height:1.55;">Explore price moves, 1-year highs, earnings dates and results, and more in your full digest.</p>
+          </div></div>
           <table role="presentation" cellpadding="0" cellspacing="0" align="center"><tr><td bgcolor="#a8edca" style="background-color:#a8edca;border-radius:6px;">
             <!--[if mso]><v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="http://localhost:8765/sample-digest.html?design=modern" style="height:48px;v-text-anchor:middle;width:250px;" arcsize="12%" strokecolor="#a8edca" fillcolor="#a8edca"><w:anchorlock/><center style="color:#102c23;font-family:Arial,sans-serif;font-size:13px;font-weight:bold;">Open my full digest</center></v:roundrect><![endif]-->
             <!--[if !mso]><!--><a href="http://localhost:8765/sample-digest.html?design=modern" style="display:inline-block;padding:15px 26px;color:#102c23;font-size:13px;font-weight:700;line-height:1.3;text-decoration:none;border-radius:6px;">Open my full digest &rarr;</a><!--<![endif]-->
