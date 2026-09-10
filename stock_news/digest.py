@@ -4,6 +4,7 @@ import math
 from datetime import date
 
 import requests
+from stock_news.indianapi import fetch_web_snapshot
 
 from stock_news.config import HEADLINES_PER_TICKER, MIN_RELEVANCE_SCORE
 from stock_news.finnhub import story_dedupe_key
@@ -178,6 +179,7 @@ def collect_digest_data(
     include_earnings: bool = False,
     include_price_ranges: bool = False,
     include_indian_media: bool = False,
+    include_financial_health: bool = False,
 ) -> tuple[list[dict], int]:
     seen_stories: set[str] = set()
     sections: list[dict] = []
@@ -197,6 +199,7 @@ def collect_digest_data(
             "earnings_history": None,
             "upcoming_earnings": None,
             "price_ranges": None,
+            "financial_health": None,
             "stories": [],
             "web_stories": [],
             "error": None,
@@ -205,11 +208,14 @@ def collect_digest_data(
         news_loaded = False
         if market == "IN":
             try:
-                section["quote"], raw_news[ticker] = fetch_quote_and_news(
-                    ticker,
-                    finnhub_key=finnhub_key,
-                    indianapi_key=indianapi_key,
-                )
+                if include_financial_health:
+                    section["quote"], raw_news[ticker], section["financial_health"] = fetch_web_snapshot(ticker, indianapi_key)
+                else:
+                    section["quote"], raw_news[ticker] = fetch_quote_and_news(
+                        ticker,
+                        finnhub_key=finnhub_key,
+                        indianapi_key=indianapi_key,
+                    )
             except requests.RequestException as exc:
                 section["error"] = str(exc)
                 raw_news[ticker] = []

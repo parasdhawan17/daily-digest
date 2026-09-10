@@ -1,5 +1,6 @@
 {% from "web_earnings.html" import render_earnings %}
 {% from "web_price_ranges.html" import render_price_ranges %}
+{% from "web_financial_health.html" import render_financial_health %}
 <!DOCTYPE html>
 <html lang="en" data-theme="dark">
 <head>
@@ -19,6 +20,7 @@
       } catch (e) {}
     })();
   </script>
+  <link rel="stylesheet" href="/financial-health.css">
   <style>
     * { box-sizing: border-box; }
     :root {
@@ -1587,7 +1589,7 @@
         </button>
         {% endif %}
       </div>
-      <div class="movers-wrap"><div class="movers" role="list"><div class="movers-track" id="progressive-movers-track"></div></div></div>
+      <div class="movers-wrap"><div class="movers" role="list" tabindex="0" aria-label="Watchlist, scroll for more stocks"><div class="movers-track" id="progressive-movers-track"></div></div></div>
     </div>
   </section>
   <section class="ai-briefing progressive-ai" id="progressive-ai" aria-label="AI briefing" hidden></section>
@@ -1612,12 +1614,16 @@
         {% endif %}
       </div>
       <div class="movers-wrap">
-      <div class="movers" role="list">
+      <div class="movers" role="list" tabindex="0" aria-label="Watchlist, scroll for more stocks">
         <div class="movers-track">
-        {% for mover in movers_bar %}
+        {% for row in range(2) %}
+        <div class="movers-row" role="presentation">
+        {% for mover in movers_bar[row::2] %}
         <span class="pill {% if mover.is_positive == true %}up{% elif mover.is_positive == false %}down{% else %}flat{% endif %}" role="listitem">
-          {{ mover.display_symbol or mover.ticker }}{% if mover.change_pct is not none %} {% if mover.change_pct >= 0 %}+{% endif %}{{ "%.1f"|format(mover.change_pct) }}%{% endif %}
+          <span class="mover-symbol">{{ mover.display_symbol or mover.ticker }}</span><span class="mover-change">{% if mover.change_pct is not none %}{% if mover.change_pct >= 0 %}+{% endif %}{{ "%.1f"|format(mover.change_pct) }}%{% endif %}</span>
         </span>
+        {% endfor %}
+        </div>
         {% endfor %}
         </div>
       </div>
@@ -1706,6 +1712,7 @@
       {{ render_price_ranges(section) }}
 
       {{ render_earnings(section.upcoming_earnings, section.earnings_history) }}
+      {{ render_financial_health(section.financial_health, financial_health_summaries.get(section.ticker)) }}
 
       {% if ai_summary and ai_summary.ticker_summaries.get(section.ticker) %}
       <p class="ticker-ai-brief"><strong>AI brief</strong> &nbsp; {{ ai_summary.ticker_summaries.get(section.ticker) }}</p>
@@ -1805,9 +1812,17 @@
           var change = hasChange ? Number(item.quote.change_pct) : 0;
           var cls = hasChange && change > 0 ? "up" : hasChange && change < 0 ? "down" : "flat";
           var move = hasChange ? ' ' + (change >= 0 ? "+" : "") + change.toFixed(1) + '%' : '';
-          return '<span class="pill ' + cls + '" role="listitem">' + esc(item.display_symbol || item.ticker) + move + '</span>';
+          return '<span class="pill ' + cls + '" role="listitem"><span class="mover-symbol">' + esc(item.display_symbol || item.ticker) + '</span><span class="mover-change">' + move + '</span></span>';
         }).join("");
         list.innerHTML = content;
+        var pills = Array.from(list.children);
+        [0, 1].forEach(function (offset) {
+          var row = document.createElement("div");
+          row.className = "movers-row";
+          row.setAttribute("role", "presentation");
+          pills.forEach(function (pill, index) { if (index % 2 === offset) row.appendChild(pill); });
+          list.appendChild(row);
+        });
         if (window.setupMoverMarquee) setupMoverMarquee(list);
         bar.hidden = false;
       }
@@ -1826,6 +1841,26 @@
             node.innerHTML = "<strong>AI brief</strong> &nbsp; " + esc(brief);
             section.querySelector(".section-inner").insertBefore(node, section.querySelector(".story-list, .empty"));
           }
+        });
+      }
+
+      function addFinancialHealthSummaries(summaries) {
+        if (!summaries) return;
+        loaded.forEach(function (item) {
+          var assessment = summaries[item.ticker];
+          if (!assessment || ["Improving", "Stable", "Mixed", "Weakening", "Unclear"].indexOf(assessment.judgement) < 0) return;
+          var sentence = assessment.summary;
+          if (typeof sentence !== "string" || !sentence) return;
+          var section = container.querySelector('[data-ticker="' + CSS.escape(item.ticker) + '"]');
+          if (!section) return;
+          var signal = section.querySelector("[data-health-signal]");
+          var context = section.querySelector("[data-health-context]");
+          if (!signal || !context) return;
+          signal.textContent = assessment.judgement;
+          signal.setAttribute("data-judgement", assessment.judgement);
+          signal.setAttribute("aria-label", "AI assessment: " + assessment.judgement);
+          context.querySelector("[data-health-sentence]").textContent = sentence;
+          context.hidden = false;
         });
       }
 
@@ -1876,7 +1911,14 @@
         });
       }).then(function (response) { return response ? response.json() : null; })
         .then(function (result) {
-          if (result && result.ok) addAiSummary(result.ai_summary);
+          if (result && result.ok) {
+            addAiSummary(result.ai_summary);
+            addFinancialHealthSummaries(result.financial_health_summaries);
+          }
+          if (!result || !result.ai_summary) {
+            var emptyAiPanel = document.getElementById("progressive-ai");
+            if (emptyAiPanel) emptyAiPanel.hidden = true;
+          }
           var statusBar = document.getElementById("progressive-status");
           if (statusBar) {
             statusBar.classList.add("is-complete");

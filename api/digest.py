@@ -3,6 +3,7 @@
 import os
 import sys
 import traceback
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone
 from http.server import BaseHTTPRequestHandler
 from pathlib import Path
@@ -14,6 +15,8 @@ if str(ROOT) not in sys.path:
 
 from api._responses import read_json, send_html, send_json
 from stock_news.ai_summary import generate_ai_summary
+from stock_news.financial_health_ai import generate_financial_health_summaries
+from stock_news.design import resolve_design
 from stock_news.brevo import BrevoError, get_contact
 from stock_news.config import BREVO_TICKERS_ATTRIBUTE
 from stock_news.digest import collect_digest_data, filter_sections
@@ -126,6 +129,7 @@ def handle_data_get(handler: BaseHTTPRequestHandler) -> None:
             include_earnings=True,
             include_price_ranges=True,
             include_indian_media=True,
+            include_financial_health=resolve_design((query.get("design") or [None])[0]) == "modern",
         )
         section = filter_sections(sections, [ticker])[0]
         send_json(handler, 200, {"ok": True, "section": section, "html": build_web_section(section, design=(query.get("design") or [None])[0])})
@@ -147,10 +151,19 @@ def handle_ai_post(handler: BaseHTTPRequestHandler) -> None:
             raise ValueError("sections must be a list")
         allowed = set(tickers)
         safe_sections = [item for item in sections if isinstance(item, dict) and item.get("ticker") in allowed]
-        send_json(handler, 200, {"ok": True, "ai_summary": generate_ai_summary(safe_sections)})
+        results = {"ai_summary": None, "financial_health_summaries": {}}
+        with ThreadPoolExecutor(max_workers=2) as executor:
+            jobs = {"ai_summary": executor.submit(generate_ai_summary, safe_sections),
+                    "financial_health_summaries": executor.submit(generate_financial_health_summaries, safe_sections)}
+            for name, job in jobs.items():
+                try:
+                    results[name] = job.result()
+                except Exception:
+                    traceback.print_exc()
+        send_json(handler, 200, {"ok": True, **results})
     except Exception:
         traceback.print_exc()
-        send_json(handler, 200, {"ok": True, "ai_summary": None})
+        send_json(handler, 200, {"ok": True, "ai_summary": None, "financial_health_summaries": {}})
 
 
 def handle_subscription_get(handler: BaseHTTPRequestHandler) -> None:

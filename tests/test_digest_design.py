@@ -33,13 +33,13 @@ class DigestDesignTest(unittest.TestCase):
         self.assertIn('$200.00', fragment)
         self.assertIn('https://example.com/apple', fragment)
 
-    def test_watchlist_is_compact_wraps_and_keeps_unquoted_tickers(self):
+    def test_watchlist_is_scrollable_grid_and_keeps_unquoted_tickers(self):
         html = build_web_digest([], ['US:AAPL', 'IN:TCS'], progressive=True, progressive_token='test-token')
 
         self.assertIn('class="watchlist-count" aria-label="2 tickers">2</span>', html)
-        self.assertRegex(html, r"\.movers-bar \.section-inner\s*\{[^}]*display:\s*grid;")
-        self.assertRegex(html, r"\.movers-track\s*\{[^}]*flex-wrap:\s*wrap;")
-        self.assertRegex(html, r"\.movers\s*\{[^}]*overflow:\s*visible;")
+        self.assertRegex(html, r"\.movers-track\s*\{[^}]*flex-direction:\s*column;")
+        self.assertRegex(html, r"\.movers-track\s*\{[^}]*height:\s*56px;")
+        self.assertRegex(html, r"\.movers\s*\{[^}]*overflow-x:\s*auto;")
         self.assertIn("var movers = loaded.slice().sort", html)
         self.assertNotIn("loaded.filter(function (item) { return item.quote", html)
 

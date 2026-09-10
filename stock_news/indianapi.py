@@ -386,6 +386,22 @@ def fetch_quote_and_news(
     return _quote_from_stock(payload), _news_from_stock(payload, limit)
 
 
+def fetch_web_snapshot(
+    symbol: str, api_key: str, *, base_url: str | None = None,
+) -> tuple[dict | None, list[dict], dict | None]:
+    """Reuse the single stock request for quote, news and financial health."""
+    from stock_news.financial_health import build_financial_health
+
+    payload = _fetch_stock(_stock_name_for_lookup(symbol), api_key, base_url=base_url)
+    if not payload:
+        return None, [], None
+    try:
+        health = build_financial_health(payload)
+    except (TypeError, ValueError, OverflowError):
+        health = None
+    return _quote_from_stock(payload), _news_from_stock(payload, FETCH_LIMIT_PER_TICKER), health
+
+
 def fetch_news(
     symbol: str,
     api_key: str,

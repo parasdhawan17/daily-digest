@@ -248,11 +248,12 @@ def _request_structured_json(
     schema: dict,
     max_tokens: int,
     parser: Callable[[Any], dict | None],
+    system_prompt: str = SYSTEM_PROMPT,
 ) -> dict | None:
     request_body = {
         "model": OPENROUTER_MODEL,
         "messages": [
-            {"role": "system", "content": SYSTEM_PROMPT},
+            {"role": "system", "content": system_prompt},
             {"role": "user", "content": prompt},
         ],
         "response_format": {"type": "json_schema", "json_schema": schema},

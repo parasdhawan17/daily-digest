@@ -510,6 +510,7 @@ class EarningsHandlerTest(unittest.TestCase):
             include_earnings=True,
             include_price_ranges=True,
             include_indian_media=True,
+            include_financial_health=True,
         )
         payload = json.loads(handler.wfile.getvalue())
         self.assertTrue(payload["ok"])

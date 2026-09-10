@@ -1,0 +1,38 @@
+{% macro render_financial_health(health, sentence=none) -%}
+{% if health and health.groups %}
+{% set assessment = sentence if sentence is mapping else {} %}
+{% set explanation = assessment.get('summary', '') if sentence is mapping else sentence %}
+{% set judgement = assessment.get('judgement') if assessment.get('judgement') in ('Improving', 'Stable', 'Mixed', 'Weakening', 'Unclear') else 'Unrated' %}
+<details class="financial-health">
+  <summary class="health-summary">
+    <svg class="health-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h4l3-7 4 14 3-7h4"/></svg>
+    <span class="health-title">Financial health</span>
+    <span class="health-signal" data-health-signal data-judgement="{{ judgement }}" aria-label="AI assessment: {{ judgement }}">{{ judgement }}</span>
+    <span class="health-chevron" aria-hidden="true"></span>
+  </summary>
+  <div class="health-content">
+    <p class="ticker-ai-brief health-context" data-health-context{% if not explanation %} hidden{% endif %}><strong>AI context</strong> &nbsp; <span data-health-sentence>{{ explanation or '' }}</span></p>
+    <div class="health-grid">
+      {% for group in health.groups %}
+      <section class="health-group" aria-label="{{ group.title }}">
+        <h3>{{ group.title }} <span>{{ health.period }}</span></h3>
+        <dl class="health-metrics">
+          {% for metric in group.metrics %}
+          <div class="health-metric{% if metric.id in ('net_profit', 'net_debt', 'fcf') %} health-metric-key{% endif %}" data-trend="{{ metric.change_tone or 'neutral' }}">
+            <dt>{{ metric.label }}{% if metric.period != health.period %}<small>{{ metric.period }}</small>{% endif %}</dt>
+            <dd>
+              {% if metric.sparkline %}<svg class="health-sparkline" viewBox="0 0 64 24" role="img" aria-label="{{ metric.label }} annual trend, {{ metric.history|length }} observations"><title>{% for point in metric.history %}{{ point.period }}: {{ point.value }} {{ metric.unit }}{% if not loop.last %}; {% endif %}{% endfor %}</title><polyline points="{{ metric.sparkline }}" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>{% endif %}
+              <span class="health-value health-tone-{{ metric.value_tone or 'neutral' }}">{{ metric.display }} <span class="health-unit">{{ metric.unit }}</span></span>
+              {% if metric.change_label %}<small class="health-change health-tone-{{ metric.change_tone or 'neutral' }}" title="{{ metric.change_label }}" aria-label="{{ metric.change_label }}">{{ metric.change_label|replace(' vs prior FY', '')|replace(' YoY', '') }}</small>{% endif %}
+            </dd>
+          </div>
+          {% endfor %}
+        </dl>
+      </section>
+      {% endfor %}
+    </div>
+    <p class="health-footnote">{% if health.end_date %}Year ended {{ health.end_date }} · Changes vs prior FY · {% endif %}TTM = trailing 12 months. {{ health.note }}</p>
+  </div>
+</details>
+{% endif %}
+{%- endmacro %}

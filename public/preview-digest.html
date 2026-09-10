@@ -1,11 +1,12 @@
 
 
+
 <!DOCTYPE html>
 <html lang="en" data-theme="dark">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Tickr Digest — 07 Sep 2026</title>
+  <title>Tickr Digest — 10 Sep 2026</title>
   <meta name="color-scheme" content="dark light">
   <script>
     (function () {
@@ -19,6 +20,7 @@
       } catch (e) {}
     })();
   </script>
+  <link rel="stylesheet" href="/financial-health.css">
   <style>
     * { box-sizing: border-box; }
     :root {
@@ -1585,14 +1587,11 @@ body { line-height: 1.55; }
 .header-home-link, .theme-toggle { top: 24px; }
 .header-home-link { left: max(24px, calc((100% - 1112px) / 2)); }
 .theme-toggle { right: max(24px, calc((100% - 1112px) / 2)); }
-.movers-bar { padding: 6px 0; }
+.movers-bar { padding: 8px 0; }
 .movers-bar .section-inner {
-  display: grid;
-  grid-template-columns: max-content minmax(0, 1fr) max-content;
-  align-items: start;
-  gap: 5px 10px;
+  display: block;
 }
-.movers-toolbar { display: contents; }
+.movers-toolbar { display: flex; margin-bottom: 5px; }
 .movers-label {
   grid-column: 1;
   align-self: center;
@@ -1617,23 +1616,51 @@ body { line-height: 1.55; }
   letter-spacing: 0;
   line-height: 1;
 }
-.movers-wrap { grid-column: 2; grid-row: 1; min-width: 0; }
-.movers { padding: 0; overflow: visible; }
-.movers-track { width: auto; flex-wrap: wrap; gap: 4px; }
+.movers-wrap { min-width: 0; }
+.movers {
+  padding: 0;
+  max-height: 68px;
+  overflow-y: hidden;
+  overflow-x: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-strong) transparent;
+}
+.movers-track {
+  display: flex;
+  flex-direction: column;
+  align-content: flex-start;
+  align-items: flex-start;
+  height: 56px;
+  width: max-content;
+  gap: 4px;
+}
+.movers-row { display: flex; gap: 4px; width: max-content; }
 .movers-wrap::before, .movers-wrap::after { display: none; }
-.pill {
-  border-radius: 4px;
+.movers .pill {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  width: max-content;
+  gap: 8px;
+  min-width: 0;
+  height: 26px;
+  box-sizing: border-box;
+  border-radius: 5px;
   font-size: 10px;
   line-height: 1.35;
-  padding: 3px 7px;
+  padding: 4px 8px;
   box-shadow: none;
 }
+.mover-symbol { overflow: hidden; text-overflow: ellipsis; }
+.mover-change { flex-shrink: 0; font-variant-numeric: tabular-nums; }
+.movers:focus-visible, .movers-edit-btn:focus-visible { outline: 2px solid var(--link); outline-offset: 3px; }
 .pill:hover { transform: none; box-shadow: none; }
 .movers-edit-btn {
   grid-column: 3;
   grid-row: 1;
   min-height: 24px;
-  padding: 5px 8px;
+  padding: 4px 8px;
   border-radius: 5px;
 }
 .ai-briefing, html[data-theme="dark"] .ai-briefing {
@@ -1694,10 +1721,7 @@ a:focus-visible, button:focus-visible, summary:focus-visible { outline: 3px soli
   .price-range-value { font-size: 11px; }
   .movers-bar .section-inner { padding: 0 16px; gap: 4px 7px; }
   .movers-label { font-size: 9px; letter-spacing: .8px; }
-  .movers-track { gap: 3px; }
-  .pill { padding: 3px 6px; font-size: 9.5px; }
-  .movers-edit-btn { width: 24px; padding: 0; justify-content: center; }
-  .movers-edit-btn span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; }
+  .movers .pill { padding: 4px 8px; font-size: 10px; }
 }
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
@@ -1744,7 +1768,7 @@ a:focus-visible, button:focus-visible, summary:focus-visible { outline: 3px soli
   <section class="movers-bar" aria-label="Subscribed tickers and session moves">
     <div class="section-inner">
       <div class="movers-toolbar">
-        <p class="movers-label">Your watchlist <span class="watchlist-count" aria-label="4 tickers">4</span></p>
+        <p class="movers-label">Your watchlist <span class="watchlist-count" aria-label="10 tickers">10</span></p>
 
         <button type="button" class="movers-edit-btn" onclick="openSubscribeModal()" aria-label="Edit subscribed tickers">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"></path><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4Z"></path></svg>
@@ -1753,24 +1777,56 @@ a:focus-visible, button:focus-visible, summary:focus-visible { outline: 3px soli
 
       </div>
       <div class="movers-wrap">
-      <div class="movers" role="list">
+      <div class="movers" role="list" tabindex="0" aria-label="Watchlist, scroll for more stocks">
         <div class="movers-track">
 
+        <div class="movers-row" role="presentation">
+
         <span class="pill up" role="listitem">
-          NVDA +2.1%
+          <span class="mover-symbol">NVDA</span><span class="mover-change">+2.1%</span>
         </span>
 
         <span class="pill up" role="listitem">
-          AAPL +1.2%
+          <span class="mover-symbol">TCS</span><span class="mover-change">+0.8%</span>
         </span>
 
         <span class="pill up" role="listitem">
-          TCS +0.8%
+          <span class="mover-symbol">MSFT</span><span class="mover-change">+0.7%</span>
         </span>
 
         <span class="pill down" role="listitem">
-          RELIANCE -0.4%
+          <span class="mover-symbol">RELIANCE</span><span class="mover-change">-0.4%</span>
         </span>
+
+        <span class="pill up" role="listitem">
+          <span class="mover-symbol">HDFCBANK</span><span class="mover-change">+0.2%</span>
+        </span>
+
+        </div>
+
+        <div class="movers-row" role="presentation">
+
+        <span class="pill up" role="listitem">
+          <span class="mover-symbol">AAPL</span><span class="mover-change">+1.2%</span>
+        </span>
+
+        <span class="pill down" role="listitem">
+          <span class="mover-symbol">INFY</span><span class="mover-change">-0.7%</span>
+        </span>
+
+        <span class="pill up" role="listitem">
+          <span class="mover-symbol">GOOGL</span><span class="mover-change">+0.5%</span>
+        </span>
+
+        <span class="pill down" role="listitem">
+          <span class="mover-symbol">AMZN</span><span class="mover-change">-0.3%</span>
+        </span>
+
+        <span class="pill down" role="listitem">
+          <span class="mover-symbol">ICICIBANK</span><span class="mover-change">-0.2%</span>
+        </span>
+
+        </div>
 
         </div>
       </div>
@@ -2033,6 +2089,7 @@ a:focus-visible, button:focus-visible, summary:focus-visible { outline: 3px soli
 
   </div>
 </details>
+
 
 
 
@@ -2386,6 +2443,7 @@ a:focus-visible, button:focus-visible, summary:focus-visible { outline: 3px soli
 
 
 
+
       <p class="ticker-ai-brief"><strong>AI brief</strong> &nbsp; New AI features and services growth are helping offset investor concerns about the pace of the hardware replacement cycle.</p>
 
 
@@ -2664,6 +2722,198 @@ a:focus-visible, button:focus-visible, summary:focus-visible { outline: 3px soli
 
 
 
+
+
+<details class="financial-health">
+  <summary class="health-summary">
+    <svg class="health-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h4l3-7 4 14 3-7h4"/></svg>
+    <span class="health-title">Financial health</span>
+    <span class="health-signal" data-health-signal data-judgement="Mixed" aria-label="AI assessment: Mixed">Mixed</span>
+    <span class="health-chevron" aria-hidden="true"></span>
+  </summary>
+  <div class="health-content">
+    <p class="ticker-ai-brief health-context" data-health-context><strong>AI context</strong> &nbsp; <span data-health-sentence>Operating cash flow covers investment spending, while profit margins have narrowed.</span></p>
+    <div class="health-grid">
+
+      <section class="health-group" aria-label="Growth">
+        <h3>Growth <span>FY2026</span></h3>
+        <dl class="health-metrics">
+
+          <div class="health-metric" data-trend="positive">
+            <dt>Revenue</dt>
+            <dd>
+
+              <span class="health-value health-tone-positive">267,021 <span class="health-unit">₹ cr</span></span>
+              <small class="health-change health-tone-positive" title="+4.6% YoY" aria-label="+4.6% YoY">+4.6%</small>
+            </dd>
+          </div>
+
+          <div class="health-metric" data-trend="positive">
+            <dt>Operating profit</dt>
+            <dd>
+
+              <span class="health-value health-tone-positive">62,632 <span class="health-unit">₹ cr</span></span>
+              <small class="health-change health-tone-positive" title="+0.7% YoY" aria-label="+0.7% YoY">+0.7%</small>
+            </dd>
+          </div>
+
+          <div class="health-metric health-metric-key" data-trend="positive">
+            <dt>Net profit</dt>
+            <dd>
+
+              <span class="health-value health-tone-positive">49,210 <span class="health-unit">₹ cr</span></span>
+              <small class="health-change health-tone-positive" title="+1.4% YoY" aria-label="+1.4% YoY">+1.4%</small>
+            </dd>
+          </div>
+
+          <div class="health-metric" data-trend="positive">
+            <dt>Diluted EPS</dt>
+            <dd>
+
+              <span class="health-value health-tone-positive">135.94 <span class="health-unit">₹</span></span>
+              <small class="health-change health-tone-positive" title="+1.4% YoY" aria-label="+1.4% YoY">+1.4%</small>
+            </dd>
+          </div>
+
+        </dl>
+      </section>
+
+      <section class="health-group" aria-label="Profitability">
+        <h3>Profitability <span>FY2026</span></h3>
+        <dl class="health-metrics">
+
+          <div class="health-metric" data-trend="negative">
+            <dt>Operating margin</dt>
+            <dd>
+              <svg class="health-sparkline" viewBox="0 0 64 24" role="img" aria-label="Operating margin annual trend, 5 observations"><title>2022-03-31: 25.26726952240892 %; 2023-03-31: 24.055478182189145 %; 2024-03-31: 24.226523809326135 %; 2025-03-31: 24.354545596966993 %; 2026-03-31: 23.45583306181911 %</title><polyline points="2.0,2.0 17.0,15.4 32.0,13.5 47.0,12.1 62.0,22.0" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              <span class="health-value health-tone-negative">23.46 <span class="health-unit">%</span></span>
+              <small class="health-change health-tone-negative" title="-0.9 pp YoY" aria-label="-0.9 pp YoY">-0.9 pp</small>
+            </dd>
+          </div>
+
+          <div class="health-metric" data-trend="negative">
+            <dt>Net margin</dt>
+            <dd>
+              <svg class="health-sparkline" viewBox="0 0 64 24" role="img" aria-label="Net margin annual trend, 5 observations"><title>2022-03-31: 19.987588264130082 %; 2023-03-31: 18.693947431450646 %; 2024-03-31: 19.057423835478822 %; 2025-03-31: 19.01623035828986 %; 2026-03-31: 18.42926211796076 %</title><polyline points="2.0,2.0 17.0,18.6 32.0,13.9 47.0,14.5 62.0,22.0" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              <span class="health-value health-tone-negative">18.43 <span class="health-unit">%</span></span>
+              <small class="health-change health-tone-negative" title="-0.6 pp YoY" aria-label="-0.6 pp YoY">-0.6 pp</small>
+            </dd>
+          </div>
+
+          <div class="health-metric" data-trend="neutral">
+            <dt>Return on equity<small>TTM</small></dt>
+            <dd>
+
+              <span class="health-value health-tone-neutral">47.99 <span class="health-unit">%</span></span>
+
+            </dd>
+          </div>
+
+          <div class="health-metric" data-trend="neutral">
+            <dt>Return on assets<small>TTM</small></dt>
+            <dd>
+
+              <span class="health-value health-tone-neutral">28.55 <span class="health-unit">%</span></span>
+
+            </dd>
+          </div>
+
+        </dl>
+      </section>
+
+      <section class="health-group" aria-label="Balance sheet">
+        <h3>Balance sheet <span>FY2026</span></h3>
+        <dl class="health-metrics">
+
+          <div class="health-metric" data-trend="caution">
+            <dt>Total debt</dt>
+            <dd>
+              <svg class="health-sparkline" viewBox="0 0 64 24" role="img" aria-label="Total debt annual trend, 5 observations"><title>2022-03-31: 7818.0 ₹ cr; 2023-03-31: 7688.0 ₹ cr; 2024-03-31: 8021.0 ₹ cr; 2025-03-31: 9392.0 ₹ cr; 2026-03-31: 11409.0 ₹ cr</title><polyline points="2.0,21.3 17.0,22.0 32.0,20.2 47.0,12.8 62.0,2.0" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              <span class="health-value health-tone-caution">11,409 <span class="health-unit">₹ cr</span></span>
+              <small class="health-change health-tone-caution" title="+21.5% vs prior FY" aria-label="+21.5% vs prior FY">+21.5%</small>
+            </dd>
+          </div>
+
+          <div class="health-metric" data-trend="negative">
+            <dt>Cash &amp; equivalents</dt>
+            <dd>
+
+              <span class="health-value health-tone-negative">6,405 <span class="health-unit">₹ cr</span></span>
+              <small class="health-change health-tone-negative" title="-23.1% vs prior FY" aria-label="-23.1% vs prior FY">-23.1%</small>
+            </dd>
+          </div>
+
+          <div class="health-metric health-metric-key" data-trend="caution">
+            <dt>Net debt</dt>
+            <dd>
+
+              <span class="health-value health-tone-caution">5,004 <span class="health-unit">₹ cr</span></span>
+              <small class="health-change health-tone-caution" title="+371.6% vs prior FY" aria-label="+371.6% vs prior FY">+371.6%</small>
+            </dd>
+          </div>
+
+          <div class="health-metric" data-trend="caution">
+            <dt>Debt / equity</dt>
+            <dd>
+
+              <span class="health-value health-tone-caution">0.11 <span class="health-unit">×</span></span>
+              <small class="health-change health-tone-caution" title="+21.5% vs prior FY" aria-label="+21.5% vs prior FY">+21.5%</small>
+            </dd>
+          </div>
+
+        </dl>
+      </section>
+
+      <section class="health-group" aria-label="Cash generation">
+        <h3>Cash generation <span>FY2026</span></h3>
+        <dl class="health-metrics">
+
+          <div class="health-metric" data-trend="positive">
+            <dt>Operating cash flow</dt>
+            <dd>
+              <svg class="health-sparkline" viewBox="0 0 64 24" role="img" aria-label="Operating cash flow annual trend, 5 observations"><title>2022-03-31: 39949.0 ₹ cr; 2023-03-31: 41965.0 ₹ cr; 2024-03-31: 44338.0 ₹ cr; 2025-03-31: 48908.0 ₹ cr; 2026-03-31: 52094.0 ₹ cr</title><polyline points="2.0,22.0 17.0,18.7 32.0,14.8 47.0,7.2 62.0,2.0" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              <span class="health-value health-tone-positive">52,094 <span class="health-unit">₹ cr</span></span>
+              <small class="health-change health-tone-positive" title="+6.5% vs prior FY" aria-label="+6.5% vs prior FY">+6.5%</small>
+            </dd>
+          </div>
+
+          <div class="health-metric" data-trend="neutral">
+            <dt>Capital expenditure</dt>
+            <dd>
+
+              <span class="health-value health-tone-neutral">4,700 <span class="health-unit">₹ cr</span></span>
+              <small class="health-change health-tone-neutral" title="-6.0% vs prior FY" aria-label="-6.0% vs prior FY">-6.0%</small>
+            </dd>
+          </div>
+
+          <div class="health-metric health-metric-key" data-trend="positive">
+            <dt>Free cash flow</dt>
+            <dd>
+              <svg class="health-sparkline" viewBox="0 0 64 24" role="img" aria-label="Free cash flow annual trend, 5 observations"><title>2022-03-31: 36954.0 ₹ cr; 2023-03-31: 38865.0 ₹ cr; 2024-03-31: 41664.0 ₹ cr; 2025-03-31: 43908.0 ₹ cr; 2026-03-31: 47394.0 ₹ cr</title><polyline points="2.0,22.0 17.0,18.3 32.0,13.0 47.0,8.7 62.0,2.0" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              <span class="health-value health-tone-positive">47,394 <span class="health-unit">₹ cr</span></span>
+              <small class="health-change health-tone-positive" title="+7.9% vs prior FY" aria-label="+7.9% vs prior FY">+7.9%</small>
+            </dd>
+          </div>
+
+          <div class="health-metric" data-trend="neutral">
+            <dt>Cash flow / share<small>TTM</small></dt>
+            <dd>
+
+              <span class="health-value health-tone-neutral">153.38 <span class="health-unit">₹</span></span>
+
+            </dd>
+          </div>
+
+        </dl>
+      </section>
+
+    </div>
+    <p class="health-footnote">Year ended 2026-03-31 · Changes vs prior FY · TTM = trailing 12 months. Free cash flow = operating cash flow less capital expenditure. Net debt excludes short-term investments.</p>
+  </div>
+</details>
+
+
+
       <p class="ticker-ai-brief"><strong>AI brief</strong> &nbsp; The latest European banking win reinforces demand for large transformation deals and supports the stock&#39;s positive move.</p>
 
 
@@ -2700,6 +2950,132 @@ a:focus-visible, button:focus-visible, summary:focus-visible { outline: 3px soli
 
 
   <section class="ticker-section section-alt">
+    <div class="section-inner">
+
+      <div class="ticker-head">
+
+        <div class="ticker-head-main">
+          <div class="ticker-row">
+            <span class="ticker-symbol">INFY</span>
+            <span class="exchange-badge in">NSE</span>
+          </div>
+
+          <div class="ticker-quote">
+            <span class="ticker-price">₹1840.00</span>
+
+            <span class="ticker-change down">
+              -0.72%
+            </span>
+
+          </div>
+
+        </div>
+      </div>
+
+
+
+
+
+
+
+
+
+
+
+      <p class="empty">No major news for INFY today.</p>
+
+    </div>
+  </section>
+
+
+
+
+
+  <section class="ticker-section">
+    <div class="section-inner">
+
+      <div class="ticker-head">
+
+        <div class="ticker-head-main">
+          <div class="ticker-row">
+            <span class="ticker-symbol">MSFT</span>
+            <span class="exchange-badge us">US</span>
+          </div>
+
+          <div class="ticker-quote">
+            <span class="ticker-price">$420.50</span>
+
+            <span class="ticker-change up">
+              +0.65%
+            </span>
+
+          </div>
+
+        </div>
+      </div>
+
+
+
+
+
+
+
+
+
+
+
+      <p class="empty">No major news for MSFT today.</p>
+
+    </div>
+  </section>
+
+
+
+
+
+  <section class="ticker-section section-alt">
+    <div class="section-inner">
+
+      <div class="ticker-head">
+
+        <div class="ticker-head-main">
+          <div class="ticker-row">
+            <span class="ticker-symbol">GOOGL</span>
+            <span class="exchange-badge us">US</span>
+          </div>
+
+          <div class="ticker-quote">
+            <span class="ticker-price">$165.80</span>
+
+            <span class="ticker-change up">
+              +0.48%
+            </span>
+
+          </div>
+
+        </div>
+      </div>
+
+
+
+
+
+
+
+
+
+
+
+      <p class="empty">No major news for GOOGL today.</p>
+
+    </div>
+  </section>
+
+
+
+
+
+  <section class="ticker-section">
     <div class="section-inner">
 
       <div class="ticker-head">
@@ -2923,6 +3299,7 @@ a:focus-visible, button:focus-visible, summary:focus-visible { outline: 3px soli
 
 
 
+
       <p class="ticker-ai-brief"><strong>AI brief</strong> &nbsp; Steady refining margins and continued Jio subscriber growth provide support despite the modest share-price decline.</p>
 
 
@@ -2972,6 +3349,132 @@ a:focus-visible, button:focus-visible, summary:focus-visible { outline: 3px soli
   </section>
 
 
+
+
+
+  <section class="ticker-section section-alt">
+    <div class="section-inner">
+
+      <div class="ticker-head">
+
+        <div class="ticker-head-main">
+          <div class="ticker-row">
+            <span class="ticker-symbol">AMZN</span>
+            <span class="exchange-badge us">US</span>
+          </div>
+
+          <div class="ticker-quote">
+            <span class="ticker-price">$185.20</span>
+
+            <span class="ticker-change down">
+              -0.32%
+            </span>
+
+          </div>
+
+        </div>
+      </div>
+
+
+
+
+
+
+
+
+
+
+
+      <p class="empty">No major news for AMZN today.</p>
+
+    </div>
+  </section>
+
+
+
+
+
+  <section class="ticker-section">
+    <div class="section-inner">
+
+      <div class="ticker-head">
+
+        <div class="ticker-head-main">
+          <div class="ticker-row">
+            <span class="ticker-symbol">HDFCBANK</span>
+            <span class="exchange-badge in">NSE</span>
+          </div>
+
+          <div class="ticker-quote">
+            <span class="ticker-price">₹1680.25</span>
+
+            <span class="ticker-change up">
+              +0.25%
+            </span>
+
+          </div>
+
+        </div>
+      </div>
+
+
+
+
+
+
+
+
+
+
+
+      <p class="empty">No major news for HDFCBANK today.</p>
+
+    </div>
+  </section>
+
+
+
+
+
+  <section class="ticker-section section-alt">
+    <div class="section-inner">
+
+      <div class="ticker-head">
+
+        <div class="ticker-head-main">
+          <div class="ticker-row">
+            <span class="ticker-symbol">ICICIBANK</span>
+            <span class="exchange-badge in">NSE</span>
+          </div>
+
+          <div class="ticker-quote">
+            <span class="ticker-price">₹1245.60</span>
+
+            <span class="ticker-change down">
+              -0.18%
+            </span>
+
+          </div>
+
+        </div>
+      </div>
+
+
+
+
+
+
+
+
+
+
+
+      <p class="empty">No major news for ICICIBANK today.</p>
+
+    </div>
+  </section>
+
+
   </main>
 
 
@@ -2988,7 +3491,7 @@ a:focus-visible, button:focus-visible, summary:focus-visible { outline: 3px soli
   <div class="subscribe-modal" id="subscribe-modal" hidden
        data-subscription-token=""
        data-prefill-email="investor@example.com"
-       data-prefill-tickers='["US:NVDA", "IN:RELIANCE", "US:AAPL", "IN:TCS"]'>
+       data-prefill-tickers='["US:NVDA", "IN:RELIANCE", "US:AAPL", "IN:TCS", "US:MSFT", "US:AMZN", "US:GOOGL", "IN:INFY", "IN:HDFCBANK", "IN:ICICIBANK"]'>
     <div class="subscribe-modal-backdrop" onclick="closeSubscribeModal()"></div>
     <div class="subscribe-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="subscribe-modal-title">
       <div class="subscribe-modal-header">

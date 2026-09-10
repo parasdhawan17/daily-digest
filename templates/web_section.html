@@ -1,5 +1,6 @@
 {% from "web_earnings.html" import render_earnings %}
 {% from "web_price_ranges.html" import render_price_ranges %}
+{% from "web_financial_health.html" import render_financial_health %}
 {% macro change_class(quote) %}{% if quote and quote.change_pct is not none %}{% if quote.change_pct > 0 %}up{% elif quote.change_pct < 0 %}down{% else %}flat{% endif %}{% endif %}{% endmacro %}
 {% macro render_story(story) %}
 <article class="story{% if story.image %} has-thumb{% endif %}">
@@ -23,6 +24,7 @@
     </div>
     {{ render_price_ranges(section) }}
     {{ render_earnings(section.upcoming_earnings, section.earnings_history) }}
+    {{ render_financial_health(section.financial_health) }}
     {% if section.error %}<p class="empty">Could not fetch news for {{ section.display_symbol or section.ticker }}.</p>
     {% elif section.web_stories %}<div class="story-list"><h2 class="coverage-heading">Company coverage</h2>{% for story in section.web_stories[:visible_story_count] %}{{ render_story(story) }}{% endfor %}{% if section.web_stories|length > visible_story_count %}<details class="story-more"><summary>See {{ section.web_stories|length - visible_story_count }} more stories</summary>{% for story in section.web_stories[visible_story_count:] %}{{ render_story(story) }}{% endfor %}</details>{% endif %}</div>
     {% else %}<p class="empty">No major news for {{ section.display_symbol or section.ticker }} today.</p>{% endif %}

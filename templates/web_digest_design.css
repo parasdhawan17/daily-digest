@@ -45,14 +45,11 @@ body { line-height: 1.55; }
 .header-home-link, .theme-toggle { top: 24px; }
 .header-home-link { left: max(24px, calc((100% - 1112px) / 2)); }
 .theme-toggle { right: max(24px, calc((100% - 1112px) / 2)); }
-.movers-bar { padding: 6px 0; }
+.movers-bar { padding: 8px 0; }
 .movers-bar .section-inner {
-  display: grid;
-  grid-template-columns: max-content minmax(0, 1fr) max-content;
-  align-items: start;
-  gap: 5px 10px;
+  display: block;
 }
-.movers-toolbar { display: contents; }
+.movers-toolbar { display: flex; margin-bottom: 5px; }
 .movers-label {
   grid-column: 1;
   align-self: center;
@@ -77,23 +74,51 @@ body { line-height: 1.55; }
   letter-spacing: 0;
   line-height: 1;
 }
-.movers-wrap { grid-column: 2; grid-row: 1; min-width: 0; }
-.movers { padding: 0; overflow: visible; }
-.movers-track { width: auto; flex-wrap: wrap; gap: 4px; }
+.movers-wrap { min-width: 0; }
+.movers {
+  padding: 0;
+  max-height: 68px;
+  overflow-y: hidden;
+  overflow-x: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-strong) transparent;
+}
+.movers-track {
+  display: flex;
+  flex-direction: column;
+  align-content: flex-start;
+  align-items: flex-start;
+  height: 56px;
+  width: max-content;
+  gap: 4px;
+}
+.movers-row { display: flex; gap: 4px; width: max-content; }
 .movers-wrap::before, .movers-wrap::after { display: none; }
-.pill {
-  border-radius: 4px;
+.movers .pill {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  width: max-content;
+  gap: 8px;
+  min-width: 0;
+  height: 26px;
+  box-sizing: border-box;
+  border-radius: 5px;
   font-size: 10px;
   line-height: 1.35;
-  padding: 3px 7px;
+  padding: 4px 8px;
   box-shadow: none;
 }
+.mover-symbol { overflow: hidden; text-overflow: ellipsis; }
+.mover-change { flex-shrink: 0; font-variant-numeric: tabular-nums; }
+.movers:focus-visible, .movers-edit-btn:focus-visible { outline: 2px solid var(--link); outline-offset: 3px; }
 .pill:hover { transform: none; box-shadow: none; }
 .movers-edit-btn {
   grid-column: 3;
   grid-row: 1;
   min-height: 24px;
-  padding: 5px 8px;
+  padding: 4px 8px;
   border-radius: 5px;
 }
 .ai-briefing, html[data-theme="dark"] .ai-briefing {
@@ -154,10 +179,7 @@ a:focus-visible, button:focus-visible, summary:focus-visible { outline: 3px soli
   .price-range-value { font-size: 11px; }
   .movers-bar .section-inner { padding: 0 16px; gap: 4px 7px; }
   .movers-label { font-size: 9px; letter-spacing: .8px; }
-  .movers-track { gap: 3px; }
-  .pill { padding: 3px 6px; font-size: 9.5px; }
-  .movers-edit-btn { width: 24px; padding: 0; justify-content: center; }
-  .movers-edit-btn span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; }
+  .movers .pill { padding: 4px 8px; font-size: 10px; }
 }
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }

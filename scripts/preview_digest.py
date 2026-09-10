@@ -13,9 +13,35 @@ os.environ.setdefault("SITE_URL", "http://localhost:8765")
 from stock_news.digest import build_earnings_history, build_indian_earnings_history
 from stock_news.design import resolve_design
 from stock_news.render import build_web_digest
+from stock_news.financial_health import build_financial_health
 
 # Working stock-themed placeholder (Unsplash photo IDs must be valid — 404s show as broken images).
 STOCK_IMAGE = "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=800&h=400&fit=crop"
+
+
+def sample_financial_health():
+    """Illustrative statement-shaped data for the local visual preview."""
+    statements = []
+    for year, revenue, operating, profit, debt, cash, ocf, capex in (
+        (2022, 191754, 48451, 38327, 7818, 12488, 39949, -2995),
+        (2023, 225458, 54235, 42147, 7688, 7123, 41965, -3100),
+        (2024, 240893, 58360, 45908, 8021, 9007, 44338, -2674),
+        (2025, 255324, 62183, 48553, 9392, 8331, 48908, -5000),
+        (2026, 267021, 62632, 49210, 11409, 6405, 52094, -4700),
+    ):
+        fields = {
+            "INC": {"TotalRevenue": revenue, "OperatingIncome": operating, "NetIncome": profit,
+                    "DilutedEPSExcludingExtraOrdItems": profit / 362, "periodLength": 12},
+            "BAL": {"Cash": cash / 2, "CashEquivalents": cash / 2, "TotalDebt": debt, "TotalEquity": 107240},
+            "CAS": {"CashfromOperatingActivities": ocf, "CapitalExpenditures": capex},
+        }
+        statements.append({"Type": "Annual", "FiscalYear": str(year), "EndDate": f"{year}-03-31",
+                           "stockFinancialMap": {group: [{"key": key, "value": str(value)} for key, value in values.items()]
+                                                 for group, values in fields.items()}})
+    return build_financial_health({"industry": "Software & Programming", "financials": statements,
+        "keyMetrics": {"mgmtEffectiveness": [{"key": "returnOnAverageEquityTrailing12Month", "value": "47.99"},
+                                              {"key": "returnOnAverageAssetsTrailing12Month", "value": "28.55"}],
+                       "persharedata": [{"key": "cashFlowPerShareTrailing12Month", "value": "153.38"}]}})
 
 
 def story(i: int, ticker: str, headline: str, source: str = "Reuters", mins: int = 2, with_image: bool = True) -> dict:
@@ -181,6 +207,25 @@ def main() -> None:
         },
     ]
 
+    for section in sections:
+        if section["ticker"] == "IN:TCS":
+            section["financial_health"] = sample_financial_health()
+    # Illustrative quotes make the compact watchlist's overflow easy to review.
+    for ticker, price, change in [
+        ("US:MSFT", 420.50, 0.65),
+        ("US:AMZN", 185.20, -0.32),
+        ("US:GOOGL", 165.80, 0.48),
+        ("IN:INFY", 1840.00, -0.72),
+        ("IN:HDFCBANK", 1680.25, 0.25),
+        ("IN:ICICIBANK", 1245.60, -0.18),
+    ]:
+        market, symbol = ticker.split(":")
+        sections.append({
+            "ticker": ticker, "display_symbol": symbol, "market": market,
+            "exchange": "NSE" if market == "IN" else "US",
+            "quote": {"price": price, "change_pct": change},
+            "web_stories": [], "error": None,
+        })
     tickers = [section["ticker"] for section in sections]
     ai_summary = {
         "market_context": (
@@ -212,6 +257,7 @@ def main() -> None:
         fetched_at_label="Fetched at 9:15 AM ET · Aug 15, 2026",
         fetched_at_iso="2026-08-15T13:15:00+00:00",
         ai_summary=ai_summary,
+        financial_health_summaries={"IN:TCS": {"judgement": "Mixed", "summary": "Operating cash flow covers investment spending, while profit margins have narrowed."}},
         subscribe_enabled_override=True,
         prefill_email="investor@example.com",
     )

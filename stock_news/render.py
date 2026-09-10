@@ -45,6 +45,7 @@ def build_web_digest(
     fetched_at_label: str | None = None,
     fetched_at_iso: str | None = None,
     ai_summary: dict | None = None,
+    financial_health_summaries: dict | None = None,
     subscribe_enabled_override: bool | None = None,
     progressive: bool = False,
     progressive_token: str | None = None,
@@ -60,6 +61,7 @@ def build_web_digest(
     template = env.get_template("web_digest.html")
     html = template.render(
         date_label=today_label,
+        financial_health_summaries=financial_health_summaries or {},
         ticker_count=len(tickers),
         story_count=web_story_count,
         site_url=SITE_URL,
