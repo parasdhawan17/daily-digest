@@ -46,7 +46,7 @@
     } else window.location.assign('/digest');
   }
   function googleButtonTheme() {
-    return document.documentElement.getAttribute('data-theme') === 'dark' ? 'filled_black' : 'outline';
+    return document.documentElement.getAttribute('data-theme') === 'dark' ? 'outline_dark' : 'outline';
   }
   function renderGoogleButton() {
     if (!controls || !googleConfig || !window.google || !google.accounts || !google.accounts.id) return;
