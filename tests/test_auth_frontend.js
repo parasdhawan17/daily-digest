@@ -36,7 +36,7 @@ const anonymous = {ok: true, authenticated: false};
 
 test('Google button follows the dark theme and can be refreshed', async () => {
   const app = await boot(anonymous, {ok: true, authenticated: true});
-  assert.equal(app.renderOptions.theme, 'outline_dark');
+  assert.equal(app.renderOptions.theme, 'filled_black');
   assert.equal(typeof app.listeners['tickr-theme-change'], 'function');
 });
 
