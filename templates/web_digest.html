@@ -1541,8 +1541,10 @@
   </style>
   <link rel="stylesheet" href="/subscribe-form.css">
   <style>{% include "web_digest_design.css" %}</style>
+<link rel="stylesheet" href="/auth.css">
 </head>
 <body>
+<p id="auth-notice" class="auth-notice" role="status" hidden></p>
   <header class="header">
         {% if site_url %}
         <a href="{{ site_url }}/" class="header-home-link" aria-label="Back to home">
@@ -1552,6 +1554,7 @@
           <span>Home</span>
         </a>
         {% endif %}
+        <div class="header-account-actions" role="group" aria-label="Account and appearance">
         <button type="button" class="theme-toggle" id="theme-toggle" aria-label="Switch to dark mode" title="Toggle color theme">
           <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M21 14.5A8.5 8.5 0 1 1 9.5 3 7 7 0 0 0 21 14.5z"></path>
@@ -1561,6 +1564,8 @@
             <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"></path>
           </svg>
         </button>
+          <div id="auth-controls" class="auth-controls"></div>
+        </div>
         <div class="header-content">
         <p class="eyebrow"><img class="digest-brand-icon" src="/assets/tickr-digest-icon.svg" alt="" width="38" height="38"><span>tickr digest<span style="color:#a8edca;">.</span></span></p>
         <h1>Your stocks. The bigger picture.</h1>
@@ -1780,7 +1785,7 @@
       </div>
     </div>
   </div>
-  <script src="/subscribe-form.js?v=20260828-prefill4" defer></script>
+  <script src="/subscribe-form.js?v=20260911-google1" defer></script>
   {% endif %}
   {% if progressive %}
   <script>
@@ -1907,7 +1912,7 @@
           aiPanel.hidden = false;
         }
         return fetch("/api/digest-ai?t=" + encodeURIComponent(token), {
-          method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({sections: loaded})
+          method: "POST", headers: {"Content-Type": "application/json", "X-CSRF-Token": ((document.cookie.split('; ').find(function (v) { return v.indexOf('tickr_csrf=') === 0; }) || '').split('=')[1] || '')}, body: JSON.stringify({sections: loaded})
         });
       }).then(function (response) { return response ? response.json() : null; })
         .then(function (result) {
@@ -2034,5 +2039,6 @@
       }
     })();
   </script>
+<script src="/auth.js" defer></script>
 </body>
 </html>

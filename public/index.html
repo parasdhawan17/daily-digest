@@ -26,6 +26,7 @@
   </script>
 <link rel="stylesheet" href="/subscribe-form.css">
 <link rel="stylesheet" href="/landing.css">
+<link rel="stylesheet" href="/auth.css">
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to content</a>
@@ -43,6 +44,7 @@
 <a href="#faq">FAQ</a>
 </div>
 <div class="nav-actions">
+<div id="auth-controls" class="auth-controls"></div>
 <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Switch color theme">
 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
 <path d="M20 15A8 8 0 019 4a8 8 0 1011 11Z"/>
@@ -52,6 +54,7 @@
 </button>
 </div>
 </nav>
+<p id="auth-notice" class="auth-notice" role="status" hidden></p>
 <div class="hero">
 <div class="hero-copy">
 <p class="eyebrow">Your personal stock briefing</p>
@@ -235,17 +238,17 @@
 <article>
 <span class="step-num">01 — PERSONALIZE</span>
 <h3>Pick the stocks you follow.</h3>
-<p>Enter your email and search by ticker or company name. Mix US stocks, ETFs, and NSE equities in one watchlist.</p>
+<p>Sign in with Google or enter your email, then search by ticker or company name. Mix US stocks, ETFs, and NSE equities in one watchlist.</p>
 </article>
 <article>
 <span class="step-num">02 — GET YOUR BRIEFING</span>
 <h3>Make staying informed a routine.</h3>
-<p>Confirm your email. Receive an AI briefing and company news around the opening and closing sessions of the markets you follow.</p>
+<p>Google signups start immediately; email-only signups confirm by email. Receive an AI briefing and company news around the opening and closing sessions of the markets you follow.</p>
 </article>
 <article>
 <span class="step-num">03 — EXPLORE THE DETAILS</span>
 <h3>Go deeper when you want.</h3>
-<p>Use the link in your email to open your full digest. Explore AI briefings, price landmarks, and earnings for each stock.</p>
+<p>Sign in with Google or use the link in your email to open your full digest. Explore AI briefings, price landmarks, and earnings for each stock.</p>
 </article>
 </div>
 </div>
@@ -305,7 +308,7 @@
 <div>
 <details class="faq-item">
 <summary>Is Tickr Digest free?</summary>
-<p>Yes. Your personalized email briefings and web digest are free. Sign up with your email, select your tickers, and confirm your subscription.</p>
+<p>Yes. Your personalized email briefings and web digest are free. Sign in with Google and select your tickers to start immediately, or sign up with email and confirm your subscription.</p>
 </details>
 <details class="faq-item">
 <summary>What’s in the email versus the web digest?</summary>
@@ -375,5 +378,6 @@
 </script>
 <script src="/subscribe-form.js" defer>
 </script>
+<script src="/auth.js" defer></script>
 </body>
 </html>

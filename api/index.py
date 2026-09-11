@@ -9,6 +9,8 @@ ROOT = Path(__file__).resolve().parent.parent
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
+from api.auth import handle_auth
+
 from api.digest import (
     handle_ai_post,
     handle_data_get,
@@ -38,10 +40,14 @@ def request_path(handler: BaseHTTPRequestHandler) -> str:
 def route(handler: BaseHTTPRequestHandler) -> str | None:
     query = parse_qs(urlparse(handler.path).query)
     explicit = (query.get("route") or [""])[0].strip().lower()
+    if explicit in ("auth-config", "auth-session", "auth-google", "auth-logout"):
+        return explicit
     if explicit in ("digest", "digest-data", "digest-ai", "subscription", "subscribe", "search", "validate"):
         return explicit
 
     normalized = request_path(handler).rstrip("/") or "/"
+    if normalized in ("/api/auth/config", "/api/auth/session", "/api/auth/google", "/api/auth/logout"):
+        return "auth-" + normalized.rsplit("/", 1)[1]
     if normalized in ("/digest", "/api/digest", "/api/index"):
         return "digest"
     if normalized == "/api/digest-data":
@@ -62,7 +68,9 @@ def route(handler: BaseHTTPRequestHandler) -> str | None:
 class handler(BaseHTTPRequestHandler):
     def do_GET(self) -> None:
         matched = route(self)
-        if matched == "digest":
+        if matched in ("auth-config", "auth-session"):
+            handle_auth(self, matched[5:])
+        elif matched == "digest":
             handle_digest(self)
         elif matched == "digest-data":
             handle_data_get(self)
@@ -77,7 +85,9 @@ class handler(BaseHTTPRequestHandler):
 
     def do_POST(self) -> None:
         matched = route(self)
-        if matched == "subscribe":
+        if matched in ("auth-google", "auth-logout"):
+            handle_auth(self, matched[5:])
+        elif matched == "subscribe":
             handle_subscribe(self)
         elif matched == "digest-ai":
             handle_ai_post(self)

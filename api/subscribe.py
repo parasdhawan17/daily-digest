@@ -12,7 +12,8 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from api._responses import read_json, send_json
-from stock_news.brevo import BrevoError, subscribe_or_update
+from stock_news.brevo import BrevoError, subscribe_or_update, subscribe_verified, send_welcome_email
+from stock_news.auth import AuthError, get_session, require_csrf
 from stock_news.config import (
     BREVO_DOI_TEMPLATE_ID,
     BREVO_LIST_ID,
@@ -33,7 +34,15 @@ def handle_post(handler: BaseHTTPRequestHandler) -> None:
     finnhub_key = os.environ.get("FINNHUB_API_KEY", "").strip()
     indianapi_key = os.environ.get("INDIANAPI_API_KEY", "").strip()
 
-    if not api_key or not template_id:
+    try:
+        identity = get_session(handler)
+        if identity:
+            require_csrf(handler)
+    except AuthError as exc:
+        send_json(handler, 403, {"ok": False, "error": str(exc)})
+        return
+
+    if not api_key or (not identity and not template_id):
         missing = [
             name
             for name, value in (
@@ -62,6 +71,11 @@ def handle_post(handler: BaseHTTPRequestHandler) -> None:
         return
 
     email = str(payload.get("email") or "").strip().lower()
+    if identity:
+        if email and email != identity['email']:
+            send_json(handler, 403, {"ok": False, "error": "Use your signed-in Google email."})
+            return
+        email = identity['email']
     if not email or not EMAIL_PATTERN.match(email):
         send_json(handler, 400, {"ok": False, "error": "Enter a valid email address."})
         return
@@ -95,6 +109,16 @@ def handle_post(handler: BaseHTTPRequestHandler) -> None:
         return
 
     try:
+        if identity:
+            already_active = subscribe_verified(email, tickers, api_key, int(list_id))
+            warning = None
+            if not already_active:
+                try:
+                    send_welcome_email(email, api_key, os.environ.get("SITE_URL", "").strip() or SITE_URL)
+                except Exception:
+                    warning = "Your subscription is active, but the welcome email could not be sent."
+            send_json(handler, 200, {"ok": True, "mode": "verified", "redirect": "/digest", "warning": warning})
+            return
         result = subscribe_or_update(
             email,
             tickers,

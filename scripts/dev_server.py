@@ -58,6 +58,10 @@ class DevHandler(BaseHTTPRequestHandler):
         path = parsed.path
         query = parse_qs(parsed.query)
 
+        if path in ("/api/auth/config", "/api/auth/session"):
+            from api.auth import handle_auth
+            handle_auth(self, path.rsplit("/", 1)[1])
+            return
         if path == "/api/tickers/search":
             self._search(query)
             return
@@ -78,12 +82,18 @@ class DevHandler(BaseHTTPRequestHandler):
         self._serve_static(path)
 
     def do_POST(self) -> None:
+        path = urlparse(self.path).path
+        if path in ("/api/auth/google", "/api/auth/logout"):
+            from api.auth import handle_auth
+            handle_auth(self, path.rsplit("/", 1)[1])
+            return
         if urlparse(self.path).path == "/api/digest-ai":
             from api.digest import handle_ai_post
             handle_ai_post(self)
             return
         if urlparse(self.path).path == "/api/subscribe":
-            self._subscribe()
+            from api.subscribe import handle_post
+            handle_post(self)
             return
         self.send_error(404)
 

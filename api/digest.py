@@ -14,6 +14,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from api._responses import read_json, send_html, send_json
+from stock_news.auth import AuthError, get_session, subscription, require_csrf
 from stock_news.ai_summary import generate_ai_summary
 from stock_news.financial_health_ai import generate_financial_health_summaries
 from stock_news.design import resolve_design
@@ -42,7 +43,9 @@ def _verify_token(handler: BaseHTTPRequestHandler) -> tuple[str | None, list[str
     query = parse_qs(urlparse(handler.path).query)
     token = (query.get("t") or [None])[0]
     if not token:
-        return None, None
+        identity = get_session(handler)
+        state = subscription(identity) if identity else None
+        return ("session", state['tickers']) if state and not state['needs_subscription'] else (None, None)
     try:
         return token, verify_digest_token(token)
     except TokenError:
@@ -54,30 +57,46 @@ def handle_get(handler: BaseHTTPRequestHandler) -> None:
     token = (query.get("t") or [None])[0]
 
     if not token:
-        html = build_digest_error(
-            "Missing link",
-            "Open the digest link from your email, or subscribe to get personalized digests.",
-        )
-        send_html(handler, 400, html)
-        return
-
-    try:
-        tickers = verify_digest_token(token)
-    except TokenError as exc:
-        message = str(exc)
-        if "expired" in message.lower():
-            title = "Link expired"
-            detail = "Open the latest email and use the link there."
-        elif "signature" in message.lower() or "format" in message.lower():
-            title = "Invalid link"
-            detail = "This digest link is not valid."
-        else:
-            title = "Invalid link"
-            detail = message
-        html = build_digest_error(title, "We couldn't open this digest.", detail=detail)
-        status = 403 if "expired" in message.lower() or "signature" in message.lower() else 400
-        send_html(handler, status, html)
-        return
+        try:
+            identity = get_session(handler)
+            if not identity:
+                handler.send_response(302)
+                handler.send_header("Location", "/?signin=1")
+                handler.send_header("Cache-Control", "no-store")
+                handler.end_headers()
+                return
+            state = subscription(identity)
+            if state['needs_subscription']:
+                handler.send_response(302)
+                handler.send_header("Location", "/#subscribe")
+                handler.send_header("Cache-Control", "no-store")
+                handler.end_headers()
+                return
+            tickers = state['tickers']
+        except AuthError as exc:
+            send_html(handler, 403, build_digest_error("Sign in again", str(exc)))
+            return
+        except Exception:
+            send_html(handler, 503, build_digest_error("Service unavailable", "Could not load your subscription. Please try again."))
+            return
+    else:
+        try:
+            tickers = verify_digest_token(token)
+        except TokenError as exc:
+            message = str(exc)
+            if "expired" in message.lower():
+                title = "Link expired"
+                detail = "Open the latest email and use the link there."
+            elif "signature" in message.lower() or "format" in message.lower():
+                title = "Invalid link"
+                detail = "This digest link is not valid."
+            else:
+                title = "Invalid link"
+                detail = message
+            html = build_digest_error(title, "We couldn't open this digest.", detail=detail)
+            status = 403 if "expired" in message.lower() or "signature" in message.lower() else 400
+            send_html(handler, status, html)
+            return
 
     missing = _missing_data_keys(tickers)
     if missing:
@@ -99,6 +118,7 @@ def handle_get(handler: BaseHTTPRequestHandler) -> None:
         fetched_at_iso=fetched_at_instant.isoformat(),
         progressive=True,
         progressive_token=token,
+        subscribe_enabled_override=True if not token else None,
         design=(query.get("design") or [None])[0],
     )
     send_html(handler, 200, html)
@@ -106,7 +126,14 @@ def handle_get(handler: BaseHTTPRequestHandler) -> None:
 
 def handle_data_get(handler: BaseHTTPRequestHandler) -> None:
     """Return one ticker's data so the browser can progressively render it."""
-    token, tickers = _verify_token(handler)
+    try:
+        token, tickers = _verify_token(handler)
+    except AuthError as exc:
+        send_json(handler, 403, {"ok": False, "error": str(exc)})
+        return
+    except Exception:
+        send_json(handler, 503, {"ok": False, "error": "Could not load your subscription."})
+        return
     query = parse_qs(urlparse(handler.path).query)
     ticker = (query.get("ticker") or [""])[0].strip().upper()
     if not token or not tickers:
@@ -140,7 +167,16 @@ def handle_data_get(handler: BaseHTTPRequestHandler) -> None:
 
 def handle_ai_post(handler: BaseHTTPRequestHandler) -> None:
     """Generate the optional AI briefing after the visible sections are loaded."""
-    _token, tickers = _verify_token(handler)
+    try:
+        _token, tickers = _verify_token(handler)
+        if _token == "session":
+            require_csrf(handler)
+    except AuthError as exc:
+        send_json(handler, 403, {"ok": False, "error": str(exc)})
+        return
+    except Exception:
+        send_json(handler, 503, {"ok": False, "error": "Could not load your subscription."})
+        return
     if not tickers:
         send_json(handler, 403, {"ok": False, "error": "Invalid digest link."})
         return
@@ -172,7 +208,16 @@ def handle_subscription_get(handler: BaseHTTPRequestHandler) -> None:
     token = (query.get("t") or [None])[0]
     api_key = os.environ.get("BREVO_API_KEY", "").strip()
     if not token:
-        send_json(handler, 400, {"ok": False, "error": "Missing digest link."})
+        try:
+            identity = get_session(handler)
+            if not identity:
+                send_json(handler, 401, {"ok": False, "error": "Sign in to load your subscription."})
+                return
+            send_json(handler, 200, subscription(identity))
+        except AuthError as exc:
+            send_json(handler, 403, {"ok": False, "error": str(exc)})
+        except Exception:
+            send_json(handler, 503, {"ok": False, "error": "Could not load your subscription."})
         return
     try:
         claims = verify_digest_claims(token)

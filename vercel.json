@@ -1,19 +1,62 @@
 {
   "rewrites": [
-    { "source": "/digest", "destination": "/api/index?route=digest" },
-    { "source": "/api/digest-data", "destination": "/api/index?route=digest-data" },
-    { "source": "/api/digest-ai", "destination": "/api/index?route=digest-ai" },
-    { "source": "/api/subscription", "destination": "/api/index?route=subscription" },
-    { "source": "/welcome", "destination": "/welcome.html" },
-    { "source": "/api/tickers/search", "destination": "/api/index?route=search" },
-    { "source": "/api/tickers/validate", "destination": "/api/index?route=validate" },
-    { "source": "/api/subscribe", "destination": "/api/index?route=subscribe" }
+    {
+      "source": "/digest",
+      "destination": "/api/index?route=digest"
+    },
+    {
+      "source": "/api/digest-data",
+      "destination": "/api/index?route=digest-data"
+    },
+    {
+      "source": "/api/digest-ai",
+      "destination": "/api/index?route=digest-ai"
+    },
+    {
+      "source": "/api/subscription",
+      "destination": "/api/index?route=subscription"
+    },
+    {
+      "source": "/welcome",
+      "destination": "/welcome.html"
+    },
+    {
+      "source": "/api/tickers/search",
+      "destination": "/api/index?route=search"
+    },
+    {
+      "source": "/api/tickers/validate",
+      "destination": "/api/index?route=validate"
+    },
+    {
+      "source": "/api/subscribe",
+      "destination": "/api/index?route=subscribe"
+    },
+    {
+      "source": "/api/auth/config",
+      "destination": "/api/index?route=auth-config"
+    },
+    {
+      "source": "/api/auth/session",
+      "destination": "/api/index?route=auth-session"
+    },
+    {
+      "source": "/api/auth/google",
+      "destination": "/api/index?route=auth-google"
+    },
+    {
+      "source": "/api/auth/logout",
+      "destination": "/api/index?route=auth-logout"
+    }
   ],
   "headers": [
     {
       "source": "/digest",
       "headers": [
-        { "key": "Cache-Control", "value": "private, no-store" }
+        {
+          "key": "Cache-Control",
+          "value": "private, no-store"
+        }
       ]
     }
   ]

@@ -4,12 +4,14 @@ import json
 from http.server import BaseHTTPRequestHandler
 
 
-def send_json(handler: BaseHTTPRequestHandler, status: int, payload: dict) -> None:
+def send_json(handler: BaseHTTPRequestHandler, status: int, payload: dict, *, headers: dict | None = None) -> None:
     body = json.dumps(payload).encode("utf-8")
     handler.send_response(status)
     handler.send_header("Content-Type", "application/json; charset=utf-8")
     handler.send_header("Cache-Control", "no-store")
     handler.send_header("Content-Length", str(len(body)))
+    for name, value in (headers or {}).items():
+        handler.send_header(name, value)
     handler.end_headers()
     handler.wfile.write(body)
 

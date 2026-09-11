@@ -129,3 +129,45 @@ Each email includes a signed **See the full digest online** link (`/digest?t=...
 - [Product requirements](documents/product-requirements.md)
 - [Technical implementation](documents/technical-implementation.md)
 - [Implementation plan](documents/implementation-plan.md)
+
+### Google sign-in
+
+The homepage supports Google sign-in alongside email-only signup. Google-verified
+Gmail and Workspace users with an active Brevo subscription open `/digest` with
+all saved US and India tickers. New users select tickers in the popup; submitting
+activates their subscription and sends a welcome email without double opt-in.
+Welcome-email failure does not block access. Email-only signup still uses DOI.
+Other Google account email domains must use email signup/confirmation and their
+emailed digest links; automatic linking for these domains is not supported.
+Suppressed contacts are never unblocked by Google sign-in or the authenticated
+subscription endpoint; sign out and use the email confirmation flow to request
+resubscription, subject to Brevo's suppression rules.
+
+Setup on the web deployment (and `.env.local` for local development):
+
+1. Create a Google Cloud OAuth client of type **Web application** and configure
+   the consent screen. Add the exact `SITE_URL` origin (no path or trailing slash)
+   and `http://localhost:3000` under Authorized JavaScript origins. This uses the
+   JavaScript callback flow, so no OAuth redirect URI is required.
+2. Set `GOOGLE_CLIENT_ID` and a new `SESSION_SIGNING_SECRET` generated with
+   `openssl rand -hex 32`. Keep it separate from `DIGEST_SIGNING_SECRET`.
+3. Set `EMAIL_FROM` to a verified Brevo sender and optionally `EMAIL_FROM_NAME`.
+   Keep the existing Brevo key, list/ticker settings, and DOI template configured.
+4. Install dependencies and deploy. The Google button remains visible but disabled until both auth
+   settings exist. No Railway cron changes or database migration are needed.
+
+Auth endpoints: `GET /api/auth/config`, `GET /api/auth/session`,
+`POST /api/auth/google` (`credential` from Google), and `POST /api/auth/logout`.
+POSTs use the `tickr_csrf` cookie value in `X-CSRF-Token` and require a matching
+`Origin`. Sessions expire after seven days; cookies are HttpOnly, SameSite=Lax,
+and Secure except on localhost. Logout clears the browser cookie; rotating the
+session secret invalidates all sessions. There is no per-session revocation store.
+`POST /api/subscribe` takes the signed-in email from the session and returns
+`redirect: "/digest"` and an optional `warning` for verified subscriptions.
+Existing signed digest links remain supported independently of browser sessions.
+
+Validate with `python -m unittest discover -s tests`, then smoke-test Google
+sign-in on the configured origin with an existing mixed-market subscriber and a
+new account. Confirm the new contact appears in Brevo immediately and receives
+its welcome email. Credentials and email delivery require live configuration;
+unit tests mock those external services.

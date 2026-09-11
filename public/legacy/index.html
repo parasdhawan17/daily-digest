@@ -996,8 +996,11 @@
     }
   </style>
   <link rel="stylesheet" href="/legacy/subscribe-form.css">
+<link rel="stylesheet" href="/auth.css">
 </head>
 <body>
+<p id="auth-notice" class="auth-notice" role="status" hidden></p>
+<div id="auth-controls" class="auth-controls"></div>
 
   <!-- Step 1: Animated hero -->
   <header class="hero">
@@ -1402,5 +1405,6 @@
     })();
   </script>
   <script src="/legacy/subscribe-form.js" defer></script>
+<script src="/auth.js" defer></script>
 </body>
 </html>

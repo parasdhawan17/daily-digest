@@ -39,7 +39,9 @@
   function loadSavedSubscription() {
     var token = modal.getAttribute("data-subscription-token") || "";
     if (!token) {
-      return Promise.resolve(null);
+      return window.tickrAuth ? window.tickrAuth.ready.then(function (data) {
+        return data.authenticated ? data : null;
+      }) : Promise.resolve(null);
     }
     if (savedSubscriptionPromise) {
       return savedSubscriptionPromise;
@@ -67,6 +69,9 @@
     var tickers = data && Array.isArray(data.tickers)
       ? data.tickers
       : readPrefillTickers();
+    var identity = window.tickrAuth && window.tickrAuth.state;
+    if (identity && identity.authenticated) email = identity.email;
+    els.email.readOnly = !!(identity && identity.authenticated);
     els.email.value = String(email || "");
     selectedTickers = tickers
       .map(function (value) { return String(value).trim().toUpperCase(); })
@@ -560,7 +565,7 @@
     els.submit.disabled = true;
     fetch("/api/subscribe", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", "X-CSRF-Token": window.tickrAuth ? window.tickrAuth.csrf() : "" },
       body: JSON.stringify({ email: email, tickers: selectedTickers }),
     })
       .then(function (response) {
@@ -571,6 +576,13 @@
       .then(function (result) {
         if (!result.data.ok) {
           showError(result.data.error || "Something went wrong. Try again.");
+          return;
+        }
+        if (result.data.redirect) {
+          try {
+            if (result.data.warning) sessionStorage.setItem('tickr-welcome-warning', result.data.warning);
+          } catch (error) {}
+          window.location.assign(result.data.redirect);
           return;
         }
         showSuccess(result.data);
@@ -622,6 +634,14 @@
       successPanel.hidden = true;
     }
   }
+
+  window.addEventListener('tickr-auth', function (event) {
+    if (event.detail.authenticated) {
+      savedSubscription = event.detail;
+      savedSubscriptionPromise = null;
+      if (formMounted) applyPrefill(savedSubscription);
+    }
+  });
 
   window.openSubscribeModal = function () {
     mountForm();

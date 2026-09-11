@@ -225,3 +225,34 @@ def _safe_brevo_message(response: requests.Response) -> str:
     except ValueError:
         message = response.text
     return str(message).strip() or "Brevo request failed"
+
+
+def subscribe_verified(email, tickers, api_key, list_id, *, attr_name=BREVO_TICKERS_ATTRIBUTE):
+    """Activate a verified Google signup; never clear provider suppression flags."""
+    contact = get_contact(email, api_key)
+    if contact and contact.get('emailBlacklisted'):
+        raise BrevoError('This email is unsubscribed or suppressed. Use email signup to confirm resubscription.')
+    already_active = bool(contact and list_id in (contact.get('listIds') or []) and
+                          parse_tickers(_get_contact_attribute(contact.get('attributes'), attr_name)))
+    if contact:
+        update_contact_tickers(email, tickers, api_key, attr_name, list_id=list_id)
+    else:
+        response = requests.post('https://api.brevo.com/v3/contacts', headers=_headers(api_key),
+            json={'email': email, 'listIds': [list_id], 'attributes': {attr_name: format_tickers_attribute(tickers)}}, timeout=30)
+        if not response.ok:
+            raise BrevoError(_safe_brevo_message(response))
+    return already_active
+
+
+def send_welcome_email(email, api_key, site_url):
+    import os
+    from html import escape
+    sender = os.getenv('EMAIL_FROM', '').strip()
+    if not sender:
+        raise BrevoError('Welcome email sender is not configured.')
+    url = site_url.rstrip('/') + '/digest'
+    send_transactional_email(
+        '<p>You’re subscribed to Tickr Digest. Your saved stocks are ready, and daily emails are active.</p>'
+        f'<p><a href="{escape(url, quote=True)}">Open your digest</a></p><p>No email confirmation is needed.</p>',
+        f'You’re subscribed to Tickr Digest. Open your digest: {url}\nNo email confirmation is needed.',
+        api_key, sender, [email], os.getenv('EMAIL_FROM_NAME', 'Tickr Digest'), 'Welcome to Tickr Digest')
