@@ -8,15 +8,17 @@ const source = fs.readFileSync('public/auth.js', 'utf8');
 async function boot(session, login) {
   const controls = {children: [], replaceChildren() { this.children = []; }, appendChild(x) { this.children.push(x); }};
   const notice = {hidden: true, textContent: ''};
-  let callback, redirected, opened = 0;
+  let callback, redirected, opened = 0, renderOptions;
   const calls = [];
+  const listeners = {};
   const location = {pathname: '/', hash: '', assign(path) { redirected = path; }};
   const context = {
-    document: {cookie: 'tickr_csrf=csrf', getElementById: id => id === 'auth-controls' ? controls : notice,
+    document: {documentElement: {getAttribute: () => 'dark'}, cookie: 'tickr_csrf=csrf', getElementById: id => id === 'auth-controls' ? controls : notice,
       createElement: () => ({}), head: {appendChild: script => script.onload()}},
     location, sessionStorage: {getItem() { return null; }},
-    google: {accounts: {id: {initialize: opts => { callback = opts.callback; }, renderButton() {}}}},
-    CustomEvent: function(type, options) { this.detail = options.detail; },
+    google: {accounts: {id: {initialize: opts => { callback = opts.callback; }, renderButton(_controls, options) { renderOptions = options; }}}},
+    CustomEvent: function(type, options) { this.type = type; this.detail = options && options.detail; },
+    addEventListener(type, callback) { listeners[type] = callback; },
     fetch: async (url, options) => {
       calls.push({url, options});
       return {json: async () => url.endsWith('/config') ? {ok: true, enabled: true, client_id: 'client'} :
@@ -27,10 +29,16 @@ async function boot(session, login) {
   context.window = context;
   vm.runInNewContext(source, context);
   await context.tickrAuth.ready;
-  return {controls, notice, calls, context, get callback() {return callback;},
+  return {controls, notice, calls, context, listeners, get renderOptions() {return renderOptions;}, get callback() {return callback;},
     get redirected() {return redirected;}, get opened() {return opened;}};
 }
 const anonymous = {ok: true, authenticated: false};
+
+test('Google button follows the dark theme and can be refreshed', async () => {
+  const app = await boot(anonymous, {ok: true, authenticated: true});
+  assert.equal(app.renderOptions.theme, 'filled_black');
+  assert.equal(typeof app.listeners['tickr-theme-change'], 'function');
+});
 
 test('Google existing subscriber opens digest and sends CSRF', async () => {
   const app = await boot(anonymous, {ok: true, authenticated: true, needs_subscription: false});

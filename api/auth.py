@@ -1,6 +1,7 @@
 """Browser authentication endpoints."""
 import os
 import secrets
+import traceback
 from api._responses import read_json, send_json
 from stock_news.auth import (AuthError, configured, cookies, cookie_header, CSRF_COOKIE,
     SESSION_COOKIE, SESSION_SECONDS, get_session, require_csrf, sign_session, subscription, verify_google)
@@ -40,4 +41,5 @@ def handle_auth(handler, action):
     except (ValueError, TypeError):
         send_json(handler, 400, {'ok': False, 'error': 'Invalid request.'})
     except Exception:
+        traceback.print_exc()
         send_json(handler, 503, {'ok': False, 'error': 'Sign-in service is unavailable. Please try again.'})

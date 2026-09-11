@@ -11,6 +11,7 @@
     root.style.colorScheme = theme;
     try { localStorage.setItem('daily-digest-theme', theme); } catch (error) {}
     syncThemeButton();
+    window.dispatchEvent(new CustomEvent('tickr-theme-change'));
   });
 
   // Keep keyboard focus inside signup and return it to the initiating control.

@@ -2,6 +2,7 @@
   var controls = document.getElementById('auth-controls');
   var notice = document.getElementById('auth-notice');
   var state = null;
+  var googleConfig = null;
   function message(text) {
     if (notice) { notice.textContent = text || ''; notice.hidden = !text; }
   }
@@ -44,12 +45,24 @@
       if (data.suppressed) message('This address is unsubscribed or suppressed. Sign out and use email signup to confirm resubscription.');
     } else window.location.assign('/digest');
   }
+  function googleButtonTheme() {
+    return document.documentElement.getAttribute('data-theme') === 'dark' ? 'filled_black' : 'outline';
+  }
+  function renderGoogleButton() {
+    if (!controls || !googleConfig || !window.google || !google.accounts || !google.accounts.id) return;
+    controls.replaceChildren();
+    google.accounts.id.renderButton(controls, {
+      type: 'standard', theme: googleButtonTheme(), size: 'medium', text: 'signin_with', shape: 'pill'
+    });
+  }
+  window.addEventListener('tickr-theme-change', renderGoogleButton);
   window.tickrAuth = {state: null, csrf: csrf};
   try {
     var warning = sessionStorage.getItem('tickr-welcome-warning');
     if (warning) { message(warning); sessionStorage.removeItem('tickr-welcome-warning'); }
   } catch (error) {}
   window.tickrAuth.ready = request('/api/auth/config').then(function (config) {
+    googleConfig = config;
     return request('/api/auth/session').then(function (data) {
       applyState(data);
       if (data.authenticated) {
@@ -77,7 +90,7 @@
             .then(function (result) { message(''); signedIn(result); })
             .catch(function (error) { message(error.message); });
         }});
-        google.accounts.id.renderButton(controls, {type: 'standard', theme: 'outline', size: 'medium', text: 'signin_with', shape: 'pill'});
+        renderGoogleButton();
       };
       document.head.appendChild(script);
       return data;
