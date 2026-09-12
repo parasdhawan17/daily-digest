@@ -1,12 +1,13 @@
 
 
 
+
 <!DOCTYPE html>
 <html lang="en" data-theme="dark">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Tickr Digest — 12 Sep 2026</title>
+  <title>Tickr Digest — 13 Sep 2026</title>
   <meta name="color-scheme" content="dark light">
   <script>
     (function () {
@@ -1730,7 +1731,228 @@ a:focus-visible, button:focus-visible, summary:focus-visible { outline: 3px soli
 }
 
 /* Loading panels remain hidden until the corresponding data arrives. */
-[hidden] { display: none !important; }</style>
+[hidden] { display: none !important; }
+
+/* Mobile-first ticker workspace: snapshot, fundamentals, then editorial context. */
+.header { padding: 78px 16px 22px; border-bottom: 1px solid var(--border); }
+.header h1 { font-size: clamp(24px, 3vw, 32px); margin: 10px 0 8px; letter-spacing: -.9px; }
+.header .digest-intro { margin-bottom: 12px; font-size: 13px; }
+.header .eyebrow { margin: 0; }
+.header .digest-brand-icon { width: 28px; height: 28px; }
+.header .muted, .header .badge { display: inline-block; margin: 0 14px 0 0; }
+.movers-bar { position: sticky; top: 0; z-index: 10; background: var(--page-bg); border-bottom: 1px solid var(--border); padding: 8px 0; }
+.movers-toolbar { align-items: center; margin-bottom: 4px; }
+.movers-label { font-size: 11px; letter-spacing: .06em; }
+.movers-edit-btn { min-height: 44px; padding: 8px 12px; }
+.movers { max-height: none; }
+.movers-track { height: auto; flex-direction: row; gap: 6px; }
+.movers-row { display: contents; }
+.movers .pill { min-height: 44px; gap: 10px; padding: 8px 12px; font-size: 12px; text-decoration: none; border-radius: 8px; cursor: pointer; }
+.movers .pill:hover { border-color: var(--link); }
+.movers .pill:focus-visible { outline-offset: -3px; }
+.watchlist-count { font-size: 11px; min-width: 22px; height: 22px; }
+.ai-briefing, html[data-theme="dark"] .ai-briefing { width: min(1112px, calc(100% - 24px)); padding: 12px 0; margin: 12px auto; border-radius: 10px; }
+.ai-briefing .section-inner { padding: 0 14px; }
+.ai-briefing-label { font-size: 11px; letter-spacing: .07em; }
+.ai-briefing-context { max-width: none; font-size: 13px; line-height: 1.5; }
+.ai-briefing-note { margin-top: 6px; font-size: 11px; }
+.ticker-section, .ticker-section-featured { padding: 12px 0; scroll-margin-top: 132px; }
+.ticker-section > .section-inner { width: min(1112px, calc(100% - 24px)); padding: 14px; border-radius: 14px; overflow: hidden; }
+.ticker-section:target > .section-inner { border-color: var(--link); }
+.section-eyebrow { color: var(--link); font-size: 10px; letter-spacing: .09em; margin-bottom: 8px; }
+.ticker-head { gap: 10px; padding-bottom: 14px; border-bottom: 1px solid var(--border); }
+.ticker-logo { width: 34px; height: 34px; padding: 4px; border-radius: 8px; }
+.ticker-head-main { gap: 6px 12px; }
+.ticker-row { flex-wrap: wrap; gap: 6px; }
+.ticker-symbol { font-size: 18px; letter-spacing: -.4px; overflow-wrap: anywhere; }
+.exchange-badge { padding: 2px 5px; font-size: 10px; }
+.ticker-price { font-size: 19px; font-weight: 650; font-variant-numeric: tabular-nums; }
+.ticker-quote { gap: 6px; }
+.ticker-change { padding: 3px 6px; font-size: 11px; }
+.ticker-workspace { display: grid; grid-template-columns: minmax(0, 1fr); gap: 14px; padding-top: 14px; }
+.ticker-fundamentals, .ticker-coverage { min-width: 0; }
+.ticker-fundamentals:empty { display: none; }
+.ticker-fundamentals { display: flex; flex-direction: column; gap: 8px; }
+.ticker-fundamentals .price-ranges { margin: 0; gap: 8px; flex-basis: auto; }
+.price-ranges-heading { font-size: 10px; letter-spacing: .07em; margin: 0; }
+.price-ranges-heading::before { display: none; }
+.price-range-item { padding: 10px; }
+.price-range-item:hover { transform: none; box-shadow: none; }
+.price-range-label { font-size: 11px; }
+.price-range-value-row { display: flex; flex-direction: column; align-items: flex-start; gap: 5px; }
+.price-range-distance { font-size: 18px; letter-spacing: -.4px; }
+.price-range-value { font-size: 12px; }
+.ticker-fundamentals .earnings-history, .ticker-fundamentals .financial-health { margin: 0; border-radius: 8px; box-shadow: none; }
+.earnings-summary, .health-summary { min-height: 48px; padding: 10px; gap: 8px; }
+.earnings-summary { flex-wrap: wrap; }
+.earnings-summary-title, .health-title { font-size: 12px; }
+.earnings-summary-subtitle, .earnings-summary-result, .health-signal { font-size: 11px; }
+.earnings-summary-icon, .health-icon { width: 16px; height: 16px; }
+.earnings-summary-copy { flex-wrap: wrap; gap: 6px; }
+.earnings-history-layout { display: grid; grid-template-columns: minmax(0, 1fr); }
+.earnings-content { padding: 10px; }
+.health-grid { grid-template-columns: minmax(0, 1fr); }
+.health-metric dt { font-size: 12px; }
+.health-group h3, .health-footnote { font-size: 10px; }
+.ticker-coverage > .ticker-ai-brief { margin: 0 0 12px; padding: 10px 12px; font-size: 12px; line-height: 1.55; }
+.story-list { margin: 0; }
+.coverage-heading { display: flex; align-items: center; justify-content: space-between; margin: 0 0 2px; font-size: 10px; letter-spacing: .08em; }
+.coverage-count { font-weight: 500; letter-spacing: 0; text-transform: none; color: var(--text-secondary); }
+.story { padding: 11px 0; }
+.story.has-thumb { flex-direction: row; gap: 10px; }
+.story-thumb { order: 2; width: 60px; height: 52px; border-radius: 6px; }
+.story-headline { display: block; font-size: 13px; line-height: 1.45; overflow: visible; }
+.story-headline a { color: var(--text-strong); }
+.story-headline a:hover { color: var(--link); }
+.story .summary { font-size: 12px; line-height: 1.5; -webkit-line-clamp: 2; margin-top: 4px; }
+.story .meta { font-size: 11px; margin: 5px 0 0; }
+.story-more summary { font-size: 12px; min-height: 44px; }
+.empty { font-size: 13px; padding: 12px 0; }
+.site-footer { padding: 24px 0; }
+@media (min-width: 768px) {
+  .header { padding: 80px 24px 24px; }
+  .ticker-section > .section-inner { padding: 20px; }
+  .ticker-workspace { grid-template-columns: minmax(280px, .85fr) minmax(0, 1.4fr); gap: 24px; padding-top: 18px; }
+  .ticker-coverage { border-left: 1px solid var(--border); padding-left: 24px; }
+  .ticker-workspace:not(:has(.ticker-fundamentals > *)) { grid-template-columns: minmax(0, 1fr); }
+  .ticker-workspace:not(:has(.ticker-fundamentals > *)) .ticker-fundamentals { display: none; }
+  .ticker-workspace:not(:has(.ticker-fundamentals > *)) .ticker-coverage { border: 0; padding-left: 0; }
+  .ticker-symbol { font-size: 21px; }
+  .ticker-price { font-size: 22px; }
+  .ticker-change { font-size: 12px; }
+  .story-thumb { width: 76px; height: 60px; }
+  .story-headline { font-size: 14px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { scroll-behavior: auto !important; animation: none !important; transition: none !important; }
+}
+.ticker-fundamentals:not(:has(> *)) { display: none; }
+.theme-toggle, .header-home-link { min-width: 44px; min-height: 44px; }
+@media (max-width: 540px) {
+  .header .header-home-link { top: 14px; left: 12px; padding: 0; width: 44px; }
+  .header .header-home-link span { display: none; }
+  .header .header-account-actions { right: 12px; gap: 6px; }
+}
+
+/* Ticker cards: a persistent snapshot with one focused detail view. */
+.ticker-section .section-eyebrow { margin: 0 0 7px; font-size: 9px; }
+.ticker-section .ticker-head { padding-bottom: 10px; gap: 8px; border: 0; }
+.ticker-section .ticker-head-main { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; }
+.ticker-section .ticker-row { gap: 5px; }
+.ticker-section .ticker-symbol { font-size: 18px; }
+.ticker-section .ticker-logo { width: 30px; height: 30px; }
+.ticker-section .ticker-quote { display: flex; align-items: flex-end; flex-direction: column; gap: 2px; }
+.ticker-section .ticker-price { font-size: 19px; line-height: 1.2; }
+.ticker-section .ticker-change { font-size: 11px; padding: 2px 5px; }
+.ticker-snapshot { display: flex; flex-wrap: wrap; gap: 0; background: var(--muted-bg); border-radius: 8px; overflow: hidden; }
+.ticker-snapshot:not(:has(> *)) { display: none; }
+.ticker-snapshot .price-ranges { display: contents; }
+.ticker-snapshot .price-ranges-heading { display: none; }
+.ticker-snapshot .price-range-item, .snapshot-event { flex: 1 1 100px; min-width: 0; padding: 9px 10px; border: 0; border-radius: 0; background: transparent; box-shadow: none; border-right: 1px solid var(--border); }
+.ticker-snapshot > :last-child { border-right: 0; }
+.ticker-snapshot .price-range-label, .snapshot-event > span { display: block; font-size: 10px; color: var(--text-secondary); font-weight: 500; line-height: 1.4; }
+.ticker-snapshot .price-range-label::before { display: none; }
+.ticker-snapshot .price-range-topline { margin-bottom: 3px; }
+.ticker-snapshot .price-range-value-row { gap: 3px; }
+.ticker-snapshot .price-range-distance { font-size: 14px; letter-spacing: -.2px; font-weight: 650; }
+.ticker-snapshot .price-range-value, .snapshot-event small { font-size: 10px; line-height: 1.4; color: var(--text-secondary); }
+.snapshot-event strong { display: block; font-size: 13px; font-weight: 650; line-height: 1.4; margin: 3px 0; color: var(--text-strong); }
+.ticker-brief-slot:not(:has(> *)) { display: none; }
+.ticker-section .ticker-brief-slot .ticker-ai-brief { margin: 10px 0 0; padding: 0 0 0 9px; background: transparent; font-size: 12px; line-height: 1.5; border-left-width: 2px; border-radius: 0; }
+.ticker-section .ticker-brief-slot .ticker-ai-brief strong { color: var(--link); font-size: 11px; margin-right: 4px; }
+.ticker-section .ticker-workspace { display: block; padding-top: 10px; }
+.ticker-section .ticker-coverage { padding: 0; border: 0; }
+.ticker-section .ticker-fundamentals { display: block; }
+.ticker-tabs { display: flex; gap: 16px; border-bottom: 1px solid var(--border); }
+.ticker-tabs button { display: inline-flex; align-items: center; justify-content: center; gap: 5px; min-height: 44px; padding: 8px 0; border: 0; border-bottom: 2px solid transparent; background: transparent; color: var(--text-secondary); font: inherit; font-size: 12px; font-weight: 600; cursor: pointer; white-space: nowrap; }
+.ticker-tabs .tab-heading { display: flex; align-items: center; gap: 5px; font-size: 12px; line-height: 1.4; }
+.ticker-tabs .tab-heading svg { width: 15px; height: 15px; flex-shrink: 0; }
+.ticker-tabs .tab-signal { color: var(--text-secondary); font-size: 10px; line-height: 1.4; font-weight: 500; white-space: normal; }
+.ticker-tabs .tab-signal[data-judgement="Improving"] { color: var(--pill-up-fg); }
+.ticker-tabs .tab-signal[data-judgement="Weakening"] { color: var(--pill-down-fg); }
+.ticker-tabs .tab-signal[data-judgement="Stable"] { color: var(--link); }
+.ticker-tabs .tab-signal[data-judgement="Mixed"] { color: #9a6100; }
+html[data-theme="dark"] .ticker-tabs .tab-signal[data-judgement="Mixed"] { color: #f6c76a; }
+.ticker-tabs button[aria-selected="true"] { color: var(--link); border-bottom-color: var(--link); }
+.ticker-tabs button:hover { color: var(--link); }
+.ticker-tabs button:focus-visible { outline-offset: -2px; }
+.ticker-section[data-tabs-ready] .coverage-heading { display: none; }
+.ticker-section [data-panel]:focus-visible { outline: 2px solid var(--link); outline-offset: -2px; }
+.ticker-section .story { padding: 10px 0; }
+.ticker-section .story-headline { font-size: 13px; line-height: 1.4; }
+.ticker-section .story-thumb { width: 46px; height: 42px; }
+.ticker-section .story .meta { margin: 3px 0 0; font-size: 10px; }
+.story-excerpt summary { display: inline-flex; align-items: center; min-height: 28px; color: var(--text-secondary); font-size: 11px; cursor: pointer; gap: 5px; }
+.story-excerpt summary::after { content: '+'; color: var(--link); }
+.story-excerpt[open] summary::after { content: '−'; }
+.story-excerpt summary::-webkit-details-marker { display: none; }
+.ticker-section .story-excerpt .summary { display: block; font-size: 12px; overflow: visible; margin: 0 0 5px; }
+.ticker-section .story-more summary { padding: 8px 0; background: transparent; }
+.ticker-section[data-tabs-ready] .earnings-history, .ticker-section[data-tabs-ready] .financial-health { margin: 10px 0 0; }
+.ticker-section .empty { margin: 0; padding: 16px 0 6px; }
+@media (max-width: 767px) {
+  .story-excerpt summary { min-height: 44px; }
+  .ticker-tabs { gap: 14px; }
+  .ticker-section .section-inner { padding: 12px; }
+}
+@media (min-width: 1100px) {
+  #full-digest, #digest-sections { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; gap: 14px; width: min(1112px, calc(100% - 48px)); margin: 14px auto; }
+  #full-digest .ticker-section, #digest-sections .ticker-section { padding: 0; min-width: 0; }
+  #full-digest .ticker-section > .section-inner, #digest-sections .ticker-section > .section-inner { width: 100%; padding: 16px; }
+}
+
+/* Tab signals stay visible even when their detail panel is closed. */
+.ticker-tabs { gap: 10px; }
+.ticker-tabs button { flex: 1; min-width: 0; flex-direction: column; align-items: flex-start; justify-content: flex-start; gap: 3px; padding: 10px 0; text-align: left; }
+.ticker-tabs button[data-view="health"] { flex: 1.3; }
+@media (max-width: 400px) {
+  .ticker-tabs { gap: 7px; }
+  .ticker-tabs .tab-heading { font-size: 11px; gap: 4px; }
+  .ticker-tabs .tab-heading svg { width: 13px; height: 13px; }
+}
+
+/* One-row sticky watchlist keeps the ticker cards in view. */
+.movers-bar { padding: 5px 0; }
+.movers-bar .section-inner { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 12px; }
+.movers-bar .movers-toolbar { display: contents; }
+.movers-bar .movers-label { grid-column: 1; grid-row: 1; }
+.movers-bar .movers-wrap { grid-column: 2; grid-row: 1; }
+.movers-bar .movers-edit-btn { grid-column: 3; grid-row: 1; justify-content: center; min-width: 44px; min-height: 44px; padding: 8px; border-radius: 8px; }
+.movers-bar .movers { scrollbar-width: none; }
+.movers-bar .movers::-webkit-scrollbar { display: none; }
+.movers-bar .movers .pill { padding: 7px 10px; gap: 7px; }
+.ticker-section { scroll-margin-top: 70px; }
+@media (max-width: 767px) {
+  .movers-bar .section-inner { grid-template-columns: minmax(0, 1fr) 44px; gap: 8px; padding: 0 12px; }
+  .movers-bar .movers-label { display: none; }
+  .movers-bar .movers-wrap { grid-column: 1; }
+  .movers-bar .movers-edit-btn { grid-column: 2; }
+  .movers-bar .movers-edit-btn span { display: none; }
+  .movers-bar .movers-edit-btn svg { width: 16px; height: 16px; }
+  .movers-bar .movers .pill { font-size: 11px; }
+}
+
+/* A compact label gives the sticky ticker strip a clear identity. */
+.movers-bar .section-inner { grid-template-columns: minmax(0, 1fr) auto; gap: 3px 8px; }
+.movers-bar .movers-label { display: inline-flex; grid-column: 1; grid-row: 1; font-size: 10px; letter-spacing: .06em; gap: 5px; line-height: 18px; }
+.movers-bar .watchlist-count { min-width: 18px; height: 18px; font-size: 10px; }
+.movers-bar .movers-wrap { grid-column: 1; grid-row: 2; }
+.movers-bar .movers-edit-btn { grid-column: 2; grid-row: 1 / 3; align-self: center; }
+.movers-bar .movers-track { gap: 5px; }
+.movers-bar .movers .pill { min-height: 32px; padding: 4px 7px; gap: 5px; border-radius: 5px; font-size: 10px; line-height: 1.3; }
+.ticker-section { scroll-margin-top: 82px; }
+@media (pointer: coarse) {
+  .movers-bar .movers .pill { min-height: 36px; }
+}
+
+/* Keep ticker identity centered independently of the two-line quote. */
+.ticker-section .ticker-head { display: grid; grid-template-columns: 30px minmax(0, 1fr); align-items: center; }
+.ticker-section .ticker-head:not(:has(> .ticker-logo)) { grid-template-columns: minmax(0, 1fr); }
+.ticker-section .ticker-head > .ticker-logo { display: block; margin: 0; align-self: center; }
+.ticker-section .ticker-head-main { align-items: center; }
+.ticker-section .ticker-row { align-items: center; }
+.ticker-section .ticker-symbol { line-height: 1.2; }
+.ticker-section .exchange-badge { line-height: 1.2; }</style>
 <link rel="stylesheet" href="/auth.css">
 </head>
 <body>
@@ -1774,7 +1996,7 @@ a:focus-visible, button:focus-visible, summary:focus-visible { outline: 3px soli
   <section class="movers-bar" aria-label="Subscribed tickers and session moves">
     <div class="section-inner">
       <div class="movers-toolbar">
-        <p class="movers-label">Your watchlist <span class="watchlist-count" aria-label="10 tickers">10</span></p>
+        <p class="movers-label">Watchlist <span class="watchlist-count" aria-label="10 tickers">10</span></p>
 
         <button type="button" class="movers-edit-btn" onclick="openSubscribeModal()" aria-label="Edit subscribed tickers">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"></path><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4Z"></path></svg>
@@ -1783,54 +2005,54 @@ a:focus-visible, button:focus-visible, summary:focus-visible { outline: 3px soli
 
       </div>
       <div class="movers-wrap">
-      <div class="movers" role="list" tabindex="0" aria-label="Watchlist, scroll for more stocks">
+      <div class="movers" role="navigation" tabindex="0" aria-label="Watchlist, scroll for more stocks">
         <div class="movers-track">
 
         <div class="movers-row" role="presentation">
 
-        <span class="pill up" role="listitem">
+        <a href="#ticker-US:NVDA" class="pill up">
           <span class="mover-symbol">NVDA</span><span class="mover-change">+2.1%</span>
-        </span>
+        </a>
 
-        <span class="pill up" role="listitem">
+        <a href="#ticker-IN:TCS" class="pill up">
           <span class="mover-symbol">TCS</span><span class="mover-change">+0.8%</span>
-        </span>
+        </a>
 
-        <span class="pill up" role="listitem">
+        <a href="#ticker-US:MSFT" class="pill up">
           <span class="mover-symbol">MSFT</span><span class="mover-change">+0.7%</span>
-        </span>
+        </a>
 
-        <span class="pill down" role="listitem">
+        <a href="#ticker-IN:RELIANCE" class="pill down">
           <span class="mover-symbol">RELIANCE</span><span class="mover-change">-0.4%</span>
-        </span>
+        </a>
 
-        <span class="pill up" role="listitem">
+        <a href="#ticker-IN:HDFCBANK" class="pill up">
           <span class="mover-symbol">HDFCBANK</span><span class="mover-change">+0.2%</span>
-        </span>
+        </a>
 
         </div>
 
         <div class="movers-row" role="presentation">
 
-        <span class="pill up" role="listitem">
+        <a href="#ticker-US:AAPL" class="pill up">
           <span class="mover-symbol">AAPL</span><span class="mover-change">+1.2%</span>
-        </span>
+        </a>
 
-        <span class="pill down" role="listitem">
+        <a href="#ticker-IN:INFY" class="pill down">
           <span class="mover-symbol">INFY</span><span class="mover-change">-0.7%</span>
-        </span>
+        </a>
 
-        <span class="pill up" role="listitem">
+        <a href="#ticker-US:GOOGL" class="pill up">
           <span class="mover-symbol">GOOGL</span><span class="mover-change">+0.5%</span>
-        </span>
+        </a>
 
-        <span class="pill down" role="listitem">
+        <a href="#ticker-US:AMZN" class="pill down">
           <span class="mover-symbol">AMZN</span><span class="mover-change">-0.3%</span>
-        </span>
+        </a>
 
-        <span class="pill down" role="listitem">
+        <a href="#ticker-IN:ICICIBANK" class="pill down">
           <span class="mover-symbol">ICICIBANK</span><span class="mover-change">-0.2%</span>
-        </span>
+        </a>
 
         </div>
 
@@ -1851,18 +2073,12 @@ a:focus-visible, button:focus-visible, summary:focus-visible { outline: 3px soli
   </section>
 
 
-
-
-
-
-
-
   <main id="full-digest">
 
 
 
 
-  <section class="ticker-section ticker-section-featured">
+  <section id="ticker-US:NVDA" data-ticker="US:NVDA" class="ticker-section ticker-section-featured">
     <div class="section-inner">
 
       <p class="section-eyebrow">Biggest mover</p>
@@ -1889,9 +2105,125 @@ a:focus-visible, button:focus-visible, summary:focus-visible { outline: 3px soli
         </div>
       </div>
 
+      <div class="ticker-snapshot">
+
+
+        <div class="snapshot-event"><span>Next earnings</span><strong>15 Sep 2026</strong><small>After close</small></div>
+
+      </div>
+      <div class="ticker-brief-slot">
+
+        <p class="ticker-ai-brief"><strong>AI brief</strong> Product-roadmap momentum and sustained data-center demand remain the central themes ahead of the next earnings update.</p>
+
+      </div>
+      <div class="ticker-workspace">
+        <div class="ticker-tabs" role="tablist" aria-label="NVDA details" hidden>
+          <button type="button" role="tab" id="tab-news-US:NVDA" aria-controls="panel-news-US:NVDA" data-view="news">
+            <span class="tab-heading"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h16v16H4zM8 8h8M8 12h3M8 16h3M15 12h1M15 16h1"/></svg>News</span>
+            <small class="tab-signal">5 stories</small>
+          </button>
+
+          <button type="button" role="tab" id="tab-earnings-US:NVDA" aria-controls="panel-earnings-US:NVDA" data-view="earnings">
+            <span class="tab-heading"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19V10M10 19V5M16 19v-7M2 19h20"/></svg>Earnings</span>
+            <small class="tab-signal">3 beats · 1 miss</small>
+          </button>
+
+
+        </div>
+        <div class="ticker-coverage" id="panel-news-US:NVDA" data-panel="news">
+
+          <div class="story-list">
+            <h2 class="coverage-heading">Company coverage</h2>
+
+
+  <article class="story has-thumb">
+    <img class="story-thumb" src="https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=800&amp;h=400&amp;fit=crop&amp;sig=NVDA0" alt="" loading="lazy" decoding="async">
+    <div class="story-body">
+      <h3 class="story-headline"><a href="https://example.com/nvda/0" target="_blank" rel="noopener">Nvidia announces next-gen chip roadmap ahead of earnings</a></h3>
+
+      <details class="story-excerpt"><summary>Read summary</summary><p class="summary">Analysts weigh supply constraints, guidance, and sector rotation as investors reposition ahead of the next earnings cycle.</p></details>
+
+      <p class="meta">
+        Reuters
+         · 2h ago
+      </p>
+    </div>
+  </article>
 
 
 
+  <article class="story has-thumb">
+    <img class="story-thumb" src="https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=800&amp;h=400&amp;fit=crop&amp;sig=NVDA1" alt="" loading="lazy" decoding="async">
+    <div class="story-body">
+      <h3 class="story-headline"><a href="https://example.com/nvda/1" target="_blank" rel="noopener">Data center demand keeps Nvidia supply chain at full tilt</a></h3>
+
+      <details class="story-excerpt"><summary>Read summary</summary><p class="summary">Analysts weigh supply constraints, guidance, and sector rotation as investors reposition ahead of the next earnings cycle.</p></details>
+
+      <p class="meta">
+        Bloomberg
+         · 4h ago
+      </p>
+    </div>
+  </article>
+
+
+
+  <article class="story">
+    <div class="story-body">
+      <h3 class="story-headline"><a href="https://example.com/nvda/2" target="_blank" rel="noopener">Wall Street raises price targets after AI infrastructure spend</a></h3>
+
+      <details class="story-excerpt"><summary>Read summary</summary><p class="summary">Analysts weigh supply constraints, guidance, and sector rotation as investors reposition ahead of the next earnings cycle.</p></details>
+
+      <p class="meta">
+        CNBC
+         · 6h ago
+      </p>
+    </div>
+  </article>
+
+
+
+            <details class="story-more"><summary>See 2 more stories</summary>
+
+
+  <article class="story has-thumb">
+    <img class="story-thumb" src="https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=800&amp;h=400&amp;fit=crop&amp;sig=NVDA3" alt="" loading="lazy" decoding="async">
+    <div class="story-body">
+      <h3 class="story-headline"><a href="https://example.com/nvda/3" target="_blank" rel="noopener">Partners line up for new accelerator platform launch</a></h3>
+
+      <details class="story-excerpt"><summary>Read summary</summary><p class="summary">Analysts weigh supply constraints, guidance, and sector rotation as investors reposition ahead of the next earnings cycle.</p></details>
+
+      <p class="meta">
+        Reuters
+         · 8h ago
+      </p>
+    </div>
+  </article>
+
+
+
+  <article class="story">
+    <div class="story-body">
+      <h3 class="story-headline"><a href="https://example.com/nvda/4" target="_blank" rel="noopener">Semiconductor peers rally on Nvidia guidance optimism</a></h3>
+
+      <details class="story-excerpt"><summary>Read summary</summary><p class="summary">Analysts weigh supply constraints, guidance, and sector rotation as investors reposition ahead of the next earnings cycle.</p></details>
+
+      <p class="meta">
+        MarketWatch
+         · 10h ago
+      </p>
+    </div>
+  </article>
+
+
+            </details>
+
+          </div>
+
+        </div>
+        <div class="ticker-fundamentals">
+
+          <div id="panel-earnings-US:NVDA" data-panel="earnings">
 
 <details class="earnings-history">
   <summary class="earnings-summary">
@@ -1900,7 +2232,7 @@ a:focus-visible, button:focus-visible, summary:focus-visible { outline: 3px soli
         <path d="M4 19V9"></path><path d="M10 19V5"></path><path d="M16 19v-7"></path><path d="M22 19H2"></path>
       </svg>
       <span class="earnings-summary-title">Earnings</span>
-
+      <span class="earnings-summary-subtitle">Next · 15 Sep 2026</span>
     </span>
     <span class="earnings-summary-meta">
 
@@ -2096,113 +2428,11 @@ a:focus-visible, button:focus-visible, summary:focus-visible { outline: 3px soli
   </div>
 </details>
 
+</div>
 
 
-
-
-      <p class="ticker-ai-brief"><strong>AI brief</strong> &nbsp; Product-roadmap momentum and sustained data-center demand remain the central themes ahead of the next earnings update.</p>
-
-
-
-      <div class="story-list">
-        <h2 class="coverage-heading">Company coverage</h2>
-
-
-
-  <article class="story has-thumb">
-    <img class="story-thumb" src="https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=800&amp;h=400&amp;fit=crop&amp;sig=NVDA0" alt="" loading="lazy" decoding="async">
-    <div class="story-body">
-      <h3 class="story-headline"><a href="https://example.com/nvda/0" target="_blank" rel="noopener">Nvidia announces next-gen chip roadmap ahead of earnings</a></h3>
-
-      <p class="summary">Analysts weigh supply constraints, guidance, and sector rotation as investors reposition ahead of the next earnings cycle.</p>
-
-      <p class="meta">
-        Reuters
-         · 2h ago
-      </p>
-    </div>
-  </article>
-
-
-
-
-
-  <article class="story has-thumb">
-    <img class="story-thumb" src="https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=800&amp;h=400&amp;fit=crop&amp;sig=NVDA1" alt="" loading="lazy" decoding="async">
-    <div class="story-body">
-      <h3 class="story-headline"><a href="https://example.com/nvda/1" target="_blank" rel="noopener">Data center demand keeps Nvidia supply chain at full tilt</a></h3>
-
-      <p class="summary">Analysts weigh supply constraints, guidance, and sector rotation as investors reposition ahead of the next earnings cycle.</p>
-
-      <p class="meta">
-        Bloomberg
-         · 4h ago
-      </p>
-    </div>
-  </article>
-
-
-
-
-
-  <article class="story">
-    <div class="story-body">
-      <h3 class="story-headline"><a href="https://example.com/nvda/2" target="_blank" rel="noopener">Wall Street raises price targets after AI infrastructure spend</a></h3>
-
-      <p class="summary">Analysts weigh supply constraints, guidance, and sector rotation as investors reposition ahead of the next earnings cycle.</p>
-
-      <p class="meta">
-        CNBC
-         · 6h ago
-      </p>
-    </div>
-  </article>
-
-
-
-
-        <details class="story-more">
-          <summary>See 2 more stories</summary>
-
-
-
-  <article class="story has-thumb">
-    <img class="story-thumb" src="https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=800&amp;h=400&amp;fit=crop&amp;sig=NVDA3" alt="" loading="lazy" decoding="async">
-    <div class="story-body">
-      <h3 class="story-headline"><a href="https://example.com/nvda/3" target="_blank" rel="noopener">Partners line up for new accelerator platform launch</a></h3>
-
-      <p class="summary">Analysts weigh supply constraints, guidance, and sector rotation as investors reposition ahead of the next earnings cycle.</p>
-
-      <p class="meta">
-        Reuters
-         · 8h ago
-      </p>
-    </div>
-  </article>
-
-
-
-
-
-  <article class="story">
-    <div class="story-body">
-      <h3 class="story-headline"><a href="https://example.com/nvda/4" target="_blank" rel="noopener">Semiconductor peers rally on Nvidia guidance optimism</a></h3>
-
-      <p class="summary">Analysts weigh supply constraints, guidance, and sector rotation as investors reposition ahead of the next earnings cycle.</p>
-
-      <p class="meta">
-        MarketWatch
-         · 10h ago
-      </p>
-    </div>
-  </article>
-
-
-
-        </details>
-
+        </div>
       </div>
-
     </div>
   </section>
 
@@ -2212,7 +2442,7 @@ a:focus-visible, button:focus-visible, summary:focus-visible { outline: 3px soli
 
 
 
-  <section class="ticker-section section-alt">
+  <section id="ticker-US:AAPL" data-ticker="US:AAPL" class="ticker-section section-alt">
     <div class="section-inner">
 
       <p class="section-eyebrow">Notable mover</p>
@@ -2239,9 +2469,74 @@ a:focus-visible, button:focus-visible, summary:focus-visible { outline: 3px soli
         </div>
       </div>
 
+      <div class="ticker-snapshot">
+
+
+        <div class="snapshot-event"><span>Next earnings</span><strong>15 Sep 2026</strong><small>Before open</small></div>
+
+      </div>
+      <div class="ticker-brief-slot">
+
+        <p class="ticker-ai-brief"><strong>AI brief</strong> New AI features and services growth are helping offset investor concerns about the pace of the hardware replacement cycle.</p>
+
+      </div>
+      <div class="ticker-workspace">
+        <div class="ticker-tabs" role="tablist" aria-label="AAPL details" hidden>
+          <button type="button" role="tab" id="tab-news-US:AAPL" aria-controls="panel-news-US:AAPL" data-view="news">
+            <span class="tab-heading"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h16v16H4zM8 8h8M8 12h3M8 16h3M15 12h1M15 16h1"/></svg>News</span>
+            <small class="tab-signal">2 stories</small>
+          </button>
+
+          <button type="button" role="tab" id="tab-earnings-US:AAPL" aria-controls="panel-earnings-US:AAPL" data-view="earnings">
+            <span class="tab-heading"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19V10M10 19V5M16 19v-7M2 19h20"/></svg>Earnings</span>
+            <small class="tab-signal">3 beats · 1 miss</small>
+          </button>
+
+
+        </div>
+        <div class="ticker-coverage" id="panel-news-US:AAPL" data-panel="news">
+
+          <div class="story-list">
+            <h2 class="coverage-heading">Company coverage</h2>
+
+
+  <article class="story has-thumb">
+    <img class="story-thumb" src="https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=800&amp;h=400&amp;fit=crop&amp;sig=AAPL0" alt="" loading="lazy" decoding="async">
+    <div class="story-body">
+      <h3 class="story-headline"><a href="https://example.com/aapl/0" target="_blank" rel="noopener">Apple expands AI features across iOS developer preview</a></h3>
+
+      <details class="story-excerpt"><summary>Read summary</summary><p class="summary">Analysts weigh supply constraints, guidance, and sector rotation as investors reposition ahead of the next earnings cycle.</p></details>
+
+      <p class="meta">
+        Bloomberg
+         · 2h ago
+      </p>
+    </div>
+  </article>
 
 
 
+  <article class="story">
+    <div class="story-body">
+      <h3 class="story-headline"><a href="https://example.com/aapl/1" target="_blank" rel="noopener">Services revenue momentum offsets hardware cycle concerns</a></h3>
+
+      <details class="story-excerpt"><summary>Read summary</summary><p class="summary">Analysts weigh supply constraints, guidance, and sector rotation as investors reposition ahead of the next earnings cycle.</p></details>
+
+      <p class="meta">
+        Reuters
+         · 5h ago
+      </p>
+    </div>
+  </article>
+
+
+
+          </div>
+
+        </div>
+        <div class="ticker-fundamentals">
+
+          <div id="panel-earnings-US:AAPL" data-panel="earnings">
 
 <details class="earnings-history">
   <summary class="earnings-summary">
@@ -2250,7 +2545,7 @@ a:focus-visible, button:focus-visible, summary:focus-visible { outline: 3px soli
         <path d="M4 19V9"></path><path d="M10 19V5"></path><path d="M16 19v-7"></path><path d="M22 19H2"></path>
       </svg>
       <span class="earnings-summary-title">Earnings</span>
-
+      <span class="earnings-summary-subtitle">Next · 15 Sep 2026</span>
     </span>
     <span class="earnings-summary-meta">
 
@@ -2446,55 +2741,11 @@ a:focus-visible, button:focus-visible, summary:focus-visible { outline: 3px soli
   </div>
 </details>
 
+</div>
 
 
-
-
-      <p class="ticker-ai-brief"><strong>AI brief</strong> &nbsp; New AI features and services growth are helping offset investor concerns about the pace of the hardware replacement cycle.</p>
-
-
-
-      <div class="story-list">
-        <h2 class="coverage-heading">Company coverage</h2>
-
-
-
-  <article class="story has-thumb">
-    <img class="story-thumb" src="https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=800&amp;h=400&amp;fit=crop&amp;sig=AAPL0" alt="" loading="lazy" decoding="async">
-    <div class="story-body">
-      <h3 class="story-headline"><a href="https://example.com/aapl/0" target="_blank" rel="noopener">Apple expands AI features across iOS developer preview</a></h3>
-
-      <p class="summary">Analysts weigh supply constraints, guidance, and sector rotation as investors reposition ahead of the next earnings cycle.</p>
-
-      <p class="meta">
-        Bloomberg
-         · 2h ago
-      </p>
-    </div>
-  </article>
-
-
-
-
-
-  <article class="story">
-    <div class="story-body">
-      <h3 class="story-headline"><a href="https://example.com/aapl/1" target="_blank" rel="noopener">Services revenue momentum offsets hardware cycle concerns</a></h3>
-
-      <p class="summary">Analysts weigh supply constraints, guidance, and sector rotation as investors reposition ahead of the next earnings cycle.</p>
-
-      <p class="meta">
-        Reuters
-         · 5h ago
-      </p>
-    </div>
-  </article>
-
-
-
-
+        </div>
       </div>
-
     </div>
   </section>
 
@@ -2502,7 +2753,7 @@ a:focus-visible, button:focus-visible, summary:focus-visible { outline: 3px soli
 
 
 
-  <section class="ticker-section">
+  <section id="ticker-IN:TCS" data-ticker="IN:TCS" class="ticker-section">
     <div class="section-inner">
 
       <p class="section-eyebrow">Notable mover</p>
@@ -2527,6 +2778,7 @@ a:focus-visible, button:focus-visible, summary:focus-visible { outline: 3px soli
         </div>
       </div>
 
+      <div class="ticker-snapshot">
 
 <div class="price-ranges" aria-label="Price highs">
   <p class="price-ranges-heading">Price landmarks</p>
@@ -2559,7 +2811,64 @@ a:focus-visible, button:focus-visible, summary:focus-visible { outline: 3px soli
 </div>
 
 
+        <div class="snapshot-event"><span>Latest EPS</span><strong>₹37.18</strong><small>Reported</small></div>
 
+      </div>
+      <div class="ticker-brief-slot">
+
+        <p class="ticker-ai-brief"><strong>AI brief</strong> The latest European banking win reinforces demand for large transformation deals and supports the stock&#39;s positive move.</p>
+
+      </div>
+      <div class="ticker-workspace">
+        <div class="ticker-tabs" role="tablist" aria-label="TCS details" hidden>
+          <button type="button" role="tab" id="tab-news-IN:TCS" aria-controls="panel-news-IN:TCS" data-view="news">
+            <span class="tab-heading"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h16v16H4zM8 8h8M8 12h3M8 16h3M15 12h1M15 16h1"/></svg>News</span>
+            <small class="tab-signal">1 story</small>
+          </button>
+
+          <button type="button" role="tab" id="tab-earnings-IN:TCS" aria-controls="panel-earnings-IN:TCS" data-view="earnings">
+            <span class="tab-heading"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19V10M10 19V5M16 19v-7M2 19h20"/></svg>Earnings</span>
+            <small class="tab-signal">Latest EPS ₹37.18</small>
+          </button>
+
+
+
+
+
+          <button type="button" role="tab" id="tab-health-IN:TCS" aria-controls="panel-health-IN:TCS" data-view="health">
+            <span class="tab-heading"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h4l3-7 4 14 3-7h4"/></svg>Financial health</span>
+            <small class="tab-signal" data-health-tab-signal data-judgement="Mixed" aria-label="AI assessment: Mixed">Mixed</small>
+          </button>
+
+        </div>
+        <div class="ticker-coverage" id="panel-news-IN:TCS" data-panel="news">
+
+          <div class="story-list">
+            <h2 class="coverage-heading">Company coverage</h2>
+
+
+  <article class="story has-thumb">
+    <img class="story-thumb" src="https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=800&amp;h=400&amp;fit=crop&amp;sig=TCS0" alt="" loading="lazy" decoding="async">
+    <div class="story-body">
+      <h3 class="story-headline"><a href="https://example.com/tcs/0" target="_blank" rel="noopener">TCS wins large deal in European banking sector</a></h3>
+
+      <details class="story-excerpt"><summary>Read summary</summary><p class="summary">Analysts weigh supply constraints, guidance, and sector rotation as investors reposition ahead of the next earnings cycle.</p></details>
+
+      <p class="meta">
+        Business Standard
+         · 1h ago
+      </p>
+    </div>
+  </article>
+
+
+
+          </div>
+
+        </div>
+        <div class="ticker-fundamentals">
+
+          <div id="panel-earnings-IN:TCS" data-panel="earnings">
 
 <details class="earnings-history">
   <summary class="earnings-summary">
@@ -2725,8 +3034,10 @@ a:focus-visible, button:focus-visible, summary:focus-visible { outline: 3px soli
   </div>
 </details>
 
+</div>
 
 
+          <div id="panel-health-IN:TCS" data-panel="health">
 
 
 
@@ -2917,37 +3228,10 @@ a:focus-visible, button:focus-visible, summary:focus-visible { outline: 3px soli
     <p class="health-footnote">Year ended 2026-03-31 · Changes vs prior FY · TTM = trailing 12 months. Free cash flow = operating cash flow less capital expenditure. Net debt excludes short-term investments.</p>
   </div>
 </details>
+</div>
 
-
-
-      <p class="ticker-ai-brief"><strong>AI brief</strong> &nbsp; The latest European banking win reinforces demand for large transformation deals and supports the stock&#39;s positive move.</p>
-
-
-
-      <div class="story-list">
-        <h2 class="coverage-heading">Company coverage</h2>
-
-
-
-  <article class="story has-thumb">
-    <img class="story-thumb" src="https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=800&amp;h=400&amp;fit=crop&amp;sig=TCS0" alt="" loading="lazy" decoding="async">
-    <div class="story-body">
-      <h3 class="story-headline"><a href="https://example.com/tcs/0" target="_blank" rel="noopener">TCS wins large deal in European banking sector</a></h3>
-
-      <p class="summary">Analysts weigh supply constraints, guidance, and sector rotation as investors reposition ahead of the next earnings cycle.</p>
-
-      <p class="meta">
-        Business Standard
-         · 1h ago
-      </p>
-    </div>
-  </article>
-
-
-
-
+        </div>
       </div>
-
     </div>
   </section>
 
@@ -2955,7 +3239,7 @@ a:focus-visible, button:focus-visible, summary:focus-visible { outline: 3px soli
 
 
 
-  <section class="ticker-section section-alt">
+  <section id="ticker-IN:INFY" data-ticker="IN:INFY" class="ticker-section section-alt">
     <div class="section-inner">
 
       <div class="ticker-head">
@@ -2978,18 +3262,30 @@ a:focus-visible, button:focus-visible, summary:focus-visible { outline: 3px soli
         </div>
       </div>
 
+      <div class="ticker-snapshot">
 
 
+      </div>
+      <div class="ticker-brief-slot">
+
+      </div>
+      <div class="ticker-workspace">
+        <div class="ticker-tabs" role="tablist" aria-label="INFY details" hidden>
+          <button type="button" role="tab" id="tab-news-IN:INFY" aria-controls="panel-news-IN:INFY" data-view="news">
+            <span class="tab-heading"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h16v16H4zM8 8h8M8 12h3M8 16h3M15 12h1M15 16h1"/></svg>News</span>
+            <small class="tab-signal">No major news</small>
+          </button>
 
 
+        </div>
+        <div class="ticker-coverage" id="panel-news-IN:INFY" data-panel="news">
+        <p class="empty">No major news for INFY today.</p>
+        </div>
+        <div class="ticker-fundamentals">
 
 
-
-
-
-
-      <p class="empty">No major news for INFY today.</p>
-
+        </div>
+      </div>
     </div>
   </section>
 
@@ -2997,7 +3293,7 @@ a:focus-visible, button:focus-visible, summary:focus-visible { outline: 3px soli
 
 
 
-  <section class="ticker-section">
+  <section id="ticker-US:MSFT" data-ticker="US:MSFT" class="ticker-section">
     <div class="section-inner">
 
       <div class="ticker-head">
@@ -3020,18 +3316,30 @@ a:focus-visible, button:focus-visible, summary:focus-visible { outline: 3px soli
         </div>
       </div>
 
+      <div class="ticker-snapshot">
 
 
+      </div>
+      <div class="ticker-brief-slot">
+
+      </div>
+      <div class="ticker-workspace">
+        <div class="ticker-tabs" role="tablist" aria-label="MSFT details" hidden>
+          <button type="button" role="tab" id="tab-news-US:MSFT" aria-controls="panel-news-US:MSFT" data-view="news">
+            <span class="tab-heading"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h16v16H4zM8 8h8M8 12h3M8 16h3M15 12h1M15 16h1"/></svg>News</span>
+            <small class="tab-signal">No major news</small>
+          </button>
 
 
+        </div>
+        <div class="ticker-coverage" id="panel-news-US:MSFT" data-panel="news">
+        <p class="empty">No major news for MSFT today.</p>
+        </div>
+        <div class="ticker-fundamentals">
 
 
-
-
-
-
-      <p class="empty">No major news for MSFT today.</p>
-
+        </div>
+      </div>
     </div>
   </section>
 
@@ -3039,7 +3347,7 @@ a:focus-visible, button:focus-visible, summary:focus-visible { outline: 3px soli
 
 
 
-  <section class="ticker-section section-alt">
+  <section id="ticker-US:GOOGL" data-ticker="US:GOOGL" class="ticker-section section-alt">
     <div class="section-inner">
 
       <div class="ticker-head">
@@ -3062,18 +3370,30 @@ a:focus-visible, button:focus-visible, summary:focus-visible { outline: 3px soli
         </div>
       </div>
 
+      <div class="ticker-snapshot">
 
 
+      </div>
+      <div class="ticker-brief-slot">
+
+      </div>
+      <div class="ticker-workspace">
+        <div class="ticker-tabs" role="tablist" aria-label="GOOGL details" hidden>
+          <button type="button" role="tab" id="tab-news-US:GOOGL" aria-controls="panel-news-US:GOOGL" data-view="news">
+            <span class="tab-heading"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h16v16H4zM8 8h8M8 12h3M8 16h3M15 12h1M15 16h1"/></svg>News</span>
+            <small class="tab-signal">No major news</small>
+          </button>
 
 
+        </div>
+        <div class="ticker-coverage" id="panel-news-US:GOOGL" data-panel="news">
+        <p class="empty">No major news for GOOGL today.</p>
+        </div>
+        <div class="ticker-fundamentals">
 
 
-
-
-
-
-      <p class="empty">No major news for GOOGL today.</p>
-
+        </div>
+      </div>
     </div>
   </section>
 
@@ -3081,7 +3401,7 @@ a:focus-visible, button:focus-visible, summary:focus-visible { outline: 3px soli
 
 
 
-  <section class="ticker-section">
+  <section id="ticker-IN:RELIANCE" data-ticker="IN:RELIANCE" class="ticker-section">
     <div class="section-inner">
 
       <div class="ticker-head">
@@ -3104,6 +3424,7 @@ a:focus-visible, button:focus-visible, summary:focus-visible { outline: 3px soli
         </div>
       </div>
 
+      <div class="ticker-snapshot">
 
 <div class="price-ranges" aria-label="Price highs">
   <p class="price-ranges-heading">Price landmarks</p>
@@ -3136,7 +3457,71 @@ a:focus-visible, button:focus-visible, summary:focus-visible { outline: 3px soli
 </div>
 
 
+        <div class="snapshot-event"><span>Latest EPS</span><strong>₹32.44</strong><small>Reported</small></div>
 
+      </div>
+      <div class="ticker-brief-slot">
+
+        <p class="ticker-ai-brief"><strong>AI brief</strong> Steady refining margins and continued Jio subscriber growth provide support despite the modest share-price decline.</p>
+
+      </div>
+      <div class="ticker-workspace">
+        <div class="ticker-tabs" role="tablist" aria-label="RELIANCE details" hidden>
+          <button type="button" role="tab" id="tab-news-IN:RELIANCE" aria-controls="panel-news-IN:RELIANCE" data-view="news">
+            <span class="tab-heading"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h16v16H4zM8 8h8M8 12h3M8 16h3M15 12h1M15 16h1"/></svg>News</span>
+            <small class="tab-signal">2 stories</small>
+          </button>
+
+          <button type="button" role="tab" id="tab-earnings-IN:RELIANCE" aria-controls="panel-earnings-IN:RELIANCE" data-view="earnings">
+            <span class="tab-heading"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19V10M10 19V5M16 19v-7M2 19h20"/></svg>Earnings</span>
+            <small class="tab-signal">Latest EPS ₹32.44</small>
+          </button>
+
+
+        </div>
+        <div class="ticker-coverage" id="panel-news-IN:RELIANCE" data-panel="news">
+
+          <div class="story-list">
+            <h2 class="coverage-heading">Company coverage</h2>
+
+
+  <article class="story has-thumb">
+    <img class="story-thumb" src="https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=800&amp;h=400&amp;fit=crop&amp;sig=RELIANCE0" alt="" loading="lazy" decoding="async">
+    <div class="story-body">
+      <h3 class="story-headline"><a href="https://example.com/reliance/0" target="_blank" rel="noopener">Reliance Industries reports steady refining margins</a></h3>
+
+      <details class="story-excerpt"><summary>Read summary</summary><p class="summary">Analysts weigh supply constraints, guidance, and sector rotation as investors reposition ahead of the next earnings cycle.</p></details>
+
+      <p class="meta">
+        Economic Times
+         · 2h ago
+      </p>
+    </div>
+  </article>
+
+
+
+  <article class="story">
+    <div class="story-body">
+      <h3 class="story-headline"><a href="https://example.com/reliance/1" target="_blank" rel="noopener">Jio subscriber growth remains strong in quarterly update</a></h3>
+
+      <details class="story-excerpt"><summary>Read summary</summary><p class="summary">Analysts weigh supply constraints, guidance, and sector rotation as investors reposition ahead of the next earnings cycle.</p></details>
+
+      <p class="meta">
+        Mint
+         · 5h ago
+      </p>
+    </div>
+  </article>
+
+
+
+          </div>
+
+        </div>
+        <div class="ticker-fundamentals">
+
+          <div id="panel-earnings-IN:RELIANCE" data-panel="earnings">
 
 <details class="earnings-history">
   <summary class="earnings-summary">
@@ -3302,55 +3687,11 @@ a:focus-visible, button:focus-visible, summary:focus-visible { outline: 3px soli
   </div>
 </details>
 
+</div>
 
 
-
-
-      <p class="ticker-ai-brief"><strong>AI brief</strong> &nbsp; Steady refining margins and continued Jio subscriber growth provide support despite the modest share-price decline.</p>
-
-
-
-      <div class="story-list">
-        <h2 class="coverage-heading">Company coverage</h2>
-
-
-
-  <article class="story has-thumb">
-    <img class="story-thumb" src="https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=800&amp;h=400&amp;fit=crop&amp;sig=RELIANCE0" alt="" loading="lazy" decoding="async">
-    <div class="story-body">
-      <h3 class="story-headline"><a href="https://example.com/reliance/0" target="_blank" rel="noopener">Reliance Industries reports steady refining margins</a></h3>
-
-      <p class="summary">Analysts weigh supply constraints, guidance, and sector rotation as investors reposition ahead of the next earnings cycle.</p>
-
-      <p class="meta">
-        Economic Times
-         · 2h ago
-      </p>
-    </div>
-  </article>
-
-
-
-
-
-  <article class="story">
-    <div class="story-body">
-      <h3 class="story-headline"><a href="https://example.com/reliance/1" target="_blank" rel="noopener">Jio subscriber growth remains strong in quarterly update</a></h3>
-
-      <p class="summary">Analysts weigh supply constraints, guidance, and sector rotation as investors reposition ahead of the next earnings cycle.</p>
-
-      <p class="meta">
-        Mint
-         · 5h ago
-      </p>
-    </div>
-  </article>
-
-
-
-
+        </div>
       </div>
-
     </div>
   </section>
 
@@ -3358,7 +3699,7 @@ a:focus-visible, button:focus-visible, summary:focus-visible { outline: 3px soli
 
 
 
-  <section class="ticker-section section-alt">
+  <section id="ticker-US:AMZN" data-ticker="US:AMZN" class="ticker-section section-alt">
     <div class="section-inner">
 
       <div class="ticker-head">
@@ -3381,18 +3722,30 @@ a:focus-visible, button:focus-visible, summary:focus-visible { outline: 3px soli
         </div>
       </div>
 
+      <div class="ticker-snapshot">
 
 
+      </div>
+      <div class="ticker-brief-slot">
+
+      </div>
+      <div class="ticker-workspace">
+        <div class="ticker-tabs" role="tablist" aria-label="AMZN details" hidden>
+          <button type="button" role="tab" id="tab-news-US:AMZN" aria-controls="panel-news-US:AMZN" data-view="news">
+            <span class="tab-heading"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h16v16H4zM8 8h8M8 12h3M8 16h3M15 12h1M15 16h1"/></svg>News</span>
+            <small class="tab-signal">No major news</small>
+          </button>
 
 
+        </div>
+        <div class="ticker-coverage" id="panel-news-US:AMZN" data-panel="news">
+        <p class="empty">No major news for AMZN today.</p>
+        </div>
+        <div class="ticker-fundamentals">
 
 
-
-
-
-
-      <p class="empty">No major news for AMZN today.</p>
-
+        </div>
+      </div>
     </div>
   </section>
 
@@ -3400,7 +3753,7 @@ a:focus-visible, button:focus-visible, summary:focus-visible { outline: 3px soli
 
 
 
-  <section class="ticker-section">
+  <section id="ticker-IN:HDFCBANK" data-ticker="IN:HDFCBANK" class="ticker-section">
     <div class="section-inner">
 
       <div class="ticker-head">
@@ -3423,18 +3776,30 @@ a:focus-visible, button:focus-visible, summary:focus-visible { outline: 3px soli
         </div>
       </div>
 
+      <div class="ticker-snapshot">
 
 
+      </div>
+      <div class="ticker-brief-slot">
+
+      </div>
+      <div class="ticker-workspace">
+        <div class="ticker-tabs" role="tablist" aria-label="HDFCBANK details" hidden>
+          <button type="button" role="tab" id="tab-news-IN:HDFCBANK" aria-controls="panel-news-IN:HDFCBANK" data-view="news">
+            <span class="tab-heading"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h16v16H4zM8 8h8M8 12h3M8 16h3M15 12h1M15 16h1"/></svg>News</span>
+            <small class="tab-signal">No major news</small>
+          </button>
 
 
+        </div>
+        <div class="ticker-coverage" id="panel-news-IN:HDFCBANK" data-panel="news">
+        <p class="empty">No major news for HDFCBANK today.</p>
+        </div>
+        <div class="ticker-fundamentals">
 
 
-
-
-
-
-      <p class="empty">No major news for HDFCBANK today.</p>
-
+        </div>
+      </div>
     </div>
   </section>
 
@@ -3442,7 +3807,7 @@ a:focus-visible, button:focus-visible, summary:focus-visible { outline: 3px soli
 
 
 
-  <section class="ticker-section section-alt">
+  <section id="ticker-IN:ICICIBANK" data-ticker="IN:ICICIBANK" class="ticker-section section-alt">
     <div class="section-inner">
 
       <div class="ticker-head">
@@ -3465,18 +3830,30 @@ a:focus-visible, button:focus-visible, summary:focus-visible { outline: 3px soli
         </div>
       </div>
 
+      <div class="ticker-snapshot">
 
 
+      </div>
+      <div class="ticker-brief-slot">
+
+      </div>
+      <div class="ticker-workspace">
+        <div class="ticker-tabs" role="tablist" aria-label="ICICIBANK details" hidden>
+          <button type="button" role="tab" id="tab-news-IN:ICICIBANK" aria-controls="panel-news-IN:ICICIBANK" data-view="news">
+            <span class="tab-heading"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h16v16H4zM8 8h8M8 12h3M8 16h3M15 12h1M15 16h1"/></svg>News</span>
+            <small class="tab-signal">No major news</small>
+          </button>
 
 
+        </div>
+        <div class="ticker-coverage" id="panel-news-IN:ICICIBANK" data-panel="news">
+        <p class="empty">No major news for ICICIBANK today.</p>
+        </div>
+        <div class="ticker-fundamentals">
 
 
-
-
-
-
-      <p class="empty">No major news for ICICIBANK today.</p>
-
+        </div>
+      </div>
     </div>
   </section>
 
@@ -3513,6 +3890,45 @@ a:focus-visible, button:focus-visible, summary:focus-visible { outline: 3px soli
   </div>
   <script src="/subscribe-form.js?v=20260911-google1" defer></script>
 
+  <script>
+    function setupTickerPanel(section) {
+      if (!section || section.dataset.tabsReady) return;
+      var tabs = Array.from(section.querySelectorAll("[data-view]"));
+      var panels = Array.from(section.querySelectorAll("[data-panel]"));
+      if (!tabs.length) return;
+      section.dataset.tabsReady = "true";
+      section.querySelector(".ticker-tabs").hidden = false;
+      function select(tab, focus) {
+        tabs.forEach(function (item) {
+          var active = item === tab;
+          item.setAttribute("aria-selected", String(active));
+          item.tabIndex = active ? 0 : -1;
+        });
+        panels.forEach(function (panel) {
+          panel.hidden = panel.dataset.panel !== tab.dataset.view;
+          panel.setAttribute("role", "tabpanel");
+          panel.setAttribute("aria-labelledby", "tab-" + panel.dataset.panel + "-" + section.dataset.ticker);
+          panel.tabIndex = 0;
+          var details = panel.querySelector(".earnings-history, .financial-health");
+          if (details && !panel.hidden) details.open = true;
+        });
+        if (focus) tab.focus();
+      }
+      tabs.forEach(function (tab, index) {
+        tab.addEventListener("click", function () { select(tab, false); });
+        tab.addEventListener("keydown", function (event) {
+          var next = event.key === "ArrowRight" ? (index + 1) % tabs.length
+            : event.key === "ArrowLeft" ? (index + tabs.length - 1) % tabs.length
+            : event.key === "Home" ? 0 : event.key === "End" ? tabs.length - 1 : -1;
+          if (next < 0) return;
+          event.preventDefault();
+          select(tabs[next], true);
+        });
+      });
+      select(tabs[0], false);
+    }
+    document.querySelectorAll(".ticker-section").forEach(setupTickerPanel);
+  </script>
 
 
   <script>

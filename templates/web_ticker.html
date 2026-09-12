@@ -1,0 +1,133 @@
+{% from "web_earnings.html" import render_earnings %}
+{% from "web_price_ranges.html" import render_price_ranges %}
+{% from "web_financial_health.html" import render_financial_health %}
+  {% macro change_class(quote) %}
+    {%- if quote and quote.change_pct is not none -%}
+      {%- if quote.change_pct > 0 -%}up{%- elif quote.change_pct < 0 -%}down{%- else -%}flat{%- endif -%}
+    {%- endif -%}
+  {% endmacro %}
+
+  {% macro render_story(story) %}
+  {% if story.image %}
+  <article class="story has-thumb">
+    <img class="story-thumb" src="{{ story.image }}" alt="" loading="lazy" decoding="async">
+    <div class="story-body">
+      <h3 class="story-headline"><a href="{{ story.url }}" target="_blank" rel="noopener">{{ story.headline }}</a></h3>
+      {% if story.summary %}
+      <details class="story-excerpt"><summary>Read summary</summary><p class="summary">{{ story.summary }}</p></details>
+      {% endif %}
+      <p class="meta">
+        {{ story.source }}
+        {% if story.published_at %} · {{ story.published_at }}{% elif story.relative_time %} · {{ story.relative_time }}{% endif %}
+      </p>
+    </div>
+  </article>
+  {% else %}
+  <article class="story">
+    <div class="story-body">
+      <h3 class="story-headline"><a href="{{ story.url }}" target="_blank" rel="noopener">{{ story.headline }}</a></h3>
+      {% if story.summary %}
+      <details class="story-excerpt"><summary>Read summary</summary><p class="summary">{{ story.summary }}</p></details>
+      {% endif %}
+      <p class="meta">
+        {{ story.source }}
+        {% if story.published_at %} · {{ story.published_at }}{% elif story.relative_time %} · {{ story.relative_time }}{% endif %}
+      </p>
+    </div>
+  </article>
+  {% endif %}
+  {% endmacro %}
+
+  {% macro render_section(section, is_hero=false, is_highlight=false, alt_bg=false, progressive=false) %}
+  {% set sec_quote = section.quote %}
+  {% set cls = change_class(sec_quote) %}
+  <section id="ticker-{{ section.ticker }}" data-ticker="{{ section.ticker }}" class="ticker-section{% if progressive %} progressive-section{% endif %}{% if is_hero %} ticker-section-featured{% endif %}{% if alt_bg %} section-alt{% endif %}">
+    <div class="section-inner">
+      {% if is_hero or is_highlight %}
+      <p class="section-eyebrow">{% if is_hero %}Biggest mover{% else %}Notable mover{% endif %}</p>
+      {% endif %}
+      <div class="ticker-head">
+        {% if section.logo %}
+        <img class="ticker-logo" src="{{ section.logo }}" alt="{{ section.ticker }}">
+        {% endif %}
+        <div class="ticker-head-main">
+          <div class="ticker-row">
+            <span class="ticker-symbol">{{ section.display_symbol or section.ticker }}</span>{% if section.exchange %}
+            <span class="exchange-badge {{ section.market|lower }}">{{ section.exchange }}</span>{% endif %}
+          </div>
+          {% if sec_quote %}
+          <div class="ticker-quote">
+            <span class="ticker-price">{% if section.market == 'IN' %}₹{% else %}${% endif %}{{ "%.2f"|format(sec_quote.price) }}</span>
+            {% if sec_quote.change_pct is not none %}
+            <span class="ticker-change {{ cls }}">
+              {% if sec_quote.change_pct >= 0 %}+{% endif %}{{ "%.2f"|format(sec_quote.change_pct) }}%
+            </span>
+            {% endif %}
+          </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="ticker-snapshot">
+        {{ render_price_ranges(section) }}
+        {% if section.upcoming_earnings %}
+        <div class="snapshot-event"><span>Next earnings</span><strong>{{ section.upcoming_earnings.date_label }}</strong><small>{% if section.upcoming_earnings.hour == 'bmo' %}Before open{% elif section.upcoming_earnings.hour == 'amc' %}After close{% else %}Timing TBD{% endif %}</small></div>
+        {% elif section.earnings_history and section.earnings_history.quarters %}
+        <div class="snapshot-event"><span>{{ "Latest EPS" if section.earnings_history.mode == "reported" else "Earnings record" }}</span><strong>{{ section.earnings_history.summary_label|replace("Latest EPS ", "") }}</strong><small>{{ "Reported" if section.earnings_history.mode == "reported" else "4 quarters" }}</small></div>
+        {% endif %}
+      </div>
+      <div class="ticker-brief-slot">
+      {% if ai_summary and ai_summary.ticker_summaries.get(section.ticker) %}
+        <p class="ticker-ai-brief"><strong>AI brief</strong> {{ ai_summary.ticker_summaries.get(section.ticker) }}</p>
+      {% endif %}
+      </div>
+      <div class="ticker-workspace">
+        <div class="ticker-tabs" role="tablist" aria-label="{{ section.display_symbol or section.ticker }} details" hidden>
+          <button type="button" role="tab" id="tab-news-{{ section.ticker }}" aria-controls="panel-news-{{ section.ticker }}" data-view="news">
+            <span class="tab-heading"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h16v16H4zM8 8h8M8 12h3M8 16h3M15 12h1M15 16h1"/></svg>News</span>
+            <small class="tab-signal">{% if section.error %}Unavailable{% elif section.web_stories %}{{ section.web_stories|length }} {{ "story" if section.web_stories|length == 1 else "stories" }}{% else %}No major news{% endif %}</small>
+          </button>
+          {% if section.upcoming_earnings or (section.earnings_history and section.earnings_history.quarters) %}
+          <button type="button" role="tab" id="tab-earnings-{{ section.ticker }}" aria-controls="panel-earnings-{{ section.ticker }}" data-view="earnings">
+            <span class="tab-heading"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19V10M10 19V5M16 19v-7M2 19h20"/></svg>Earnings</span>
+            <small class="tab-signal">{% if section.earnings_history and section.earnings_history.quarters %}{{ section.earnings_history.summary_label }}{% else %}Next · {{ section.upcoming_earnings.date_label }}{% endif %}</small>
+          </button>
+          {% endif %}
+          {% if section.financial_health and section.financial_health.groups %}
+          {% set health_assessment = (financial_health_summaries|default({})).get(section.ticker) %}
+          {% set judgement = health_assessment.get('judgement') if health_assessment is mapping else none %}
+          {% set judgement = judgement if judgement in ('Improving', 'Stable', 'Mixed', 'Weakening', 'Unclear') else 'Unrated' %}
+          <button type="button" role="tab" id="tab-health-{{ section.ticker }}" aria-controls="panel-health-{{ section.ticker }}" data-view="health">
+            <span class="tab-heading"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h4l3-7 4 14 3-7h4"/></svg>Financial health</span>
+            <small class="tab-signal" data-health-tab-signal data-judgement="{{ judgement }}" aria-label="AI assessment: {{ judgement }}">{{ judgement }}</small>
+          </button>
+          {% endif %}
+        </div>
+        <div class="ticker-coverage" id="panel-news-{{ section.ticker }}" data-panel="news">
+        {% if section.error %}
+          <p class="empty">Could not fetch news for {{ section.display_symbol or section.ticker }}.</p>
+        {% elif section.web_stories %}
+          <div class="story-list">
+            <h2 class="coverage-heading">Company coverage</h2>
+            {% for story in section.web_stories[:visible_story_count] %}{{ render_story(story) }}{% endfor %}
+            {% if section.web_stories|length > visible_story_count %}
+            <details class="story-more"><summary>See {{ section.web_stories|length - visible_story_count }} more stories</summary>
+              {% for story in section.web_stories[visible_story_count:] %}{{ render_story(story) }}{% endfor %}
+            </details>
+            {% endif %}
+          </div>
+        {% else %}<p class="empty">No major news for {{ section.display_symbol or section.ticker }} today.</p>{% endif %}
+        </div>
+        <div class="ticker-fundamentals">
+          {% if section.upcoming_earnings or (section.earnings_history and section.earnings_history.quarters) %}
+          <div id="panel-earnings-{{ section.ticker }}" data-panel="earnings">{{ render_earnings(section.upcoming_earnings, section.earnings_history) }}</div>
+          {% endif %}
+          {% if section.financial_health and section.financial_health.groups %}
+          <div id="panel-health-{{ section.ticker }}" data-panel="health">{{ render_financial_health(section.financial_health, (financial_health_summaries|default({})).get(section.ticker)) }}</div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </section>
+  {% endmacro %}
+

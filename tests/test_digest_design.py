@@ -49,3 +49,36 @@ class DigestDesignTest(unittest.TestCase):
         self.assertIn('setAttribute("data-move-magnitude", String(change))', html)
         self.assertIn("function sortTickerSectionsByMove()", html)
         self.assertIn("sortTickerSectionsByMove();", html)
+
+    def test_full_and_progressive_sections_share_dashboard_structure(self):
+        section = sample_sections()[0]
+        section['web_stories'] = section['stories']
+        for html in (build_web_section(section), build_web_digest([section], ['US:AAPL'])):
+            self.assertIn('id="ticker-US:AAPL"', html)
+            self.assertIn('class="ticker-workspace"', html)
+            self.assertIn('class="ticker-fundamentals"', html)
+            self.assertIn('class="ticker-coverage"', html)
+            self.assertIn('https://example.com/apple', html)
+
+    def test_watchlist_links_target_rendered_tickers(self):
+        html = build_web_digest(sample_sections(), ['US:AAPL', 'US:MSFT'])
+        self.assertIn('href="#ticker-US:AAPL"', html)
+        self.assertIn('id="ticker-US:AAPL"', html)
+        self.assertIn('href="#ticker-US:MSFT"', html)
+        self.assertIn('id="ticker-US:MSFT"', html)
+
+    def test_progressive_ai_targets_coverage_panel(self):
+        html = build_web_digest([], ['US:AAPL'], progressive=True, progressive_token='test-token')
+        self.assertIn('section.querySelector(".ticker-brief-slot").replaceChildren(node)', html)
+        self.assertIn('setupTickerPanel(rendered)', html)
+
+    def test_ticker_tabs_have_unique_targets_and_keep_fallback_content(self):
+        section = sample_sections()[0]
+        section['web_stories'] = section['stories']
+        html = build_web_section(section)
+        self.assertIn('aria-controls="panel-news-US:AAPL"', html)
+        self.assertIn('id="panel-news-US:AAPL" data-panel="news"', html)
+        self.assertIn('class="ticker-brief-slot"', html)
+        self.assertIn('https://example.com/apple', html)
+        # Tickers without fundamentals should not advertise unavailable views.
+        self.assertNotIn('data-view="health"', html)

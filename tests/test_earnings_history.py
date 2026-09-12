@@ -392,9 +392,10 @@ class EarningsRenderTest(unittest.TestCase):
         self.assertIn("earnings-chart-row is-upcoming", html)
         self.assertIn("earnings-result upcoming", html)
         self.assertIn("15 Sep 2026", html)
-        summary = html[html.index('<summary class="earnings-summary">'):html.index("</summary>")]
+        summary_start = html.index('<summary class="earnings-summary">')
+        summary = html[summary_start:html.index("</summary>", summary_start)]
         self.assertNotIn("Next earnings", summary)
-        self.assertNotIn("15 Sep 2026", summary)
+        self.assertIn("Next · 15 Sep 2026", summary)
         self.assertIn('<span class="earnings-summary-result beat">3 beats</span>', summary)
         self.assertIn('<span class="earnings-summary-result miss">1 miss</span>', summary)
         self.assertNotIn("<th scope=\"row\">Revenue estimate</th>", html)
@@ -409,7 +410,7 @@ class EarningsRenderTest(unittest.TestCase):
         self.assertIn("-0.9%", html)
         self.assertLess(html.index("Q4 FY25"), html.index("Q3 FY26"))
         self.assertLess(html.index("ticker-head"), html.index("earnings-history"))
-        self.assertLess(html.index("earnings-history"), html.index("story-list"))
+        self.assertLess(html.index("story-list"), html.index("earnings-history"))
 
     def test_hides_panel_when_history_is_unavailable(self) -> None:
         section = sample_section(None)

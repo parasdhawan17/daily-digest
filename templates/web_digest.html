@@ -1,3 +1,4 @@
+{% from "web_ticker.html" import render_section with context %}
 {% from "web_earnings.html" import render_earnings %}
 {% from "web_price_ranges.html" import render_price_ranges %}
 {% from "web_financial_health.html" import render_financial_health %}
@@ -1586,7 +1587,7 @@
   <section class="movers-bar progressive-movers" id="progressive-movers" aria-label="Subscribed tickers and session moves" hidden>
     <div class="section-inner">
       <div class="movers-toolbar">
-        <p class="movers-label">Your watchlist <span class="watchlist-count" aria-label="{{ progressive_tickers|length }} tickers">{{ progressive_tickers|length }}</span></p>
+        <p class="movers-label">Watchlist <span class="watchlist-count" aria-label="{{ progressive_tickers|length }} tickers">{{ progressive_tickers|length }}</span></p>
         {% if subscribe_enabled %}
         <button type="button" class="movers-edit-btn" onclick="openSubscribeModal()" aria-label="Edit subscribed tickers">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"></path><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4Z"></path></svg>
@@ -1594,13 +1595,13 @@
         </button>
         {% endif %}
       </div>
-      <div class="movers-wrap"><div class="movers" role="list" tabindex="0" aria-label="Watchlist, scroll for more stocks"><div class="movers-track" id="progressive-movers-track"></div></div></div>
+      <div class="movers-wrap"><div class="movers" role="navigation" tabindex="0" aria-label="Watchlist, scroll for more stocks"><div class="movers-track" id="progressive-movers-track"></div></div></div>
     </div>
   </section>
   <section class="ai-briefing progressive-ai" id="progressive-ai" aria-label="AI briefing" hidden></section>
   <main id="digest-sections" class="progressive-sections" data-token="{{ progressive_token or '' }}" data-tickers='{{ progressive_tickers|tojson }}'>
     {% for ticker in progressive_tickers %}
-    <section class="ticker-section progressive-placeholder" data-ticker="{{ ticker }}" aria-label="Loading {{ ticker }}">
+    <section class="ticker-section progressive-placeholder" id="ticker-{{ ticker }}" data-ticker="{{ ticker }}" aria-label="Loading {{ ticker }}">
       <div class="section-inner"><div class="skeleton skeleton-title"></div><div class="skeleton skeleton-price"></div><div class="skeleton skeleton-earnings"></div><div class="skeleton skeleton-line"></div><div class="skeleton skeleton-line short"></div></div>
     </section>
     {% endfor %}
@@ -1610,7 +1611,7 @@
   <section class="movers-bar" aria-label="Subscribed tickers and session moves">
     <div class="section-inner">
       <div class="movers-toolbar">
-        <p class="movers-label">Your watchlist <span class="watchlist-count" aria-label="{{ ticker_count }} tickers">{{ ticker_count }}</span></p>
+        <p class="movers-label">Watchlist <span class="watchlist-count" aria-label="{{ ticker_count }} tickers">{{ ticker_count }}</span></p>
         {% if subscribe_enabled %}
         <button type="button" class="movers-edit-btn" onclick="openSubscribeModal()" aria-label="Edit subscribed tickers">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"></path><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4Z"></path></svg>
@@ -1619,14 +1620,14 @@
         {% endif %}
       </div>
       <div class="movers-wrap">
-      <div class="movers" role="list" tabindex="0" aria-label="Watchlist, scroll for more stocks">
+      <div class="movers" role="navigation" tabindex="0" aria-label="Watchlist, scroll for more stocks">
         <div class="movers-track">
         {% for row in range(2) %}
         <div class="movers-row" role="presentation">
         {% for mover in movers_bar[row::2] %}
-        <span class="pill {% if mover.is_positive == true %}up{% elif mover.is_positive == false %}down{% else %}flat{% endif %}" role="listitem">
+        <a href="#ticker-{{ mover.ticker }}" class="pill {% if mover.is_positive == true %}up{% elif mover.is_positive == false %}down{% else %}flat{% endif %}">
           <span class="mover-symbol">{{ mover.display_symbol or mover.ticker }}</span><span class="mover-change">{% if mover.change_pct is not none %}{% if mover.change_pct >= 0 %}+{% endif %}{{ "%.1f"|format(mover.change_pct) }}%{% endif %}</span>
-        </span>
+        </a>
         {% endfor %}
         </div>
         {% endfor %}
@@ -1646,106 +1647,6 @@
     </div>
   </section>
   {% endif %}
-
-  {% macro change_class(quote) %}
-    {%- if quote and quote.change_pct is not none -%}
-      {%- if quote.change_pct > 0 -%}up{%- elif quote.change_pct < 0 -%}down{%- else -%}flat{%- endif -%}
-    {%- endif -%}
-  {% endmacro %}
-
-  {% macro render_story(story) %}
-  {% if story.image %}
-  <article class="story has-thumb">
-    <img class="story-thumb" src="{{ story.image }}" alt="" loading="lazy" decoding="async">
-    <div class="story-body">
-      <h3 class="story-headline"><a href="{{ story.url }}" target="_blank" rel="noopener">{{ story.headline }}</a></h3>
-      {% if story.summary %}
-      <p class="summary">{{ story.summary }}</p>
-      {% endif %}
-      <p class="meta">
-        {{ story.source }}
-        {% if story.published_at %} · {{ story.published_at }}{% elif story.relative_time %} · {{ story.relative_time }}{% endif %}
-      </p>
-    </div>
-  </article>
-  {% else %}
-  <article class="story">
-    <div class="story-body">
-      <h3 class="story-headline"><a href="{{ story.url }}" target="_blank" rel="noopener">{{ story.headline }}</a></h3>
-      {% if story.summary %}
-      <p class="summary">{{ story.summary }}</p>
-      {% endif %}
-      <p class="meta">
-        {{ story.source }}
-        {% if story.published_at %} · {{ story.published_at }}{% elif story.relative_time %} · {{ story.relative_time }}{% endif %}
-      </p>
-    </div>
-  </article>
-  {% endif %}
-  {% endmacro %}
-
-  {% macro render_section(section, is_hero=false, is_highlight=false, alt_bg=false) %}
-  {% set sec_quote = section.quote %}
-  {% set cls = change_class(sec_quote) %}
-  <section class="ticker-section{% if is_hero %} ticker-section-featured{% endif %}{% if alt_bg %} section-alt{% endif %}">
-    <div class="section-inner">
-      {% if is_hero or is_highlight %}
-      <p class="section-eyebrow">{% if is_hero %}Biggest mover{% else %}Notable mover{% endif %}</p>
-      {% endif %}
-      <div class="ticker-head">
-        {% if section.logo %}
-        <img class="ticker-logo" src="{{ section.logo }}" alt="{{ section.ticker }}">
-        {% endif %}
-        <div class="ticker-head-main">
-          <div class="ticker-row">
-            <span class="ticker-symbol">{{ section.display_symbol or section.ticker }}</span>{% if section.exchange %}
-            <span class="exchange-badge {{ section.market|lower }}">{{ section.exchange }}</span>{% endif %}
-          </div>
-          {% if sec_quote %}
-          <div class="ticker-quote">
-            <span class="ticker-price">{% if section.market == 'IN' %}₹{% else %}${% endif %}{{ "%.2f"|format(sec_quote.price) }}</span>
-            {% if sec_quote.change_pct is not none %}
-            <span class="ticker-change {{ cls }}">
-              {% if sec_quote.change_pct >= 0 %}+{% endif %}{{ "%.2f"|format(sec_quote.change_pct) }}%
-            </span>
-            {% endif %}
-          </div>
-          {% endif %}
-        </div>
-      </div>
-
-      {{ render_price_ranges(section) }}
-
-      {{ render_earnings(section.upcoming_earnings, section.earnings_history) }}
-      {{ render_financial_health(section.financial_health, financial_health_summaries.get(section.ticker)) }}
-
-      {% if ai_summary and ai_summary.ticker_summaries.get(section.ticker) %}
-      <p class="ticker-ai-brief"><strong>AI brief</strong> &nbsp; {{ ai_summary.ticker_summaries.get(section.ticker) }}</p>
-      {% endif %}
-
-      {% if section.error %}
-      <p class="empty">Could not fetch news for {{ section.display_symbol or section.ticker }}.</p>
-      {% elif section.web_stories %}
-      <div class="story-list">
-        <h2 class="coverage-heading">Company coverage</h2>
-        {% for story in section.web_stories[:visible_story_count] %}
-        {{ render_story(story) }}
-        {% endfor %}
-        {% if section.web_stories|length > visible_story_count %}
-        <details class="story-more">
-          <summary>See {{ section.web_stories|length - visible_story_count }} more stories</summary>
-          {% for story in section.web_stories[visible_story_count:] %}
-          {{ render_story(story) }}
-          {% endfor %}
-        </details>
-        {% endif %}
-      </div>
-      {% else %}
-      <p class="empty">No major news for {{ section.display_symbol or section.ticker }} today.</p>
-      {% endif %}
-    </div>
-  </section>
-  {% endmacro %}
 
   <main id="full-digest">
   {% if hero %}
@@ -1787,6 +1688,45 @@
   </div>
   <script src="/subscribe-form.js?v=20260911-google1" defer></script>
   {% endif %}
+  <script>
+    function setupTickerPanel(section) {
+      if (!section || section.dataset.tabsReady) return;
+      var tabs = Array.from(section.querySelectorAll("[data-view]"));
+      var panels = Array.from(section.querySelectorAll("[data-panel]"));
+      if (!tabs.length) return;
+      section.dataset.tabsReady = "true";
+      section.querySelector(".ticker-tabs").hidden = false;
+      function select(tab, focus) {
+        tabs.forEach(function (item) {
+          var active = item === tab;
+          item.setAttribute("aria-selected", String(active));
+          item.tabIndex = active ? 0 : -1;
+        });
+        panels.forEach(function (panel) {
+          panel.hidden = panel.dataset.panel !== tab.dataset.view;
+          panel.setAttribute("role", "tabpanel");
+          panel.setAttribute("aria-labelledby", "tab-" + panel.dataset.panel + "-" + section.dataset.ticker);
+          panel.tabIndex = 0;
+          var details = panel.querySelector(".earnings-history, .financial-health");
+          if (details && !panel.hidden) details.open = true;
+        });
+        if (focus) tab.focus();
+      }
+      tabs.forEach(function (tab, index) {
+        tab.addEventListener("click", function () { select(tab, false); });
+        tab.addEventListener("keydown", function (event) {
+          var next = event.key === "ArrowRight" ? (index + 1) % tabs.length
+            : event.key === "ArrowLeft" ? (index + tabs.length - 1) % tabs.length
+            : event.key === "Home" ? 0 : event.key === "End" ? tabs.length - 1 : -1;
+          if (next < 0) return;
+          event.preventDefault();
+          select(tabs[next], true);
+        });
+      });
+      select(tabs[0], false);
+    }
+    document.querySelectorAll(".ticker-section").forEach(setupTickerPanel);
+  </script>
   {% if progressive %}
   <script>
     (function () {
@@ -1817,7 +1757,7 @@
           var change = hasChange ? Number(item.quote.change_pct) : 0;
           var cls = hasChange && change > 0 ? "up" : hasChange && change < 0 ? "down" : "flat";
           var move = hasChange ? ' ' + (change >= 0 ? "+" : "") + change.toFixed(1) + '%' : '';
-          return '<span class="pill ' + cls + '" role="listitem"><span class="mover-symbol">' + esc(item.display_symbol || item.ticker) + '</span><span class="mover-change">' + move + '</span></span>';
+          return '<a href="#ticker-' + esc(item.ticker) + '" class="pill ' + cls + '"><span class="mover-symbol">' + esc(item.display_symbol || item.ticker) + '</span><span class="mover-change">' + move + '</span></a>';
         }).join("");
         list.innerHTML = content;
         var pills = Array.from(list.children);
@@ -1844,7 +1784,7 @@
             var node = document.createElement("p");
             node.className = "ticker-ai-brief";
             node.innerHTML = "<strong>AI brief</strong> &nbsp; " + esc(brief);
-            section.querySelector(".section-inner").insertBefore(node, section.querySelector(".story-list, .empty"));
+            section.querySelector(".ticker-brief-slot").replaceChildren(node);
           }
         });
       }
@@ -1861,6 +1801,12 @@
           var signal = section.querySelector("[data-health-signal]");
           var context = section.querySelector("[data-health-context]");
           if (!signal || !context) return;
+          var tabSignal = section.querySelector("[data-health-tab-signal]");
+          if (tabSignal) {
+            tabSignal.textContent = assessment.judgement;
+            tabSignal.setAttribute("data-judgement", assessment.judgement);
+            tabSignal.setAttribute("aria-label", "AI assessment: " + assessment.judgement);
+          }
           signal.textContent = assessment.judgement;
           signal.setAttribute("data-judgement", assessment.judgement);
           signal.setAttribute("aria-label", "AI assessment: " + assessment.judgement);
@@ -1880,6 +1826,7 @@
             var change = result.section.quote && result.section.quote.change_pct != null
               ? Math.abs(Number(result.section.quote.change_pct))
               : -1;
+            setupTickerPanel(rendered);
             if (rendered) rendered.setAttribute("data-move-magnitude", String(change));
             loaded.push(result.section);
             showMovers();
