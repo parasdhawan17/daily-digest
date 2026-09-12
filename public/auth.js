@@ -3,8 +3,16 @@
   var notice = document.getElementById('auth-notice');
   var state = null;
   var googleConfig = null;
-  function message(text) {
-    if (notice) { notice.textContent = text || ''; notice.hidden = !text; }
+  var messageTimer = null;
+  function message(text, autoDismiss) {
+    if (!notice) return;
+    if (messageTimer) { clearTimeout(messageTimer); messageTimer = null; }
+    notice.textContent = text || ''; notice.hidden = !text;
+    if (text && autoDismiss) {
+      messageTimer = setTimeout(function () {
+        notice.textContent = ''; notice.hidden = true; messageTimer = null;
+      }, 5000);
+    }
   }
   function csrf() {
     var value = document.cookie.split('; ').find(function (v) { return v.indexOf('tickr_csrf=') === 0; });
@@ -34,7 +42,7 @@
     logout.onclick = function () {
       logout.disabled = true;
       request('/api/auth/logout', {}).then(function () { window.location.assign('/'); })
-        .catch(function (error) { message(error.message); logout.disabled = false; });
+        .catch(function (error) { message(error.message, true); logout.disabled = false; });
     };
     controls.appendChild(logout);
   }
@@ -55,7 +63,7 @@
   window.tickrAuth = {state: null, csrf: csrf};
   try {
     var warning = sessionStorage.getItem('tickr-welcome-warning');
-    if (warning) { message(warning); sessionStorage.removeItem('tickr-welcome-warning'); }
+    if (warning) { message(warning, true); sessionStorage.removeItem('tickr-welcome-warning'); }
   } catch (error) {}
   window.tickrAuth.ready = request('/api/auth/config').then(function (config) {
     googleConfig = config;
@@ -78,13 +86,13 @@
       }
       var script = document.createElement('script');
       script.src = 'https://accounts.google.com/gsi/client'; script.async = true;
-      script.onerror = function () { message('Google sign-in could not load. You can still subscribe with email.'); };
+      script.onerror = function () { message('Google sign-in could not load. You can still subscribe with email.', true); };
       script.onload = function () {
         google.accounts.id.initialize({client_id: config.client_id, callback: function (result) {
           message('Signing in…');
           request('/api/auth/google', {credential: result.credential})
             .then(function (result) { message(''); signedIn(result); })
-            .catch(function (error) { message(error.message); });
+            .catch(function (error) { message(error.message, true); });
         }});
         renderGoogleButton();
       };
@@ -92,7 +100,7 @@
       return data;
     });
   }).catch(function (error) {
-    message(error.message);
+    message(error.message, true);
     return {authenticated: false};
   });
 })();

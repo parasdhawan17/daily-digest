@@ -71,7 +71,10 @@
       : readPrefillTickers();
     var identity = window.tickrAuth && window.tickrAuth.state;
     if (identity && identity.authenticated) email = identity.email;
-    els.email.readOnly = !!(identity && identity.authenticated);
+    var accountEmail = !!(identity && identity.authenticated);
+    els.email.readOnly = accountEmail;
+    els.email.setAttribute("aria-readonly", accountEmail ? "true" : "false");
+    els.email.classList.toggle("is-readonly", accountEmail);
     els.email.value = String(email || "");
     selectedTickers = tickers
       .map(function (value) { return String(value).trim().toUpperCase(); })
@@ -658,6 +661,13 @@
         applyPrefill(data);
       }
     });
+    if (window.tickrAuth && window.tickrAuth.ready) {
+      window.tickrAuth.ready.then(function (data) {
+        if (data && data.authenticated && !modal.hidden && !formDirty) {
+          applyPrefill(data);
+        }
+      });
+    }
   };
 
   window.closeSubscribeModal = function () {

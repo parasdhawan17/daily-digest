@@ -71,7 +71,10 @@
       : readPrefillTickers();
     var identity = window.tickrAuth && window.tickrAuth.state;
     if (identity && identity.authenticated) email = identity.email;
-    els.email.readOnly = !!(identity && identity.authenticated);
+    var accountEmail = !!(identity && identity.authenticated);
+    els.email.readOnly = accountEmail;
+    els.email.setAttribute("aria-readonly", accountEmail ? "true" : "false");
+    els.email.classList.toggle("is-readonly", accountEmail);
     els.email.value = String(email || "");
     if (els.emailOption && els.emailBriefings) {
       els.emailOption.hidden = !(identity && identity.authenticated);
@@ -107,7 +110,7 @@
       '<p class="subscribe-hint">US stocks, ETFs, and NSE listings are validated before they are added.</p>' +
       '<div class="subscribe-email-option" id="subscribe-email-option" hidden>' +
       '<input type="checkbox" id="subscribe-email-briefings" name="email_briefings">' +
-      '<label for="subscribe-email-briefings"><strong>Email briefings</strong><span>Send optional updates around the market sessions I follow.</span></label>' +
+      '<label for="subscribe-email-briefings"><strong>Email briefings <em>Optional</em></strong><span>Get a concise update on your saved stocks around each market session. You can turn these emails off anytime.</span></label>' +
       '</div>' +
       '<button type="submit" class="btn-subscribe" id="subscribe-submit">Save watchlist &amp; open dashboard</button>' +
       "</form>";
@@ -675,6 +678,13 @@
         applyPrefill(data);
       }
     });
+    if (window.tickrAuth && window.tickrAuth.ready) {
+      window.tickrAuth.ready.then(function (data) {
+        if (data && data.authenticated && !modal.hidden && !formDirty) {
+          applyPrefill(data);
+        }
+      });
+    }
   };
 
   window.closeSubscribeModal = function () {
