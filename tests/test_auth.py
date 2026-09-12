@@ -130,17 +130,20 @@ class AuthTests(unittest.TestCase):
 @patch.dict(os.environ, ENV)
 class SubscribeTests(unittest.TestCase):
     @patch('api.subscribe.validate_symbol', return_value=True)
+    @patch('api.subscribe.LOGGER.exception')
     @patch('api.subscribe.send_welcome_email')
     @patch('api.subscribe.subscribe_verified', return_value=False)
-    def test_verified_signup_welcome_failure_and_update(self, save, welcome, validate):
+    def test_verified_signup_welcome_failure_and_update(self, save, welcome, log_exception, validate):
         for active, failure in [(False, False), (False, True), (True, False)]:
             save.return_value = active
-            welcome.reset_mock(); welcome.side_effect = BrevoError('offline') if failure else None
+            welcome.reset_mock(); log_exception.reset_mock()
+            welcome.side_effect = BrevoError('offline') if failure else None
             h = handler(payload={'email': IDENTITY['email'], 'tickers': ['US:AAPL', 'IN:TCS']}, signed_in=True)
             handle_post(h)
             self.assertEqual(result(h)['redirect'], '/digest')
             self.assertEqual(bool(result(h)['warning']), failure)
             self.assertEqual(welcome.call_count, 0 if active else 1)
+            self.assertEqual(log_exception.call_count, 1 if failure else 0)
 
         welcome.reset_mock()
         h = handler(payload={'email': IDENTITY['email'], 'tickers': ['US:AAPL'],

@@ -1,5 +1,6 @@
 """Subscribe / update tickers handler."""
 
+import logging
 import os
 import re
 import sys
@@ -25,6 +26,7 @@ from stock_news.markets import market_of
 from stock_news.relevance import parse_tickers
 
 EMAIL_PATTERN = re.compile(r"^[^\s@]+@[^\s@]+\.[^\s@]+$")
+LOGGER = logging.getLogger(__name__)
 
 
 def handle_post(handler: BaseHTTPRequestHandler) -> None:
@@ -119,6 +121,9 @@ def handle_post(handler: BaseHTTPRequestHandler) -> None:
                 try:
                     send_welcome_email(email, api_key, os.environ.get("SITE_URL", "").strip() or SITE_URL)
                 except Exception:
+                    LOGGER.exception(
+                        "Welcome email send failed after verified subscription was saved"
+                    )
                     warning = "Your email briefings are active, but the welcome email could not be sent."
             send_json(handler, 200, {"ok": True, "mode": "verified", "redirect": "/digest",
                                      "email_briefings": email_briefings, "warning": warning})
