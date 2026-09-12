@@ -2,6 +2,7 @@
 """Local dev server: static public/ + subscribe/search API (no Vercel CLI required)."""
 
 import json
+import mimetypes
 import os
 import re
 import sys
@@ -308,11 +309,7 @@ class DevHandler(BaseHTTPRequestHandler):
             self.send_error(404)
             return
         content = file_path.read_bytes()
-        content_type = "text/html"
-        if file_path.suffix == ".js":
-            content_type = "application/javascript"
-        elif file_path.suffix == ".css":
-            content_type = "text/css"
+        content_type = mimetypes.guess_type(file_path.name)[0] or "application/octet-stream"
         self.send_response(200)
         self.send_header("Content-Type", content_type)
         self.send_header("Content-Length", str(len(content)))

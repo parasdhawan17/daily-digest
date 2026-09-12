@@ -73,6 +73,12 @@
     if (identity && identity.authenticated) email = identity.email;
     els.email.readOnly = !!(identity && identity.authenticated);
     els.email.value = String(email || "");
+    if (els.emailOption && els.emailBriefings) {
+      els.emailOption.hidden = !(identity && identity.authenticated);
+      els.emailBriefings.checked = identity && identity.authenticated
+        ? !!(data && data.email_briefings)
+        : true;
+    }
     selectedTickers = tickers
       .map(function (value) { return String(value).trim().toUpperCase(); })
       .filter(function (value, index, values) { return value && values.indexOf(value) === index; });
@@ -99,7 +105,11 @@
       "</div>" +
       '<div class="subscribe-chips" id="subscribe-chips"></div>' +
       '<p class="subscribe-hint">US stocks, ETFs, and NSE listings are validated before they are added.</p>' +
-      '<button type="submit" class="btn-subscribe" id="subscribe-submit">Get your digest</button>' +
+      '<div class="subscribe-email-option" id="subscribe-email-option" hidden>' +
+      '<input type="checkbox" id="subscribe-email-briefings" name="email_briefings">' +
+      '<label for="subscribe-email-briefings"><strong>Email briefings</strong><span>Send optional updates around the market sessions I follow.</span></label>' +
+      '</div>' +
+      '<button type="submit" class="btn-subscribe" id="subscribe-submit">Save watchlist &amp; open dashboard</button>' +
       "</form>";
 
     els.form = document.getElementById("subscribe-form");
@@ -111,6 +121,8 @@
     els.chips = document.getElementById("subscribe-chips");
     els.error = document.getElementById("subscribe-error");
     els.submit = document.getElementById("subscribe-submit");
+    els.emailOption = document.getElementById("subscribe-email-option");
+    els.emailBriefings = document.getElementById("subscribe-email-briefings");
 
     els.form.addEventListener("submit", onSubmit);
     els.email.addEventListener("input", function () { formDirty = true; });
@@ -553,6 +565,7 @@
     showError("");
 
     var email = (els.email.value || "").trim();
+    var identity = window.tickrAuth && window.tickrAuth.state;
     if (!email) {
       showError("Enter your email address.");
       return;
@@ -566,7 +579,11 @@
     fetch("/api/subscribe", {
       method: "POST",
       headers: { "Content-Type": "application/json", "X-CSRF-Token": window.tickrAuth ? window.tickrAuth.csrf() : "" },
-      body: JSON.stringify({ email: email, tickers: selectedTickers }),
+      body: JSON.stringify({
+        email: email,
+        tickers: selectedTickers,
+        email_briefings: identity && identity.authenticated ? !!els.emailBriefings.checked : true
+      }),
     })
       .then(function (response) {
         return parseJsonResponse(response).then(function (data) {

@@ -8,7 +8,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
-os.environ.setdefault("SITE_URL", "http://localhost:8765")
+os.environ.setdefault("SITE_URL", "http://localhost:3000")
 
 from stock_news.email import count_email_stories
 from stock_news.design import resolve_design
@@ -249,15 +249,15 @@ def main() -> None:
         tickers,
         total_stories,
         session="post_close",
-        digest_url="http://localhost:8765/" + ("legacy/" if resolve_design() == "legacy" else "") + "sample-digest.html",
+        digest_url="http://localhost:3000/" + ("legacy/" if resolve_design() == "legacy" else "") + "sample-digest.html",
         ai_summary={"market_context": "AI investment and cloud demand are key themes across this sample watchlist, while investors weigh upcoming earnings and company spending plans.", "ticker_summaries": {"US:NVDA": "Chip demand and the next earnings update are in focus in the linked coverage."}},
-        update_tickers_url="http://localhost:8765/#update-tickers",
+        update_tickers_url="http://localhost:3000/#update-tickers",
     )
 
     output_dir = ROOT / "public" / ("legacy" if resolve_design() == "legacy" else "")
     output_dir.mkdir(parents=True, exist_ok=True)
     out = output_dir / "preview-email-digest.html"
-    html = html.replace('<table role="presentation" class="email-outer"', '<p style="text-align:center;font:12px/1.6 system-ui;color:#637185;padding:12px;">Design preview · Illustrative AI summaries and company news, not live data.</p><table role="presentation" class="email-outer"', 1)
+    html = html.replace('<table role="presentation" class="email-outer"', '<p style="text-align:center;font:12px/1.6 system-ui;color:#68778b;padding:12px;">Design preview · Illustrative AI summaries and company news, not live data.</p><table role="presentation" class="email-outer"', 1)
     out.write_text("\n".join(line.rstrip() for line in html.splitlines()) + "\n", encoding="utf-8")
     text_out = output_dir / "preview-email-digest.txt"
     text_out.write_text(text, encoding="utf-8")
@@ -265,7 +265,7 @@ def main() -> None:
     print(f"Wrote {out} ({len(html)} bytes)")
     print(f"Wrote {text_out} ({len(text)} bytes)")
     print(f"Subject: {subject}")
-    print(f"Open http://localhost:8765/{out.relative_to(ROOT / 'public').as_posix()}")
+    print(f"Open http://localhost:3000/{out.relative_to(ROOT / 'public').as_posix()}")
 
 
 if __name__ == "__main__":

@@ -4,6 +4,7 @@ const assert = require('node:assert/strict');
 const vm = require('node:vm');
 const fs = require('node:fs');
 const source = fs.readFileSync('public/auth.js', 'utf8');
+const authStyles = fs.readFileSync('public/auth.css', 'utf8');
 
 async function boot(session, login) {
   const controls = {children: [], replaceChildren() { this.children = []; }, appendChild(x) { this.children.push(x); }};
@@ -34,10 +35,15 @@ async function boot(session, login) {
 }
 const anonymous = {ok: true, authenticated: false};
 
-test('Google button follows the dark theme and can be refreshed', async () => {
+test('Google button is rendered as the primary action and can be refreshed', async () => {
   const app = await boot(anonymous, {ok: true, authenticated: true});
-  assert.equal(app.renderOptions.theme, 'filled_black');
+  assert.equal(app.renderOptions.theme, 'filled_blue');
+  assert.equal(app.renderOptions.size, 'large');
   assert.equal(typeof app.listeners['tickr-theme-change'], 'function');
+});
+
+test('Google button container is not clipped in dark mode', () => {
+  assert.doesNotMatch(authStyles, /#auth-controls\s*>\s*div\s*\{[^}]*clip-path/);
 });
 
 test('Google existing subscriber opens digest and sends CSRF', async () => {

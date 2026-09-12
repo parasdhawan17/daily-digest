@@ -1,5 +1,5 @@
 US Post-Market • NVDA moved high
-07 Sep 2026 · 9 tickers · 11 stories
+12 Sep 2026 · 9 tickers · 11 stories
 
 === AI BRIEFING ===
 AI investment and cloud demand are key themes across this sample watchlist, while investors weigh upcoming earnings and company spending plans.
@@ -68,5 +68,5 @@ AMD  $162.40  0.00% today
   https://example.com/amd/mi350-ramp
 
 9 tickers · 11 stories · Tickr Digest
-Read full digest: http://localhost:8765/sample-digest.html?design=modern
-Update your tickers: http://localhost:8765/#update-tickers
+Read full digest: http://localhost:3000/sample-digest.html?design=modern
+Update your tickers: http://localhost:3000/#update-tickers

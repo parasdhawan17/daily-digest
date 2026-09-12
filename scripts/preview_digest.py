@@ -8,7 +8,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
-os.environ.setdefault("SITE_URL", "http://localhost:8765")
+os.environ.setdefault("SITE_URL", "http://localhost:3000")
 
 from stock_news.digest import build_earnings_history, build_indian_earnings_history
 from stock_news.design import resolve_design
@@ -267,7 +267,7 @@ def main() -> None:
     out = output_dir / "preview-digest.html"
     out.write_text(html, encoding="utf-8")
     print(f"Wrote {out} ({len(html)} bytes)")
-    print(f"Open http://localhost:8765/{out.relative_to(ROOT / 'public').as_posix()}")
+    print(f"Open http://localhost:3000/{out.relative_to(ROOT / 'public').as_posix()}")
 
 
 if __name__ == "__main__":

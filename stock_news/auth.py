@@ -114,6 +114,9 @@ def subscription(identity):
         raise RuntimeError('Subscription lookup is not configured.')
     contact = get_contact(identity['email'], api_key)
     tickers = parse_tickers(_get_contact_attribute((contact or {}).get('attributes'), BREVO_TICKERS_ATTRIBUTE))
-    active = bool(contact and not contact.get('emailBlacklisted') and int(BREVO_LIST_ID) in (contact.get('listIds') or []) and tickers)
+    active = bool(contact and tickers)
+    email_briefings = bool(contact and not contact.get('emailBlacklisted') and
+                           int(BREVO_LIST_ID) in (contact.get('listIds') or []))
     return {'ok': True, 'authenticated': True, 'email': identity['email'], 'tickers': tickers,
-            'needs_subscription': not active, 'suppressed': bool(contact and contact.get('emailBlacklisted'))}
+            'needs_subscription': not active, 'email_briefings': email_briefings,
+            'suppressed': bool(contact and contact.get('emailBlacklisted'))}

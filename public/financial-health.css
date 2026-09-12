@@ -1,10 +1,10 @@
 .financial-health {
-  --health-accent: #256b5c;
-  --health-accent-soft: #edf6f2;
+  --health-accent: #365cf5;
+  --health-accent-soft: #eef1ff;
   --health-positive: var(--pill-up-fg);
   --health-negative: var(--pill-down-fg);
-  --health-caution: #92400e;
-  --health-caution-soft: #fff3d6;
+  --health-caution: #9a6100;
+  --health-caution-soft: #fff1d6;
   margin: 6px 0 8px;
   border: 1px solid var(--border-strong);
   border-radius: 12px;
@@ -13,10 +13,10 @@
   overflow: hidden;
 }
 html[data-theme="dark"] .financial-health {
-  --health-accent: #a7ddc3;
-  --health-accent-soft: #213b34;
-  --health-caution: #fcd081;
-  --health-caution-soft: #49351d;
+  --health-accent: #8ea2ff;
+  --health-accent-soft: #252e50;
+  --health-caution: #f6c76a;
+  --health-caution-soft: #493a20;
 }
 .health-summary {
   min-height: 40px;

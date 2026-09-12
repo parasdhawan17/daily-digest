@@ -42,17 +42,13 @@
     applyState(data);
     if (data.needs_subscription) {
       window.openSubscribeModal();
-      if (data.suppressed) message('This address is unsubscribed or suppressed. Sign out and use email signup to confirm resubscription.');
     } else window.location.assign('/digest');
-  }
-  function googleButtonTheme() {
-    return document.documentElement.getAttribute('data-theme') === 'dark' ? 'filled_black' : 'outline';
   }
   function renderGoogleButton() {
     if (!controls || !googleConfig || !window.google || !google.accounts || !google.accounts.id) return;
     controls.replaceChildren();
     google.accounts.id.renderButton(controls, {
-      type: 'standard', theme: googleButtonTheme(), size: 'medium', text: 'signin_with', shape: 'pill'
+      type: 'standard', theme: 'filled_blue', size: 'large', text: 'signin_with', shape: 'pill'
     });
   }
   window.addEventListener('tickr-theme-change', renderGoogleButton);

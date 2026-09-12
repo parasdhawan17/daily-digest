@@ -353,7 +353,7 @@ class AiSummaryTest(unittest.TestCase):
         )
         self.assertIn("AI briefing", html)
         self.assertIn('class="ai-panel"', html)
-        self.assertIn('bgcolor="#eaf2ee"', html)
+        self.assertIn('bgcolor="#eeeafe"', html)
         self.assertIn('class="ticker-ai-panel"', html)
         self.assertEqual(html.count("Open full digest"), 2)
         self.assertIn("Open my full digest", html)

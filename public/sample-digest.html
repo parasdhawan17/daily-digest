@@ -1,5 +1,6 @@
 
 
+
 <!DOCTYPE html>
 <html lang="en" data-theme="dark">
 <head>
@@ -19,35 +20,36 @@
       } catch (e) {}
     })();
   </script>
+  <link rel="stylesheet" href="/financial-health.css">
   <style>
     * { box-sizing: border-box; }
     :root {
-      --page-bg: #eef1f5;
+      --page-bg: #f5f7fb;
       --card-bg: #ffffff;
-      --muted-bg: #f8fafc;
-      --panel-bg: #fafbfc;
-      --text: #1a1a2e;
-      --text-strong: #0f172a;
-      --text-secondary: #475569;
-      --text-muted: #94a3b8;
-      --text-label: #64748b;
-      --border: #e8ecf0;
-      --border-strong: #e2e8f0;
-      --border-soft: #f1f5f9;
-      --link: #1d4ed8;
+      --muted-bg: #edf2f7;
+      --panel-bg: #edf2f7;
+      --text: #132238;
+      --text-strong: #132238;
+      --text-secondary: #526176;
+      --text-muted: #68778b;
+      --text-label: #526176;
+      --border: #d8e0ea;
+      --border-strong: #c7d2df;
+      --border-soft: #e6ebf1;
+      --link: #365cf5;
       --shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
-      --pill-up-bg: #dcfce7;
-      --pill-up-fg: #15803d;
-      --pill-down-bg: #fee2e2;
-      --pill-down-fg: #b91c1c;
-      --pill-flat-bg: #f1f5f9;
-      --pill-flat-fg: #64748b;
-      --earnings-beat: #15803d;
-      --earnings-beat-soft: #dcfce7;
-      --earnings-miss: #b91c1c;
-      --earnings-miss-soft: #fee2e2;
-      --earnings-inline: #64748b;
-      --earnings-latest-bg: #eff6ff;
+      --pill-up-bg: #ddf7ec;
+      --pill-up-fg: #087f5b;
+      --pill-down-bg: #fde7ea;
+      --pill-down-fg: #c23a4b;
+      --pill-flat-bg: #edf2f7;
+      --pill-flat-fg: #526176;
+      --earnings-beat: #087f5b;
+      --earnings-beat-soft: #ddf7ec;
+      --earnings-miss: #c23a4b;
+      --earnings-miss-soft: #fde7ea;
+      --earnings-inline: #526176;
+      --earnings-latest-bg: #eef1ff;
       --toggle-bg: rgba(255, 255, 255, 0.12);
       --toggle-border: rgba(255, 255, 255, 0.22);
       --toggle-fg: #f8fafc;
@@ -57,40 +59,40 @@
       --easing: cubic-bezier(0.4, 0, 0.2, 1);
     }
     html[data-theme="dark"] {
-      --page-bg: #0b1220;
-      --card-bg: #111827;
-      --muted-bg: #1e293b;
-      --panel-bg: #1e293b;
-      --text: #e2e8f0;
-      --text-strong: #f8fafc;
-      --text-secondary: #cbd5e1;
-      --text-muted: #94a3b8;
-      --text-label: #94a3b8;
-      --border: #334155;
-      --border-strong: #334155;
-      --border-soft: #1f2937;
-      --link: #93c5fd;
+      --page-bg: #0b1420;
+      --card-bg: #121f2f;
+      --muted-bg: #19283a;
+      --panel-bg: #19283a;
+      --text: #f3f7fa;
+      --text-strong: #f3f7fa;
+      --text-secondary: #a9b7c6;
+      --text-muted: #8999ac;
+      --text-label: #a9b7c6;
+      --border: #2c3d51;
+      --border-strong: #40536a;
+      --border-soft: #243448;
+      --link: #8ea2ff;
       --shadow: 0 4px 24px rgba(0, 0, 0, 0.35);
-      --pill-up-bg: #14532d;
-      --pill-up-fg: #86efac;
-      --pill-down-bg: #7f1d1d;
-      --pill-down-fg: #fca5a5;
-      --pill-flat-bg: #334155;
-      --pill-flat-fg: #cbd5e1;
-      --earnings-beat: #86efac;
-      --earnings-beat-soft: #14532d;
-      --earnings-miss: #fca5a5;
-      --earnings-miss-soft: #7f1d1d;
-      --earnings-inline: #cbd5e1;
-      --earnings-latest-bg: #172554;
+      --pill-up-bg: #173e32;
+      --pill-up-fg: #4adea3;
+      --pill-down-bg: #4a2630;
+      --pill-down-fg: #fb8290;
+      --pill-flat-bg: #243347;
+      --pill-flat-fg: #a9b7c6;
+      --earnings-beat: #4adea3;
+      --earnings-beat-soft: #173e32;
+      --earnings-miss: #fb8290;
+      --earnings-miss-soft: #4a2630;
+      --earnings-inline: #a9b7c6;
+      --earnings-latest-bg: #252e50;
       --modal-backdrop: rgba(2, 6, 23, 0.72);
       --toggle-bg: rgba(15, 23, 42, 0.45);
       --toggle-border: rgba(255, 255, 255, 0.22);
       --toggle-fg: #f8fafc;
     }
     html[data-theme="dark"] .ai-briefing {
-      background: linear-gradient(135deg, #172554 0%, #1e1b4b 52%, #172554 100%);
-      border-color: #3730a3;
+      background: linear-gradient(135deg, #29294d 0%, #242642 52%, #29294d 100%);
+      border-color: #5b56a1;
     }
     html[data-theme="dark"] .ai-briefing::before {
       color: rgba(165, 180, 252, 0.18);
@@ -99,11 +101,11 @@
       background: rgba(129, 140, 248, 0.12);
     }
     html[data-theme="dark"] .ai-briefing-label::before {
-      color: #a5b4fc;
+      color: #b8a7ff;
     }
     html[data-theme="dark"] .ticker-ai-brief {
-      border-color: #818cf8;
-      background: #1e293b;
+      border-color: #8ea2ff;
+      background: #19283a;
     }
     body {
       margin: 0;
@@ -170,7 +172,7 @@
       background: rgba(255, 255, 255, 0.2);
     }
     .header-home-link:focus-visible {
-      outline: 2px solid #93c5fd;
+      outline: 2px solid #8ea2ff;
       outline-offset: 2px;
     }
     .theme-toggle:hover {
@@ -178,7 +180,7 @@
       background: rgba(255, 255, 255, 0.2);
     }
     .theme-toggle:focus-visible {
-      outline: 2px solid #93c5fd;
+      outline: 2px solid #8ea2ff;
       outline-offset: 2px;
     }
     .theme-toggle svg {
@@ -194,7 +196,7 @@
       position: relative;
       overflow: hidden;
       isolation: isolate;
-      background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 100%);
+      background: linear-gradient(135deg, #0b1420 0%, #19283a 100%);
       padding: 64px 24px 56px;
       text-align: center;
       color: #fff;
@@ -708,52 +710,52 @@
       background: var(--price-range-accent-soft);
     }
     .price-range-item.year-high {
-      --price-range-accent: #f59e0b;
+      --price-range-accent: #9a6100;
       --price-range-accent-soft: rgba(245, 158, 11, 0.12);
     }
     .price-range-item.all-time-high {
-      --price-range-accent: #6366f1;
+      --price-range-accent: #6d5bd0;
       --price-range-accent-soft: rgba(99, 102, 241, 0.12);
     }
     html[data-theme="dark"] .price-range-item.year-high {
-      --price-range-accent: #fbbf24;
+      --price-range-accent: #f6c76a;
       --price-range-accent-soft: rgba(251, 191, 36, 0.14);
     }
     html[data-theme="dark"] .price-range-item.all-time-high {
-      --price-range-accent: #a5b4fc;
+      --price-range-accent: #b8a7ff;
       --price-range-accent-soft: rgba(165, 180, 252, 0.14);
     }
     .price-range-item.at-high {
-      --price-range-signal: #15803d;
-      --price-range-signal-soft: #dcfce7;
+      --price-range-signal: #087f5b;
+      --price-range-signal-soft: #ddf7ec;
     }
     .price-range-item.near-high {
       --price-range-signal: #65a30d;
       --price-range-signal-soft: #ecfccb;
     }
     .price-range-item.below-high {
-      --price-range-signal: #ef4444;
-      --price-range-signal-soft: #fee2e2;
+      --price-range-signal: #c23a4b;
+      --price-range-signal-soft: #fde7ea;
     }
     .price-range-item.far-below-high {
-      --price-range-signal: #b91c1c;
-      --price-range-signal-soft: #fecaca;
+      --price-range-signal: #c23a4b;
+      --price-range-signal-soft: #fde7ea;
     }
     html[data-theme="dark"] .price-range-item.at-high {
-      --price-range-signal: #86efac;
-      --price-range-signal-soft: #14532d;
+      --price-range-signal: #4adea3;
+      --price-range-signal-soft: #173e32;
     }
     html[data-theme="dark"] .price-range-item.near-high {
       --price-range-signal: #bef264;
       --price-range-signal-soft: #365314;
     }
     html[data-theme="dark"] .price-range-item.below-high {
-      --price-range-signal: #f87171;
-      --price-range-signal-soft: #7f1d1d;
+      --price-range-signal: #fb8290;
+      --price-range-signal-soft: #4a2630;
     }
     html[data-theme="dark"] .price-range-item.far-below-high {
-      --price-range-signal: #fca5a5;
-      --price-range-signal-soft: #450a0a;
+      --price-range-signal: #fb8290;
+      --price-range-signal-soft: #4a2630;
     }
     .price-range-topline {
       position: relative;
@@ -784,25 +786,23 @@
       box-shadow: 0 0 0 3px var(--price-range-accent-soft);
     }
     .price-range-distance {
-      flex: 0 0 auto;
-      padding: 2px 5px;
-      border-radius: 999px;
-      background: var(--price-range-signal-soft);
+      display: block;
       color: var(--price-range-signal);
-      font-size: 9px;
-      font-weight: 700;
-      line-height: 1.25;
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1.15;
       white-space: nowrap;
     }
     .price-range-value {
       position: relative;
       z-index: 1;
       display: block;
-      margin-top: 5px;
-      color: var(--text-strong);
-      font-size: 20px;
-      font-weight: 800;
-      letter-spacing: -0.03em;
+      margin-top: 4px;
+      color: var(--text-secondary);
+      font-size: 11px;
+      font-weight: 650;
+      letter-spacing: 0;
     }
     .price-range-value-row {
       position: relative;
@@ -810,35 +810,11 @@
       display: block;
     }
     .price-range-value-row .price-range-value {
-      margin-top: 5px;
-    }
-    .price-range-value-row .price-range-distance {
-      display: inline-flex;
       margin-top: 4px;
     }
-    .price-range-track {
-      position: relative;
-      z-index: 1;
-      height: 4px;
-      margin-top: 9px;
-      overflow: hidden;
-      border-radius: 99px;
-      background: var(--border-soft);
-    }
-    .price-range-fill {
-      height: 100%;
-      min-width: 4px;
-      border-radius: inherit;
-      background: linear-gradient(90deg, var(--price-range-signal-soft), var(--price-range-signal));
-    }
-    .price-range-caption {
-      position: relative;
-      z-index: 1;
+    .price-range-value-row .price-range-distance {
       display: block;
-      margin-top: 5px;
-      color: var(--text-muted);
-      font-size: 9px;
-      font-weight: 600;
+      margin-top: 6px;
     }
     .visually-hidden {
       position: absolute !important;
@@ -887,6 +863,13 @@
       gap: 4px 9px;
       min-width: 0;
     }
+    .earnings-summary-icon {
+      width: 17px;
+      height: 17px;
+      align-self: center;
+      flex: 0 0 auto;
+      color: var(--link);
+    }
     .earnings-summary-title {
       color: var(--text-strong);
       font-size: 14px;
@@ -913,6 +896,28 @@
       font-weight: 700;
       font-variant-numeric: tabular-nums;
       white-space: nowrap;
+    }
+    .earnings-summary-results {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .earnings-summary-result {
+      padding: 4px 9px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 800;
+      font-variant-numeric: tabular-nums;
+      line-height: 1.2;
+      white-space: nowrap;
+    }
+    .earnings-summary-result.beat {
+      background: var(--earnings-beat-soft);
+      color: var(--earnings-beat);
+    }
+    .earnings-summary-result.miss {
+      background: var(--earnings-miss-soft);
+      color: var(--earnings-miss);
     }
     .earnings-chevron {
       width: 8px;
@@ -1452,6 +1457,7 @@
         overflow: hidden;
       }
       .earnings-summary-title { flex-shrink: 0; font-size: 12px; }
+      .earnings-summary-icon { width: 15px; height: 15px; }
       .earnings-summary-subtitle {
         overflow: hidden;
         font-size: 10px;
@@ -1465,6 +1471,8 @@
         background: transparent;
         font-size: 11px;
       }
+      .earnings-summary-results { gap: 4px; }
+      .earnings-summary-result { padding: 3px 6px; font-size: 10px; }
       .earnings-content {
         display: block;
         padding: 12px;
@@ -1534,67 +1542,138 @@
   <link rel="stylesheet" href="/subscribe-form.css">
   <style>/* Shared visual direction with the landing page; inline for portable digest HTML. */
 :root {
-  --page-bg: #f7f8fa;
-  --text: #142334;
-  --text-strong: #142334;
-  --text-secondary: #536174;
-  --text-muted: #637185;
-  --text-label: #536174;
-  --border: #dce3e9;
-  --border-strong: #ccd6e0;
-  --link: #17634f;
+  --page-bg: #f5f7fb;
+  --text: #132238;
+  --text-strong: #132238;
+  --text-secondary: #526176;
+  --text-muted: #68778b;
+  --text-label: #526176;
+  --border: #d8e0ea;
+  --border-strong: #c7d2df;
+  --link: #365cf5;
   --section-max: 1160px;
-  --earnings-latest-bg: #eaf2ee;
+  --earnings-latest-bg: #eef1ff;
 }
 html[data-theme="dark"] {
-  --page-bg: #0d1723;
-  --card-bg: #142130;
-  --muted-bg: #1b2a3c;
-  --panel-bg: #1b2a3c;
-  --text: #eaf0f5;
-  --text-secondary: #b4c1cf;
-  --text-muted: #a1b0c2;
-  --text-label: #b4c1cf;
-  --border: #2d3b4c;
-  --border-strong: #405064;
-  --link: #a8edca;
-  --earnings-latest-bg: #1b352e;
+  --page-bg: #0b1420;
+  --card-bg: #121f2f;
+  --muted-bg: #19283a;
+  --panel-bg: #19283a;
+  --text: #f3f7fa;
+  --text-strong: #f3f7fa;
+  --text-secondary: #a9b7c6;
+  --text-muted: #8999ac;
+  --text-label: #a9b7c6;
+  --border: #2c3d51;
+  --border-strong: #40536a;
+  --link: #8ea2ff;
+  --earnings-latest-bg: #252e50;
 }
 html { scroll-behavior: smooth; }
 body { line-height: 1.55; }
 .header {
-  background: #101e2d;
+  background: #0b1420;
   padding: 84px 24px 32px;
   text-align: left;
 }
 .header-content { max-width: 1112px; margin: auto; }
 .header-content::before { display: none; }
-.header .eyebrow { color: #a8edca; font-size: 16px; font-weight: 750; letter-spacing: -.5px; text-transform: none; text-shadow: none; }
+.header .eyebrow { color: #8ea2ff; font-size: 16px; font-weight: 750; letter-spacing: -.5px; text-transform: none; text-shadow: none; }
+.digest-brand-logo { display:block; width:181px; height:38px; object-fit:contain; }
+.digest-brand-icon { display:inline-block; width:38px; height:38px; vertical-align:middle; margin-right:10px; }
 .header h1 { font-size: clamp(28px, 3.5vw, 40px); letter-spacing: -1.3px; font-weight: 600; line-height: 1.12; text-shadow: none; margin: 16px 0; }
-.header .digest-intro { color: #b9c7d5; font-size: 14px; max-width: 620px; margin: 0 0 22px; }
-.header .muted { color: #b9c7d5; font-size: 12px; text-shadow: none; }
-.header .badge { background: transparent; padding: 0; border: 0; color: #a8edca; font-size: 12px; }
+.header .digest-intro { color: #a9b7c6; font-size: 14px; max-width: 620px; margin: 0 0 22px; }
+.header .muted { color: #a9b7c6; font-size: 12px; text-shadow: none; }
+.header .badge { background: transparent; padding: 0; border: 0; color: #8ea2ff; font-size: 12px; }
 .header-home-link, .theme-toggle { top: 24px; }
 .header-home-link { left: max(24px, calc((100% - 1112px) / 2)); }
 .theme-toggle { right: max(24px, calc((100% - 1112px) / 2)); }
-.movers-bar { padding: 16px 0; }
-.movers-label, .section-eyebrow { font-size: 11px; letter-spacing: 1.5px; }
-.movers { padding: 10px 0 0; overflow: visible; }
-.movers-track { width: auto; flex-wrap: wrap; gap: 8px; }
+.movers-bar { padding: 8px 0; }
+.movers-bar .section-inner {
+  display: block;
+}
+.movers-toolbar { display: flex; margin-bottom: 5px; }
+.movers-label {
+  grid-column: 1;
+  align-self: center;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  white-space: nowrap;
+  font-size: 10px;
+  letter-spacing: 1.1px;
+}
+.watchlist-count {
+  display: inline-grid;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  place-items: center;
+  border: 1px solid var(--border-strong);
+  border-radius: 999px;
+  color: var(--text-secondary);
+  font-size: 9px;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0;
+  line-height: 1;
+}
+.movers-wrap { min-width: 0; }
+.movers {
+  padding: 0;
+  max-height: 68px;
+  overflow-y: hidden;
+  overflow-x: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-strong) transparent;
+}
+.movers-track {
+  display: flex;
+  flex-direction: column;
+  align-content: flex-start;
+  align-items: flex-start;
+  height: 56px;
+  width: max-content;
+  gap: 4px;
+}
+.movers-row { display: flex; gap: 4px; width: max-content; }
 .movers-wrap::before, .movers-wrap::after { display: none; }
-.pill { border-radius: 5px; font-size: 12px; padding: 7px 11px; box-shadow: none; }
+.movers .pill {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  width: max-content;
+  gap: 8px;
+  min-width: 0;
+  height: 26px;
+  box-sizing: border-box;
+  border-radius: 5px;
+  font-size: 10px;
+  line-height: 1.35;
+  padding: 4px 8px;
+  box-shadow: none;
+}
+.mover-symbol { overflow: hidden; text-overflow: ellipsis; }
+.mover-change { flex-shrink: 0; font-variant-numeric: tabular-nums; }
+.movers:focus-visible, .movers-edit-btn:focus-visible { outline: 2px solid var(--link); outline-offset: 3px; }
 .pill:hover { transform: none; box-shadow: none; }
-.movers-edit-btn { border-radius: 6px; min-height: 40px; padding: 10px 14px; }
+.movers-edit-btn {
+  grid-column: 3;
+  grid-row: 1;
+  min-height: 24px;
+  padding: 4px 8px;
+  border-radius: 5px;
+}
 .ai-briefing, html[data-theme="dark"] .ai-briefing {
   width: min(1112px, calc(100% - 48px));
   margin: 20px auto;
   padding: 16px 0;
-  background: #eaf2ee;
-  border: 1px solid #c9ddd1;
-  border-left: 3px solid #487964;
+  background: #eeeafe;
+  border: 1px solid #cfc7f8;
+  border-left: 3px solid #6d5bd0;
   border-radius: 0 9px 9px 0;
 }
-html[data-theme="dark"] .ai-briefing { background: #1b352e; border-color: #487964; }
+html[data-theme="dark"] .ai-briefing { background: #29294d; border-color: #5b56a1; }
 .ai-briefing::before, .ai-briefing::after, .ai-briefing-label::before { display: none; }
 .ai-briefing-label { color: var(--link); font-size: 11px; letter-spacing: 1.3px; }
 .ai-briefing-context { color: var(--text-strong); font-size: 14px; line-height: 1.6; font-weight: 500; }
@@ -1606,10 +1685,11 @@ html[data-theme="dark"] .ai-briefing { background: #1b352e; border-color: #48796
 .ticker-price { font-size: 20px; }
 .ticker-logo { width: 38px; height: 38px; }
 .ticker-change { border-radius: 5px; font-size: 13px; }
-.ticker-ai-brief, html[data-theme="dark"] .ticker-ai-brief { background: var(--muted-bg); border-left: 3px solid #487964; border-radius: 0 6px 6px 0; font-size: 13px; line-height: 1.6; padding: 16px; box-shadow: none; }
+.ticker-ai-brief, html[data-theme="dark"] .ticker-ai-brief { background: var(--muted-bg); border-left: 3px solid #6d5bd0; border-radius: 0 6px 6px 0; font-size: 13px; line-height: 1.6; padding: 16px; box-shadow: none; }
 .price-range-item { background: var(--muted-bg); border: 1px solid var(--border); border-radius: 8px; box-shadow: none; }
 .price-range-item::before, .price-range-item::after { display: none; }
-.price-range-value { font-size: 22px; }
+.price-range-distance { font-size: 22px; }
+.price-range-value { font-size: 11px; }
 .price-ranges-heading { font-size: 11px; letter-spacing: 1.4px; }
 .earnings-history { border-radius: 8px; box-shadow: none; border-color: var(--border); }
 .earnings-summary { padding: 12px; min-height: 46px; }
@@ -1623,9 +1703,9 @@ html[data-theme="dark"] .ai-briefing { background: #1b352e; border-color: #48796
 .story-more summary { min-height: 44px; padding: 12px; border-radius: 6px; }
 .coverage-heading { margin: 18px 0 0; font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text-label); }
 .site-footer { background: transparent; margin-top: 16px; }
-a:focus-visible, button:focus-visible, summary:focus-visible { outline: 3px solid #487964; outline-offset: 4px; }
-.subscribe-form .btn-subscribe { background: #17634f; border-radius: 7px; box-shadow: none; }
-.subscribe-form .btn-subscribe:hover:not(:disabled) { background: #104936; }
+a:focus-visible, button:focus-visible, summary:focus-visible { outline: 3px solid var(--link); outline-offset: 4px; }
+.subscribe-form .btn-subscribe { background: #365cf5; border-radius: 7px; box-shadow: none; }
+.subscribe-form .btn-subscribe:hover:not(:disabled) { background: #2948d6; }
 @media (max-width: 767px) {
   .header { padding: 80px 20px 26px; }
   .header h1 { font-size: 29px; letter-spacing: -1.5px; }
@@ -1638,7 +1718,11 @@ a:focus-visible, button:focus-visible, summary:focus-visible { outline: 3px soli
   .earnings-summary { padding: 12px; flex-wrap: wrap; }
   .earnings-summary-copy { flex-wrap: wrap; }
   .earnings-summary-subtitle { white-space: normal; }
-  .price-range-value { font-size: 23px; }
+  .price-range-distance { font-size: 22px; }
+  .price-range-value { font-size: 11px; }
+  .movers-bar .section-inner { padding: 0 16px; gap: 4px 7px; }
+  .movers-label { font-size: 9px; letter-spacing: .8px; }
+  .movers .pill { padding: 4px 8px; font-size: 10px; }
 }
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
@@ -1647,22 +1731,25 @@ a:focus-visible, button:focus-visible, summary:focus-visible { outline: 3px soli
 
 /* Loading panels remain hidden until the corresponding data arrives. */
 [hidden] { display: none !important; }</style>
+<link rel="stylesheet" href="/auth.css">
 <meta name="robots" content="noindex">
 </head>
 <body>
-<aside style="padding:16px 24px;background:#a8edca;color:#102c23;text-align:center;font:14px/1.6 system-ui">
+<aside style="padding:16px 24px;background:#8ea2ff;color:#0b1420;text-align:center;font:14px/1.6 system-ui">
 <strong>Explore a sample digest.</strong> All prices, news, AI summaries, and earnings below are illustrative, not live data.
-<a href="/" style="color:#102c23;font-weight:700;margin-left:12px">Back to Tickr Digest →</a>
+<a href="/" style="color:#0b1420;font-weight:700;margin-left:12px">Back to Tickr Digest →</a>
 </aside>
+<p id="auth-notice" class="auth-notice" role="status" hidden></p>
   <header class="header">
 
-        <a href="/" class="header-home-link" aria-label="Back to home">
+        <a href="http://localhost:3000/" class="header-home-link" aria-label="Back to home">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M19 12H5M12 19l-7-7 7-7"></path>
           </svg>
           <span>Home</span>
         </a>
 
+        <div class="header-account-actions" role="group" aria-label="Account and appearance">
         <button type="button" class="theme-toggle" id="theme-toggle" aria-label="Switch to dark mode" title="Toggle color theme">
           <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M21 14.5A8.5 8.5 0 1 1 9.5 3 7 7 0 0 0 21 14.5z"></path>
@@ -1672,8 +1759,10 @@ a:focus-visible, button:focus-visible, summary:focus-visible { outline: 3px soli
             <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"></path>
           </svg>
         </button>
+          <div id="auth-controls" class="auth-controls"></div>
+        </div>
         <div class="header-content">
-        <p class="eyebrow"><img class="digest-brand-logo" src="/assets/tickr-digest-logo.png" alt="tickr digest." width="181" height="38"></p>
+        <p class="eyebrow"><img class="digest-brand-icon" src="/assets/tickr-digest-icon.svg" alt="" width="38" height="38"><span>tickr digest<span style="color:#8ea2ff;">.</span></span></p>
         <h1>Your stocks. The bigger picture.</h1>
         <p class="digest-intro">Your AI briefing, price landmarks, earnings, and company coverage — together in one place.</p>
 
@@ -1690,7 +1779,7 @@ a:focus-visible, button:focus-visible, summary:focus-visible { outline: 3px soli
   <section class="movers-bar" aria-label="Subscribed tickers and session moves">
     <div class="section-inner">
       <div class="movers-toolbar">
-        <p class="movers-label">Your watchlist</p>
+        <p class="movers-label">Your watchlist <span class="watchlist-count" aria-label="10 tickers">10</span></p>
 
         <button type="button" class="movers-edit-btn" onclick="openSubscribeModal()" aria-label="Edit subscribed tickers">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"></path><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4Z"></path></svg>
@@ -1699,24 +1788,56 @@ a:focus-visible, button:focus-visible, summary:focus-visible { outline: 3px soli
 
       </div>
       <div class="movers-wrap">
-      <div class="movers" role="list">
+      <div class="movers" role="list" tabindex="0" aria-label="Watchlist, scroll for more stocks">
         <div class="movers-track">
 
+        <div class="movers-row" role="presentation">
+
         <span class="pill up" role="listitem">
-          NVDA +2.1%
+          <span class="mover-symbol">NVDA</span><span class="mover-change">+2.1%</span>
         </span>
 
         <span class="pill up" role="listitem">
-          AAPL +1.2%
+          <span class="mover-symbol">TCS</span><span class="mover-change">+0.8%</span>
         </span>
 
         <span class="pill up" role="listitem">
-          TCS +0.8%
+          <span class="mover-symbol">MSFT</span><span class="mover-change">+0.7%</span>
         </span>
 
         <span class="pill down" role="listitem">
-          RELIANCE -0.4%
+          <span class="mover-symbol">RELIANCE</span><span class="mover-change">-0.4%</span>
         </span>
+
+        <span class="pill up" role="listitem">
+          <span class="mover-symbol">HDFCBANK</span><span class="mover-change">+0.2%</span>
+        </span>
+
+        </div>
+
+        <div class="movers-row" role="presentation">
+
+        <span class="pill up" role="listitem">
+          <span class="mover-symbol">AAPL</span><span class="mover-change">+1.2%</span>
+        </span>
+
+        <span class="pill down" role="listitem">
+          <span class="mover-symbol">INFY</span><span class="mover-change">-0.7%</span>
+        </span>
+
+        <span class="pill up" role="listitem">
+          <span class="mover-symbol">GOOGL</span><span class="mover-change">+0.5%</span>
+        </span>
+
+        <span class="pill down" role="listitem">
+          <span class="mover-symbol">AMZN</span><span class="mover-change">-0.3%</span>
+        </span>
+
+        <span class="pill down" role="listitem">
+          <span class="mover-symbol">ICICIBANK</span><span class="mover-change">-0.2%</span>
+        </span>
+
+        </div>
 
         </div>
       </div>
@@ -1780,11 +1901,19 @@ a:focus-visible, button:focus-visible, summary:focus-visible { outline: 3px soli
 <details class="earnings-history">
   <summary class="earnings-summary">
     <span class="earnings-summary-copy">
-      <span class="earnings-summary-title">Next earnings</span>
+      <svg class="earnings-summary-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M4 19V9"></path><path d="M10 19V5"></path><path d="M16 19v-7"></path><path d="M22 19H2"></path>
+      </svg>
+      <span class="earnings-summary-title">Earnings</span>
 
     </span>
     <span class="earnings-summary-meta">
-      <span class="earnings-summary-score">15 Sep 2026</span>
+
+      <span class="earnings-summary-results" aria-label="Last four quarters: 3 beats and 1 miss">
+        <span class="earnings-summary-result beat">3 beats</span>
+        <span class="earnings-summary-result miss">1 miss</span>
+      </span>
+
       <span class="earnings-chevron" aria-hidden="true"></span>
     </span>
   </summary>
@@ -1975,6 +2104,7 @@ a:focus-visible, button:focus-visible, summary:focus-visible { outline: 3px soli
 
 
 
+
       <p class="ticker-ai-brief"><strong>AI brief</strong> &nbsp; Product-roadmap momentum and sustained data-center demand remain the central themes ahead of the next earnings update.</p>
 
 
@@ -2121,11 +2251,19 @@ a:focus-visible, button:focus-visible, summary:focus-visible { outline: 3px soli
 <details class="earnings-history">
   <summary class="earnings-summary">
     <span class="earnings-summary-copy">
-      <span class="earnings-summary-title">Next earnings</span>
+      <svg class="earnings-summary-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M4 19V9"></path><path d="M10 19V5"></path><path d="M16 19v-7"></path><path d="M22 19H2"></path>
+      </svg>
+      <span class="earnings-summary-title">Earnings</span>
 
     </span>
     <span class="earnings-summary-meta">
-      <span class="earnings-summary-score">15 Sep 2026</span>
+
+      <span class="earnings-summary-results" aria-label="Last four quarters: 3 beats and 1 miss">
+        <span class="earnings-summary-result beat">3 beats</span>
+        <span class="earnings-summary-result miss">1 miss</span>
+      </span>
+
       <span class="earnings-chevron" aria-hidden="true"></span>
     </span>
   </summary>
@@ -2316,6 +2454,7 @@ a:focus-visible, button:focus-visible, summary:focus-visible { outline: 3px soli
 
 
 
+
       <p class="ticker-ai-brief"><strong>AI brief</strong> &nbsp; New AI features and services growth are helping offset investor concerns about the pace of the hardware replacement cycle.</p>
 
 
@@ -2401,14 +2540,12 @@ a:focus-visible, button:focus-visible, summary:focus-visible { outline: 3px soli
 
 <div class="price-range-item year-high below-high">
   <div class="price-range-topline">
-    <span class="price-range-label">52-week high</span>
+    <span class="price-range-label">1-year high</span>
   </div>
   <div class="price-range-value-row">
-    <strong class="price-range-value">₹4592.25</strong>
-    <span class="price-range-distance">10.2% below</span>
+    <strong class="price-range-distance">10.2% below</strong>
+    <span class="price-range-value">₹4592.25</span>
   </div>
-  <div class="price-range-track" aria-hidden="true"><div class="price-range-fill" style="width: 89.84%;"></div></div>
-  <span class="price-range-caption">Current price → high</span>
 </div>
 
 
@@ -2419,11 +2556,9 @@ a:focus-visible, button:focus-visible, summary:focus-visible { outline: 3px soli
     <span class="price-range-label">All-time high</span>
   </div>
   <div class="price-range-value-row">
-    <strong class="price-range-value">₹4592.25</strong>
-    <span class="price-range-distance">10.2% below</span>
+    <strong class="price-range-distance">10.2% below</strong>
+    <span class="price-range-value">₹4592.25</span>
   </div>
-  <div class="price-range-track" aria-hidden="true"><div class="price-range-fill" style="width: 89.84%;"></div></div>
-  <span class="price-range-caption">Current price → high</span>
 </div>
 
 </div>
@@ -2434,6 +2569,9 @@ a:focus-visible, button:focus-visible, summary:focus-visible { outline: 3px soli
 <details class="earnings-history">
   <summary class="earnings-summary">
     <span class="earnings-summary-copy">
+      <svg class="earnings-summary-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M4 19V9"></path><path d="M10 19V5"></path><path d="M16 19v-7"></path><path d="M22 19H2"></path>
+      </svg>
       <span class="earnings-summary-title">Earnings</span>
       <span class="earnings-summary-subtitle">Last 4 reported quarters</span>
     </span>
@@ -2595,6 +2733,198 @@ a:focus-visible, button:focus-visible, summary:focus-visible { outline: 3px soli
 
 
 
+
+
+<details class="financial-health">
+  <summary class="health-summary">
+    <svg class="health-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h4l3-7 4 14 3-7h4"/></svg>
+    <span class="health-title">Financial health</span>
+    <span class="health-signal" data-health-signal data-judgement="Mixed" aria-label="AI assessment: Mixed">Mixed</span>
+    <span class="health-chevron" aria-hidden="true"></span>
+  </summary>
+  <div class="health-content">
+    <p class="ticker-ai-brief health-context" data-health-context><strong>AI context</strong> &nbsp; <span data-health-sentence>Operating cash flow covers investment spending, while profit margins have narrowed.</span></p>
+    <div class="health-grid">
+
+      <section class="health-group" aria-label="Growth">
+        <h3>Growth <span>FY2026</span></h3>
+        <dl class="health-metrics">
+
+          <div class="health-metric" data-trend="positive">
+            <dt>Revenue</dt>
+            <dd>
+
+              <span class="health-value health-tone-positive">267,021 <span class="health-unit">₹ cr</span></span>
+              <small class="health-change health-tone-positive" title="+4.6% YoY" aria-label="+4.6% YoY">+4.6%</small>
+            </dd>
+          </div>
+
+          <div class="health-metric" data-trend="positive">
+            <dt>Operating profit</dt>
+            <dd>
+
+              <span class="health-value health-tone-positive">62,632 <span class="health-unit">₹ cr</span></span>
+              <small class="health-change health-tone-positive" title="+0.7% YoY" aria-label="+0.7% YoY">+0.7%</small>
+            </dd>
+          </div>
+
+          <div class="health-metric health-metric-key" data-trend="positive">
+            <dt>Net profit</dt>
+            <dd>
+
+              <span class="health-value health-tone-positive">49,210 <span class="health-unit">₹ cr</span></span>
+              <small class="health-change health-tone-positive" title="+1.4% YoY" aria-label="+1.4% YoY">+1.4%</small>
+            </dd>
+          </div>
+
+          <div class="health-metric" data-trend="positive">
+            <dt>Diluted EPS</dt>
+            <dd>
+
+              <span class="health-value health-tone-positive">135.94 <span class="health-unit">₹</span></span>
+              <small class="health-change health-tone-positive" title="+1.4% YoY" aria-label="+1.4% YoY">+1.4%</small>
+            </dd>
+          </div>
+
+        </dl>
+      </section>
+
+      <section class="health-group" aria-label="Profitability">
+        <h3>Profitability <span>FY2026</span></h3>
+        <dl class="health-metrics">
+
+          <div class="health-metric" data-trend="negative">
+            <dt>Operating margin</dt>
+            <dd>
+              <svg class="health-sparkline" viewBox="0 0 64 24" role="img" aria-label="Operating margin annual trend, 5 observations"><title>2022-03-31: 25.26726952240892 %; 2023-03-31: 24.055478182189145 %; 2024-03-31: 24.226523809326135 %; 2025-03-31: 24.354545596966993 %; 2026-03-31: 23.45583306181911 %</title><polyline points="2.0,2.0 17.0,15.4 32.0,13.5 47.0,12.1 62.0,22.0" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              <span class="health-value health-tone-negative">23.46 <span class="health-unit">%</span></span>
+              <small class="health-change health-tone-negative" title="-0.9 pp YoY" aria-label="-0.9 pp YoY">-0.9 pp</small>
+            </dd>
+          </div>
+
+          <div class="health-metric" data-trend="negative">
+            <dt>Net margin</dt>
+            <dd>
+              <svg class="health-sparkline" viewBox="0 0 64 24" role="img" aria-label="Net margin annual trend, 5 observations"><title>2022-03-31: 19.987588264130082 %; 2023-03-31: 18.693947431450646 %; 2024-03-31: 19.057423835478822 %; 2025-03-31: 19.01623035828986 %; 2026-03-31: 18.42926211796076 %</title><polyline points="2.0,2.0 17.0,18.6 32.0,13.9 47.0,14.5 62.0,22.0" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              <span class="health-value health-tone-negative">18.43 <span class="health-unit">%</span></span>
+              <small class="health-change health-tone-negative" title="-0.6 pp YoY" aria-label="-0.6 pp YoY">-0.6 pp</small>
+            </dd>
+          </div>
+
+          <div class="health-metric" data-trend="neutral">
+            <dt>Return on equity<small>TTM</small></dt>
+            <dd>
+
+              <span class="health-value health-tone-neutral">47.99 <span class="health-unit">%</span></span>
+
+            </dd>
+          </div>
+
+          <div class="health-metric" data-trend="neutral">
+            <dt>Return on assets<small>TTM</small></dt>
+            <dd>
+
+              <span class="health-value health-tone-neutral">28.55 <span class="health-unit">%</span></span>
+
+            </dd>
+          </div>
+
+        </dl>
+      </section>
+
+      <section class="health-group" aria-label="Balance sheet">
+        <h3>Balance sheet <span>FY2026</span></h3>
+        <dl class="health-metrics">
+
+          <div class="health-metric" data-trend="caution">
+            <dt>Total debt</dt>
+            <dd>
+              <svg class="health-sparkline" viewBox="0 0 64 24" role="img" aria-label="Total debt annual trend, 5 observations"><title>2022-03-31: 7818.0 ₹ cr; 2023-03-31: 7688.0 ₹ cr; 2024-03-31: 8021.0 ₹ cr; 2025-03-31: 9392.0 ₹ cr; 2026-03-31: 11409.0 ₹ cr</title><polyline points="2.0,21.3 17.0,22.0 32.0,20.2 47.0,12.8 62.0,2.0" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              <span class="health-value health-tone-caution">11,409 <span class="health-unit">₹ cr</span></span>
+              <small class="health-change health-tone-caution" title="+21.5% vs prior FY" aria-label="+21.5% vs prior FY">+21.5%</small>
+            </dd>
+          </div>
+
+          <div class="health-metric" data-trend="negative">
+            <dt>Cash &amp; equivalents</dt>
+            <dd>
+
+              <span class="health-value health-tone-negative">6,405 <span class="health-unit">₹ cr</span></span>
+              <small class="health-change health-tone-negative" title="-23.1% vs prior FY" aria-label="-23.1% vs prior FY">-23.1%</small>
+            </dd>
+          </div>
+
+          <div class="health-metric health-metric-key" data-trend="caution">
+            <dt>Net debt</dt>
+            <dd>
+
+              <span class="health-value health-tone-caution">5,004 <span class="health-unit">₹ cr</span></span>
+              <small class="health-change health-tone-caution" title="+371.6% vs prior FY" aria-label="+371.6% vs prior FY">+371.6%</small>
+            </dd>
+          </div>
+
+          <div class="health-metric" data-trend="caution">
+            <dt>Debt / equity</dt>
+            <dd>
+
+              <span class="health-value health-tone-caution">0.11 <span class="health-unit">×</span></span>
+              <small class="health-change health-tone-caution" title="+21.5% vs prior FY" aria-label="+21.5% vs prior FY">+21.5%</small>
+            </dd>
+          </div>
+
+        </dl>
+      </section>
+
+      <section class="health-group" aria-label="Cash generation">
+        <h3>Cash generation <span>FY2026</span></h3>
+        <dl class="health-metrics">
+
+          <div class="health-metric" data-trend="positive">
+            <dt>Operating cash flow</dt>
+            <dd>
+              <svg class="health-sparkline" viewBox="0 0 64 24" role="img" aria-label="Operating cash flow annual trend, 5 observations"><title>2022-03-31: 39949.0 ₹ cr; 2023-03-31: 41965.0 ₹ cr; 2024-03-31: 44338.0 ₹ cr; 2025-03-31: 48908.0 ₹ cr; 2026-03-31: 52094.0 ₹ cr</title><polyline points="2.0,22.0 17.0,18.7 32.0,14.8 47.0,7.2 62.0,2.0" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              <span class="health-value health-tone-positive">52,094 <span class="health-unit">₹ cr</span></span>
+              <small class="health-change health-tone-positive" title="+6.5% vs prior FY" aria-label="+6.5% vs prior FY">+6.5%</small>
+            </dd>
+          </div>
+
+          <div class="health-metric" data-trend="neutral">
+            <dt>Capital expenditure</dt>
+            <dd>
+
+              <span class="health-value health-tone-neutral">4,700 <span class="health-unit">₹ cr</span></span>
+              <small class="health-change health-tone-neutral" title="-6.0% vs prior FY" aria-label="-6.0% vs prior FY">-6.0%</small>
+            </dd>
+          </div>
+
+          <div class="health-metric health-metric-key" data-trend="positive">
+            <dt>Free cash flow</dt>
+            <dd>
+              <svg class="health-sparkline" viewBox="0 0 64 24" role="img" aria-label="Free cash flow annual trend, 5 observations"><title>2022-03-31: 36954.0 ₹ cr; 2023-03-31: 38865.0 ₹ cr; 2024-03-31: 41664.0 ₹ cr; 2025-03-31: 43908.0 ₹ cr; 2026-03-31: 47394.0 ₹ cr</title><polyline points="2.0,22.0 17.0,18.3 32.0,13.0 47.0,8.7 62.0,2.0" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              <span class="health-value health-tone-positive">47,394 <span class="health-unit">₹ cr</span></span>
+              <small class="health-change health-tone-positive" title="+7.9% vs prior FY" aria-label="+7.9% vs prior FY">+7.9%</small>
+            </dd>
+          </div>
+
+          <div class="health-metric" data-trend="neutral">
+            <dt>Cash flow / share<small>TTM</small></dt>
+            <dd>
+
+              <span class="health-value health-tone-neutral">153.38 <span class="health-unit">₹</span></span>
+
+            </dd>
+          </div>
+
+        </dl>
+      </section>
+
+    </div>
+    <p class="health-footnote">Year ended 2026-03-31 · Changes vs prior FY · TTM = trailing 12 months. Free cash flow = operating cash flow less capital expenditure. Net debt excludes short-term investments.</p>
+  </div>
+</details>
+
+
+
       <p class="ticker-ai-brief"><strong>AI brief</strong> &nbsp; The latest European banking win reinforces demand for large transformation deals and supports the stock&#39;s positive move.</p>
 
 
@@ -2637,6 +2967,132 @@ a:focus-visible, button:focus-visible, summary:focus-visible { outline: 3px soli
 
         <div class="ticker-head-main">
           <div class="ticker-row">
+            <span class="ticker-symbol">INFY</span>
+            <span class="exchange-badge in">NSE</span>
+          </div>
+
+          <div class="ticker-quote">
+            <span class="ticker-price">₹1840.00</span>
+
+            <span class="ticker-change down">
+              -0.72%
+            </span>
+
+          </div>
+
+        </div>
+      </div>
+
+
+
+
+
+
+
+
+
+
+
+      <p class="empty">No major news for INFY today.</p>
+
+    </div>
+  </section>
+
+
+
+
+
+  <section class="ticker-section">
+    <div class="section-inner">
+
+      <div class="ticker-head">
+
+        <div class="ticker-head-main">
+          <div class="ticker-row">
+            <span class="ticker-symbol">MSFT</span>
+            <span class="exchange-badge us">US</span>
+          </div>
+
+          <div class="ticker-quote">
+            <span class="ticker-price">$420.50</span>
+
+            <span class="ticker-change up">
+              +0.65%
+            </span>
+
+          </div>
+
+        </div>
+      </div>
+
+
+
+
+
+
+
+
+
+
+
+      <p class="empty">No major news for MSFT today.</p>
+
+    </div>
+  </section>
+
+
+
+
+
+  <section class="ticker-section section-alt">
+    <div class="section-inner">
+
+      <div class="ticker-head">
+
+        <div class="ticker-head-main">
+          <div class="ticker-row">
+            <span class="ticker-symbol">GOOGL</span>
+            <span class="exchange-badge us">US</span>
+          </div>
+
+          <div class="ticker-quote">
+            <span class="ticker-price">$165.80</span>
+
+            <span class="ticker-change up">
+              +0.48%
+            </span>
+
+          </div>
+
+        </div>
+      </div>
+
+
+
+
+
+
+
+
+
+
+
+      <p class="empty">No major news for GOOGL today.</p>
+
+    </div>
+  </section>
+
+
+
+
+
+  <section class="ticker-section">
+    <div class="section-inner">
+
+      <div class="ticker-head">
+
+        <div class="ticker-head-main">
+          <div class="ticker-row">
             <span class="ticker-symbol">RELIANCE</span>
             <span class="exchange-badge in">NSE</span>
           </div>
@@ -2661,14 +3117,12 @@ a:focus-visible, button:focus-visible, summary:focus-visible { outline: 3px soli
 
 <div class="price-range-item year-high below-high">
   <div class="price-range-topline">
-    <span class="price-range-label">52-week high</span>
+    <span class="price-range-label">1-year high</span>
   </div>
   <div class="price-range-value-row">
-    <strong class="price-range-value">₹3217.60</strong>
-    <span class="price-range-distance">11.2% below</span>
+    <strong class="price-range-distance">11.2% below</strong>
+    <span class="price-range-value">₹3217.60</span>
   </div>
-  <div class="price-range-track" aria-hidden="true"><div class="price-range-fill" style="width: 88.77%;"></div></div>
-  <span class="price-range-caption">Current price → high</span>
 </div>
 
 
@@ -2679,11 +3133,9 @@ a:focus-visible, button:focus-visible, summary:focus-visible { outline: 3px soli
     <span class="price-range-label">All-time high</span>
   </div>
   <div class="price-range-value-row">
-    <strong class="price-range-value">₹3217.60</strong>
-    <span class="price-range-distance">11.2% below</span>
+    <strong class="price-range-distance">11.2% below</strong>
+    <span class="price-range-value">₹3217.60</span>
   </div>
-  <div class="price-range-track" aria-hidden="true"><div class="price-range-fill" style="width: 88.77%;"></div></div>
-  <span class="price-range-caption">Current price → high</span>
 </div>
 
 </div>
@@ -2694,6 +3146,9 @@ a:focus-visible, button:focus-visible, summary:focus-visible { outline: 3px soli
 <details class="earnings-history">
   <summary class="earnings-summary">
     <span class="earnings-summary-copy">
+      <svg class="earnings-summary-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M4 19V9"></path><path d="M10 19V5"></path><path d="M16 19v-7"></path><path d="M22 19H2"></path>
+      </svg>
       <span class="earnings-summary-title">Earnings</span>
       <span class="earnings-summary-subtitle">Last 4 reported quarters</span>
     </span>
@@ -2855,6 +3310,7 @@ a:focus-visible, button:focus-visible, summary:focus-visible { outline: 3px soli
 
 
 
+
       <p class="ticker-ai-brief"><strong>AI brief</strong> &nbsp; Steady refining margins and continued Jio subscriber growth provide support despite the modest share-price decline.</p>
 
 
@@ -2904,12 +3360,138 @@ a:focus-visible, button:focus-visible, summary:focus-visible { outline: 3px soli
   </section>
 
 
+
+
+
+  <section class="ticker-section section-alt">
+    <div class="section-inner">
+
+      <div class="ticker-head">
+
+        <div class="ticker-head-main">
+          <div class="ticker-row">
+            <span class="ticker-symbol">AMZN</span>
+            <span class="exchange-badge us">US</span>
+          </div>
+
+          <div class="ticker-quote">
+            <span class="ticker-price">$185.20</span>
+
+            <span class="ticker-change down">
+              -0.32%
+            </span>
+
+          </div>
+
+        </div>
+      </div>
+
+
+
+
+
+
+
+
+
+
+
+      <p class="empty">No major news for AMZN today.</p>
+
+    </div>
+  </section>
+
+
+
+
+
+  <section class="ticker-section">
+    <div class="section-inner">
+
+      <div class="ticker-head">
+
+        <div class="ticker-head-main">
+          <div class="ticker-row">
+            <span class="ticker-symbol">HDFCBANK</span>
+            <span class="exchange-badge in">NSE</span>
+          </div>
+
+          <div class="ticker-quote">
+            <span class="ticker-price">₹1680.25</span>
+
+            <span class="ticker-change up">
+              +0.25%
+            </span>
+
+          </div>
+
+        </div>
+      </div>
+
+
+
+
+
+
+
+
+
+
+
+      <p class="empty">No major news for HDFCBANK today.</p>
+
+    </div>
+  </section>
+
+
+
+
+
+  <section class="ticker-section section-alt">
+    <div class="section-inner">
+
+      <div class="ticker-head">
+
+        <div class="ticker-head-main">
+          <div class="ticker-row">
+            <span class="ticker-symbol">ICICIBANK</span>
+            <span class="exchange-badge in">NSE</span>
+          </div>
+
+          <div class="ticker-quote">
+            <span class="ticker-price">₹1245.60</span>
+
+            <span class="ticker-change down">
+              -0.18%
+            </span>
+
+          </div>
+
+        </div>
+      </div>
+
+
+
+
+
+
+
+
+
+
+
+      <p class="empty">No major news for ICICIBANK today.</p>
+
+    </div>
+  </section>
+
+
   </main>
 
 
   <footer class="site-footer">
     <div class="section-inner">
-      <p class="footer-brand">Tickr Digest</p>
+      <p class="footer-brand"><img class="digest-brand-icon" src="/assets/tickr-digest-icon.svg" alt="" width="30" height="30"><span>tickr digest<span style="color:#8ea2ff;">.</span></span></p>
       <p>A broader view of your stocks. For information, not investment advice.</p>
 
       <p><button type="button" class="footer-link-btn" onclick="openSubscribeModal()">Create your own briefing</button></p>
@@ -2920,7 +3502,7 @@ a:focus-visible, button:focus-visible, summary:focus-visible { outline: 3px soli
   <div class="subscribe-modal" id="subscribe-modal" hidden
        data-subscription-token=""
        data-prefill-email=""
-       data-prefill-tickers='["US:NVDA", "IN:RELIANCE", "US:AAPL", "IN:TCS"]'>
+       data-prefill-tickers='["US:NVDA", "IN:RELIANCE", "US:AAPL", "IN:TCS", "US:MSFT", "US:AMZN", "US:GOOGL", "IN:INFY", "IN:HDFCBANK", "IN:ICICIBANK"]'>
     <div class="subscribe-modal-backdrop" onclick="closeSubscribeModal()"></div>
     <div class="subscribe-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="subscribe-modal-title">
       <div class="subscribe-modal-header">
@@ -2934,7 +3516,7 @@ a:focus-visible, button:focus-visible, summary:focus-visible { outline: 3px soli
       </div>
     </div>
   </div>
-  <script src="/subscribe-form.js?v=20260828-prefill4" defer></script>
+  <script src="/subscribe-form.js?v=20260911-google1" defer></script>
 
 
 
@@ -3034,5 +3616,6 @@ a:focus-visible, button:focus-visible, summary:focus-visible { outline: 3px soli
       }
     })();
   </script>
+<script src="/auth.js" defer></script>
 </body>
 </html>

@@ -55,10 +55,13 @@ def update_contact_tickers(
     attr_name: str = BREVO_TICKERS_ATTRIBUTE,
     *,
     list_id: int | None = None,
+    unlink_list_id: int | None = None,
 ) -> None:
     payload: dict = {"attributes": {attr_name: format_tickers_attribute(tickers)}}
     if list_id is not None:
         payload["listIds"] = [list_id]
+    if unlink_list_id is not None:
+        payload["unlinkListIds"] = [unlink_list_id]
 
     response = requests.put(
         f"https://api.brevo.com/v3/contacts/{email}",
@@ -227,21 +230,27 @@ def _safe_brevo_message(response: requests.Response) -> str:
     return str(message).strip() or "Brevo request failed"
 
 
-def subscribe_verified(email, tickers, api_key, list_id, *, attr_name=BREVO_TICKERS_ATTRIBUTE):
-    """Activate a verified Google signup; never clear provider suppression flags."""
+def subscribe_verified(email, tickers, api_key, list_id, *, attr_name=BREVO_TICKERS_ATTRIBUTE,
+                       email_briefings=True):
+    """Save a verified Google user's watchlist and optional email preference."""
     contact = get_contact(email, api_key)
-    if contact and contact.get('emailBlacklisted'):
+    if email_briefings and contact and contact.get('emailBlacklisted'):
         raise BrevoError('This email is unsubscribed or suppressed. Use email signup to confirm resubscription.')
-    already_active = bool(contact and list_id in (contact.get('listIds') or []) and
+    already_active = bool(email_briefings and contact and list_id in (contact.get('listIds') or []) and
                           parse_tickers(_get_contact_attribute(contact.get('attributes'), attr_name)))
     if contact:
-        update_contact_tickers(email, tickers, api_key, attr_name, list_id=list_id)
+        update_contact_tickers(email, tickers, api_key, attr_name,
+                               list_id=list_id if email_briefings else None,
+                               unlink_list_id=None if email_briefings else list_id)
     else:
+        payload = {'email': email, 'attributes': {attr_name: format_tickers_attribute(tickers)}}
+        if email_briefings:
+            payload['listIds'] = [list_id]
         response = requests.post('https://api.brevo.com/v3/contacts', headers=_headers(api_key),
-            json={'email': email, 'listIds': [list_id], 'attributes': {attr_name: format_tickers_attribute(tickers)}}, timeout=30)
+            json=payload, timeout=30)
         if not response.ok:
             raise BrevoError(_safe_brevo_message(response))
-    return already_active
+    return already_active if email_briefings else True
 
 
 def send_welcome_email(email, api_key, site_url):

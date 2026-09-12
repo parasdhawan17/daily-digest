@@ -181,6 +181,46 @@
   color: var(--text-muted);
 }
 
+.subscribe-email-option {
+  display: grid;
+  grid-template-columns: 20px 1fr;
+  gap: 10px;
+  align-items: start;
+  margin: 2px 0 18px;
+  padding: 13px 14px;
+  border: 1px solid var(--border-strong);
+  border-radius: 9px;
+  background: var(--muted-bg);
+}
+
+.subscribe-email-option[hidden] {
+  display: none;
+}
+
+.subscribe-email-option input {
+  width: 18px;
+  height: 18px;
+  margin: 2px 0 0;
+  accent-color: var(--link);
+}
+
+.subscribe-email-option label {
+  margin: 0;
+  cursor: pointer;
+}
+
+.subscribe-email-option label strong,
+.subscribe-email-option label span {
+  display: block;
+}
+
+.subscribe-email-option label span {
+  margin-top: 2px;
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 400;
+}
+
 .subscribe-error {
   margin: 0 0 12px;
   padding: 10px 12px;
@@ -199,7 +239,7 @@
   padding: 12px 20px;
   border: none;
   border-radius: 999px;
-  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  background: linear-gradient(135deg, #365cf5 0%, #2948d6 100%);
   color: #fff;
   font-size: 15px;
   font-weight: 600;
@@ -208,7 +248,7 @@
 }
 
 .subscribe-form .btn-subscribe:hover:not(:disabled) {
-  background: linear-gradient(135deg, #f87171 0%, #b91c1c 100%);
+  background: linear-gradient(135deg, #4e70f8 0%, #213dc0 100%);
 }
 
 .subscribe-form .btn-subscribe:disabled {

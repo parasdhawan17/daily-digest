@@ -1,5 +1,6 @@
 .auth-controls { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 12px; color-scheme: light dark; }
-html[data-theme="dark"] #auth-controls > div { clip-path: inset(6px 10px round 24px); }
+.auth-controls.hero-auth { justify-content: flex-start; }
+.auth-controls > div { min-height: 40px; }
 .auth-controls a, .auth-controls button { font: inherit; font-size: 13px; color: inherit; }
 .auth-controls button { cursor: pointer; border: 1px solid currentColor; border-radius: 18px; background: transparent; padding: 7px 12px; }
 .auth-notice { max-width: 760px; margin: 12px auto; padding: 12px 20px; font-size: 14px; line-height: 1.5; }
@@ -20,6 +21,20 @@ body > .auth-controls { padding: 12px 20px; }
 }
 .header-account-actions .theme-toggle { position: static; flex-shrink: 0; }
 .header-account-actions .auth-controls { flex-wrap: nowrap; }
+.hero-auth a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+  padding: 0 16px;
+  border-radius: 999px;
+  background: var(--accent, #365cf5);
+  color: #0b1420;
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.hero-auth a:hover { background: #a9b7ff; }
 .header-account-actions .auth-controls button {
   height: 40px;
   padding: 0 14px;
@@ -31,7 +46,7 @@ body > .auth-controls { padding: 12px 20px; }
   white-space: nowrap;
 }
 .header-account-actions .auth-controls button:hover:not(:disabled) { background: rgba(255, 255, 255, 0.2); }
-.header-account-actions .auth-controls button:focus-visible { outline: 2px solid #93c5fd; outline-offset: 2px; }
+.header-account-actions .auth-controls button:focus-visible { outline: 2px solid var(--link, #8ea2ff); outline-offset: 2px; }
 @media (max-width: 540px) {
   .header-account-actions { top: 14px; right: 20px; gap: 8px; }
 }

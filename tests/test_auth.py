@@ -84,11 +84,13 @@ class AuthTests(unittest.TestCase):
     @patch('stock_news.auth.get_contact', return_value=CONTACT)
     def test_session_existing_and_incomplete_contacts(self, lookup):
         for contact, needs in [(CONTACT, False), (None, True),
-                ({**CONTACT, 'listIds': []}, True), ({**CONTACT, 'attributes': {}}, True),
-                ({**CONTACT, 'emailBlacklisted': True}, True)]:
+                ({**CONTACT, 'listIds': []}, False), ({**CONTACT, 'attributes': {}}, True),
+                ({**CONTACT, 'emailBlacklisted': True}, False)]:
             lookup.return_value = contact
             state = auth.subscription(IDENTITY)
             self.assertEqual(state['needs_subscription'], needs)
+            self.assertEqual(state['email_briefings'], bool(contact and not contact.get('emailBlacklisted') and
+                                                            7 in (contact.get('listIds') or [])))
         lookup.return_value = {**CONTACT, 'attributes': {'US_TICKERS': 'AAPL'}}
         self.assertEqual(auth.subscription(IDENTITY)['tickers'], ['US:AAPL'])
 
@@ -140,6 +142,14 @@ class SubscribeTests(unittest.TestCase):
             self.assertEqual(bool(result(h)['warning']), failure)
             self.assertEqual(welcome.call_count, 0 if active else 1)
 
+        welcome.reset_mock()
+        h = handler(payload={'email': IDENTITY['email'], 'tickers': ['US:AAPL'],
+                             'email_briefings': False}, signed_in=True)
+        handle_post(h)
+        self.assertFalse(result(h)['email_briefings'])
+        self.assertFalse(save.call_args.kwargs['email_briefings'])
+        welcome.assert_not_called()
+
     @patch('api.subscribe.subscribe_verified')
     def test_email_substitution_csrf_and_invalid_tickers(self, save):
         for payload in [{'email': 'other@gmail.com', 'tickers': ['AAPL']}, {'tickers': []}]:
@@ -178,6 +188,9 @@ class SubscribeTests(unittest.TestCase):
         lookup.return_value = {**CONTACT, 'emailBlacklisted': True}
         with self.assertRaises(BrevoError): subscribe_verified(IDENTITY['email'], ['AAPL'], 'key', 7)
         self.assertEqual(update.call_count, 1)
+        self.assertTrue(subscribe_verified(IDENTITY['email'], ['AAPL'], 'key', 7,
+                                           email_briefings=False))
+        self.assertEqual(update.call_args.kwargs['unlink_list_id'], 7)
 
 
 @patch.dict(os.environ, ENV)

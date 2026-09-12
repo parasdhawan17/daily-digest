@@ -132,16 +132,17 @@ Each email includes a signed **See the full digest online** link (`/digest?t=...
 
 ### Google sign-in
 
-The homepage supports Google sign-in alongside email-only signup. Google-verified
-Gmail and Workspace users with an active Brevo subscription open `/digest` with
-all saved US and India tickers. New users select tickers in the popup; submitting
-activates their subscription and sends a welcome email without double opt-in.
+The homepage uses Google sign-in as the primary path. Google-verified Gmail and
+Workspace users with a saved watchlist open `/digest` with all saved US and India
+tickers. New users select tickers in the popup and can independently opt into
+email briefings. Enabling email adds the contact to the delivery list and sends a
+welcome email without double opt-in; dashboard-only users stay off that list.
 Welcome-email failure does not block access. Email-only signup still uses DOI.
 Other Google account email domains must use email signup/confirmation and their
 emailed digest links; automatic linking for these domains is not supported.
-Suppressed contacts are never unblocked by Google sign-in or the authenticated
-subscription endpoint; sign out and use the email confirmation flow to request
-resubscription, subject to Brevo's suppression rules.
+Suppressed contacts can continue using their saved dashboard, but Google sign-in
+never clears suppression or silently re-enables email. The email confirmation
+flow remains the path to request resubscription, subject to Brevo's rules.
 
 Setup on the web deployment (and `.env.local` for local development):
 
@@ -162,8 +163,9 @@ POSTs use the `tickr_csrf` cookie value in `X-CSRF-Token` and require a matching
 `Origin`. Sessions expire after seven days; cookies are HttpOnly, SameSite=Lax,
 and Secure except on localhost. Logout clears the browser cookie; rotating the
 session secret invalidates all sessions. There is no per-session revocation store.
-`POST /api/subscribe` takes the signed-in email from the session and returns
-`redirect: "/digest"` and an optional `warning` for verified subscriptions.
+`POST /api/subscribe` takes the signed-in email from the session, saves its
+watchlist and `email_briefings` preference, and returns `redirect: "/digest"`
+plus an optional `warning` when welcome-email delivery fails.
 Existing signed digest links remain supported independently of browser sessions.
 
 Validate with `python -m unittest discover -s tests`, then smoke-test Google

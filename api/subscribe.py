@@ -110,14 +110,18 @@ def handle_post(handler: BaseHTTPRequestHandler) -> None:
 
     try:
         if identity:
-            already_active = subscribe_verified(email, tickers, api_key, int(list_id))
+            email_briefings = payload.get("email_briefings", True) is True
+            already_active = subscribe_verified(
+                email, tickers, api_key, int(list_id), email_briefings=email_briefings
+            )
             warning = None
-            if not already_active:
+            if email_briefings and not already_active:
                 try:
                     send_welcome_email(email, api_key, os.environ.get("SITE_URL", "").strip() or SITE_URL)
                 except Exception:
-                    warning = "Your subscription is active, but the welcome email could not be sent."
-            send_json(handler, 200, {"ok": True, "mode": "verified", "redirect": "/digest", "warning": warning})
+                    warning = "Your email briefings are active, but the welcome email could not be sent."
+            send_json(handler, 200, {"ok": True, "mode": "verified", "redirect": "/digest",
+                                     "email_briefings": email_briefings, "warning": warning})
             return
         result = subscribe_or_update(
             email,
