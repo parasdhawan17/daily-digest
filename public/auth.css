@@ -1,6 +1,10 @@
 .auth-controls { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 12px; color-scheme: light dark; }
 .auth-controls.hero-auth { justify-content: flex-start; }
-.auth-controls > div { min-height: 40px; }
+.auth-controls > div {
+  min-height: 40px;
+  overflow: hidden;
+  border-radius: 999px;
+}
 .auth-controls a, .auth-controls button { font: inherit; font-size: 13px; color: inherit; }
 .auth-controls button { cursor: pointer; border: 1px solid currentColor; border-radius: 18px; background: transparent; padding: 7px 12px; }
 .auth-notice { max-width: 760px; margin: 12px auto; padding: 12px 20px; font-size: 14px; line-height: 1.5; }
