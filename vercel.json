@@ -1,5 +1,7 @@
 {
   "rewrites": [
+    {"source": "/stocks/:symbol", "destination": "/api/index?route=stock&symbol=:symbol"},
+    {"source": "/api/stock-data", "destination": "/api/index?route=stock-data"},
     {
       "source": "/digest",
       "destination": "/api/index?route=digest"

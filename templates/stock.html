@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>{{ symbol or 'Stock research' }} — Tickr Digest</title>
+  <meta name="description" content="Explore company financials, ownership, price history, analyst views and news with Tickr Digest.">
+  <meta name="color-scheme" content="light dark">
+  <script>(function(){try{var t=localStorage.getItem('daily-digest-theme');if(t!=='light'&&t!=='dark')t=matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light';document.documentElement.dataset.theme=t;document.documentElement.style.colorScheme=t;}catch(e){}})();</script>
+  <link rel="stylesheet" href="/landing.css"><link rel="stylesheet" href="/stock-search.css"><link rel="stylesheet" href="/stock.css">
+  <script src="/stock-search.js" defer></script><script src="/stock-format.js" defer></script><script src="/stock.js" defer></script>
+</head>
+<body class="stock-page" data-symbol="{{ symbol }}">
+<a class="skip-link" href="#stock-main">Skip to company details</a>
+<header class="stock-masthead"><div class="container"><nav class="nav" aria-label="Main navigation">
+  <a class="brand" href="/" aria-label="Tickr Digest home"><img class="brand-icon" src="/assets/tickr-digest-icon.svg" alt=""><span>tickr digest<span class="brand-dot">.</span></span></a>
+  <div class="nav-actions"><button type="button" data-stock-search>Search a stock</button><button class="theme-toggle" id="theme-toggle" type="button" aria-label="Switch color theme"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M20 15A8 8 0 019 4a8 8 0 1011 11Z"/></svg></button></div>
+</nav></div></header>
+<main id="stock-main" class="container">
+  <div class="stock-breadcrumb"><a href="/">Home</a><span>/</span><span>Indian equities</span><span>/</span><span>{{ symbol|replace('IN:', '') }}</span></div>
+  <div id="stock-status" role="status" class="stock-state">{{ error or 'Loading your company overview…' }}</div>
+  <div id="stock-content" hidden>
+    <section class="stock-hero" aria-labelledby="company-name"><div><p class="stock-eyebrow" id="company-industry"></p><h1 id="company-name"></h1><div id="company-identifiers" class="stock-identifiers"></div></div><div class="stock-price-block"><p class="stock-eyebrow" id="primary-exchange"></p><div class="stock-price-line"><strong id="company-price"></strong><span id="company-change" class="stock-change"></span></div><p id="secondary-price"></p></div></section>
+    <div class="stock-freshness"><span id="source-time"></span><span>Source: IndianAPI · Market data may be delayed</span></div>
+    <nav class="stock-tabs" role="tablist" aria-label="Company research">
+      {% for id, label in [('overview','Overview'),('financials','Financials'),('ownership','Ownership'),('analysis','Analysis'),('actions','Corporate actions'),('news','News')] %}
+      <button type="button" role="tab" id="tab-{{ id }}" aria-controls="panel-{{ id }}" aria-selected="{{ 'true' if loop.first else 'false' }}" tabindex="{{ '0' if loop.first else '-1' }}" data-tab="{{ id }}">{{ label }}</button>
+      {% endfor %}
+    </nav>
+    {% for id in ['overview','financials','ownership','analysis','actions','news'] %}<section id="panel-{{ id }}" class="stock-panel" role="tabpanel" aria-labelledby="tab-{{ id }}" tabindex="0"{% if not loop.first %} hidden{% endif %}></section>{% endfor %}
+  </div>
+</main>
+<footer class="container stock-footer"><a class="brand" href="/">tickr digest<span class="brand-dot">.</span></a><p>A clearer view of the companies you follow.</p><span>Financial figures reflect their reported periods. Analyst opinions and estimates are attributed to the data provider.</span></footer>
+</body></html>

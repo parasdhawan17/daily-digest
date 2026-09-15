@@ -9,6 +9,7 @@ Live web app for **Daily Digest** — marketing landing page plus on-demand pers
 | `public/` | Static landing page (`/`) |
 | `api/digest.py` | Vercel serverless — live digest (`/digest?t=...`) |
 | `api/tickers_search.py` | Ticker autocomplete (Finnhub + IndianAPI.in) |
+| `api/stock.py` | Public Indian stock research pages and cached section data |
 | `api/subscribe.py` | Subscribe / update holdings (Brevo API) |
 | `scripts/send_digests.py` | Email cron entrypoint (Railway) |
 | `stock_news/` | Python package (market routing, relevance, render, tokens) |
@@ -24,6 +25,40 @@ Tickers are stored with a market prefix:
 - `IN:RELIANCE` — NSE listings (IndianAPI.in)
 
 Bare symbols from existing subscribers (e.g. `AAPL`) are normalized to `US:AAPL` on read.
+
+## Stock research
+
+Use **Search a stock** on the homepage or digest to open a public company page,
+such as `/stocks/IN:TCS`. No sign-in is required. Pages use the existing light/dark
+theme and contain Overview, Financials, Ownership, Analysis, Corporate actions,
+and News tabs. Indian tickers in the digest and resolved peers link to these pages.
+
+`GET /api/stock-data?symbol=IN:TCS&section=core` returns the normalized company
+snapshot. Other allowlisted sections are `history` (`period=1m|6m|1yr|3yr|5yr|10yr|max`),
+`financials` (`series=quarter_results|yoy_results|balancesheet|cashflow|ratios|shareholding_pattern_quarterly|shareholding_pattern_yearly`),
+`targets`, and `forecasts` (annual EPS). Supplemental requests load when needed.
+`GET /api/tickers/search?q=TCS&market=IN` limits autocomplete to Indian stocks;
+omitting `market` preserves mixed-market search.
+
+The existing `INDIANAPI_API_KEY` and `INDIANAPI_BASE_URL` configure the feature.
+Only the backend receives the key. Successful public data is cached at the CDN
+and in a bounded process cache: snapshots for 5 minutes, history for 1 hour,
+and financial/analyst supplements for 6 hours. Process-local requests are coalesced;
+separate serverless instances may still issue independent upstream requests.
+Errors use `no-store` and section-level retry controls. Pages do not poll.
+
+Provider timestamps are distinct from retrieval times. Coverage and freshness
+vary by company. Financial-statement amounts use INR crore, while monetary
+metrics whose scale is unspecified retain a **provider units** label. Forecast
+actuals and estimates are kept separate. Relative Mint article links returned by
+IndianAPI are resolved to the original publisher.
+
+Run the stock-specific checks with:
+
+```sh
+python -m unittest discover -s tests -p test_stock_detail.py
+node --test tests/test_stock_format.js
+```
 
 ## Quick start (local)
 

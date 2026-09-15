@@ -59,12 +59,22 @@ class DevHandler(BaseHTTPRequestHandler):
         path = parsed.path
         query = parse_qs(parsed.query)
 
+        if path.startswith('/stocks/'):
+            from api.stock import handle_page
+            handle_page(self)
+            return
+        if path == '/api/stock-data':
+            from api.stock import handle_data
+            handle_data(self)
+            return
+
         if path in ("/api/auth/config", "/api/auth/session"):
             from api.auth import handle_auth
             handle_auth(self, path.rsplit("/", 1)[1])
             return
         if path == "/api/tickers/search":
-            self._search(query)
+            from api.tickers_search import handle_get
+            handle_get(self)
             return
         if path == "/api/tickers/validate":
             self._validate(query)

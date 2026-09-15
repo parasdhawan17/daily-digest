@@ -52,7 +52,7 @@
         {% endif %}
         <div class="ticker-head-main">
           <div class="ticker-row">
-            <span class="ticker-symbol">{{ section.display_symbol or section.ticker }}</span>{% if section.exchange %}
+            {% if section.market == 'IN' %}<a class="ticker-symbol" style="color:inherit;text-decoration:none" href="/stocks/{{ section.ticker|urlencode }}">{{ section.display_symbol or section.ticker }}</a>{% else %}<span class="ticker-symbol">{{ section.display_symbol or section.ticker }}</span>{% endif %}{% if section.exchange %}
             <span class="exchange-badge {{ section.market|lower }}">{{ section.exchange }}</span>{% endif %}
           </div>
           {% if sec_quote %}
@@ -130,4 +130,3 @@
     </div>
   </section>
   {% endmacro %}
-

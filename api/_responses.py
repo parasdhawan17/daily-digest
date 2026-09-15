@@ -8,7 +8,8 @@ def send_json(handler: BaseHTTPRequestHandler, status: int, payload: dict, *, he
     body = json.dumps(payload).encode("utf-8")
     handler.send_response(status)
     handler.send_header("Content-Type", "application/json; charset=utf-8")
-    handler.send_header("Cache-Control", "no-store")
+    if not headers or 'Cache-Control' not in headers:
+        handler.send_header("Cache-Control", "no-store")
     handler.send_header("Content-Length", str(len(body)))
     for name, value in (headers or {}).items():
         handler.send_header(name, value)

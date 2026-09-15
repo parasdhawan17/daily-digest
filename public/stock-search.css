@@ -1,0 +1,21 @@
+.stock-search-button {display:inline-flex;align-items:center;justify-content:center;gap:9px;min-height:40px;padding:9px 15px;border:1px solid #7186cd66;border-radius:8px;background:#365cf51c;color:inherit;font:inherit;font-size:13px;font-weight:650;cursor:pointer;white-space:nowrap;text-decoration:none}
+.stock-search-button svg {width:17px;height:17px;flex-shrink:0}
+.stock-search-button:hover {background:#7186cd33}
+.stock-search-button:focus-visible,.stock-search-dialog :focus-visible {outline:3px solid var(--accent,#8ea2ff);outline-offset:3px}
+.stock-search-dialog {box-sizing:border-box;width:min(570px,calc(100% - 28px));max-height:85vh;margin:12vh auto auto;padding:0;border:1px solid var(--border,#d8e0ea);border-radius:16px;background:var(--card-bg,#fff);color:var(--text,#132238);box-shadow:0 30px 100px #0005;font-family:Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
+html[data-theme=dark] .stock-search-dialog {background:#121f2f;color:#f3f7fa;border-color:#2c3d51}
+.stock-search-dialog::backdrop {background:#06111dbb;backdrop-filter:blur(6px)}
+.stock-search-heading {display:flex;align-items:center;justify-content:space-between;gap:12px;padding:22px 24px 12px}
+.stock-search-heading h2 {margin:0;font-size:20px;letter-spacing:-.5px;line-height:1.3}
+.stock-search-close {border:0;background:transparent;color:inherit;font-size:24px;cursor:pointer;width:36px;height:36px}
+.stock-search-input-wrap {padding:0 24px}
+.stock-search-dialog input {box-sizing:border-box;width:100%;font:inherit;font-size:16px;color:inherit;background:transparent;border:1px solid var(--border,#7186cd66);border-radius:9px;padding:14px}
+.stock-search-status {font-size:13px;margin:14px 24px;color:var(--text-secondary,#68778b)}
+.stock-search-results {list-style:none;margin:0;padding:0 10px 12px;max-height:44vh;overflow:auto}
+.stock-search-results li {display:flex;align-items:center;gap:14px;justify-content:space-between;padding:14px;border-radius:8px;cursor:pointer}
+.stock-search-results li[aria-selected=true],.stock-search-results li:hover {background:#7186cd25}
+.stock-search-results strong {display:block;font-size:14px}
+.stock-search-results small {display:block;margin-top:4px;color:var(--text-secondary,#8999ac)}
+.stock-search-results span:last-child {color:var(--text-secondary,#8999ac);font-size:12px}
+@media(max-width:500px){.stock-search-button{padding:8px 10px;font-size:12px}.stock-search-dialog{margin-top:6vh}}
+@media(max-width:540px){.header-account-actions .stock-search-button{width:40px;min-height:40px;padding:8px;flex-shrink:0}.header-account-actions .stock-search-button span{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}}

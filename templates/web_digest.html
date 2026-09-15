@@ -1543,6 +1543,8 @@
   <link rel="stylesheet" href="/subscribe-form.css">
   <style>{% include "web_digest_design.css" %}</style>
 <link rel="stylesheet" href="/auth.css">
+<link rel="stylesheet" href="/stock-search.css">
+<script src="/stock-search.js" defer></script>
 </head>
 <body>
 <p id="auth-notice" class="auth-notice" role="status" hidden></p>
@@ -1556,6 +1558,7 @@
         </a>
         {% endif %}
         <div class="header-account-actions" role="group" aria-label="Account and appearance">
+        <button type="button" data-stock-search>Search a stock</button>
         <button type="button" class="theme-toggle" id="theme-toggle" aria-label="Switch to dark mode" title="Toggle color theme">
           <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M21 14.5A8.5 8.5 0 1 1 9.5 3 7 7 0 0 0 21 14.5z"></path>

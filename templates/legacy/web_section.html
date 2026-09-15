@@ -17,7 +17,7 @@
     <div class="ticker-head">
       {% if section.logo %}<img class="ticker-logo" src="{{ section.logo }}" alt="{{ section.ticker }}" loading="lazy">{% endif %}
       <div class="ticker-head-main">
-        <div class="ticker-row"><span class="ticker-symbol">{{ section.display_symbol or section.ticker }}</span>{% if section.exchange %}<span class="exchange-badge {{ section.market|lower }}">{{ section.exchange }}</span>{% endif %}</div>
+        <div class="ticker-row">{% if section.market == 'IN' %}<a class="ticker-symbol" style="color:inherit;text-decoration:none" href="/stocks/{{ section.ticker|urlencode }}">{{ section.display_symbol or section.ticker }}</a>{% else %}<span class="ticker-symbol">{{ section.display_symbol or section.ticker }}</span>{% endif %}{% if section.exchange %}<span class="exchange-badge {{ section.market|lower }}">{{ section.exchange }}</span>{% endif %}</div>
         {% if quote %}<div class="ticker-quote"><span class="ticker-price">{% if section.market == 'IN' %}₹{% else %}${% endif %}{{ "%.2f"|format(quote.price) }}</span>{% if quote.change_pct is not none %}<span class="ticker-change {{ change_class(quote) }}">{% if quote.change_pct >= 0 %}+{% endif %}{{ "%.2f"|format(quote.change_pct) }}%</span>{% endif %}</div>{% endif %}
       </div>
     </div>

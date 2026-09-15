@@ -18,6 +18,10 @@ from stock_news.market_data import search_symbols
 def handle_get(handler: BaseHTTPRequestHandler) -> None:
     query = parse_qs(urlparse(handler.path).query)
     q = (query.get("q") or [""])[0]
+    market = (query.get("market") or [""])[0].upper() or None
+    if market not in (None, 'IN', 'US') or len(q) > 100:
+        send_json(handler, 400, {"ok": False, "error": "Invalid search query."})
+        return
 
     finnhub_key = os.environ.get("FINNHUB_API_KEY", "").strip()
     indianapi_key = os.environ.get("INDIANAPI_API_KEY", "").strip()
@@ -30,7 +34,7 @@ def handle_get(handler: BaseHTTPRequestHandler) -> None:
         return
 
     try:
-        results = search_symbols(q, finnhub_key=finnhub_key, indianapi_key=indianapi_key)
+        results = search_symbols(q, finnhub_key=finnhub_key, indianapi_key=indianapi_key, market=market)
         send_json(handler, 200, {"ok": True, "results": results})
     except Exception:
         traceback.print_exc()
