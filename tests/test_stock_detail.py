@@ -165,6 +165,7 @@ class EndpointTests(unittest.TestCase):
         self.assertEqual(route(handler('/stocks/IN:TCS')), 'stock')
         self.assertEqual(route(handler('/api/index?route=stock&symbol=IN:TCS')), 'stock')
         self.assertEqual(route(handler('/api/stock-data?symbol=IN:TCS')), 'stock-data')
+        self.assertEqual(route(handler('/api/stock-ai?symbol=IN:TCS')), 'stock-ai')
 
     def test_page_is_public_and_escaped(self):
         h = handler('/stocks/IN:M%26M')
@@ -172,6 +173,7 @@ class EndpointTests(unittest.TestCase):
         h.send_response.assert_called_with(200)
         self.assertIn(b'data-symbol="IN:M&amp;M"', h.wfile.getvalue())
         self.assertNotIn(b'credential', h.wfile.getvalue())
+        self.assertIn(b'AI Overview', h.wfile.getvalue())
 
     def test_invalid_page(self):
         h = handler('/stocks/US:AAPL')
@@ -199,6 +201,15 @@ class EndpointTests(unittest.TestCase):
         stock.handle_data(h)
         h.send_header.assert_any_call('Cache-Control', 'no-store')
         self.assertEqual(json.loads(h.wfile.getvalue())['code'], 'provider_error')
+
+    @patch.object(stock, 'get_stock_ai_overview', return_value=({'ok': True, 'data': {}}, 21600))
+    @patch.object(stock, 'get_data', return_value=({'ok': True, 'data': {'name': 'TCS'}}, 300))
+    def test_ai_endpoint_is_publicly_cached(self, get_data, get_overview):
+        h = handler('/api/stock-ai?symbol=IN:TCS')
+        stock.handle_ai(h)
+        h.send_response.assert_called_with(200)
+        h.send_header.assert_any_call('Cache-Control', 'public, max-age=0, s-maxage=21600, stale-while-revalidate=3600')
+        get_overview.assert_called_once_with('IN:TCS', {'name': 'TCS'})
 
     @patch.dict('os.environ', {'INDIANAPI_API_KEY': 'key'})
     @patch.object(tickers_search, 'search_symbols', return_value=[])

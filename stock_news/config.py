@@ -92,6 +92,9 @@ AI_SUMMARY_MAX_OUTPUT_TOKENS = int(
 AI_SUMMARY_MARKET_MAX_OUTPUT_TOKENS = int(
     os.environ.get("AI_SUMMARY_MARKET_MAX_OUTPUT_TOKENS", "400")
 )
+AI_STOCK_OVERVIEW_MAX_OUTPUT_TOKENS = int(
+    os.environ.get("AI_STOCK_OVERVIEW_MAX_OUTPUT_TOKENS", "900")
+)
 
 US_SYMBOL_TYPES = frozenset({"Common Stock", "ETF", "ETP", "ADR", "ETN", "ETC", "Closed-End Fund"})
 FOREIGN_SYMBOL_SUFFIXES = (".DE", ".L", ".TO", ".HK", ".SW", ".PA", ".AS", ".MI", ".AX", ".KS", ".TW")

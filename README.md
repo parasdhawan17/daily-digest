@@ -40,6 +40,11 @@ snapshot. Other allowlisted sections are `history` (`period=1m|6m|1yr|3yr|5yr|10
 `GET /api/tickers/search?q=TCS&market=IN` limits autocomplete to Indian stocks;
 omitting `market` preserves mixed-market search.
 
+The AI Overview tab loads only when opened. It makes one bounded structured-model
+request from a compact subset of the existing company snapshot, then caches successful
+results for six hours in-process and at the CDN. Evidence links lead back to the
+deterministic tabs; unavailable or malformed AI output never replaces factual content.
+
 The existing `INDIANAPI_API_KEY` and `INDIANAPI_BASE_URL` configure the feature.
 Only the backend receives the key. Successful public data is cached at the CDN
 and in a bounded process cache: snapshots for 5 minutes, history for 1 hour,
@@ -100,7 +105,7 @@ python3 -m venv .venv
 | `BREVO_LIST_ID` | Subscribe form | Always `7` (Daily Digest - US). Setup scripts pin this. |
 | `BREVO_DOI_TEMPLATE_ID` | New subscribers | Double opt-in template ID from Brevo |
 | `BREVO_TICKERS_ATTRIBUTE` | Subscribe + email cron | Optional (default `US_TICKERS` — text, comma-separated) |
-| `OPENROUTER_API_KEY` | Optional AI email briefing | If unset, emails use the existing deterministic content only |
+| `OPENROUTER_API_KEY` | Optional AI briefing and stock overview | If unset, AI features remain unavailable while deterministic content continues to work |
 | `OPENROUTER_MODEL` | Optional AI email briefing | Default `google/gemini-2.5-flash-lite`; choose a low-cost text model |
 | `OPENROUTER_SITE_URL` | Optional AI email briefing | Optional attribution URL; defaults to `SITE_URL` |
 | `OPENROUTER_APP_NAME` | Optional AI email briefing | Optional attribution name; defaults to `Tickr Digest` |
@@ -111,6 +116,7 @@ python3 -m venv .venv
 | `AI_SUMMARY_RETRIES` | Optional AI email briefing | Default `2`; retries transient or unusable responses with backoff |
 | `AI_SUMMARY_MAX_OUTPUT_TOKENS` | Optional AI email briefing | Default `1800` per ticker batch |
 | `AI_SUMMARY_MARKET_MAX_OUTPUT_TOKENS` | Optional AI email briefing | Default `400` for final headline and market context |
+| `AI_STOCK_OVERVIEW_MAX_OUTPUT_TOKENS` | Optional stock AI overview | Default `900` for one bounded, structured company overview |
 
 Copy from sibling `stock-news-bot/.env` via `./scripts/setup_vercel_env.sh`.
 

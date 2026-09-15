@@ -249,6 +249,7 @@ def _request_structured_json(
     max_tokens: int,
     parser: Callable[[Any], dict | None],
     system_prompt: str = SYSTEM_PROMPT,
+    retries: int | None = None,
 ) -> dict | None:
     request_body = {
         "model": OPENROUTER_MODEL,
@@ -268,7 +269,7 @@ def _request_structured_json(
         "X-Title": OPENROUTER_APP_NAME,
     }
 
-    retry_count = max(0, AI_SUMMARY_RETRIES)
+    retry_count = max(0, AI_SUMMARY_RETRIES if retries is None else retries)
     for attempt in range(retry_count + 1):
         retryable = True
         try:

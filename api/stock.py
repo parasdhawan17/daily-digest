@@ -7,6 +7,7 @@ from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 from api._responses import send_json, send_html
 from stock_news.stock_detail import StockDataError, get_data, validate_request
+from stock_news.stock_ai_overview import get_stock_ai_overview
 
 _env = Environment(loader=FileSystemLoader(Path(__file__).resolve().parent.parent / 'templates'),
                    autoescape=select_autoescape(['html']))
@@ -34,3 +35,25 @@ def handle_data(handler):
         send_json(handler, 200, payload, headers={'Cache-Control': f'public, max-age=0, s-maxage={ttl}'})
     except StockDataError as error:
         send_json(handler, error.status, {'ok': False, 'code': error.code, 'error': str(error)})
+
+
+def handle_ai(handler):
+    query = parse_qs(urlparse(handler.path).query)
+    symbol = (query.get('symbol') or [''])[0]
+    try:
+        symbol = validate_request(symbol)
+        core_payload, _ = get_data(symbol, 'core', '1yr', 'quarter_results',
+                                   os.environ.get('INDIANAPI_API_KEY', '').strip())
+        payload, ttl = get_stock_ai_overview(symbol, core_payload['data'])
+        if not payload:
+            send_json(handler, 503, {'ok': False, 'code': 'ai_unavailable',
+                                     'error': 'The AI overview is temporarily unavailable.'})
+            return
+        send_json(handler, 200, payload, headers={
+            'Cache-Control': f'public, max-age=0, s-maxage={ttl}, stale-while-revalidate=3600'
+        })
+    except StockDataError as error:
+        send_json(handler, error.status, {'ok': False, 'code': error.code, 'error': str(error)})
+    except Exception:
+        send_json(handler, 503, {'ok': False, 'code': 'ai_unavailable',
+                                 'error': 'The AI overview is temporarily unavailable.'})

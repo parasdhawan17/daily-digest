@@ -10,7 +10,11 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from api.auth import handle_auth
-from api.stock import handle_page as handle_stock_page, handle_data as handle_stock_data
+from api.stock import (
+    handle_ai as handle_stock_ai,
+    handle_page as handle_stock_page,
+    handle_data as handle_stock_data,
+)
 
 from api.digest import (
     handle_ai_post,
@@ -43,7 +47,7 @@ def route(handler: BaseHTTPRequestHandler) -> str | None:
     explicit = (query.get("route") or [""])[0].strip().lower()
     if explicit in ("auth-config", "auth-session", "auth-google", "auth-logout"):
         return explicit
-    if explicit in ("digest", "digest-data", "digest-ai", "subscription", "subscribe", "search", "validate", "stock", "stock-data"):
+    if explicit in ("digest", "digest-data", "digest-ai", "subscription", "subscribe", "search", "validate", "stock", "stock-data", "stock-ai"):
         return explicit
 
     normalized = request_path(handler).rstrip("/") or "/"
@@ -51,6 +55,8 @@ def route(handler: BaseHTTPRequestHandler) -> str | None:
         return 'stock'
     if normalized == '/api/stock-data':
         return 'stock-data'
+    if normalized == '/api/stock-ai':
+        return 'stock-ai'
     if normalized in ("/api/auth/config", "/api/auth/session", "/api/auth/google", "/api/auth/logout"):
         return "auth-" + normalized.rsplit("/", 1)[1]
     if normalized in ("/digest", "/api/digest", "/api/index"):
@@ -77,6 +83,8 @@ class handler(BaseHTTPRequestHandler):
             handle_stock_page(self)
         elif matched == 'stock-data':
             handle_stock_data(self)
+        elif matched == 'stock-ai':
+            handle_stock_ai(self)
         elif matched in ("auth-config", "auth-session"):
             handle_auth(self, matched[5:])
         elif matched == "digest":

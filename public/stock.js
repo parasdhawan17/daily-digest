@@ -4,7 +4,7 @@
   const $ = id => document.getElementById(id);
   const {number, fmt, money, pct, statementUnit, metricUnit, field, direction} = window.tickrStockFormat;
   const colors = ['#6f8aff', '#60b6b0', '#ce9c67', '#af8bcb', '#8093ac', '#ca8295'];
-  const labels = {mgmtEffectiveness: 'Management effectiveness', financialstrength: 'Financial strength', persharedata: 'Per-share data', priceandVolume: 'Price & volume', INC: 'Income statement', BAL: 'Balance sheet', CAS: 'Cash flow', isInId: 'ISIN', exchangeCodeBse: 'BSE code', exchangeCodeNse: 'NSE symbol', xdDate: 'Ex-date', yoy_results: 'Annual results', quarter_results: 'Quarterly results', balancesheet: 'Balance sheet', cashflow: 'Cash flow', ratios: 'Ratios', shareholding_pattern_quarterly: 'Quarterly ownership', shareholding_pattern_yearly: 'Yearly ownership', stockFinancialMap: 'Statements', qoQComp: 'Quarter-over-quarter comparison', yqoQComp: 'Year-over-year comparison'};
+  const labels = {mgmtEffectiveness: 'Management effectiveness', financialstrength: 'Financial strength', persharedata: 'Per-share data', priceandVolume: 'Price & volume', INC: 'Income statement', BAL: 'Balance sheet', CAS: 'Cash flow', isInId: 'ISIN', exchangeCodeBse: 'BSE code', exchangeCodeNse: 'NSE symbol', xdDate: 'Ex-date', yoy_results: 'Annual results', quarter_results: 'Quarterly results', balancesheet: 'Balance sheet', cashflow: 'Cash flow', ratios: 'Ratios', shareholding_pattern_quarterly: 'Quarterly ownership', shareholding_pattern_yearly: 'Yearly ownership', stockFinancialMap: 'Statements', qoQComp: 'Quarter-over-quarter comparison', yqoQComp: 'Year-over-year comparison', actions: 'Corporate actions', 'ai-overview': 'AI Overview'};
   Object.assign(labels, {bsePrice: 'BSE price (₹)', nsePrice: 'NSE price (₹)', stdDev: 'Standard deviation (provider units)',
     yhigh: '52-week high (₹)', ylow: '52-week low (₹)', high: 'Day high (₹)', low: 'Day low (₹)', close: 'Previous close (₹)', price: 'Price (₹)',
     percentChange: 'Change (%)', marketCap: 'Market cap (₹ cr)', pPerEBasicExcludingExtraordinaryItemsTTM: 'P/E · trailing 12 months (×)',
@@ -60,6 +60,16 @@
     const promise = fetch('/api/stock-data?' + key).then(async response => {
       const data = await response.json();
       if (!response.ok || !data.ok) throw new Error(data.error || 'Unable to load this section.');
+      return data;
+    }).catch(error => { requests.delete(key); throw error; });
+    requests.set(key, promise); return promise;
+  }
+  function requestAI() {
+    const key = 'ai-overview:' + symbol;
+    if (requests.has(key)) return requests.get(key);
+    const promise = fetch('/api/stock-ai?' + new URLSearchParams({symbol, schema: '2'})).then(async response => {
+      const data = await response.json();
+      if (!response.ok || !data.ok) throw new Error(data.error || 'Unable to generate the AI overview.');
       return data;
     }).catch(error => { requests.delete(key); throw error; });
     requests.set(key, promise); return promise;
@@ -159,6 +169,76 @@
       peers.append(details('Full peer metrics', dataView(core.peers)));
     } else peers.append(empty()); panel.append(peers);
   }
+  function aiEvidence(ids, sources) {
+    const links = node('span', 'stock-ai-evidence');
+    (ids || []).forEach(id => {
+      const source = sources.get(id); if (!source) return;
+      const link = node('a', '', id); link.href = '#' + source.section;
+      link.title = 'View source: ' + source.label;
+      link.setAttribute('aria-label', id + ': ' + source.label);
+      links.append(link);
+    });
+    return links;
+  }
+  function aiTone(value, fallback) { return ['positive', 'negative', 'caution', 'neutral'].includes(value) ? value : fallback; }
+  function aiSignal(item, sources, fallbackHeading, fallbackTone, lead) {
+    const tone = aiTone(item && item.tone, fallbackTone), signal = node('div', 'stock-ai-insight signal-' + tone);
+    const head = node('div', 'stock-ai-insight-head'), heading = node('h3', '', item && item.heading || fallbackHeading);
+    const toneLabel = node('span', 'stock-ai-tone', ({positive: 'Positive', negative: 'Negative', caution: 'Watch', neutral: 'Neutral'})[tone]);
+    head.append(heading, toneLabel);
+    const body = node('p', lead ? 'stock-ai-lead' : '', item && item.text || 'A reliable insight could not be generated.');
+    if (item) body.append(aiEvidence(item.evidence_ids, sources));
+    signal.append(head, body); return signal;
+  }
+  function aiInsightList(items, sources, emptyText, fallbackHeading, fallbackTone) {
+    if (!Array.isArray(items) || !items.length) return empty(emptyText || 'The available evidence does not support a reliable item here.');
+    const list = node('ul', 'stock-ai-list');
+    items.forEach(item => { const li = node('li'); li.append(aiSignal(item, sources, fallbackHeading, fallbackTone, false)); list.append(li); });
+    return list;
+  }
+  function renderAIOverview(panel, response) {
+    const data = response.data || {}, sources = new Map((data.sources || []).map(source => [source.id, source]));
+    const intro = card('The 60-second view', 'A concise synthesis of the latest available company evidence.'); intro.classList.add('stock-ai-summary');
+    intro.append(aiSignal(data.summary, sources, 'Overall picture', 'caution', true)); panel.append(intro);
+
+    const balance = node('div', 'stock-grid stock-ai-balance'), encouraging = card('What looks encouraging'), attention = card('What needs attention');
+    encouraging.classList.add('stock-ai-positive'); attention.classList.add('stock-ai-caution');
+    encouraging.append(aiInsightList(data.encouraging, sources, '', 'Positive signal', 'positive'));
+    attention.append(aiInsightList(data.attention, sources, '', 'Downside signal', 'negative'));
+    balance.append(encouraging, attention); panel.append(balance);
+
+    const changes = card('What changed recently', 'Only explicit period-over-period changes are included.');
+    changes.append(aiInsightList(data.changes, sources, 'No reliable period comparison was available.', 'Recent movement', 'caution')); panel.append(changes);
+
+    const outlook = node('div', 'stock-grid'), catalysts = card('Potential catalysts', 'Reported events, plans or developments—not predictions.'), risks = card('Key risks');
+    catalysts.classList.add('stock-ai-positive'); risks.classList.add('stock-ai-negative');
+    catalysts.append(aiInsightList(data.catalysts, sources, '', 'Potential catalyst', 'positive'));
+    risks.append(aiInsightList(data.risks, sources, '', 'Risk factor', 'negative'));
+    outlook.append(catalysts, risks); panel.append(outlook);
+
+    const watch = card('What to watch next', 'Measurable questions for future results and disclosures.');
+    watch.append(aiInsightList(data.watch_next, sources, '', 'Monitoring point', 'neutral')); panel.append(watch);
+
+    const sourceCard = card('Sources and freshness'); sourceCard.classList.add('stock-ai-sources');
+    const sourceList = node('ol');
+    (data.sources || []).forEach(source => { const item = node('li'), link = node('a', '', source.label); link.href = '#' + source.section; item.append(link, node('span', '', ' · ' + label(source.section))); sourceList.append(item); });
+    sourceCard.append(sourceList);
+    const coverage = response.coverage || {}, meta = node('p', 'stock-caption');
+    meta.textContent = 'Generated ' + stamp(data.generated_at) + ' · ' + fmt(coverage.sources) + ' evidence groups · ' + fmt(coverage.news_stories) + ' available news stories · Cached for up to 6 hours';
+    sourceCard.append(meta, node('p', 'stock-ai-disclaimer', 'AI-generated synthesis · Not investment advice · Coverage may be incomplete or delayed.'));
+    panel.append(sourceCard);
+  }
+  async function aiOverview() {
+    const panel = $('panel-ai-overview');
+    panel.replaceChildren(node('div', 'stock-state loading', 'Building a concise overview from the latest evidence…'));
+    panel.setAttribute('aria-busy', 'true');
+    try {
+      const response = await requestAI(); panel.replaceChildren(); renderAIOverview(panel, response);
+    } catch (error) {
+      const state = node('div', 'stock-state'); state.setAttribute('role', 'status'); state.append(node('p', '', error.message));
+      const retry = node('button', 'stock-retry', 'Try again'); retry.type = 'button'; retry.onclick = aiOverview; state.append(retry); panel.replaceChildren(state);
+    } finally { panel.removeAttribute('aria-busy'); }
+  }
   function periodSort(a, b) { const aa = Date.parse('1 ' + a), bb = Date.parse('1 ' + b); return Number.isFinite(aa) && Number.isFinite(bb) ? aa - bb : a.localeCompare(b); }
   function historyTable(target, data, series) {
     const rows = Object.entries(data || {}).filter(([, v]) => v && typeof v === 'object' && !Array.isArray(v));
@@ -248,7 +328,7 @@
       if (story.summary) body.append(node('p', '', story.summary)); c.append(body); grid.append(c);
     }); panel.append(core.news.length ? grid : empty('No recent company stories are available.'));
   }
-  const built = new Set(); const builders = {overview, financials, ownership, analysis, actions, news};
+  const built = new Set(); const builders = {overview, 'ai-overview': aiOverview, financials, ownership, analysis, actions, news};
   function activate(id, focus) {
     if (!builders[id]) id = 'overview';
     document.querySelectorAll('[data-tab]').forEach(tab => { const selected = tab.dataset.tab === id; tab.setAttribute('aria-selected', String(selected)); tab.tabIndex = selected ? 0 : -1; $('panel-' + tab.dataset.tab).hidden = !selected; });
