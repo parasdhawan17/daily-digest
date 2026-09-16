@@ -83,7 +83,9 @@
       </div>
       {% if section.market == 'IN' %}
       <div class="indian-dashboard" data-indian-dashboard data-symbol="{{ section.ticker }}">
-        <div class="indian-dashboard-loading" role="status">Loading your selected research cards…</div>
+        <div class="indian-dashboard-loading" role="status" aria-label="Loading your selected research cards">
+          <span class="dashboard-shimmer-line"></span><span class="dashboard-shimmer-line is-short"></span><span class="dashboard-shimmer-block"></span>
+        </div>
       </div>
       <noscript><style>.indian-dashboard{display:none}.indian-dashboard-fallback[hidden]{display:block}</style></noscript>
       {% endif %}

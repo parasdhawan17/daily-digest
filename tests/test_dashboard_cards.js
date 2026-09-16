@@ -18,6 +18,7 @@ class Element {
     this.childElementCount = 0;
   }
   append(...children) {
+    children.forEach(child => { if (child instanceof Element) child.parent = this; });
     this.children.push(...children);
     this.childElementCount = this.children.filter(child => child instanceof Element).length;
   }
@@ -30,7 +31,7 @@ class Element {
   }
   addEventListener() {}
   click() { if (this.onclick) this.onclick(); }
-  remove() {}
+  remove() { if (this.parent) { this.parent.children = this.parent.children.filter(child => child !== this); this.parent.childElementCount = this.parent.children.filter(child => child instanceof Element).length; this.parent = null; } }
 }
 
 function descendants(node, predicate) {
@@ -93,4 +94,32 @@ test('every selectable Indian dashboard card renders without a fallback or excep
   assert.ok(descendants(card('analysis_price_target_summary'), node => node.className === 'dashboard-metrics').length);
   assert.ok(descendants(card('news_company_coverage'), node => node.className === 'dashboard-news-card').length);
   assert.equal(descendants(root, node => node.className === 'dashboard-card-state' && /is not defined|cannot read|could not load/i.test(node.textContent || '')).length, 0);
+});
+
+test('pending tab cards shimmer until their request settles', async () => {
+  const root = new Element(); root.dataset.symbol = 'IN:INFY';
+  const section = new Element(); section.append(root);
+  const container = new Element(); container.dataset.dashboardCards = JSON.stringify(['analysis_price_target_summary']);
+  let resolveTargets;
+  const targets = new Promise(resolve => { resolveTargets = resolve; });
+  const document = {
+    createElement: tag => new Element(tag),
+    createElementNS: (_, tag) => new Element(tag),
+    createTextNode: text => String(text),
+    querySelectorAll: selector => selector === '.ticker-section' ? [section] : [],
+    getElementById: id => id === 'digest-sections' ? container : null
+  };
+  vm.runInNewContext(source, {document, Node: Element, URL, URLSearchParams, Intl, Map, Set, Array, Object, Number, String, Date, Math, console,
+    window: {tickrStockFormat: format},
+    fetch: url => url === '/dashboard-catalog.json' ? Promise.resolve({json: async () => catalog})
+      : url.includes('section=targets') ? targets
+      : Promise.resolve({json: async () => ({ok: true, data: mockData('core')})})});
+  for (let i = 0; i < 4; i++) await new Promise(resolve => setImmediate(resolve));
+  const card = descendants(root, node => node.dataset.card === 'analysis_price_target_summary')[0];
+  assert.ok(card);
+  assert.equal(descendants(card, node => node.className === 'dashboard-shimmer').length, 1);
+  resolveTargets({json: async () => ({ok: true, data: mockData('targets')})});
+  for (let i = 0; i < 4; i++) await new Promise(resolve => setImmediate(resolve));
+  assert.equal(descendants(card, node => node.className === 'dashboard-shimmer').length, 0);
+  assert.equal(descendants(card, node => node.className === 'dashboard-metrics').length, 1);
 });

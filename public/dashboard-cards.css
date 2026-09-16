@@ -101,3 +101,12 @@ html[data-theme=dark] .indian-dashboard{--signal-green:#57bb93;--signal-strong-g
 @media(max-width:760px){.indian-dashboard .dashboard-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.indian-dashboard .dashboard-news-grid{grid-template-columns:1fr}.indian-dashboard .dashboard-ai-sources{columns:1}}
 @media(max-width:600px){.indian-dashboard .dashboard-mini-table th,.indian-dashboard .dashboard-mini-table td{padding:7px 9px}.indian-dashboard .dashboard-news-card img{height:120px}}
 @media(prefers-reduced-motion:reduce){.indian-dashboard *{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+
+/* Shimmer placeholders retain each card's layout while its data request is pending. */
+.indian-dashboard-loading,.dashboard-shimmer{display:grid;gap:10px;min-height:110px;align-content:start}
+.indian-dashboard-loading{padding:16px;border-style:solid;text-align:left}
+.dashboard-shimmer{padding-top:4px}
+.dashboard-shimmer-line,.dashboard-shimmer-block{display:block;border-radius:5px;background:linear-gradient(100deg,var(--muted-bg) 20%,var(--border-soft) 48%,var(--muted-bg) 76%);background-size:200% 100%;animation:dashboard-shimmer 1.5s ease-in-out infinite}
+.dashboard-shimmer-line{width:75%;height:12px}.dashboard-shimmer-line.is-short{width:45%}.dashboard-shimmer-block{width:100%;height:54px;margin-top:3px}
+@keyframes dashboard-shimmer{to{background-position-x:-200%}}
+@media(prefers-reduced-motion:reduce){.dashboard-shimmer-line,.dashboard-shimmer-block{animation:none}}
