@@ -19,7 +19,7 @@
   function ai(symbol) {
     var key='ai:'+symbol;if(!requests.has(key))requests.set(key,fetch('/api/stock-ai?'+new URLSearchParams({symbol:symbol,schema:'2'})).then(function(r){return r.json();}).then(function(data){if(!data.ok)throw new Error(data.error||'AI unavailable');return data.data;}));return requests.get(key);
   }
-  function card(meta, wide) { var node=el('article','dashboard-card'+(wide?' is-wide':''));node.dataset.card=meta.id;node.append(el('h3','',meta.title),el('p','dashboard-card-caption',meta.description));return node; }
+  function card(meta, wide) { var node=el('article','dashboard-card'+(wide?' is-wide':''));node.dataset.card=meta.id;if(meta.id==='ai_company_summary')node.classList.add('dashboard-ai-summary');if(['ai_encouraging_signals','ai_potential_catalysts'].indexOf(meta.id)>=0)node.classList.add('dashboard-ai-positive');if(['ai_attention_signals','ai_recent_changes'].indexOf(meta.id)>=0)node.classList.add('dashboard-ai-caution');if(meta.id==='ai_key_risks')node.classList.add('dashboard-ai-negative');node.append(el('h3','',meta.title),el('p','dashboard-card-caption',meta.description));return node; }
   function state(node,message){node.append(el('p','dashboard-card-state',message||'Not available for this company.'));}
   function list(object, limit) {
     var dl=el('dl','dashboard-data-list'), entries=[];
@@ -61,8 +61,8 @@
     if(id==='financial_statement_cash_flow')return statement(node,core,'CAS');
     if(id==='financial_provider_metrics')return generic(node,core.metrics);
     if(id==='financial_additional_data')return generic(node,core.additional_financials);
-    if(id==='ownership_current_mix'){var values={};(core.ownership||[]).forEach(function(group){var rows=group.categories||[];var latest=rows[rows.length-1]||{};values[group.displayName||group.categoryName]=latest.percentage;});return generic(node,values);}
-    if(id==='ownership_detail')return generic(node,core.ownership);
+    if(id==='ownership_current_mix')return ownershipMix(node,core);
+    if(id==='ownership_detail')return ownershipDetail(node,core);
     if(id==='analysis_analyst_consensus')return generic(node,core.ratings);
     if(id==='analysis_rating_history')return generic(node,core.ratings);
     if(id==='analysis_recommendation_summary')return generic(node,core.recommendations);
@@ -80,27 +80,71 @@
     if(id==='news_company_coverage'){if(!(core.news||[]).length){state(node,'No recent company coverage is available.');return;}(core.news||[]).slice(0,8).forEach(function(story){var item=el('div','dashboard-story'),a=el('a','',story.headline||'Company news');if(story.url){a.href=story.url;a.target='_blank';a.rel='noopener noreferrer';}item.append(a);if(story.summary)item.append(el('p','',story.summary));node.append(item);});return;}
     state(node);
   }
-  function historyCard(meta,node,symbol,series){api(symbol,'financials',{series:series}).then(function(data){generic(node,data);}).catch(function(e){state(node,e.message);});}
+  function historyCard(meta,node,symbol,series){
+    var rows,periods,selection,content=el('div'),controls=el('div','stock-controls'),select=el('select','dashboard-series-select');
+    select.setAttribute('aria-label',meta.title+' series');
+    node.append(controls,content);
+    api(symbol,'financials',{series:series}).then(function(data){
+      rows=Object.entries(data||{}).filter(function(pair){return pair[1]&&typeof pair[1]==='object'&&!Array.isArray(pair[1]);});
+      periods=Array.from(new Set(rows.flatMap(function(pair){return Object.keys(pair[1]);}))).sort(function(a,b){return Date.parse('1 '+a)-Date.parse('1 '+b);});
+      if(!rows.length||!periods.length){state(content);return;}
+      rows.forEach(function(pair,index){var option=el('option','',pair[0]);option.value=index;select.append(option);});
+      select.value=String(Math.max(0,rows.findIndex(function(pair){return /^(Sales|Net Profit|Cash from Operating Activity|Promoters|ROCE %|Total Assets)$/i.test(pair[0]);})));
+      controls.append(select);
+      function display(){
+        content.replaceChildren();selection=rows[Number(select.value)];var owner=series.indexOf('shareholding')===0,ratio=series==='ratios',unit=owner?(/shareholder/i.test(selection[0])?'holders':'%'):ratio?(/%/.test(selection[0])?'%':'days'):/EPS/i.test(selection[0])?'₹':'₹ cr';
+        var points=periods.map(function(period){var date=Date.parse('1 '+period);return [Number.isFinite(date)?new Date(date).toISOString().slice(0,10):'',selection[1][period]];}).filter(function(point){return point[0]&&num(point[1])!==null;});
+        if(points.length)renderPriceChart(content,[{metric:selection[0],label:selection[0],values:points}],selection[0]+' history',unit);
+        var disclosure=el('details','dashboard-detail');disclosure.append(el('summary','','View chart data'));
+        var wrap=el('div','dashboard-table-wrap'),table=el('table','dashboard-mini-table'),head=el('thead'),tr=el('tr'),body=el('tbody');
+        ['Metric'].concat(periods.slice().reverse()).forEach(function(value){tr.append(el('th','',value));});head.append(tr);
+        rows.forEach(function(pair){var row=el('tr'),rowUnit=owner?(/shareholder/i.test(pair[0])?'holders':'%'):ratio?(/%/.test(pair[0])?'%':'days'):/%|margin/i.test(pair[0])?'%':/EPS/i.test(pair[0])?'₹':'₹ cr';row.append(el('td','',pair[0]+' ('+rowUnit+')'));periods.slice().reverse().forEach(function(period){row.append(el('td','',fmt(pair[1][period])));});body.append(row);});table.append(head,body);wrap.append(table);disclosure.append(wrap);content.append(disclosure);
+      }
+      select.onchange=display;display();
+    }).catch(function(e){state(content,e.message);});
+  }
+  function ownershipMix(node,core){
+    var groups=core.ownership||[],dates=groups.flatMap(function(group){return (group.categories||[]).map(function(row){return row.holdingDate;});}).filter(Boolean).sort(),latest=dates[dates.length-1];
+    if(!latest){state(node);return;}
+    node.append(el('p','dashboard-ownership-date','As of '+chartDate(latest)));
+    var colors=['#6f8aff','#60b6b0','#ce9c67','#af8bcb','#8093ac','#ca8295'],strip=el('div','dashboard-stacked-bar'),bars=el('div','dashboard-bars');
+    var values=groups.map(function(group){return {label:group.displayName||group.categoryName,value:num(((group.categories||[]).find(function(row){return row.holdingDate===latest;})||{}).percentage)};}).filter(function(row){return row.value!==null;});
+    var total=values.reduce(function(sum,row){return sum+Math.max(0,row.value);},0);
+    values.forEach(function(row,index){var segment=el('span');segment.style.width=(total?Math.max(0,row.value)/total*100:0)+'%';segment.style.background=colors[index%colors.length];segment.title=row.label+': '+fmt(row.value)+'%';strip.append(segment);
+      var item=el('div'),heading=el('div','dashboard-bar-label'),track=el('div','dashboard-bar-track'),fill=el('div','dashboard-bar-fill');heading.append(el('span','',row.label),el('strong','',fmt(row.value)+'%'));fill.style.width=Math.max(0,Math.min(100,row.value))+'%';fill.style.background=colors[index%colors.length];track.append(fill);item.append(heading,track);bars.append(item);});node.append(strip,bars);
+  }
+  function ownershipDetail(node,core){
+    if(!(core.ownership||[]).length){state(node);return;}
+    core.ownership.forEach(function(group){var detail=el('details','dashboard-detail'),body=el('div'),table=simpleTable(group.categories||[]);detail.append(el('summary','',group.categoryName||group.displayName));if(table)body.append(table);else state(body);detail.append(body);node.append(detail);});
+  }
   var svgNS='http://www.w3.org/2000/svg';
   function svgEl(tag,attrs,content){var n=document.createElementNS(svgNS,tag);Object.keys(attrs||{}).forEach(function(k){n.setAttribute(k,attrs[k]);});if(content!==undefined)n.textContent=content;return n;}
   function chartDate(value){var d=new Date(value);return Number.isNaN(+d)?String(value):d.toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});}
-  function renderPriceChart(target,datasets){
+  function renderPriceChart(target,datasets,title,unit){
     var series=(datasets||[]).filter(function(s){return Array.isArray(s.values);}).map(function(s){return {metric:s.metric,label:s.label||s.metric,values:s.values.filter(function(v){return Array.isArray(v)&&num(v[1])!==null&&Number.isFinite(Date.parse(v[0]));}).map(function(v){return [v[0],num(v[1])];}).sort(function(a,b){return Date.parse(a[0])-Date.parse(b[0]);})};}).filter(function(s){return s.values.length;});
     var price=series.find(function(s){return s.metric==='Price';})||series.find(function(s){return s.metric!=='Volume';});if(!price||price.values.length<2){state(target,'No history is available for this range.');return;}
-    var rising=price.values[price.values.length-1][1]>=price.values[0][1],color=rising?'var(--pill-up-fg)':'var(--pill-down-fg)',W=720,H=245,left=58,right=12,top=18,bottom=171,plotW=W-left-right;
+    var rising=price.values[price.values.length-1][1]>=price.values[0][1],color=price.metric==='Price'?(rising?'var(--pill-up-fg)':'var(--pill-down-fg)'):'#6f8aff',W=720,H=245,left=58,right=12,top=18,bottom=171,plotW=W-left-right;
     var lines=series.filter(function(s){return s.metric!=='Volume';}),all=[];lines.forEach(function(s){s.values.forEach(function(v){all.push(v[1]);});});var low=Math.min.apply(Math,all),high=Math.max.apply(Math,all),pad=(high-low)*.08||Math.abs(high)*.05||1;low-=pad;high+=pad;
     var dates=[];series.forEach(function(s){s.values.forEach(function(v){dates.push(Date.parse(v[0]));});});var start=Math.min.apply(Math,dates),end=Math.max.apply(Math,dates),x=function(v){return left+(Date.parse(v)-start)/(end-start||1)*plotW;},y=function(v){return bottom-(v-low)/(high-low)*(bottom-top);};
-    var svg=svgEl('svg',{viewBox:'0 0 '+W+' '+H,class:'stock-chart',tabindex:'0',role:'img','aria-label':'Price history. Use left and right arrows to explore values.'});svg.append(svgEl('title',{},'Price history'));
+    var svg=svgEl('svg',{viewBox:'0 0 '+W+' '+H,class:'stock-chart',tabindex:'0',role:'img','aria-label':(title||'Price history')+'. Use left and right arrows to explore values.'});svg.append(svgEl('title',{},title||'Price history'));
     for(var i=0;i<5;i++){var value=low+(high-low)*i/4,yy=y(value);svg.append(svgEl('line',{x1:left,y1:yy,x2:W-right,y2:yy,class:'grid-line'}),svgEl('text',{x:left-8,y:yy+3,'text-anchor':'end'},new Intl.NumberFormat('en-IN',{notation:'compact',maximumFractionDigits:1}).format(value)));}
     var volume=series.find(function(s){return s.metric==='Volume';});if(volume){var max=Math.max.apply(Math,volume.values.map(function(v){return v[1];}).concat([1]));volume.values.forEach(function(v){svg.append(svgEl('rect',{x:x(v[0]),y:215-v[1]/max*24,width:Math.max(.7,Math.min(6,plotW/volume.values.length*.7)),height:v[1]/max*24,class:'volume-bar'}));});}
     lines.forEach(function(s,index){svg.append(svgEl('path',{d:s.values.map(function(v,j){return (j?'L':'M')+x(v[0]).toFixed(2)+','+y(v[1]).toFixed(2);}).join(' '),fill:'none',stroke:s===price?color:'#6f8aff','stroke-width':s===price?2.5:1.3,'stroke-dasharray':s===price?'':'5 4'}));});[0,.5,1].forEach(function(t){svg.append(svgEl('text',{x:left+plotW*t,y:H-7,'text-anchor':t===0?'start':t===1?'end':'middle'},chartDate(new Date(start+(end-start)*t).toISOString())));});
     var cursor=svgEl('line',{x1:0,y1:top,x2:0,y2:217,stroke:'var(--text-muted)','stroke-dasharray':'3 3',visibility:'hidden'}),dot=svgEl('circle',{r:4,fill:color,visibility:'hidden'});svg.append(cursor,dot);var readout=el('p','stock-chart-readout'),active=price.values.length-1;
-    function inspect(index){active=Math.max(0,Math.min(price.values.length-1,index));var point=price.values[active];cursor.setAttribute('x1',x(point[0]));cursor.setAttribute('x2',x(point[0]));cursor.setAttribute('visibility','visible');dot.setAttribute('cx',x(point[0]));dot.setAttribute('cy',y(point[1]));dot.setAttribute('visibility','visible');readout.textContent=chartDate(point[0])+' · '+price.label+' '+money(point[1]);}
+    function inspect(index){active=Math.max(0,Math.min(price.values.length-1,index));var point=price.values[active];cursor.setAttribute('x1',x(point[0]));cursor.setAttribute('x2',x(point[0]));cursor.setAttribute('visibility','visible');dot.setAttribute('cx',x(point[0]));dot.setAttribute('cy',y(point[1]));dot.setAttribute('visibility','visible');readout.textContent=chartDate(point[0])+' · '+price.label+' '+(unit&&unit!=='₹'?fmt(point[1])+' '+unit:money(point[1]));}
     svg.addEventListener('pointermove',function(event){var rect=svg.getBoundingClientRect(),relative=(event.clientX-rect.left)/rect.width*W,best=0;price.values.forEach(function(v,i){if(Math.abs(x(v[0])-relative)<Math.abs(x(price.values[best][0])-relative))best=i;});inspect(best);});svg.addEventListener('keydown',function(event){if(['ArrowLeft','ArrowRight','Home','End'].indexOf(event.key)>=0){event.preventDefault();inspect(event.key==='Home'?0:event.key==='End'?price.values.length-1:active+(event.key==='ArrowLeft'?-1:1));}});
-    var legend=el('div','stock-chart-legend');series.forEach(function(s){var item=el('span','',s.label);item.style.setProperty('--series-color',s.metric==='Volume'?'var(--link)':s===price?color:'#6f8aff');legend.append(item);});var change=(price.values[price.values.length-1][1]/price.values[0][1]-1)*100,indicator=el('span','stock-indicator '+(change>=0?'positive':'negative'),pct(change)+' over selected range');legend.append(indicator);target.append(readout,svg,legend);inspect(active);
+    var legend=el('div','stock-chart-legend');series.forEach(function(s){var item=el('span','',s.label);item.style.setProperty('--series-color',s.metric==='Volume'?'var(--link)':s===price?color:'#6f8aff');legend.append(item);});if(price.metric==='Price'&&price.values[0][1]>0){var change=(price.values[price.values.length-1][1]/price.values[0][1]-1)*100,indicator=el('span','stock-indicator '+(change>=0?'positive':'negative'),pct(change)+' over selected range');legend.append(indicator);}target.append(readout,svg,legend);inspect(active);
   }
   function priceHistory(meta,node,symbol){var controls=el('div','stock-controls'),target=el('div');[['1m','1M'],['6m','6M'],['1yr','1Y'],['3yr','3Y'],['5yr','5Y'],['10yr','10Y'],['max','Max']].forEach(function(pair){var button=el('button','',pair[1]);button.type='button';button.setAttribute('aria-pressed',String(pair[0]==='1yr'));button.onclick=function(){Array.from(controls.children).forEach(function(b){b.setAttribute('aria-pressed',String(b===button));});target.replaceChildren(el('p','dashboard-card-state','Loading history…'));api(symbol,'history',{period:pair[0]}).then(function(data){target.replaceChildren();renderPriceChart(target,data.datasets);}).catch(function(e){target.replaceChildren();state(target,e.message);});};controls.append(button);});node.append(controls,target);controls.querySelector('[aria-pressed=true]').click();}
-  function aiCard(meta,node,symbol){ai(symbol).then(function(data){var map={ai_company_summary:data.summary,ai_encouraging_signals:data.encouraging,ai_attention_signals:data.attention,ai_recent_changes:data.changes,ai_potential_catalysts:data.catalysts,ai_key_risks:data.risks,ai_watch_next:data.watch_next,ai_sources_freshness:data.sources};var value=map[meta.id];if(Array.isArray(value)){value.forEach(function(item){var box=el('div','dashboard-story');if(item.tone)box.append(el('span','dashboard-ai-tone',item.tone));box.append(el('p','dashboard-ai-text',item.text||item.label||item.heading||JSON.stringify(item)));node.append(box);});if(!value.length)state(node);return;}if(value&&typeof value==='object'){if(value.tone)node.append(el('span','dashboard-ai-tone',value.tone));node.append(el('p','dashboard-ai-text',value.text||value.heading||'No reliable summary is available.'));return;}generic(node,value);}).catch(function(e){state(node,e.message);});}
+  function aiCard(meta,node,symbol){ai(symbol).then(function(data){
+    var map={ai_company_summary:data.summary,ai_encouraging_signals:data.encouraging,ai_attention_signals:data.attention,ai_recent_changes:data.changes,ai_potential_catalysts:data.catalysts,ai_key_risks:data.risks,ai_watch_next:data.watch_next,ai_sources_freshness:data.sources},value=map[meta.id];
+    if(meta.id==='ai_sources_freshness'){var sources=el('ol','dashboard-ai-sources');(data.sources||[]).forEach(function(source){var item=el('li'),link=el('a','',source.label||source.id);link.href='/stocks/'+encodeURIComponent(symbol).replace('%3A',':')+'#'+encodeURIComponent(source.section||'overview');item.append(link);sources.append(item);});if(sources.childElementCount)node.append(sources);else state(node);return;}
+    var fallback={ai_company_summary:['Overall picture','caution'],ai_encouraging_signals:['Positive signal','positive'],ai_attention_signals:['Downside signal','negative'],ai_recent_changes:['Recent movement','caution'],ai_potential_catalysts:['Potential catalyst','positive'],ai_key_risks:['Risk factor','negative'],ai_watch_next:['Monitoring point','neutral']}[meta.id]||['Insight','neutral'];
+    function insight(item){var tone=['positive','negative','caution','neutral'].indexOf(item.tone)>=0?item.tone:fallback[1],box=el('div','dashboard-ai-insight signal-'+tone),head=el('div','dashboard-ai-insight-head'),heading=el('h4','',item.heading||fallback[0]),badge=el('span','dashboard-ai-tone',({positive:'Positive',negative:'Negative',caution:'Watch',neutral:'Neutral'})[tone]),body=el('p','dashboard-ai-text',item.text||'A reliable insight could not be generated.');head.append(heading,badge);
+      var evidence=el('span','dashboard-ai-evidence');(item.evidence_ids||[]).forEach(function(id){var source=(data.sources||[]).find(function(entry){return entry.id===id;});if(!source)return;var link=el('a','',id);link.href='/stocks/'+encodeURIComponent(symbol).replace('%3A',':')+'#'+encodeURIComponent(source.section||'overview');link.title='View source: '+source.label;link.setAttribute('aria-label',id+': '+source.label);evidence.append(link);});body.append(evidence);box.append(head,body);return box;}
+    if(Array.isArray(value)){if(!value.length){state(node);return;}value.forEach(function(item){node.append(insight(item));});return;}
+    if(value&&typeof value==='object'){node.append(insight(value));return;}state(node);
+  }).catch(function(e){state(node,e.message);});}
   function renderCard(meta,node,core,symbol){
     var id=meta.id;if(id==='ai_watchlist_briefing'){state(node,'Shown once above your stock list.');return;}
     if(id.indexOf('ai_')===0){aiCard(meta,node,symbol);return;}
@@ -117,7 +161,7 @@
     Promise.all([catalogPromise,api(symbol,'core')]).then(function(values){var catalog=values[0],core=values[1],categories=catalog.categories.map(function(category){return {category:category,cards:category.cards.filter(function(card){return selected.indexOf(card.id)>=0&&card.id!=='ai_watchlist_briefing';})};}).filter(function(item){return item.cards.length;});
       root.replaceChildren();if(!categories.length){state(root,'No company cards selected. Customize your dashboard to add some.');return;}
       var tabs=el('div','dashboard-category-tabs');tabs.setAttribute('role','tablist');var panels=el('div');
-      function activate(index){Array.from(tabs.children).forEach(function(tab,i){tab.setAttribute('aria-selected',String(i===index));tab.tabIndex=i===index?0:-1;});Array.from(panels.children).forEach(function(panel,i){panel.hidden=i!==index;if(i===index&&!panel.dataset.loaded){panel.dataset.loaded='true';var grid=el('div','dashboard-card-grid');categories[i].cards.forEach(function(meta){var node=card(meta,['overview_price_history','overview_peer_comparison','news_company_coverage','financial_provider_metrics','financial_additional_data'].indexOf(meta.id)>=0);grid.append(node);renderCard(meta,node,core,symbol);});panel.append(grid);}});}
+      function activate(index){Array.from(tabs.children).forEach(function(tab,i){tab.setAttribute('aria-selected',String(i===index));tab.tabIndex=i===index?0:-1;});Array.from(panels.children).forEach(function(panel,i){panel.hidden=i!==index;if(i===index&&!panel.dataset.loaded){panel.dataset.loaded='true';var grid=el('div','dashboard-card-grid');categories[i].cards.forEach(function(meta){var wide=['overview_price_history','overview_peer_comparison','news_company_coverage','financial_provider_metrics','financial_additional_data','ai_company_summary','ownership_current_mix','ownership_detail','financial_quarterly_results','financial_annual_results','financial_balance_sheet_history','financial_cash_flow_history','financial_ratios_history','ownership_quarterly_history','ownership_annual_history'].indexOf(meta.id)>=0, node=card(meta,wide);grid.append(node);renderCard(meta,node,core,symbol);});panel.append(grid);}});}
       categories.forEach(function(item,index){var tab=el('button','dashboard-category-tab',item.category.title);tab.type='button';tab.setAttribute('role','tab');tab.onclick=function(){activate(index);};tab.onkeydown=function(event){var next=event.key==='ArrowRight'?(index+1)%categories.length:event.key==='ArrowLeft'?(index+categories.length-1)%categories.length:-1;if(next>=0){event.preventDefault();activate(next);tabs.children[next].focus();}};tabs.append(tab);var panel=el('section','dashboard-category-panel');panel.setAttribute('role','tabpanel');panels.append(panel);});root.append(tabs,panels);activate(0);
     }).catch(function(error){root.replaceChildren();state(root,error.message||'Could not load your selected cards.');});
   }
