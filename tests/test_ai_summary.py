@@ -351,19 +351,18 @@ class AiSummaryTest(unittest.TestCase):
                 "ticker_summaries": {"US:AAPL": "Apple summary."},
             },
         )
-        self.assertIn("AI briefing", html)
-        self.assertIn('class="ai-panel"', html)
+        self.assertNotIn('class="ai-panel"', html)
+        self.assertNotIn("Shared context.", html)
         self.assertIn('bgcolor="#eeeafe"', html)
         self.assertIn('class="ticker-ai-panel"', html)
         self.assertEqual(html.count("Open full digest"), 2)
         self.assertIn("Open my full digest", html)
         self.assertIn("Your closing briefing", html)
-        self.assertLess(html.index("Shared context."), html.index("Apple expands services offering"))
         self.assertIn("$200.00", html)
         self.assertIn("+1.20% today", html)
         self.assertIn("$200.00  +1.20% today", text)
         self.assertIn("Apple summary.", html)
-        self.assertIn("=== AI BRIEFING ===", text)
+        self.assertNotIn("=== AI BRIEFING ===", text)
         self.assertIn("AI brief: Apple summary.", text)
         self.assertEqual(subject, "US Post-Market • Cloud and services demand shape today’s market")
 
@@ -382,8 +381,8 @@ class AiSummaryTest(unittest.TestCase):
                 },
             },
         )
-        self.assertIn('aria-label="AI briefing"', html)
-        self.assertIn("Shared context.", html)
+        self.assertNotIn('aria-label="AI briefing"', html)
+        self.assertNotIn("Shared context.", html)
         self.assertEqual(html.count("<strong>AI brief</strong>"), 2)
         self.assertIn("Apple summary.", html)
         self.assertIn("Microsoft summary.", html)
@@ -391,10 +390,7 @@ class AiSummaryTest(unittest.TestCase):
     def test_web_ai_briefs_use_compact_text_sizes(self) -> None:
         html = build_web_digest([], [])
 
-        self.assertRegex(
-            html,
-            re.compile(r"\.ai-briefing-context\s*\{.*?font-size:\s*11px;", re.DOTALL),
-        )
+        self.assertNotIn(".ai-briefing-context", html)
         self.assertRegex(
             html,
             re.compile(r"\.ticker-ai-brief\s*\{.*?font-size:\s*12px;", re.DOTALL),

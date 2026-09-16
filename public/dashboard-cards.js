@@ -152,7 +152,7 @@
     if(value&&typeof value==='object'){node.append(insight(value));return;}state(node);
   }).catch(function(e){state(node,e.message);});}
   function renderCard(meta,node,core,symbol){
-    var id=meta.id;if(id==='ai_watchlist_briefing'){state(node,'Shown once above your stock list.');return;}
+    var id=meta.id;
     if(id.indexOf('ai_')===0)return aiCard(meta,node,symbol);
     if(id==='overview_price_history')return priceHistory(meta,node,symbol);
     var series={financial_quarterly_results:'quarter_results',financial_annual_results:'yoy_results',financial_balance_sheet_history:'balancesheet',financial_cash_flow_history:'cashflow',financial_ratios_history:'ratios',ownership_quarterly_history:'shareholding_pattern_quarterly',ownership_annual_history:'shareholding_pattern_yearly'}[id];
@@ -164,7 +164,7 @@
   function setup(section) {
     var root=section&&section.querySelector('[data-indian-dashboard]');if(!root||root.dataset.ready)return;root.dataset.ready='true';var symbol=root.dataset.symbol;
     var container=document.getElementById('digest-sections'),selected=JSON.parse(container&&container.dataset.dashboardCards||'[]');
-    Promise.all([catalogPromise,api(symbol,'core')]).then(function(values){var catalog=values[0],core=values[1],categories=catalog.categories.map(function(category){return {category:category,cards:category.cards.filter(function(card){return selected.indexOf(card.id)>=0&&card.id!=='ai_watchlist_briefing';})};}).filter(function(item){return item.cards.length;});
+    Promise.all([catalogPromise,api(symbol,'core')]).then(function(values){var catalog=values[0],core=values[1],categories=catalog.categories.map(function(category){return {category:category,cards:category.cards.filter(function(card){return selected.indexOf(card.id)>=0;})};}).filter(function(item){return item.cards.length;});
       root.replaceChildren();if(!categories.length){state(root,'No company cards selected. Customize your dashboard to add some.');return;}
       var tabs=el('div','dashboard-category-tabs');tabs.setAttribute('role','tablist');var panels=el('div');
       function activate(index){Array.from(tabs.children).forEach(function(tab,i){tab.setAttribute('aria-selected',String(i===index));tab.tabIndex=i===index?0:-1;});Array.from(panels.children).forEach(function(panel,i){panel.hidden=i!==index;if(i===index&&!panel.dataset.loaded){panel.dataset.loaded='true';var grid=el('div','dashboard-card-grid');categories[i].cards.forEach(function(meta){var wide=['overview_price_history','overview_peer_comparison','news_company_coverage','ai_company_summary','ai_sources_freshness','analysis_rating_history','analysis_price_target_summary','analysis_price_target_history','analysis_eps_forecasts','analysis_market_snapshot'].indexOf(meta.id)>=0||['financial_','ownership_','actions_'].some(function(prefix){return meta.id.indexOf(prefix)===0;}),node=card(meta,wide),placeholder=meta.id==='overview_price_history'?null:shimmer(node);grid.append(node);Promise.resolve(renderCard(meta,node,core,symbol)).then(function(){if(placeholder)placeholder.remove();});});panel.append(grid);}});}

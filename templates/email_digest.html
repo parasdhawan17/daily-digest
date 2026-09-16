@@ -26,9 +26,7 @@
       .text-secondary { color: #a9b7c6 !important; }
       .text-muted { color: #8999ac !important; }
       .link-primary { color: #8ea2ff !important; }
-      .ai-panel { background-color: #29294d !important; border-color: #8ea2ff !important; }
       .ticker-ai-panel { background-color: #29294d !important; border-color: #8ea2ff !important; }
-      .ai-copy { color: #ded9ff !important; }
       .ai-label { color: #b8a7ff !important; }
       .price-up { color: #4adea3 !important; }
       .price-down { color: #fb8290 !important; }
@@ -46,7 +44,7 @@
   <!--[if mso]><style>body, table, td { font-family: Arial, Helvetica, sans-serif !important; }</style><![endif]-->
 </head>
 <body class="email-body" style="margin:0;padding:0;background-color:#f5f7fb;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#132238;">
-  <div style="display:none;font-size:1px;color:#f5f7fb;line-height:1px;max-height:0;max-width:0;opacity:0;overflow:hidden;">{% if ai_summary %}Your watchlist’s AI briefing and company news.{% else %}Company news for your watchlist.{% endif %} Open the full digest for prices, earnings, and more.</div>
+  <div style="display:none;font-size:1px;color:#f5f7fb;line-height:1px;max-height:0;max-width:0;opacity:0;overflow:hidden;">Company news for your watchlist. Open the full digest for prices, earnings, and more.</div>
 
   {% macro render_company(section, stories) %}
   <tr>
@@ -105,7 +103,7 @@
           <div class="gmail-blend-screen"><div class="gmail-blend-difference">
             <p style="margin:0 0 12px;font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#ffffff;">{{ market_label }} · {{ date_label }}</p>
             <h1 class="email-heading" style="margin:0;color:#ffffff;font-size:26px;font-weight:600;line-height:1.2;letter-spacing:-1px;">{{ briefing_title }}</h1>
-            <p style="margin:12px 0 0;color:#ffffff;font-size:13px;line-height:1.55;">{% if ai_summary %}Your AI briefing and company news, in one quick read.{% else %}Company news for your watchlist, in one quick read.{% endif %}</p>
+            <p style="margin:12px 0 0;color:#ffffff;font-size:13px;line-height:1.55;">Company news for your watchlist, in one quick read.</p>
           </div></div>
           {% if digest_url %}
           <table role="presentation" cellpadding="0" cellspacing="0" style="margin-top:18px;"><tr><td bgcolor="#365cf5" style="background-color:#365cf5;border-radius:6px;">
@@ -114,17 +112,6 @@
           </td></tr></table>
           {% endif %}
         </td></tr>
-        {% if ai_summary %}
-        <tr><td class="email-card mobile-section" bgcolor="#ffffff" style="padding:18px 26px 6px;background-color:#ffffff;">
-          <table role="presentation" class="ai-panel" width="100%" cellpadding="0" cellspacing="0" bgcolor="#eeeafe" style="width:100%;background-color:#eeeafe;border-left:3px solid #6d5bd0;border-radius:0 7px 7px 0;">
-            <tr><td style="padding:16px;">
-              <h2 class="ai-label" style="margin:0 0 10px;color:#5546b8;font-size:12px;font-weight:750;letter-spacing:1px;text-transform:uppercase;">AI briefing · Your watchlist in context</h2>
-              <p class="ai-copy" style="margin:0;color:#38345f;font-size:13px;line-height:1.55;">{{ ai_summary.market_context }}</p>
-              <p class="text-muted" style="margin:14px 0 0;color:#665f87;font-size:11px;line-height:1.6;">AI-generated from linked headlines and excerpts. Not investment advice.</p>
-            </td></tr>
-          </table>
-        </td></tr>
-        {% endif %}
         <tr><td class="email-card mobile-section" bgcolor="#ffffff" style="padding:18px 26px 0;background-color:#ffffff;">
           <p class="text-muted" style="margin:0;font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#68778b;">Company news · Your selected stocks</p>
         </td></tr>

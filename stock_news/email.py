@@ -336,13 +336,6 @@ def build_plain_text(
     ]
 
     ai_summary = layout.get("ai_summary")
-    if ai_summary:
-        lines.append("=== AI BRIEFING ===")
-        lines.append(ai_summary["market_context"])
-        lines.append("")
-        lines.append("AI-generated from linked headlines and excerpts. Not investment advice.")
-        lines.append("")
-
     lines.append("=== COMPANY NEWS ===")
     if layout["hero"]:
         hero_ticker = layout["hero"]["ticker"]

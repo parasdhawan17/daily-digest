@@ -122,20 +122,6 @@ body { line-height: 1.55; }
   padding: 4px 8px;
   border-radius: 5px;
 }
-.ai-briefing, html[data-theme="dark"] .ai-briefing {
-  width: min(1112px, calc(100% - 48px));
-  margin: 20px auto;
-  padding: 16px 0;
-  background: #eeeafe;
-  border: 1px solid #cfc7f8;
-  border-left: 3px solid #6d5bd0;
-  border-radius: 0 9px 9px 0;
-}
-html[data-theme="dark"] .ai-briefing { background: #29294d; border-color: #5b56a1; }
-.ai-briefing::before, .ai-briefing::after, .ai-briefing-label::before { display: none; }
-.ai-briefing-label { color: var(--link); font-size: 11px; letter-spacing: 1.3px; }
-.ai-briefing-context { color: var(--text-strong); font-size: 14px; line-height: 1.6; font-weight: 500; }
-.ai-briefing-note { font-size: 12px; color: var(--text-secondary); }
 .ticker-section, .ticker-section-featured { padding: 24px 0; background: transparent; border-top: 0; }
 .ticker-section > .section-inner { padding: 22px; width: min(1112px, calc(100% - 48px)); background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; }
 .ticker-section + .ticker-section { padding-top: 0; }
@@ -167,7 +153,6 @@ a:focus-visible, button:focus-visible, summary:focus-visible { outline: 3px soli
 @media (max-width: 767px) {
   .header { padding: 80px 20px 26px; }
   .header h1 { font-size: 29px; letter-spacing: -1.5px; }
-  .ai-briefing, html[data-theme="dark"] .ai-briefing { width: calc(100% - 32px); margin: 20px auto; }
   .ticker-section { padding: 16px 0; }
   .ticker-section > .section-inner { width: calc(100% - 32px); padding: 16px; }
   .ticker-symbol { font-size: 20px; }
@@ -208,11 +193,6 @@ a:focus-visible, button:focus-visible, summary:focus-visible { outline: 3px soli
 .movers .pill:hover { border-color: var(--link); }
 .movers .pill:focus-visible { outline-offset: -3px; }
 .watchlist-count { font-size: 11px; min-width: 22px; height: 22px; }
-.ai-briefing, html[data-theme="dark"] .ai-briefing { width: min(1112px, calc(100% - 24px)); padding: 12px 0; margin: 12px auto; border-radius: 10px; }
-.ai-briefing .section-inner { padding: 0 14px; }
-.ai-briefing-label { font-size: 11px; letter-spacing: .07em; }
-.ai-briefing-context { max-width: none; font-size: 13px; line-height: 1.5; }
-.ai-briefing-note { margin-top: 6px; font-size: 11px; }
 .ticker-section, .ticker-section-featured { padding: 12px 0; scroll-margin-top: 132px; }
 .ticker-section > .section-inner { width: min(1112px, calc(100% - 24px)); padding: 14px; border-radius: 14px; overflow: hidden; }
 .ticker-section:target > .section-inner { border-color: var(--link); }
@@ -433,9 +413,6 @@ html[data-theme="dark"] .ticker-tabs .tab-signal[data-judgement="Mixed"] { color
 .indian-personal-dashboard .movers-bar { top: 0; background: var(--page-bg); }
 .indian-personal-dashboard .movers-bar .section-inner,
 .indian-personal-dashboard .progressive-status .section-inner { width: min(1380px, calc(100% - 40px)); max-width: none; padding: 0; }
-.indian-personal-dashboard .ai-briefing,
-html[data-theme="dark"] .indian-personal-dashboard .ai-briefing { width: min(1380px, calc(100% - 40px)); margin: 14px auto; padding: 0; border: 1px solid var(--border); border-left: 3px solid var(--link); border-radius: 0 9px 9px 0; background: var(--card-bg); }
-.indian-personal-dashboard .ai-briefing .section-inner { max-width: none; padding: 16px; }
 .indian-personal-dashboard #digest-sections,
 .indian-personal-dashboard #full-digest { display: grid; grid-template-columns: minmax(0, 1fr); gap: 14px; width: min(1380px, calc(100% - 40px)); margin: 14px auto; }
 .indian-personal-dashboard #digest-sections .ticker-section,
@@ -452,9 +429,6 @@ html[data-theme="dark"] .indian-personal-dashboard .ai-briefing { width: min(138
 .indian-personal-dashboard .digest-stock-overview-grid { padding-top: 18px; padding-bottom: 16px; gap: 20px; }
 .indian-personal-dashboard .digest-stock-eyebrow { margin-bottom: 5px; }
 .indian-personal-dashboard .digest-stock-overview h1 { margin-bottom: 5px; }
-.indian-personal-dashboard .ai-briefing,
-html[data-theme="dark"] .indian-personal-dashboard .ai-briefing { margin: 10px auto; }
-.indian-personal-dashboard .ai-briefing .section-inner { padding: 12px 14px; }
 .indian-personal-dashboard #digest-sections,
 .indian-personal-dashboard #full-digest { gap: 10px; margin: 10px auto; }
 .indian-personal-dashboard #digest-sections .ticker-section > .section-inner,
@@ -475,7 +449,6 @@ html[data-theme="dark"] .indian-personal-dashboard .ai-briefing { margin: 10px a
   .indian-personal-dashboard .digest-stock-shell,
   .indian-personal-dashboard .movers-bar .section-inner,
   .indian-personal-dashboard .progressive-status .section-inner,
-  .indian-personal-dashboard .ai-briefing,
   .indian-personal-dashboard #digest-sections,
   .indian-personal-dashboard #full-digest,
   .indian-personal-dashboard .site-footer .section-inner { width: calc(100% - 24px); }

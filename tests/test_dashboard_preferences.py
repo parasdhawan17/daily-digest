@@ -18,7 +18,7 @@ class DashboardPreferencesTest(unittest.TestCase):
         self.assertEqual(len(ids), len(set(ids)))
         self.assertEqual(tuple(ids), allowed_cards())
         self.assertIn("overview_market_cap", default_cards())
-        self.assertIn("ai_watchlist_briefing", default_cards())
+        self.assertNotIn("ai_watchlist_briefing", allowed_cards())
         self.assertIn("news_company_coverage", default_cards())
         self.assertNotIn("ownership_current_mix", default_cards())
         for category in data["categories"]:

@@ -86,7 +86,7 @@ test('every selectable Indian dashboard card renders without a fallback or excep
     for (let i = 0; i < 8; i++) await new Promise(resolve => setImmediate(resolve));
   }
   const cards = descendants(root, node => node.tagName === 'ARTICLE' && node.dataset.card);
-  assert.deepEqual(cards.map(card => card.dataset.card).sort(), selected.filter(id => id !== 'ai_watchlist_briefing').sort());
+  assert.deepEqual(cards.map(card => card.dataset.card).sort(), selected.sort());
   const card = id => cards.find(node => node.dataset.card === id);
   assert.ok(descendants(card('ai_company_summary'), node => node.className?.includes('dashboard-ai-insight')).length);
   assert.ok(descendants(card('financial_quarterly_results'), node => node.attributes?.class === 'stock-chart').length);

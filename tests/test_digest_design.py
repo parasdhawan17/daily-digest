@@ -24,7 +24,8 @@ class DigestDesignTest(unittest.TestCase):
         html = build_web_digest([], ['US:AAPL'], progressive=True, progressive_token='test-token')
         self.assertIn('id="digest-sections"', html)
         self.assertIn('data-token="test-token"', html)
-        self.assertIn('id="progressive-ai"', html)
+        self.assertNotIn('id="progressive-ai"', html)
+        self.assertNotIn('AI briefing · Your watchlist in context', html)
         self.assertIn('[hidden] { display: none !important; }', html)
         section = sample_sections()[0]
         section['web_stories'] = section['stories']

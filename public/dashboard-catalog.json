@@ -27,9 +27,8 @@
       "title": "AI Overview",
       "description": "Evidence-linked synthesis and watch points.",
       "default": true,
-      "recommended": ["ai_watchlist_briefing", "ai_company_summary", "ai_encouraging_signals", "ai_attention_signals", "ai_key_risks"],
+      "recommended": ["ai_company_summary", "ai_encouraging_signals", "ai_attention_signals", "ai_key_risks"],
       "cards": [
-        {"id":"ai_watchlist_briefing","title":"Watchlist briefing","description":"The main themes across your complete watchlist."},
         {"id":"ai_company_summary","title":"60-second company view","description":"A concise evidence-based company summary."},
         {"id":"ai_encouraging_signals","title":"Encouraging signals","description":"Reported developments that look constructive."},
         {"id":"ai_attention_signals","title":"What needs attention","description":"Reported issues that deserve closer attention."},
