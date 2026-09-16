@@ -1,0 +1,96 @@
+const test = require('node:test');
+const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const vm = require('node:vm');
+
+const catalog = JSON.parse(fs.readFileSync('public/dashboard-catalog.json', 'utf8'));
+const source = fs.readFileSync('public/dashboard-cards.js', 'utf8');
+const format = require('../public/stock-format.js');
+
+class Element {
+  constructor(tag = 'div') {
+    this.tagName = tag.toUpperCase();
+    this.children = [];
+    this.dataset = {};
+    this.attributes = {};
+    this.style = {setProperty() {}};
+    this.classList = {add: name => { this.className = `${this.className || ''} ${name}`; }};
+    this.childElementCount = 0;
+  }
+  append(...children) {
+    this.children.push(...children);
+    this.childElementCount = this.children.filter(child => child instanceof Element).length;
+  }
+  replaceChildren(...children) { this.children = []; this.append(...children); }
+  setAttribute(name, value) { this.attributes[name] = String(value); }
+  querySelector(selector) {
+    if (selector === '[aria-pressed=true]') return this.children.find(child => child.attributes?.['aria-pressed'] === 'true');
+    if (selector === '[data-indian-dashboard]') return this.children.find(child => child.dataset?.symbol);
+    return null;
+  }
+  addEventListener() {}
+  click() { if (this.onclick) this.onclick(); }
+  remove() {}
+}
+
+function descendants(node, predicate) {
+  return (node.children || []).flatMap(child => child instanceof Element
+    ? [...(predicate(child) ? [child] : []), ...descendants(child, predicate)] : []);
+}
+
+function mockData(section, params) {
+  if (section === 'core') return {
+    snapshot: {marketCap: 10, pPerEBasicExcludingExtraordinaryItemsTTM: 12, currentDividendYieldCommonStockPrimaryIssueLTM: 1, priceYTDPricePercentChange: 2, high: 10, low: 8, close: 9, price5DayPercentChange: -1},
+    year_low: 5, year_high: 15, prices: {NSE: 10, BSE: 9},
+    profile: {companyDescription: 'Company profile', industry: 'Technology', officers: {officer: [{firstName: 'A', lastName: 'B', title: {Value: 'CEO'}}]}},
+    health: {end_date: '2026-06-30', groups: [{title: 'Growth', metrics: [{id: 'revenue', label: 'Revenue', value: 20, unit: '₹ cr', change_label: '+2%', value_tone: 'positive'}]}, {title: 'Profitability', metrics: []}, {title: 'Balance sheet', metrics: []}, {title: 'Cash generation', metrics: []}]},
+    financials: [{Type: 'Annual', EndDate: '2026-06-30', stockFinancialMap: {INC: [{key: 'Revenue', value: 20}], BAL: [{key: 'Assets', value: 40}], CAS: [{key: 'CashFlow', value: 5}]}}],
+    ownership: [{displayName: 'Promoter', categoryName: 'Promoter', categories: [{holdingDate: '2026-06-30', percentage: 30}]}],
+    peers: [{symbol: 'IN:TCS', companyName: 'TCS', price: 10}],
+    ratings: [{ratingName: 'Buy', ratingValue: 1, numberOfAnalystsLatest: 3}], recommendations: {Buy: 3},
+    technical: {average: 8}, risk: {level: 'Low'}, futures: {expiry: '2026-09'}, actions: {dividend: [{remarks: 'Dividend', xdDate: '2026-08-01'}], bonus: [], rights: [], splits: [], annualGeneralMeeting: [], boardMeetings: []},
+    metrics: {growth: [{key: 'Revenue', value: 20}]}, additional_financials: {cash: 4},
+    news: [{headline: 'Company news', source: 'Example', date: '2026-09-01', url: 'https://example.com/story'}]
+  };
+  if (section === 'financials') return {Sales: {'Jun 2025': 10, 'Jun 2026': 20}, Expenses: {'Jun 2025': 5, 'Jun 2026': 9}};
+  if (section === 'history') return {datasets: [{metric: 'Price', label: 'Price', values: [['2026-01-01', 10], ['2026-02-01', 12]]}]};
+  if (section === 'targets') return {priceTarget: {Low: 9, Mean: 12, High: 15, NumberOfEstimates: 3}, priceTargetSnapshots: [], recommendation: {}, recommendationSnapshots: []};
+  if (section === 'forecasts') return {periods: [{FiscalPeriod: {Year: 2026}, Estimates: {Estimate: [{Mean: 12, Low: 10, High: 14, NumberOfEstimates: 3}]}}]};
+  return {};
+}
+
+test('every selectable Indian dashboard card renders without a fallback or exception', async () => {
+  const selected = catalog.categories.flatMap(category => category.cards.map(card => card.id));
+  const root = new Element(); root.dataset.symbol = 'IN:INFY';
+  const section = new Element(); section.append(root);
+  const container = new Element(); container.dataset.dashboardCards = JSON.stringify(selected);
+  const document = {
+    createElement: tag => new Element(tag),
+    createElementNS: (_, tag) => new Element(tag),
+    createTextNode: text => String(text),
+    querySelectorAll: selector => selector === '.ticker-section' ? [section] : [],
+    getElementById: id => id === 'digest-sections' ? container : null
+  };
+  const context = {document, Node: Element, URL, URLSearchParams, Intl, Map, Set, Array, Object, Number, String, Date, Math, console,
+    window: {tickrStockFormat: format},
+    fetch: async url => ({json: async () => url === '/dashboard-catalog.json' ? catalog
+      : url.startsWith('/api/stock-ai') ? {ok: true, data: {summary: {heading: 'Summary', text: 'Text', tone: 'positive'}, encouraging: [], attention: [], changes: [], catalysts: [], risks: [], watch_next: [], sources: [], generated_at: '2026-09-01'}}
+      : {ok: true, data: mockData(new URL(url, 'https://example.test').searchParams.get('section'), new URL(url, 'https://example.test').searchParams)}})};
+  vm.runInNewContext(source, context);
+  for (let i = 0; i < 8; i++) await new Promise(resolve => setImmediate(resolve));
+  const tabs = descendants(root, node => node.className === 'dashboard-category-tab');
+  assert.equal(tabs.length, catalog.categories.length, JSON.stringify(root.children.map(child => child.textContent || child.className)));
+  for (const tab of tabs) {
+    tab.onclick();
+    for (let i = 0; i < 8; i++) await new Promise(resolve => setImmediate(resolve));
+  }
+  const cards = descendants(root, node => node.tagName === 'ARTICLE' && node.dataset.card);
+  assert.deepEqual(cards.map(card => card.dataset.card).sort(), selected.filter(id => id !== 'ai_watchlist_briefing').sort());
+  const card = id => cards.find(node => node.dataset.card === id);
+  assert.ok(descendants(card('ai_company_summary'), node => node.className?.includes('dashboard-ai-insight')).length);
+  assert.ok(descendants(card('financial_quarterly_results'), node => node.attributes?.class === 'stock-chart').length);
+  assert.ok(descendants(card('ownership_current_mix'), node => node.className === 'dashboard-stacked-bar').length);
+  assert.ok(descendants(card('analysis_price_target_summary'), node => node.className === 'dashboard-metrics').length);
+  assert.ok(descendants(card('news_company_coverage'), node => node.className === 'dashboard-news-card').length);
+  assert.equal(descendants(root, node => node.className === 'dashboard-card-state' && /is not defined|cannot read|could not load/i.test(node.textContent || '')).length, 0);
+});
