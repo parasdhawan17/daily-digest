@@ -19,7 +19,8 @@ from stock_news.ai_summary import generate_ai_summary
 from stock_news.financial_health_ai import generate_financial_health_summaries
 from stock_news.design import resolve_design
 from stock_news.brevo import BrevoError, get_contact
-from stock_news.config import BREVO_TICKERS_ATTRIBUTE
+from stock_news.config import BREVO_IN_DASHBOARD_ATTRIBUTE, BREVO_TICKERS_ATTRIBUTE
+from stock_news.dashboard_preferences import default_cards, parse_dashboard_cards
 from stock_news.digest import collect_digest_data, filter_sections
 from stock_news.formatting import format_fetched_at_label
 from stock_news.markets import market_of
@@ -68,11 +69,12 @@ def handle_get(handler: BaseHTTPRequestHandler) -> None:
             state = subscription(identity)
             if state['needs_subscription']:
                 handler.send_response(302)
-                handler.send_header("Location", "/#subscribe")
+                handler.send_header("Location", "/onboarding")
                 handler.send_header("Cache-Control", "no-store")
                 handler.end_headers()
                 return
             tickers = state['tickers']
+            dashboard_cards = state['in_dashboard_cards']
         except AuthError as exc:
             send_html(handler, 403, build_digest_error("Sign in again", str(exc)))
             return
@@ -81,7 +83,19 @@ def handle_get(handler: BaseHTTPRequestHandler) -> None:
             return
     else:
         try:
-            tickers = verify_digest_token(token)
+            claims = verify_digest_claims(token)
+            tickers = claims.tickers
+            dashboard_cards = default_cards()
+            if claims.subscriber_id and os.environ.get("BREVO_API_KEY", "").strip():
+                try:
+                    contact = get_contact(claims.subscriber_id, os.environ["BREVO_API_KEY"].strip())
+                    attributes = (contact or {}).get("attributes") or {}
+                    dashboard_cards = parse_dashboard_cards(
+                        next((value for key, value in attributes.items()
+                              if str(key).upper() == BREVO_IN_DASHBOARD_ATTRIBUTE.upper()), "")
+                    )
+                except Exception:
+                    dashboard_cards = default_cards()
         except TokenError as exc:
             message = str(exc)
             if "expired" in message.lower():
@@ -120,6 +134,7 @@ def handle_get(handler: BaseHTTPRequestHandler) -> None:
         progressive_token=token,
         subscribe_enabled_override=True if not token else None,
         design=(query.get("design") or [None])[0],
+        in_dashboard_cards=dashboard_cards,
     )
     send_html(handler, 200, html)
 
@@ -228,7 +243,8 @@ def handle_subscription_get(handler: BaseHTTPRequestHandler) -> None:
     # Older links did not carry a contact identifier. They can still prefill the
     # tickers embedded in the digest, while leaving email entry to the user.
     if claims.subscriber_id is None:
-        send_json(handler, 200, {"ok": True, "email": "", "tickers": claims.tickers})
+        send_json(handler, 200, {"ok": True, "email": "", "tickers": claims.tickers,
+                                 "in_dashboard_cards": default_cards()})
         return
     if not api_key:
         send_json(handler, 503, {"ok": False, "error": "Subscription lookup is unavailable."})
@@ -255,6 +271,10 @@ def handle_subscription_get(handler: BaseHTTPRequestHandler) -> None:
                 "ok": True,
                 "email": str(contact.get("email") or "").strip().lower(),
                 "tickers": parse_tickers(raw_tickers) or claims.tickers,
+                "in_dashboard_cards": parse_dashboard_cards(
+                    next((value for key, value in attributes.items()
+                          if str(key).upper() == BREVO_IN_DASHBOARD_ATTRIBUTE.upper()), "")
+                ),
             },
         )
     except BrevoError:

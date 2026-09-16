@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>Build your dashboard — Tickr Digest</title>
+  <script>(function(){try{var t=localStorage.getItem('daily-digest-theme');if(t!=='light'&&t!=='dark')t=matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light';document.documentElement.dataset.theme=t;document.documentElement.style.colorScheme=t}catch(e){}})()</script>
+  <link rel="stylesheet" href="/landing.css">
+  <link rel="stylesheet" href="/auth.css">
+  <link rel="stylesheet" href="/onboarding.css">
+  <link rel="stylesheet" href="/onboarding-catalog.css">
+</head>
+<body>
+  <a class="skip-link" href="#onboarding-main">Skip to setup</a>
+  <header class="onboarding-header">
+    <a class="brand" href="/" aria-label="Tickr Digest home"><img class="brand-icon" src="/assets/tickr-digest-icon.svg" alt=""><span>tickr digest<span class="brand-dot">.</span></span></a>
+    <div class="onboarding-header-actions"><button type="button" id="theme-toggle" class="theme-toggle" aria-label="Switch color theme"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M20 15A8 8 0 019 4a8 8 0 1011 11Z"/></svg></button><div id="auth-controls" class="auth-controls"></div></div>
+  </header>
+  <main id="onboarding-main" class="onboarding-shell">
+    <p id="auth-notice" class="onboarding-notice" role="status" hidden></p>
+    <div class="stepper" aria-label="Onboarding progress">
+      <div class="stepper-item is-active" data-step-indicator="1"><span>1</span><div><strong>Choose stocks</strong><small>Your watchlist</small></div></div>
+      <span class="stepper-line" aria-hidden="true"></span>
+      <div class="stepper-item" data-step-indicator="2"><span>2</span><div><strong>Shape dashboard</strong><small>Indian stocks</small></div></div>
+    </div>
+
+    <section class="onboarding-step" data-step="1" aria-labelledby="step-one-title">
+      <div class="step-copy"><p class="eyebrow">Step 1 of 2</p><h1 id="step-one-title">Which stocks do you follow?</h1><p>Search by ticker or company name. US and NSE listings can live in the same watchlist.</p></div>
+      <div class="setup-card stock-setup-card">
+        <label class="field-label" for="onboarding-email">Signed-in email</label>
+        <input id="onboarding-email" class="setup-input" type="email" readonly aria-readonly="true">
+        <label class="field-label" for="ticker-input">Add stocks</label>
+        <div class="ticker-search">
+          <div class="ticker-search-row"><input id="ticker-input" class="setup-input" type="search" autocomplete="off" placeholder="Search TCS, Reliance, Apple…" role="combobox" aria-autocomplete="list" aria-controls="ticker-suggestions" aria-expanded="false"><button id="ticker-add" type="button" class="secondary-button">Add</button></div>
+          <p id="ticker-status" class="field-help" role="status">Search, choose a match, or press Enter to validate.</p>
+          <ul id="ticker-suggestions" class="ticker-suggestions" role="listbox" hidden></ul>
+        </div>
+        <div id="ticker-chips" class="ticker-chips" aria-live="polite"></div>
+        <label class="email-choice"><input id="email-briefings" type="checkbox"><span><strong>Email briefings <small>Optional</small></strong><em>Receive concise updates around the market sessions you follow.</em></span></label>
+      </div>
+      <p id="step-one-error" class="form-error" role="alert" hidden></p>
+      <div class="step-actions"><a class="text-button" href="/">Cancel</a><button id="step-one-next" class="primary-button" type="button">Continue</button></div>
+    </section>
+
+    <section class="onboarding-step" data-step="2" aria-labelledby="step-two-title" hidden>
+      <div class="step-copy"><p class="eyebrow">Step 2 of 2</p><h1 id="step-two-title">Make it yours.</h1><p>Choose a category, then keep only the cards you want for every Indian stock.</p></div>
+      <div class="customizer">
+        <nav id="category-rail" class="category-rail" aria-label="Dashboard categories"></nav>
+        <section class="card-picker" aria-live="polite">
+          <div class="card-picker-head"><div><p id="active-category-kicker" class="eyebrow"></p><h2 id="active-category-title"></h2><p id="active-category-description"></p></div><div class="picker-actions"><button type="button" id="select-recommended">Recommended</button><button type="button" id="select-all">Select all</button><button type="button" id="clear-category">Clear</button></div></div>
+          <div id="card-grid" class="selection-grid"></div>
+        </section>
+        <aside class="selection-preview" aria-labelledby="preview-title"><p class="eyebrow">Live preview</p><h2 id="preview-title">Your dashboard</h2><p class="preview-intro">A glimpse of how your selected cards will feel.</p><div id="preview-canvas" class="preview-canvas"></div><div class="preview-list-heading"><span>Included sections</span><span id="preview-total"></span></div><div id="preview-list"></div></aside>
+      </div>
+      <p id="step-two-error" class="form-error" role="alert" hidden></p>
+      <div class="selection-footer"><p id="selection-count" role="status"></p><div><button id="step-two-back" class="text-button" type="button">Back</button><button id="save-dashboard" class="primary-button" type="button">Save &amp; open dashboard</button></div></div>
+    </section>
+  </main>
+  <script src="/auth.js" defer></script>
+  <script src="/onboarding.js" defer></script>
+</body>
+</html>

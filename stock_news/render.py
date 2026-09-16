@@ -51,6 +51,7 @@ def build_web_digest(
     progressive_token: str | None = None,
     prefill_email: str | None = None,
     design: str | None = None,
+    in_dashboard_cards: list[str] | None = None,
 ) -> str:
     today_label = date.today().strftime("%d %b %Y")
     layout = prepare_email_layout(sections)
@@ -79,6 +80,7 @@ def build_web_digest(
         progressive_tickers=tickers if progressive else [],
         prefill_email=prefill_email or "",
         prefill_tickers=tickers,
+        in_dashboard_cards=in_dashboard_cards or [],
         **layout,
     )
 

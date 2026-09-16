@@ -130,6 +130,34 @@ class AuthTests(unittest.TestCase):
 @patch.dict(os.environ, ENV)
 class SubscribeTests(unittest.TestCase):
     @patch('api.subscribe.validate_symbol', return_value=True)
+    @patch('api.subscribe.send_welcome_email')
+    @patch('api.subscribe.subscribe_verified', return_value=True)
+    def test_indian_dashboard_cards_are_validated_and_saved(self, save, welcome, validate):
+        valid = ['overview_market_cap', 'news_company_coverage']
+        h = handler(payload={'tickers': ['IN:TCS'], 'in_dashboard_cards': valid}, signed_in=True)
+        handle_post(h)
+        self.assertTrue(result(h)['ok'])
+        self.assertEqual(save.call_args.kwargs['dashboard_cards'], valid)
+
+        h = handler(payload={'tickers': ['IN:TCS'], 'in_dashboard_cards': ['unknown']}, signed_in=True)
+        handle_post(h)
+        self.assertFalse(result(h)['ok'])
+        self.assertEqual(save.call_count, 1)
+
+        h = handler(payload={'tickers': ['IN:TCS'], 'in_dashboard_cards': []}, signed_in=True)
+        handle_post(h)
+        self.assertFalse(result(h)['ok'])
+
+    @patch('api.subscribe.validate_symbol', return_value=True)
+    @patch('api.subscribe.send_welcome_email')
+    @patch('api.subscribe.subscribe_verified', return_value=True)
+    def test_us_only_update_preserves_indian_preferences(self, save, welcome, validate):
+        h = handler(payload={'tickers': ['US:AAPL'], 'in_dashboard_cards': ['unknown']}, signed_in=True)
+        handle_post(h)
+        self.assertTrue(result(h)['ok'])
+        self.assertIsNone(save.call_args.kwargs['dashboard_cards'])
+
+    @patch('api.subscribe.validate_symbol', return_value=True)
     @patch('api.subscribe.LOGGER.exception')
     @patch('api.subscribe.send_welcome_email')
     @patch('api.subscribe.subscribe_verified', return_value=False)
@@ -207,9 +235,9 @@ class DigestSessionTests(unittest.TestCase):
         self.assertTrue(render.call_args.kwargs['progressive'])
 
     @patch('stock_news.auth.get_contact', return_value=None)
-    def test_digest_redirects_new_user_to_popup(self, lookup):
+    def test_digest_redirects_new_user_to_onboarding(self, lookup):
         h = handler('/digest', signed_in=True); handle_get(h)
-        h.send_header.assert_any_call('Location', '/#subscribe')
+        h.send_header.assert_any_call('Location', '/onboarding')
         h = handler('/digest'); handle_get(h)
         h.send_header.assert_any_call('Location', '/?signin=1')
 

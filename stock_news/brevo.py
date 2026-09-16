@@ -4,7 +4,9 @@ import time
 
 import requests
 
-from stock_news.config import BREVO_TICKERS_ATTRIBUTE, SEND_DELAY_SECONDS, SITE_URL
+from stock_news.config import (BREVO_IN_DASHBOARD_ATTRIBUTE, BREVO_TICKERS_ATTRIBUTE,
+                               SEND_DELAY_SECONDS, SITE_URL)
+from stock_news.dashboard_preferences import serialize_dashboard_cards
 from stock_news.relevance import parse_tickers
 
 
@@ -56,8 +58,12 @@ def update_contact_tickers(
     *,
     list_id: int | None = None,
     unlink_list_id: int | None = None,
+    dashboard_cards: list[str] | None = None,
 ) -> None:
-    payload: dict = {"attributes": {attr_name: format_tickers_attribute(tickers)}}
+    attributes = {attr_name: format_tickers_attribute(tickers)}
+    if dashboard_cards is not None:
+        attributes[BREVO_IN_DASHBOARD_ATTRIBUTE] = serialize_dashboard_cards(dashboard_cards)
+    payload: dict = {"attributes": attributes}
     if list_id is not None:
         payload["listIds"] = [list_id]
     if unlink_list_id is not None:
@@ -231,7 +237,7 @@ def _safe_brevo_message(response: requests.Response) -> str:
 
 
 def subscribe_verified(email, tickers, api_key, list_id, *, attr_name=BREVO_TICKERS_ATTRIBUTE,
-                       email_briefings=True):
+                       email_briefings=True, dashboard_cards=None):
     """Save a verified Google user's watchlist and optional email preference."""
     contact = get_contact(email, api_key)
     if email_briefings and contact and contact.get('emailBlacklisted'):
@@ -241,9 +247,12 @@ def subscribe_verified(email, tickers, api_key, list_id, *, attr_name=BREVO_TICK
     if contact:
         update_contact_tickers(email, tickers, api_key, attr_name,
                                list_id=list_id if email_briefings else None,
-                               unlink_list_id=None if email_briefings else list_id)
+                               unlink_list_id=None if email_briefings else list_id,
+                               dashboard_cards=dashboard_cards)
     else:
         payload = {'email': email, 'attributes': {attr_name: format_tickers_attribute(tickers)}}
+        if dashboard_cards is not None:
+            payload['attributes'][BREVO_IN_DASHBOARD_ATTRIBUTE] = serialize_dashboard_cards(dashboard_cards)
         if email_briefings:
             payload['listIds'] = [list_id]
         response = requests.post('https://api.brevo.com/v3/contacts', headers=_headers(api_key),

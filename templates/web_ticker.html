@@ -68,7 +68,7 @@
         </div>
       </div>
 
-      <div class="ticker-snapshot">
+      <div class="ticker-snapshot{% if section.market == 'IN' %} indian-dashboard-fallback{% endif %}"{% if section.market == 'IN' %} hidden aria-hidden="true"{% endif %}>
         {{ render_price_ranges(section) }}
         {% if section.upcoming_earnings %}
         <div class="snapshot-event"><span>Next earnings</span><strong>{{ section.upcoming_earnings.date_label }}</strong><small>{% if section.upcoming_earnings.hour == 'bmo' %}Before open{% elif section.upcoming_earnings.hour == 'amc' %}After close{% else %}Timing TBD{% endif %}</small></div>
@@ -76,12 +76,18 @@
         <div class="snapshot-event"><span>{{ "Latest EPS" if section.earnings_history.mode == "reported" else "Earnings record" }}</span><strong>{{ section.earnings_history.summary_label|replace("Latest EPS ", "") }}</strong><small>{{ "Reported" if section.earnings_history.mode == "reported" else "4 quarters" }}</small></div>
         {% endif %}
       </div>
-      <div class="ticker-brief-slot">
+      <div class="ticker-brief-slot{% if section.market == 'IN' %} indian-dashboard-fallback{% endif %}"{% if section.market == 'IN' %} hidden aria-hidden="true"{% endif %}>
       {% if ai_summary and ai_summary.ticker_summaries.get(section.ticker) %}
         <p class="ticker-ai-brief"><strong>AI brief</strong> {{ ai_summary.ticker_summaries.get(section.ticker) }}</p>
       {% endif %}
       </div>
-      <div class="ticker-workspace">
+      {% if section.market == 'IN' %}
+      <div class="indian-dashboard" data-indian-dashboard data-symbol="{{ section.ticker }}">
+        <div class="indian-dashboard-loading" role="status">Loading your selected research cards…</div>
+      </div>
+      <noscript><style>.indian-dashboard{display:none}.indian-dashboard-fallback[hidden]{display:block}</style></noscript>
+      {% endif %}
+      <div class="ticker-workspace{% if section.market == 'IN' %} indian-dashboard-fallback{% endif %}"{% if section.market == 'IN' %} hidden aria-hidden="true"{% endif %}>
         <div class="ticker-tabs" role="tablist" aria-label="{{ section.display_symbol or section.ticker }} details" hidden>
           <button type="button" role="tab" id="tab-news-{{ section.ticker }}" aria-controls="panel-news-{{ section.ticker }}" data-view="news">
             <span class="tab-heading"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h16v16H4zM8 8h8M8 12h3M8 16h3M15 12h1M15 16h1"/></svg>News</span>

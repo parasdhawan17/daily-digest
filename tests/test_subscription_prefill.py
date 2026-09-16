@@ -4,6 +4,7 @@ from unittest.mock import patch
 
 from api.digest import handle_subscription_get
 from stock_news.tokens import DigestTokenClaims
+from stock_news.dashboard_preferences import default_cards
 
 
 class SubscriptionPrefillHandlerTest(unittest.TestCase):
@@ -18,7 +19,8 @@ class SubscriptionPrefillHandlerTest(unittest.TestCase):
         send_json.assert_called_once_with(
             handler,
             200,
-            {"ok": True, "email": "", "tickers": ["US:AAPL"]},
+            {"ok": True, "email": "", "tickers": ["US:AAPL"],
+             "in_dashboard_cards": default_cards()},
         )
 
     @patch.dict("os.environ", {"BREVO_API_KEY": "brevo-key"})
@@ -48,6 +50,7 @@ class SubscriptionPrefillHandlerTest(unittest.TestCase):
                 "ok": True,
                 "email": "investor@example.com",
                 "tickers": ["US:AAPL", "IN:TCS"],
+                "in_dashboard_cards": default_cards(),
             },
         )
 

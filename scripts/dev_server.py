@@ -318,6 +318,8 @@ class DevHandler(BaseHTTPRequestHandler):
             path = "/index.html"
         elif path == "/welcome":
             path = "/welcome.html"
+        elif path == "/onboarding":
+            path = "/onboarding.html"
         file_path = PUBLIC / path.lstrip("/")
         if not file_path.is_file():
             self.send_error(404)

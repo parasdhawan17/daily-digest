@@ -49,7 +49,7 @@
   function signedIn(data) {
     applyState(data);
     if (data.needs_subscription) {
-      window.openSubscribeModal();
+      window.location.assign('/onboarding');
     } else window.location.assign('/digest');
   }
   function renderGoogleButton() {
@@ -70,7 +70,7 @@
     return request('/api/auth/session').then(function (data) {
       applyState(data);
       if (data.authenticated) {
-        if (location.pathname !== '/digest' && data.needs_subscription && location.hash === '#subscribe') window.openSubscribeModal();
+        if (location.pathname !== '/digest' && location.pathname !== '/onboarding' && data.needs_subscription && location.hash === '#subscribe') window.location.assign('/onboarding');
         return data;
       }
       if (!controls) return data;

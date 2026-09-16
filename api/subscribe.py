@@ -24,6 +24,7 @@ from stock_news.config import (
 from stock_news.market_data import validate_symbol
 from stock_news.markets import market_of
 from stock_news.relevance import parse_tickers
+from stock_news.dashboard_preferences import allowed_cards, default_cards, parse_dashboard_cards
 
 EMAIL_PATTERN = re.compile(r"^[^\s@]+@[^\s@]+\.[^\s@]+$")
 LOGGER = logging.getLogger(__name__)
@@ -110,11 +111,30 @@ def handle_post(handler: BaseHTTPRequestHandler) -> None:
         send_json(handler, 503, {"ok": False, "error": "India ticker validation is not configured."})
         return
 
+    raw_dashboard_cards = payload.get("in_dashboard_cards")
+    dashboard_cards = None
+    if needs_in:
+        if raw_dashboard_cards is not None and not isinstance(raw_dashboard_cards, list):
+            send_json(handler, 400, {"ok": False, "error": "Choose valid dashboard cards."})
+            return
+        if isinstance(raw_dashboard_cards, list):
+            unknown = [str(item) for item in raw_dashboard_cards if str(item) not in allowed_cards()]
+            dashboard_cards = parse_dashboard_cards(raw_dashboard_cards, default_if_empty=False)
+            if unknown:
+                send_json(handler, 400, {"ok": False, "error": "Choose valid dashboard cards."})
+                return
+            if not dashboard_cards:
+                send_json(handler, 400, {"ok": False, "error": "Select at least one Indian dashboard card."})
+                return
+        else:
+            dashboard_cards = default_cards()
+
     try:
         if identity:
             email_briefings = payload.get("email_briefings", True) is True
             already_active = subscribe_verified(
-                email, tickers, api_key, int(list_id), email_briefings=email_briefings
+                email, tickers, api_key, int(list_id), email_briefings=email_briefings,
+                dashboard_cards=dashboard_cards
             )
             warning = None
             if email_briefings and not already_active:

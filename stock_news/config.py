@@ -70,6 +70,9 @@ BREVO_DOI_TEMPLATE_ID = os.environ.get("BREVO_DOI_TEMPLATE_ID", "").strip()
 # Canonical list: Daily Digest - US. Subscribe and cron always use this id.
 BREVO_LIST_ID = "7"
 BREVO_TICKERS_ATTRIBUTE = os.environ.get("BREVO_TICKERS_ATTRIBUTE", "US_TICKERS").strip().upper()
+BREVO_IN_DASHBOARD_ATTRIBUTE = os.environ.get(
+    "BREVO_IN_DASHBOARD_ATTRIBUTE", "IN_DASHBOARD_CARDS"
+).strip().upper()
 EMAIL_FROM = os.environ.get("EMAIL_FROM", "").strip()
 EMAIL_FROM_NAME = os.environ.get("EMAIL_FROM_NAME", "Tickr Digest").strip()
 

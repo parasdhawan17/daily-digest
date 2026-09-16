@@ -27,6 +27,8 @@ async function boot(session, login) {
     },
     dispatchEvent() {}, openSubscribeModal() { opened++; }
   };
+  context.setTimeout = function () { return 1; };
+  context.clearTimeout = function () {};
   context.window = context;
   vm.runInNewContext(source, context);
   await context.tickrAuth.ready;
@@ -53,12 +55,12 @@ test('Google existing subscriber opens digest and sends CSRF', async () => {
   assert.equal(app.redirected, '/digest');
   assert.equal(app.calls.at(-1).options.headers['X-CSRF-Token'], 'csrf');
 });
-test('Google new subscriber opens popup without redirect', async () => {
+test('Google new subscriber opens full-page onboarding', async () => {
   const app = await boot(anonymous, {ok: true, authenticated: true, needs_subscription: true});
   app.callback({credential: 'token'});
   await new Promise(setImmediate);
-  assert.equal(app.opened, 1);
-  assert.equal(app.redirected, undefined);
+  assert.equal(app.opened, 0);
+  assert.equal(app.redirected, '/onboarding');
 });
 test('Failed verification shows error without opening digest', async () => {
   const app = await boot(anonymous, {ok: false, error: 'Could not verify'});

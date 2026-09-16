@@ -22,6 +22,7 @@
     })();
   </script>
   <link rel="stylesheet" href="/financial-health.css">
+  <link rel="stylesheet" href="/dashboard-cards.css">
   <style>
     * { box-sizing: border-box; }
     :root {
@@ -1592,7 +1593,7 @@
       <div class="movers-toolbar">
         <p class="movers-label">Watchlist <span class="watchlist-count" aria-label="{{ progressive_tickers|length }} tickers">{{ progressive_tickers|length }}</span></p>
         {% if subscribe_enabled %}
-        <button type="button" class="movers-edit-btn" onclick="openSubscribeModal()" aria-label="Edit subscribed tickers">
+        <button type="button" class="movers-edit-btn" onclick="location.href='/onboarding'" aria-label="Edit watchlist and dashboard">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"></path><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4Z"></path></svg>
           <span>Edit</span>
         </button>
@@ -1602,7 +1603,7 @@
     </div>
   </section>
   <section class="ai-briefing progressive-ai" id="progressive-ai" aria-label="AI briefing" hidden></section>
-  <main id="digest-sections" class="progressive-sections" data-token="{{ progressive_token or '' }}" data-tickers='{{ progressive_tickers|tojson }}'>
+  <main id="digest-sections" class="progressive-sections" data-token="{{ progressive_token or '' }}" data-tickers='{{ progressive_tickers|tojson }}' data-dashboard-cards='{{ in_dashboard_cards|tojson }}'>
     {% for ticker in progressive_tickers %}
     <section class="ticker-section progressive-placeholder" id="ticker-{{ ticker }}" data-ticker="{{ ticker }}" aria-label="Loading {{ ticker }}">
       <div class="section-inner"><div class="skeleton skeleton-title"></div><div class="skeleton skeleton-price"></div><div class="skeleton skeleton-earnings"></div><div class="skeleton skeleton-line"></div><div class="skeleton skeleton-line short"></div></div>
@@ -1616,7 +1617,7 @@
       <div class="movers-toolbar">
         <p class="movers-label">Watchlist <span class="watchlist-count" aria-label="{{ ticker_count }} tickers">{{ ticker_count }}</span></p>
         {% if subscribe_enabled %}
-        <button type="button" class="movers-edit-btn" onclick="openSubscribeModal()" aria-label="Edit subscribed tickers">
+        <button type="button" class="movers-edit-btn" onclick="location.href='/onboarding'" aria-label="Edit watchlist and dashboard">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"></path><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4Z"></path></svg>
           <span>Edit</span>
         </button>
@@ -1667,7 +1668,7 @@
       <p class="footer-brand"><img class="digest-brand-icon" src="/assets/tickr-digest-icon.svg" alt="" width="30" height="30"><span>tickr digest<span style="color:#8ea2ff;">.</span></span></p>
       <p>A broader view of your stocks. For information, not investment advice.</p>
       {% if subscribe_enabled %}
-      <p><button type="button" class="footer-link-btn" onclick="openSubscribeModal()">Update your tickers</button></p>
+      <p><button type="button" class="footer-link-btn" onclick="location.href='/onboarding'">Customize your dashboard</button></p>
       {% endif %}
     </div>
   </footer>
@@ -1731,6 +1732,8 @@
     document.querySelectorAll(".ticker-section").forEach(setupTickerPanel);
   </script>
   {% if progressive %}
+  <script src="/stock-format.js"></script>
+  <script src="/dashboard-cards.js"></script>
   <script>
     (function () {
       var container = document.getElementById("digest-sections");
@@ -1781,6 +1784,7 @@
         panel.innerHTML = '<div class="section-inner"><p class="ai-briefing-label">AI briefing · Your watchlist in context</p><p class="ai-briefing-context">' + esc(summary.market_context) + '</p><p class="ai-briefing-note">AI-generated from the linked headlines and excerpts. Not investment advice.</p></div>';
         panel.hidden = false;
         loaded.forEach(function (item) {
+          if (item.market === "IN") return;
           var brief = summary.ticker_summaries && summary.ticker_summaries[item.ticker];
           var section = container.querySelector('[data-ticker="' + CSS.escape(item.ticker) + '"]');
           if (brief && section) {
@@ -1830,6 +1834,7 @@
               ? Math.abs(Number(result.section.quote.change_pct))
               : -1;
             setupTickerPanel(rendered);
+            if (window.setupIndianDashboard) window.setupIndianDashboard(rendered);
             if (rendered) rendered.setAttribute("data-move-magnitude", String(change));
             loaded.push(result.section);
             showMovers();
@@ -1856,6 +1861,9 @@
       Promise.all(tickers.map(loadTicker)).then(function () {
         sortTickerSectionsByMove();
         status.textContent = "Your digest is ready";
+        var selectedCards = JSON.parse(container.getAttribute("data-dashboard-cards") || "[]");
+        var hasIndian = tickers.some(function (ticker) { return ticker.indexOf("IN:") === 0; });
+        if (hasIndian && selectedCards.indexOf("ai_watchlist_briefing") < 0) return null;
         var aiPanel = document.getElementById("progressive-ai");
         if (aiPanel) {
           aiPanel.innerHTML = '<div class="section-inner"><p class="ai-briefing-label">Preparing your AI briefing…</p></div>';

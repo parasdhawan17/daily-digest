@@ -9,7 +9,9 @@ from http.cookies import CookieError, SimpleCookie
 from urllib.parse import urlparse
 
 from stock_news.brevo import get_contact, _get_contact_attribute
-from stock_news.config import BREVO_LIST_ID, BREVO_TICKERS_ATTRIBUTE, SITE_URL
+from stock_news.config import (BREVO_IN_DASHBOARD_ATTRIBUTE, BREVO_LIST_ID,
+                               BREVO_TICKERS_ATTRIBUTE, SITE_URL)
+from stock_news.dashboard_preferences import parse_dashboard_cards
 from stock_news.relevance import parse_tickers
 
 SESSION_COOKIE = 'tickr_session'
@@ -113,10 +115,15 @@ def subscription(identity):
     if not api_key:
         raise RuntimeError('Subscription lookup is not configured.')
     contact = get_contact(identity['email'], api_key)
-    tickers = parse_tickers(_get_contact_attribute((contact or {}).get('attributes'), BREVO_TICKERS_ATTRIBUTE))
+    attributes = (contact or {}).get('attributes') or {}
+    tickers = parse_tickers(_get_contact_attribute(attributes, BREVO_TICKERS_ATTRIBUTE))
+    dashboard_cards = parse_dashboard_cards(
+        _get_contact_attribute(attributes, BREVO_IN_DASHBOARD_ATTRIBUTE)
+    )
     active = bool(contact and tickers)
     email_briefings = bool(contact and not contact.get('emailBlacklisted') and
                            int(BREVO_LIST_ID) in (contact.get('listIds') or []))
     return {'ok': True, 'authenticated': True, 'email': identity['email'], 'tickers': tickers,
+            'in_dashboard_cards': dashboard_cards,
             'needs_subscription': not active, 'email_briefings': email_briefings,
             'suppressed': bool(contact and contact.get('emailBlacklisted'))}

@@ -105,6 +105,7 @@ python3 -m venv .venv
 | `BREVO_LIST_ID` | Subscribe form | Always `7` (Daily Digest - US). Setup scripts pin this. |
 | `BREVO_DOI_TEMPLATE_ID` | New subscribers | Double opt-in template ID from Brevo |
 | `BREVO_TICKERS_ATTRIBUTE` | Subscribe + email cron | Optional (default `US_TICKERS` — text, comma-separated) |
+| `BREVO_IN_DASHBOARD_ATTRIBUTE` | Indian dashboard customization | Optional (default `IN_DASHBOARD_CARDS` — create this text attribute in Brevo before deployment) |
 | `OPENROUTER_API_KEY` | Optional AI briefing and stock overview | If unset, AI features remain unavailable while deterministic content continues to work |
 | `OPENROUTER_MODEL` | Optional AI email briefing | Default `google/gemini-2.5-flash-lite`; choose a low-cost text model |
 | `OPENROUTER_SITE_URL` | Optional AI email briefing | Optional attribution URL; defaults to `SITE_URL` |

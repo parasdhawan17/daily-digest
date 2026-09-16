@@ -1,0 +1,125 @@
+{
+  "version": 1,
+  "categories": [
+    {
+      "id": "overview",
+      "title": "Overview",
+      "description": "Price, business and market context.",
+      "default": true,
+      "recommended": ["overview_market_cap", "overview_pe_ratio", "overview_price_history", "overview_price_landmarks", "overview_financial_pulse"],
+      "cards": [
+        {"id":"overview_market_cap","title":"Market cap","description":"Reported market capitalisation."},
+        {"id":"overview_pe_ratio","title":"P/E ratio","description":"Trailing twelve-month valuation."},
+        {"id":"overview_dividend_yield","title":"Dividend yield","description":"Latest twelve-month dividend yield."},
+        {"id":"overview_ytd_return","title":"Year-to-date return","description":"Price return since the start of the year."},
+        {"id":"overview_price_history","title":"Price history","description":"Interactive historical price chart."},
+        {"id":"overview_price_landmarks","title":"Price landmarks","description":"52-week range and current position."},
+        {"id":"overview_day_statistics","title":"Day statistics","description":"High, low, previous close and short-term return."},
+        {"id":"overview_financial_pulse","title":"Financial pulse","description":"Revenue, profit, cash flow and net debt."},
+        {"id":"overview_company_description","title":"Company description","description":"A concise explanation of the business."},
+        {"id":"overview_company_information","title":"Company information","description":"Industry, identifiers and reported profile details."},
+        {"id":"overview_leadership","title":"Leadership","description":"Reported company officers and roles."},
+        {"id":"overview_peer_comparison","title":"Peer comparison","description":"Comparable companies and valuation measures."}
+      ]
+    },
+    {
+      "id": "ai",
+      "title": "AI Overview",
+      "description": "Evidence-linked synthesis and watch points.",
+      "default": true,
+      "recommended": ["ai_watchlist_briefing", "ai_company_summary", "ai_encouraging_signals", "ai_attention_signals", "ai_key_risks"],
+      "cards": [
+        {"id":"ai_watchlist_briefing","title":"Watchlist briefing","description":"The main themes across your complete watchlist."},
+        {"id":"ai_company_summary","title":"60-second company view","description":"A concise evidence-based company summary."},
+        {"id":"ai_encouraging_signals","title":"Encouraging signals","description":"Reported developments that look constructive."},
+        {"id":"ai_attention_signals","title":"What needs attention","description":"Reported issues that deserve closer attention."},
+        {"id":"ai_recent_changes","title":"Recent changes","description":"Explicit period-over-period developments."},
+        {"id":"ai_potential_catalysts","title":"Potential catalysts","description":"Events and plans that could matter next."},
+        {"id":"ai_key_risks","title":"Key risks","description":"Material risks found in the available evidence."},
+        {"id":"ai_watch_next","title":"What to watch next","description":"Measurable questions for future results."},
+        {"id":"ai_sources_freshness","title":"Sources and freshness","description":"Evidence coverage, timestamps and source links."}
+      ]
+    },
+    {
+      "id": "financials",
+      "title": "Financials",
+      "description": "Results, statements and financial health.",
+      "default": true,
+      "recommended": ["financial_quarterly_results", "financial_ratios_history", "financial_health_growth", "financial_health_profitability", "financial_health_balance_sheet", "financial_health_cash_generation", "financial_statement_income"],
+      "cards": [
+        {"id":"financial_quarterly_results","title":"Quarterly results","description":"Quarterly income and earnings history."},
+        {"id":"financial_annual_results","title":"Annual results","description":"Reported annual performance history."},
+        {"id":"financial_balance_sheet_history","title":"Balance-sheet history","description":"Historical assets, liabilities and equity."},
+        {"id":"financial_cash_flow_history","title":"Cash-flow history","description":"Historical operating, investing and financing cash flow."},
+        {"id":"financial_ratios_history","title":"Ratio history","description":"Profitability, efficiency and leverage ratios."},
+        {"id":"financial_health_growth","title":"Growth health","description":"Revenue, operating profit, net profit and EPS."},
+        {"id":"financial_health_profitability","title":"Profitability health","description":"Margins and returns on capital."},
+        {"id":"financial_health_balance_sheet","title":"Balance-sheet health","description":"Debt, cash and interest coverage."},
+        {"id":"financial_health_cash_generation","title":"Cash-generation health","description":"Operating cash flow, capex and free cash flow."},
+        {"id":"financial_statement_income","title":"Income statement","description":"Latest reported income-statement line items."},
+        {"id":"financial_statement_balance_sheet","title":"Balance sheet","description":"Latest reported balance-sheet line items."},
+        {"id":"financial_statement_cash_flow","title":"Cash-flow statement","description":"Latest reported cash-flow line items."},
+        {"id":"financial_provider_metrics","title":"Provider metrics","description":"Additional provider-reported key metrics."},
+        {"id":"financial_additional_data","title":"Additional financial data","description":"Other available reported financial fields."}
+      ]
+    },
+    {
+      "id": "ownership",
+      "title": "Ownership",
+      "description": "Shareholding mix and changes over time.",
+      "default": false,
+      "recommended": ["ownership_current_mix", "ownership_quarterly_history"],
+      "cards": [
+        {"id":"ownership_current_mix","title":"Current ownership mix","description":"Latest reported shareholding categories."},
+        {"id":"ownership_detail","title":"Ownership detail","description":"Underlying category records and dates."},
+        {"id":"ownership_quarterly_history","title":"Quarterly ownership history","description":"Quarter-by-quarter shareholding changes."},
+        {"id":"ownership_annual_history","title":"Annual ownership history","description":"Year-by-year shareholding changes."}
+      ]
+    },
+    {
+      "id": "analysis",
+      "title": "Analysis",
+      "description": "Analyst, technical and forward-looking context.",
+      "default": false,
+      "recommended": ["analysis_analyst_consensus", "analysis_technical_averages", "analysis_risk_assessment", "analysis_price_target_summary", "analysis_eps_forecasts"],
+      "cards": [
+        {"id":"analysis_analyst_consensus","title":"Analyst consensus","description":"Latest distribution of analyst ratings."},
+        {"id":"analysis_rating_history","title":"Rating history","description":"How analyst ratings changed over time."},
+        {"id":"analysis_recommendation_summary","title":"Recommendation summary","description":"Provider recommendation breakdown."},
+        {"id":"analysis_technical_averages","title":"Technical averages","description":"Reported technical price measures."},
+        {"id":"analysis_risk_assessment","title":"Risk assessment","description":"Provider-reported risk context."},
+        {"id":"analysis_price_target_summary","title":"Price-target summary","description":"Low, mean and high analyst targets."},
+        {"id":"analysis_price_target_history","title":"Price-target history","description":"Historical target and recommendation snapshots."},
+        {"id":"analysis_eps_forecasts","title":"EPS forecasts","description":"Annual estimates and reported actuals."},
+        {"id":"analysis_futures","title":"Futures","description":"Available expiries and futures overview."},
+        {"id":"analysis_market_snapshot","title":"Additional market snapshot","description":"Provider-reported market detail and periods."}
+      ]
+    },
+    {
+      "id": "actions",
+      "title": "Corporate Actions",
+      "description": "Capital changes, distributions and meetings.",
+      "default": false,
+      "recommended": ["actions_dividends", "actions_bonus_issues", "actions_stock_splits"],
+      "cards": [
+        {"id":"actions_dividends","title":"Dividends","description":"Declared distributions and key dates."},
+        {"id":"actions_bonus_issues","title":"Bonus issues","description":"Reported bonus share events."},
+        {"id":"actions_rights_issues","title":"Rights issues","description":"Reported rights offerings."},
+        {"id":"actions_stock_splits","title":"Stock splits","description":"Reported split events and dates."},
+        {"id":"actions_annual_general_meetings","title":"Annual general meetings","description":"Reported AGM schedule and dates."},
+        {"id":"actions_board_meetings","title":"Board meetings","description":"Reported board meeting events."},
+        {"id":"actions_other","title":"Other actions","description":"Other reported company actions."}
+      ]
+    },
+    {
+      "id": "news",
+      "title": "News",
+      "description": "Recent sourced company coverage.",
+      "default": true,
+      "recommended": ["news_company_coverage"],
+      "cards": [
+        {"id":"news_company_coverage","title":"Company coverage","description":"Recent headlines, summaries and original sources."}
+      ]
+    }
+  ]
+}
