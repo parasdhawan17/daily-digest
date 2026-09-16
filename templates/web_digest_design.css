@@ -441,6 +441,30 @@ html[data-theme="dark"] .ticker-tabs .tab-signal[data-judgement="Mixed"] { color
 .indian-personal-dashboard .dashboard-card-caption { margin-bottom: 6px; }
 .indian-personal-dashboard .dashboard-card-value { margin-top: 6px; }
 .indian-personal-dashboard .dashboard-card.is-wide { grid-column: 1 / -1; }
+/* Give each company identity and its research navigation a distinct surface. */
+.indian-personal-dashboard {
+  --company-header-top: #eef2ff;
+  --company-header-bottom: #f5f7ff;
+  --company-header-border: #d9e1ff;
+}
+html[data-theme="dark"] .indian-personal-dashboard {
+  --company-header-top: #202d4b;
+  --company-header-bottom: #1a2940;
+  --company-header-border: #35466b;
+}
+.indian-personal-dashboard .ticker-section .ticker-head {
+  margin: -14px -14px 0;
+  padding: 16px 14px 13px;
+  border-bottom: 1px solid var(--company-header-border);
+  background: linear-gradient(115deg, var(--company-header-top), var(--company-header-bottom));
+}
+.indian-personal-dashboard .indian-dashboard { margin-top: 0; }
+.indian-personal-dashboard .dashboard-category-tabs {
+  margin: 0 -14px;
+  padding: 0 14px;
+  border-bottom-color: var(--company-header-border);
+  background: var(--company-header-bottom);
+}
 @media (max-width: 900px) {
   .indian-personal-dashboard .dashboard-card-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
@@ -468,6 +492,8 @@ html[data-theme="dark"] .ticker-tabs .tab-signal[data-judgement="Mixed"] { color
   .indian-personal-dashboard .digest-stock-meta { margin-top: 8px; }
   .indian-personal-dashboard #digest-sections .ticker-section > .section-inner,
   .indian-personal-dashboard #full-digest .ticker-section > .section-inner { padding: 12px; }
+  .indian-personal-dashboard .ticker-section .ticker-head { margin: -12px -12px 0; padding: 14px 12px 12px; }
+  .indian-personal-dashboard .dashboard-category-tabs { margin: 0 -12px; padding: 0 12px; }
 }
 @media (max-width: 439px) {
   .indian-personal-dashboard .dashboard-card-grid { grid-template-columns: minmax(0, 1fr); }
