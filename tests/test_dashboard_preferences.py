@@ -1,4 +1,6 @@
+import json
 import unittest
+from pathlib import Path
 
 from stock_news.dashboard_preferences import (
     allowed_cards,
@@ -29,6 +31,13 @@ class DashboardPreferencesTest(unittest.TestCase):
         )
         self.assertEqual(serialize_dashboard_cards(["news_company_coverage"]), "news_company_coverage")
         self.assertEqual(parse_dashboard_cards(""), default_cards())
+
+    def test_vercel_function_bundles_the_catalog(self):
+        config = json.loads(Path("vercel.json").read_text(encoding="utf-8"))
+        self.assertEqual(
+            config["functions"]["api/index.py"]["includeFiles"],
+            "public/dashboard-catalog.json",
+        )
 
 
 if __name__ == "__main__":

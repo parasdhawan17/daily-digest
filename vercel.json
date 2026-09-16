@@ -1,4 +1,9 @@
 {
+  "functions": {
+    "api/index.py": {
+      "includeFiles": "public/dashboard-catalog.json"
+    }
+  },
   "rewrites": [
     {"source": "/onboarding", "destination": "/onboarding.html"},
     {"source": "/stocks/:symbol", "destination": "/api/index?route=stock&symbol=:symbol"},
