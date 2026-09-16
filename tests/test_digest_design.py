@@ -72,6 +72,16 @@ class DigestDesignTest(unittest.TestCase):
         self.assertIn('section.querySelector(".ticker-brief-slot").replaceChildren(node)', html)
         self.assertIn('setupTickerPanel(rendered)', html)
 
+    def test_indian_only_digest_uses_stock_workspace_shell(self):
+        html = build_web_digest([], ['IN:TCS', 'IN:INFY'], progressive=True, progressive_token='test-token')
+        self.assertIn('class="indian-personal-dashboard"', html)
+        self.assertIn('class="digest-stock-masthead"', html)
+        self.assertIn('Your Indian stocks', html)
+
+        mixed = build_web_digest([], ['IN:TCS', 'US:AAPL'], progressive=True, progressive_token='test-token')
+        self.assertNotIn('class="indian-personal-dashboard"', mixed)
+        self.assertNotIn('class="digest-stock-masthead"', mixed)
+
     def test_ticker_tabs_have_unique_targets_and_keep_fallback_content(self):
         section = sample_sections()[0]
         section['web_stories'] = section['stories']

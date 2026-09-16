@@ -81,6 +81,7 @@ def build_web_digest(
         prefill_email=prefill_email or "",
         prefill_tickers=tickers,
         in_dashboard_cards=in_dashboard_cards or [],
+        indian_only=bool(tickers) and all(ticker.startswith("IN:") for ticker in tickers),
         **layout,
     )
 

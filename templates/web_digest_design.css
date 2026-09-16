@@ -410,3 +410,63 @@ html[data-theme="dark"] .ticker-tabs .tab-signal[data-judgement="Mixed"] { color
 .ticker-section .ticker-row { align-items: center; }
 .ticker-section .ticker-symbol { line-height: 1.2; }
 .ticker-section .exchange-badge { line-height: 1.2; }
+
+/* Indian-only personal dashboards borrow the single-stock workspace language. */
+.indian-personal-dashboard { font-size: 13px; line-height: 1.45; }
+.indian-personal-dashboard .digest-stock-shell { width: min(1380px, calc(100% - 40px)); margin: 0 auto; }
+.indian-personal-dashboard .digest-stock-masthead { background: #0b1420; color: #f3f7fa; }
+.indian-personal-dashboard .digest-stock-nav { display: flex; align-items: center; justify-content: space-between; gap: 24px; padding: 10px 0; }
+.indian-personal-dashboard .digest-stock-brand { display: inline-flex; align-items: center; gap: 10px; color: inherit; font-size: 20px; font-weight: 750; letter-spacing: -.6px; text-decoration: none; }
+.indian-personal-dashboard .digest-stock-brand img { display: block; width: 33px; height: 33px; }
+.indian-personal-dashboard .digest-stock-brand-dot { color: var(--link); }
+.indian-personal-dashboard .digest-stock-masthead .header-account-actions { position: static !important; display: flex; align-items: center; gap: 10px; }
+.indian-personal-dashboard .digest-stock-masthead .theme-toggle { position: static; width: 40px; height: 40px; border-color: #425365; background: transparent; color: #dce6ee; }
+.indian-personal-dashboard .digest-stock-overview { border-bottom: 1px solid var(--border); background: var(--page-bg); }
+.indian-personal-dashboard .digest-stock-overview-grid { display: flex; align-items: center; justify-content: space-between; gap: 28px; padding-top: 34px; padding-bottom: 22px; }
+.indian-personal-dashboard .digest-stock-eyebrow { margin: 0 0 7px; color: var(--text-muted); font-size: 10px; font-weight: 750; letter-spacing: 1px; text-transform: uppercase; }
+.indian-personal-dashboard .digest-stock-overview h1 { margin: 0 0 8px; color: var(--text-strong); font-size: clamp(22px, 2.3vw, 30px); font-weight: 650; letter-spacing: -.9px; line-height: 1.16; }
+.indian-personal-dashboard .digest-stock-overview p { margin-bottom: 0; font-size: 12px; }
+.indian-personal-dashboard .digest-stock-meta { min-width: 220px; text-align: right; }
+.indian-personal-dashboard .digest-stock-meta p { display: flex; justify-content: space-between; gap: 20px; margin: 0; padding: 5px 0; color: var(--text-secondary); border-bottom: 1px solid var(--border-soft); }
+.indian-personal-dashboard .digest-stock-meta p:last-child { border-bottom: 0; }
+.indian-personal-dashboard .digest-stock-meta span { color: var(--text-muted); }
+.indian-personal-dashboard .movers-bar { top: 0; background: var(--page-bg); }
+.indian-personal-dashboard .movers-bar .section-inner,
+.indian-personal-dashboard .progressive-status .section-inner { width: min(1380px, calc(100% - 40px)); max-width: none; padding: 0; }
+.indian-personal-dashboard .ai-briefing,
+html[data-theme="dark"] .indian-personal-dashboard .ai-briefing { width: min(1380px, calc(100% - 40px)); margin: 14px auto; padding: 0; border: 1px solid var(--border); border-left: 3px solid var(--link); border-radius: 0 9px 9px 0; background: var(--card-bg); }
+.indian-personal-dashboard .ai-briefing .section-inner { max-width: none; padding: 16px; }
+.indian-personal-dashboard #digest-sections,
+.indian-personal-dashboard #full-digest { display: grid; grid-template-columns: minmax(0, 1fr); gap: 14px; width: min(1380px, calc(100% - 40px)); margin: 14px auto; }
+.indian-personal-dashboard #digest-sections .ticker-section,
+.indian-personal-dashboard #full-digest .ticker-section { min-width: 0; padding: 0; }
+.indian-personal-dashboard #digest-sections .ticker-section > .section-inner,
+.indian-personal-dashboard #full-digest .ticker-section > .section-inner { width: 100%; max-width: none; padding: 16px; border: 1px solid var(--border); border-radius: 9px; background: var(--card-bg); }
+.indian-personal-dashboard .ticker-section .ticker-head { padding-bottom: 10px; border-bottom: 1px solid var(--border); }
+.indian-personal-dashboard .ticker-section .ticker-logo { width: 34px; height: 34px; }
+.indian-personal-dashboard .ticker-section .ticker-symbol { font-size: 21px; font-weight: 650; }
+.indian-personal-dashboard .ticker-section .ticker-price { font-size: 22px; font-weight: 600; }
+.indian-personal-dashboard .ticker-section .ticker-change { border-radius: 5px; }
+.indian-personal-dashboard .site-footer .section-inner { width: min(1380px, calc(100% - 40px)); max-width: none; padding: 20px 0 24px; border-top: 1px solid var(--border); }
+@media (max-width: 600px) {
+  .indian-personal-dashboard { overflow-x: hidden; }
+  .indian-personal-dashboard .digest-stock-shell,
+  .indian-personal-dashboard .movers-bar .section-inner,
+  .indian-personal-dashboard .progressive-status .section-inner,
+  .indian-personal-dashboard .ai-briefing,
+  .indian-personal-dashboard #digest-sections,
+  .indian-personal-dashboard #full-digest,
+  .indian-personal-dashboard .site-footer .section-inner { width: calc(100% - 24px); }
+  .indian-personal-dashboard .digest-stock-brand { font-size: 16px; gap: 6px; }
+  .indian-personal-dashboard .digest-stock-brand img { width: 26px; height: 26px; }
+  .indian-personal-dashboard .digest-stock-overview-grid { display: block; padding-top: 20px; padding-bottom: 16px; }
+  .indian-personal-dashboard .digest-stock-meta { margin-top: 12px; text-align: left; }
+  .indian-personal-dashboard .digest-stock-meta p { justify-content: flex-start; }
+  .indian-personal-dashboard .digest-stock-masthead .header-account-actions { gap: 7px; }
+  .indian-personal-dashboard .digest-stock-masthead .auth-controls { display: none; }
+  .indian-personal-dashboard .digest-stock-masthead .theme-toggle { width: 34px; height: 34px; }
+  .indian-personal-dashboard #digest-sections .ticker-section > .section-inner,
+  .indian-personal-dashboard #full-digest .ticker-section > .section-inner { padding: 13px; }
+  .indian-personal-dashboard .ticker-section .ticker-head-main { width: 100%; min-width: 0; }
+  .indian-personal-dashboard .ticker-section .ticker-quote { width: auto; min-width: 0; }
+}

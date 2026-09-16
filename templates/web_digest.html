@@ -15,14 +15,14 @@
         var stored = localStorage.getItem("daily-digest-theme");
         var theme = stored === "light" || stored === "dark"
           ? stored
-          : "dark";
+          : {% if indian_only %}(matchMedia("(prefers-color-scheme:dark)").matches ? "dark" : "light"){% else %}"dark"{% endif %};
         document.documentElement.setAttribute("data-theme", theme);
         document.documentElement.style.colorScheme = theme;
       } catch (e) {}
     })();
   </script>
   <link rel="stylesheet" href="/financial-health.css">
-  <link rel="stylesheet" href="/dashboard-cards.css">
+  <link rel="stylesheet" href="/dashboard-cards.css?v=20260916-stock-visuals1">
   <style>
     * { box-sizing: border-box; }
     :root {
@@ -1547,8 +1547,34 @@
 <link rel="stylesheet" href="/stock-search.css">
 <script src="/stock-search.js" defer></script>
 </head>
-<body>
+<body{% if indian_only %} class="indian-personal-dashboard"{% endif %}>
 <p id="auth-notice" class="auth-notice" role="status" hidden></p>
+  {% if indian_only %}
+  <header class="digest-stock-masthead">
+    <div class="digest-stock-shell">
+      <nav class="digest-stock-nav" aria-label="Main navigation">
+        <a class="digest-stock-brand" href="{{ site_url or '' }}/" aria-label="Tickr Digest home"><img src="/assets/tickr-digest-icon.svg" alt="" width="33" height="33"><span>tickr digest<span class="digest-stock-brand-dot">.</span></span></a>
+        <div class="header-account-actions" role="group" aria-label="Account and appearance">
+          <button type="button" data-stock-search>Search a stock</button>
+          <button type="button" class="theme-toggle" id="theme-toggle" aria-label="Switch to dark mode" title="Toggle color theme">
+            <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 14.5A8.5 8.5 0 1 1 9.5 3 7 7 0 0 0 21 14.5z"></path></svg>
+            <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"></path></svg>
+          </button>
+          <div id="auth-controls" class="auth-controls"></div>
+        </div>
+      </nav>
+    </div>
+  </header>
+  <section class="digest-stock-overview" aria-labelledby="digest-title">
+    <div class="digest-stock-shell digest-stock-overview-grid">
+      <div><p class="digest-stock-eyebrow">Personal market dashboard</p><h1 id="digest-title">Your Indian stocks</h1><p>Your AI briefing, price landmarks, earnings and company coverage in one research workspace.</p></div>
+      <div class="digest-stock-meta">
+        {% if fetched_at_label %}<p><span>Last refreshed</span><time id="fetched-at"{% if fetched_at_iso %} datetime="{{ fetched_at_iso }}" data-fetched-at="{{ fetched_at_iso }}"{% endif %}>{{ fetched_at_label }}</time></p>{% endif %}
+        {% if top_mover_label %}<p><span>Biggest move</span><strong>{{ top_mover_label }}</strong></p>{% endif %}
+      </div>
+    </div>
+  </section>
+  {% else %}
   <header class="header">
         {% if site_url %}
         <a href="{{ site_url }}/" class="header-home-link" aria-label="Back to home">
@@ -1583,6 +1609,7 @@
         {% endif %}
         </div>
       </header>
+  {% endif %}
 
   {% if progressive %}
   <section class="progressive-status" id="progressive-status" aria-live="polite">
@@ -1733,7 +1760,7 @@
   </script>
   {% if progressive %}
   <script src="/stock-format.js"></script>
-  <script src="/dashboard-cards.js"></script>
+  <script src="/dashboard-cards.js?v=20260916-stock-visuals1"></script>
   <script>
     (function () {
       var container = document.getElementById("digest-sections");
