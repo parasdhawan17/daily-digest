@@ -11,3 +11,39 @@
 @media(max-width:720px){body{overflow-x:hidden}.customizer{display:block}.category-rail{display:flex;max-width:100%;overflow-x:auto;scroll-snap-type:x proximity}.category-button{min-width:184px;scroll-snap-align:start}.category-button-copy small{max-width:100px}.card-picker{padding:18px}.selection-grid{grid-template-columns:1fr}.selection-card{padding:14px}.selection-preview{display:block}.selection-footer{gap:12px}.selection-footer p{max-width:none;min-width:76px;line-height:1.35}.selection-footer>div{flex-shrink:0}.selection-footer .primary-button{font-size:12px;padding:0 12px}.card-visual{height:96px}}
 @media(max-width:430px){.selection-footer{align-items:stretch;flex-direction:column}.selection-footer p{text-align:center}.selection-footer>div{width:100%}.selection-footer .primary-button{flex:1}.card-picker-head h2{font-size:25px}.picker-actions{display:grid;grid-template-columns:repeat(3,1fr)}.picker-actions button{padding:0 6px}}
 @media(prefers-reduced-motion:reduce){.selection-card,.selection-card::before,.category-button,.selection-check{transition:none}.selection-card:hover{transform:none}}
+
+/* Onboarding uses the stock page's actual card shell and content styles. */
+.selection-card{padding:0;border:0;background:transparent;box-shadow:none;overflow:visible}
+.selection-card::before{display:none}
+.selection-card:hover,.selection-card.is-selected{background:transparent;border:0;box-shadow:none}
+.selection-card .dashboard-card{height:100%;min-height:172px;padding:16px 42px 16px 16px;transition:border-color .18s,box-shadow .18s}
+.selection-card:hover .dashboard-card{border-color:var(--border-strong);box-shadow:0 8px 24px rgb(15 23 42/.08)}
+.selection-card.is-selected .dashboard-card{border-color:var(--link);box-shadow:0 0 0 2px color-mix(in srgb,var(--link) 13%,transparent)}
+.selection-card .selection-check{z-index:3;right:12px;top:12px}
+.selection-card input:focus-visible+.selection-check{outline:3px solid color-mix(in srgb,var(--link) 30%,transparent)}
+.sample-dashboard-card h3{padding-right:0}
+.selection-card .dashboard-card strong{color:var(--text-strong);margin-bottom:0}
+.selection-card .dashboard-card-value{font-size:18px}
+.selection-card .dashboard-metric strong{font-size:14px}
+.selection-card .dashboard-range-labels span,.selection-card .dashboard-card-note{display:block}
+.sample-dashboard-card .dashboard-card-caption{min-height:31px;margin-bottom:9px}
+.sample-dashboard-card .dashboard-card-value{margin-top:18px}
+.sample-dashboard-card .dashboard-range{margin-top:22px}
+.sample-dashboard-card .dashboard-range-labels{margin-bottom:4px}
+.sample-dashboard-card .dashboard-stacked-bar{margin:15px 0}
+.sample-dashboard-card .dashboard-ai-insight{margin-top:10px}
+.sample-dashboard-card .dashboard-metrics{margin-top:12px}
+.sample-dashboard-card .stock-controls{margin:3px 0 5px}
+.sample-control{padding:3px 7px;border:1px solid var(--border);border-radius:5px;color:var(--text-secondary);font-size:10px}
+.sample-control.is-active{border-color:var(--link);color:var(--link);background:var(--muted-bg)}
+.sample-stock-chart{display:block;width:100%;height:66px}
+.sample-grid-line{fill:none;stroke:var(--border-soft);stroke-width:1}
+.sample-price-line{fill:none;stroke:var(--pill-up-fg);stroke-width:2.5;vector-effect:non-scaling-stroke}
+.sample-dashboard-card .stock-chart-legend{margin-bottom:0}
+.preview-canvas{background:var(--muted-bg);border-color:var(--border)}
+.preview-canvas .dashboard-card-grid{display:grid;grid-template-columns:1fr;gap:8px}
+.preview-canvas .sample-dashboard-card{padding:12px;min-height:0}
+.preview-canvas .sample-dashboard-card h3{font-size:13px}
+.preview-canvas .sample-dashboard-card .dashboard-card-caption{min-height:0}
+.preview-canvas .sample-stock-chart{height:45px}
+@media(max-width:720px){.selection-card .dashboard-card{min-height:150px;padding:14px 42px 14px 14px}}

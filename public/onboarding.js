@@ -113,11 +113,29 @@
     return '<div class="card-visual card-visual--metric' + cls + '"><div><strong>' + sample[0] + '</strong><span>' + sample[1] + '</span></div><svg viewBox="0 0 80 36" preserveAspectRatio="none" aria-hidden="true"><path d="M1 31 C14 27 15 18 27 22 S42 30 51 15 67 17 79 4"/></svg></div>';
   }
 
+  // Keep the sample in the same card language as the stock page. Values here are illustrative.
+  function dashboardSample(card, categoryId) {
+    var id = card.id, kind = previewKind(card, categoryId), sample = metricSample(id);
+    var titles = {ai_company_summary:'The 60-second view',ai_encouraging_signals:'What looks encouraging',overview_price_history:'The price story',overview_price_landmarks:'Price context',overview_peer_comparison:'In good company',ownership_current_mix:'Who owns the company?',analysis_analyst_consensus:'The analyst view',analysis_eps_forecasts:'Looking ahead: earnings per share'};
+    var captions = {ai_company_summary:'A concise synthesis of the latest available company evidence.',overview_price_history:'Price, moving averages and trading volume.',overview_price_landmarks:'Reported price landmarks · ₹',overview_peer_comparison:'Peers reported by IndianAPI · Prices in ₹ · Market cap in ₹ crore',ownership_current_mix:'Shareholding categories as reported by IndianAPI.'};
+    var body;
+    if (id === 'overview_price_landmarks') body = '<div class="dashboard-range"><i style="left:72%"></i></div><div class="dashboard-range-labels"><span>₹2,420<small>52-week low</small></span><span>₹3,012<small>52-week high</small></span></div>';
+    else if (kind === 'chart') body = '<div class="stock-controls"><span class="sample-control is-active">1Y</span><span class="sample-control">3Y</span><span class="sample-control">5Y</span></div><p class="stock-chart-readout">Sep 2026 · ₹2,846</p><svg class="sample-stock-chart" viewBox="0 0 260 90" preserveAspectRatio="none" aria-hidden="true"><path class="sample-grid-line" d="M0 20H260M0 50H260M0 80H260"/><path class="sample-price-line" d="M0 74 C25 65 32 48 55 57 S88 72 110 44 142 58 163 34 194 43 214 22 242 30 260 12"/></svg><div class="stock-chart-legend"><span>Price</span><span class="stock-indicator positive">+12.8%</span></div>';
+    else if (kind === 'ai') body = '<div class="dashboard-ai-insight signal-positive"><span class="dashboard-ai-tone">Sample insight</span><p class="dashboard-ai-text">Revenue and cash generation have remained steady in recent reports.</p></div>';
+    else if (kind === 'donut') body = '<p class="dashboard-ownership-date">Illustrative ownership mix</p><div class="dashboard-stacked-bar"><span style="width:50%;background:#6f8aff"></span><span style="width:18%;background:#60b6b0"></span><span style="width:32%;background:#ce9c67"></span></div><dl class="dashboard-facts"><div class="dashboard-fact"><dt>Promoters</dt><dd>50.3%</dd></div><div class="dashboard-fact"><dt>Institutions</dt><dd>17.7%</dd></div></dl>';
+    else if (kind === 'timeline') body = '<div class="dashboard-table-wrap"><table class="dashboard-mini-table"><thead><tr><th>Event</th><th>Record date</th></tr></thead><tbody><tr><td>Dividend</td><td>18 Sep 2026</td></tr></tbody></table></div>';
+    else if (kind === 'news') body = '<div class="dashboard-news-grid"><div class="dashboard-news-card"><div class="dashboard-news-body"><span class="dashboard-news-meta">Sample company news · Today</span><h4><span>Company announces its latest quarterly update</span></h4></div></div></div>';
+    else if (kind === 'profile') body = '<dl class="dashboard-facts"><div class="dashboard-fact"><dt>Company</dt><dd>Example Industries</dd></div><div class="dashboard-fact"><dt>Sector</dt><dd>Energy &amp; Retail</dd></div></dl>';
+    else if (kind === 'range') body = '<div class="dashboard-metrics"><div class="dashboard-metric"><span>Low target</span><strong>₹2,420</strong></div><div class="dashboard-metric"><span>Mean target</span><strong>₹3,080</strong></div></div>';
+    else body = '<strong class="dashboard-card-value">' + sample[0] + '</strong><small class="dashboard-card-note">' + sample[1] + '</small>';
+    var tone = id === 'ai_company_summary' ? ' dashboard-ai-summary' : id === 'ai_key_risks' ? ' dashboard-ai-negative' : id === 'ai_attention_signals' || id === 'ai_recent_changes' ? ' dashboard-ai-caution' : id === 'ai_encouraging_signals' || id === 'ai_potential_catalysts' ? ' dashboard-ai-positive' : '';
+    return '<div class="dashboard-card sample-dashboard-card' + tone + '" data-card="' + id + '"><h3>' + (titles[id] || card.title) + '</h3><p class="dashboard-card-caption">' + (captions[id] || card.description) + '</p>' + body + '</div>';
+  }
+
   function categoryById(id) { return catalog.categories.find(function (category) { return category.id === id; }); }
   function categorySelected(category) { return category.cards.filter(function (card) { return selectedCards.has(card.id); }); }
-  function activateCategory(id, enable) {
+  function activateCategory(id) {
     var category = categoryById(id); if (!category) return;
-    if (enable && !categorySelected(category).length) category.recommended.forEach(function (card) { selectedCards.add(card); });
     activeCategory = id; renderCustomizer();
   }
   function renderCustomizer() {
@@ -125,13 +143,14 @@
       var count = categorySelected(category).length;
       return '<button type="button" class="category-button tone-' + category.id + ' ' + (category.id === activeCategory ? 'is-active ' : '') + (count ? 'has-selection' : '') + '" data-category="' + category.id + '" aria-current="' + (category.id === activeCategory ? 'true' : 'false') + '">' + icon(category.id,'category-icon') + '<span class="category-button-copy"><strong>' + category.title + '</strong><small>' + category.description + '</small></span><span class="category-count">' + count + '<small>/' + category.cards.length + '</small></span></button>';
     }).join('');
-    $('category-rail').querySelectorAll('[data-category]').forEach(function (button) { button.onclick = function () { activateCategory(button.dataset.category, true); }; });
+    $('category-rail').querySelectorAll('[data-category]').forEach(function (button) { button.onclick = function () { activateCategory(button.dataset.category); }; });
     var category = categoryById(activeCategory) || catalog.categories[0];
     $('active-category-kicker').textContent = 'Choose cards'; $('active-category-title').textContent = category.title; $('active-category-description').textContent = category.description;
+    $('category-selection-count').textContent = categorySelected(category).length + ' of ' + category.cards.length + ' selected in this section';
     $('card-grid').className = 'selection-grid tone-' + category.id;
     $('card-grid').innerHTML = category.cards.map(function (card) {
       var checked = selectedCards.has(card.id);
-      return '<label class="selection-card ' + (checked ? 'is-selected' : '') + '"><input type="checkbox" value="' + card.id + '" ' + (checked ? 'checked' : '') + '><span class="selection-check" aria-hidden="true"><svg viewBox="0 0 16 16"><path d="m3.5 8 3 3 6-6"/></svg></span><span class="selection-card-head">' + icon(cardIcon(card.id,category.id),'card-type-icon') + '<span><strong>' + card.title + '</strong><small>' + card.description + '</small></span></span>' + cardVisual(card,category.id,false) + '</label>';
+      return '<label class="selection-card ' + (checked ? 'is-selected' : '') + '"><input type="checkbox" value="' + card.id + '" ' + (checked ? 'checked' : '') + '><span class="selection-check" aria-hidden="true"><svg viewBox="0 0 16 16"><path d="m3.5 8 3 3 6-6"/></svg></span>' + dashboardSample(card,category.id) + '</label>';
     }).join('');
     $('card-grid').querySelectorAll('input').forEach(function (input) { input.onchange = function () { if (input.checked) selectedCards.add(input.value); else selectedCards.delete(input.value); renderCustomizer(); }; });
     renderPreview();
@@ -140,7 +159,7 @@
     var enabled = catalog.categories.map(function (category) { return {category:category,cards:categorySelected(category)}; }).filter(function (item) { return item.cards.length; });
     var active = categoryById(activeCategory), activeCards = active ? categorySelected(active) : [];
     $('preview-canvas').className = 'preview-canvas tone-' + (active ? active.id : 'overview');
-    $('preview-canvas').innerHTML = activeCards.length ? '<div class="preview-device-head"><span>' + icon(active.id,'preview-category-icon') + '<strong>' + active.title + '</strong></span><i></i></div>' + activeCards.slice(0,2).map(function (card) { return '<div class="preview-dashboard-card"><div><span>' + card.title + '</span><button type="button" tabindex="-1" aria-hidden="true">•••</button></div>' + cardVisual(card,active.id,true) + '</div>'; }).join('') : '<p class="preview-empty">Choose a card to see it here.</p>';
+    $('preview-canvas').innerHTML = activeCards.length ? '<div class="preview-device-head"><span>' + icon(active.id,'preview-category-icon') + '<strong>' + active.title + '</strong></span></div><div class="dashboard-card-grid">' + activeCards.slice(0,2).map(function (card) { return dashboardSample(card,active.id); }).join('') + '</div>' : '<p class="preview-empty">Choose a card to see it here.</p>';
     $('preview-list').innerHTML = enabled.length ? enabled.map(function (item) { return '<div class="preview-category tone-' + item.category.id + '">' + icon(item.category.id,'preview-list-icon') + '<span><strong>' + item.category.title + '</strong><small>' + item.cards.slice(0,2).map(function (card) { return card.title; }).join(' · ') + (item.cards.length > 2 ? ' +' + (item.cards.length - 2) : '') + '</small></span><b>' + item.cards.length + '</b></div>'; }).join('') : '<p class="preview-empty">Choose a category to begin.</p>';
     var total = selectedCards.size; $('selection-count').textContent = enabled.length + ' categories · ' + total + ' cards selected';
     $('preview-total').textContent = total + ' cards';

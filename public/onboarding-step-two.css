@@ -1,0 +1,73 @@
+/* The setup frame only. Stock dashboard card styles live in dashboard-cards.css. */
+.onboarding-step[data-step="2"]{--setup-accent:var(--link)}
+.step-two-intro{display:flex;align-items:end;justify-content:space-between;gap:28px;margin:-8px 0 27px;padding:0 2px 25px;border-bottom:1px solid var(--border)}
+.step-two-intro .step-copy{margin:0;max-width:650px}
+.step-two-intro .step-copy h1{margin:7px 0 10px;font-size:clamp(35px,4vw,53px);letter-spacing:-2px;line-height:1.06}
+.step-two-intro .step-copy>p:last-child{margin:0;color:var(--text-secondary);font-size:15px;line-height:1.55}
+.step-two-guide{display:flex;align-items:center;gap:7px;flex-wrap:wrap;justify-content:flex-end;max-width:460px;padding-bottom:3px}
+.step-two-guide span{display:inline-flex;align-items:center;gap:7px;white-space:nowrap;color:var(--text-secondary);font-size:11px;font-weight:600}
+.step-two-guide span+span::before{content:"";width:17px;height:1px;margin-right:2px;background:var(--border-strong)}
+.step-two-guide b{display:grid;place-items:center;width:22px;height:22px;border:1px solid var(--border-strong);border-radius:50%;color:var(--text-strong);background:var(--card-bg);font-size:10px}
+.onboarding-step[data-step="2"] .customizer{grid-template-columns:220px minmax(0,1fr) 272px;gap:16px;align-items:start}
+.onboarding-step[data-step="2"] .category-rail,.onboarding-step[data-step="2"] .card-picker,.onboarding-step[data-step="2"] .selection-preview{border-radius:16px;box-shadow:none}
+.onboarding-step[data-step="2"] .category-rail{padding:8px;top:16px}
+.rail-heading{padding:12px 11px 13px;margin-bottom:4px;border-bottom:1px solid var(--border)}
+.rail-heading span{display:block;color:var(--text-strong);font-size:13px;font-weight:750}
+.rail-heading small{display:block;margin-top:4px;color:var(--text-muted);font-size:11px}
+#category-rail{display:grid;gap:3px}
+.onboarding-step[data-step="2"] .category-button{min-height:59px;border-radius:9px;box-shadow:none}
+.onboarding-step[data-step="2"] .category-button.is-active{box-shadow:inset 3px 0 var(--tone)}
+.onboarding-step[data-step="2"] .category-button small{font-size:10px}
+.onboarding-step[data-step="2"] .card-picker{padding:22px;min-height:0}
+.onboarding-step[data-step="2"] .card-picker-head{display:block;padding-bottom:17px}
+.onboarding-step[data-step="2"] .card-picker-head h2{margin-bottom:6px;font-size:26px}
+.onboarding-step[data-step="2"] .card-picker-head p:not(.eyebrow){max-width:580px;font-size:12px;line-height:1.5}
+.category-selection-count{display:inline-flex;align-items:center;gap:7px;margin:13px 0 0!important;color:var(--text-secondary)!important;font-size:11px!important;font-weight:650}
+.category-selection-count::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--setup-accent)}
+.onboarding-step[data-step="2"] .picker-actions{justify-content:flex-start;gap:7px;margin-top:17px}
+.onboarding-step[data-step="2"] .picker-actions button{min-height:34px;padding:0 12px;border-radius:7px;font-size:11px}
+.onboarding-step[data-step="2"] #select-recommended{background:color-mix(in srgb,var(--setup-accent) 9%,var(--card-bg));border-color:color-mix(in srgb,var(--setup-accent) 28%,var(--border));color:var(--setup-accent)}
+.onboarding-step[data-step="2"] .picker-actions button:focus-visible,.onboarding-step[data-step="2"] .category-button:focus-visible,.onboarding-step[data-step="2"] .selection-footer button:focus-visible{outline:2px solid var(--setup-accent);outline-offset:2px}
+.onboarding-step[data-step="2"] .selection-grid{padding-top:17px}
+.onboarding-step[data-step="2"] .selection-preview{top:16px;padding:17px}
+.onboarding-step[data-step="2"] .selection-preview h2{font-size:21px}
+.onboarding-step[data-step="2"] .preview-intro{font-size:11px;line-height:1.5}
+.onboarding-step[data-step="2"] .preview-canvas{border-radius:11px}
+.onboarding-step[data-step="2"] .preview-list-heading{margin-top:17px}
+.onboarding-step[data-step="2"] .preview-category{padding:8px 0}
+.onboarding-step[data-step="2"] .selection-footer{bottom:12px;gap:18px;padding:12px 14px 12px 18px;border-radius:12px;background:color-mix(in srgb,var(--card-bg) 96%,transparent);box-shadow:0 10px 30px rgb(15 23 42/.13)}
+.onboarding-step[data-step="2"] .selection-footer .selection-footer-copy{display:grid;gap:3px;min-width:0}
+.selection-footer-copy strong{color:var(--text-strong);font-size:13px}
+.selection-footer-copy span{color:var(--text-muted);font-size:10px}
+.onboarding-step[data-step="2"] .selection-footer>div:last-child{flex-shrink:0}
+.onboarding-step[data-step="2"] .selection-footer .primary-button{min-height:42px}
+@media(max-width:1100px){
+  .step-two-intro{align-items:start;flex-direction:column;gap:15px}
+  .step-two-guide{justify-content:flex-start;max-width:none}
+  .onboarding-step[data-step="2"] .customizer{grid-template-columns:205px minmax(0,1fr)}
+  .onboarding-step[data-step="2"] .selection-preview{grid-column:2;position:static;display:block}
+  .onboarding-step[data-step="2"] .selection-preview .preview-canvas{max-width:450px}
+}
+@media(max-width:720px){
+  .step-two-intro{margin-top:0;padding-bottom:18px}
+  .step-two-intro .step-copy h1{letter-spacing:-1.5px}
+  .step-two-guide{gap:6px}
+  .step-two-guide span{font-size:10px}
+  .step-two-guide span+span::before{width:9px}
+  .onboarding-step[data-step="2"] .customizer{display:block}
+  .onboarding-step[data-step="2"] .category-rail{position:static;display:block;margin-bottom:12px}
+  .rail-heading{padding:8px 9px 10px}
+  .rail-heading small{display:none}
+  #category-rail{display:flex;gap:6px;overflow-x:auto;scroll-snap-type:x proximity;scrollbar-width:thin;padding:4px 1px 5px}
+  .onboarding-step[data-step="2"] .category-button{min-width:180px;scroll-snap-align:start}
+  .onboarding-step[data-step="2"] .card-picker{padding:17px}
+  .onboarding-step[data-step="2"] .selection-preview{margin-top:12px}
+  .onboarding-step[data-step="2"] .selection-footer{align-items:center}
+  .selection-footer-copy span{display:none}
+}
+@media(max-width:430px){
+  .step-two-guide span{white-space:normal}
+  .onboarding-step[data-step="2"] .selection-footer{align-items:stretch;flex-direction:column;gap:9px}
+  .selection-footer-copy{text-align:center}
+  .onboarding-step[data-step="2"] .selection-footer>div:last-child{width:100%}
+}

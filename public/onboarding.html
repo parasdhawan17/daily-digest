@@ -9,7 +9,9 @@
   <link rel="stylesheet" href="/landing.css">
   <link rel="stylesheet" href="/auth.css">
   <link rel="stylesheet" href="/onboarding.css">
+  <link rel="stylesheet" href="/dashboard-cards.css">
   <link rel="stylesheet" href="/onboarding-catalog.css">
+  <link rel="stylesheet" href="/onboarding-step-two.css">
 </head>
 <body>
   <a class="skip-link" href="#onboarding-main">Skip to setup</a>
@@ -43,18 +45,18 @@
       <div class="step-actions"><a class="text-button" href="/">Cancel</a><button id="step-one-next" class="primary-button" type="button">Continue</button></div>
     </section>
 
-    <section class="onboarding-step" data-step="2" aria-labelledby="step-two-title" hidden>
-      <div class="step-copy"><p class="eyebrow">Step 2 of 2</p><h1 id="step-two-title">Make it yours.</h1><p>Choose a category, then keep only the cards you want for every Indian stock.</p></div>
+    <section class="onboarding-step indian-dashboard" data-step="2" aria-labelledby="step-two-title" hidden>
+      <div class="step-two-intro"><div class="step-copy"><p class="eyebrow">Step 2 of 2 · Indian stocks</p><h1 id="step-two-title">Build your stock view.</h1><p>Pick the information you want to see on every Indian stock page. You can change it later.</p></div><div class="step-two-guide" aria-label="How to customize"><span><b>1</b> Explore a section</span><span><b>2</b> Select cards</span><span><b>3</b> Save your view</span></div></div>
       <div class="customizer">
-        <nav id="category-rail" class="category-rail" aria-label="Dashboard categories"></nav>
+        <nav class="category-rail" aria-label="Dashboard categories"><div class="rail-heading"><span>Explore sections</span><small>Choose what matters to you</small></div><div id="category-rail"></div></nav>
         <section class="card-picker" aria-live="polite">
-          <div class="card-picker-head"><div><p id="active-category-kicker" class="eyebrow"></p><h2 id="active-category-title"></h2><p id="active-category-description"></p></div><div class="picker-actions"><button type="button" id="select-recommended">Recommended</button><button type="button" id="select-all">Select all</button><button type="button" id="clear-category">Clear</button></div></div>
+          <div class="card-picker-head"><div><p id="active-category-kicker" class="eyebrow"></p><h2 id="active-category-title"></h2><p id="active-category-description"></p><p id="category-selection-count" class="category-selection-count" role="status"></p></div><div class="picker-actions" aria-label="Select cards in this section"><button type="button" id="select-recommended">Use recommended</button><button type="button" id="select-all">Select all</button><button type="button" id="clear-category">Clear</button></div></div>
           <div id="card-grid" class="selection-grid"></div>
         </section>
-        <aside class="selection-preview" aria-labelledby="preview-title"><p class="eyebrow">Live preview</p><h2 id="preview-title">Your dashboard</h2><p class="preview-intro">A glimpse of how your selected cards will feel.</p><div id="preview-canvas" class="preview-canvas"></div><div class="preview-list-heading"><span>Included sections</span><span id="preview-total"></span></div><div id="preview-list"></div></aside>
+        <aside class="selection-preview" aria-labelledby="preview-title"><p class="eyebrow">Your view</p><h2 id="preview-title">Live preview</h2><p class="preview-intro">See what you have selected. Figures are examples.</p><div id="preview-canvas" class="preview-canvas"></div><div class="preview-list-heading"><span>Included sections</span><span id="preview-total"></span></div><div id="preview-list"></div></aside>
       </div>
       <p id="step-two-error" class="form-error" role="alert" hidden></p>
-      <div class="selection-footer"><p id="selection-count" role="status"></p><div><button id="step-two-back" class="text-button" type="button">Back</button><button id="save-dashboard" class="primary-button" type="button">Save &amp; open dashboard</button></div></div>
+      <div class="selection-footer"><div class="selection-footer-copy"><strong id="selection-count" role="status"></strong><span>Your choices apply to every Indian stock.</span></div><div><button id="step-two-back" class="text-button" type="button">Back</button><button id="save-dashboard" class="primary-button" type="button">Save &amp; open dashboard</button></div></div>
     </section>
   </main>
   <script src="/auth.js" defer></script>
