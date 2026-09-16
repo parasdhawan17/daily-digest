@@ -7,6 +7,7 @@
 @media(max-width:720px){.dashboard-card-grid{grid-template-columns:1fr}.dashboard-card{padding:13px}.indian-dashboard .stock-chart{min-height:165px}.dashboard-mini-table th,.dashboard-mini-table td{padding:7px 9px}}@media(prefers-reduced-motion:reduce){.dashboard-category-tab{transition:none}}
 
 /* Personal-dashboard research cards follow the single-stock card language. */
+.indian-dashboard .dashboard-history-card .stock-chart{max-width:720px}
 .indian-dashboard{--signal-caution:#92620d;--signal-caution-bg:#fff3d5}
 html[data-theme=dark] .indian-dashboard{--signal-caution:#e8bf68;--signal-caution-bg:#3b301b}
 .indian-dashboard .dashboard-ai-summary{border-top:3px solid var(--link)}

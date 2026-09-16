@@ -253,6 +253,7 @@
   }
   function supplement(title, options, initial) {
     const c = card(title, 'Explore reported history. Each series keeps its own reporting periods.');
+    c.classList.add('stock-history-card');
     const controls = node('div', 'stock-controls'), select = node('select', 'stock-select'); select.setAttribute('aria-label', title + ' series'); options.forEach(value => { const opt = node('option', '', label(value)); opt.value = value; select.append(opt); }); select.value = initial;
     const content = node('div'); select.onchange = () => { const series = select.value; loadInto(content, 'financials', {series}, (t, d) => historyTable(t, d, series)); }; controls.append(select); c.append(controls, content); select.onchange(); return c;
   }

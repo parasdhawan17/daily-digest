@@ -86,6 +86,7 @@
     state(node);
   }
   function historyCard(meta,node,symbol,series){
+    node.classList.add('dashboard-history-card');
     var rows,periods,selection,content=el('div'),controls=el('div','stock-controls'),select=el('select','dashboard-series-select');
     select.setAttribute('aria-label',meta.title+' series');
     node.append(controls,content);
