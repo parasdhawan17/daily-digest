@@ -1,4 +1,8 @@
 /* The setup frame only. Stock dashboard card styles live in dashboard-cards.css. */
+.primary-button.is-saving{display:inline-flex;align-items:center;justify-content:center;gap:9px;cursor:wait;opacity:.85}
+.primary-button.is-saving::before{content:"";width:14px;height:14px;flex:none;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;animation:save-spin .75s linear infinite}
+@keyframes save-spin{to{transform:rotate(360deg)}}
+@media(prefers-reduced-motion:reduce){.primary-button.is-saving::before{animation:none}}
 .onboarding-step[data-step="2"]{--setup-accent:var(--link)}
 .step-two-intro{display:flex;align-items:end;justify-content:space-between;gap:28px;margin:-8px 0 27px;padding:0 2px 25px;border-bottom:1px solid var(--border)}
 .step-two-intro .step-copy{margin:0;max-width:650px}
@@ -107,7 +111,9 @@
 .onboarding-step[data-step="2"] .selection-footer{position:sticky;bottom:12px;margin-top:10px;padding:9px 12px}
 
 /* Keep the selected state clear without making the whole card glow. */
-.onboarding-step[data-step="2"] .selection-card .dashboard-card{border:1px solid var(--border-strong);background:var(--card-bg);transition:background .18s,border-color .18s,box-shadow .18s}
+.onboarding-step[data-step="2"] .selection-card .dashboard-card{border:1px solid var(--border-strong);background:var(--card-bg);transition:background .18s,border-color .18s,box-shadow .18s,opacity .18s,filter .18s}
+.onboarding-step[data-step="2"] .selection-card:not(.is-selected) .dashboard-card{opacity:.55;filter:saturate(.5)}
+.onboarding-step[data-step="2"] .selection-card:not(.is-selected):hover .dashboard-card,.onboarding-step[data-step="2"] .selection-card:not(.is-selected):focus-within .dashboard-card{opacity:.8;filter:saturate(.8)}
 .onboarding-step[data-step="2"] .selection-card:hover .dashboard-card{border-color:color-mix(in srgb,var(--link) 55%,var(--border-strong));box-shadow:0 5px 16px color-mix(in srgb,var(--link) 8%,transparent)}
 .onboarding-step[data-step="2"] .selection-card.is-selected .dashboard-card{border:1px solid color-mix(in srgb,var(--link) 65%,var(--border-strong));background:color-mix(in srgb,var(--link) 4%,var(--card-bg));box-shadow:none}
 .onboarding-step[data-step="2"] .selection-card .dashboard-card h3{padding-right:78px}

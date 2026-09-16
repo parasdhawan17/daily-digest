@@ -168,7 +168,17 @@
     notice('step-one-error', ''); notice('step-two-error', '');
     if (!selectedTickers.length) { notice('step-one-error', 'Add at least one validated stock.'); showStep(1); return; }
     if (hasIndia() && !selectedCards.size) { notice('step-two-error', 'Select at least one card for your Indian dashboard.'); return; }
-    $('save-dashboard').disabled = true; $('step-one-next').disabled = true;
+    var buttons = [$('save-dashboard'), $('step-one-next')];
+    var labels = buttons.map(function (button) { return button.textContent; });
+    function setSaving(saving) {
+      buttons.forEach(function (button, index) {
+        button.disabled = saving;
+        button.classList.toggle('is-saving', saving);
+        button.setAttribute('aria-busy', String(saving));
+        button.textContent = saving ? 'Saving…' : labels[index];
+      });
+    }
+    setSaving(true);
     fetch('/api/subscribe', {method:'POST',headers:{'Content-Type':'application/json','X-CSRF-Token':csrf()},body:JSON.stringify({
       email:$('onboarding-email').value,tickers:selectedTickers,email_briefings:$('email-briefings').checked,
       in_dashboard_cards:hasIndia()?Array.from(selectedCards):undefined
@@ -176,7 +186,7 @@
       if (!data.ok) throw new Error(data.error || 'Could not save your dashboard.');
       if (data.warning) try { sessionStorage.setItem('tickr-welcome-warning', data.warning); } catch (e) {}
       location.assign('/digest');
-    }).catch(function (error) { notice(hasIndia() ? 'step-two-error' : 'step-one-error', error.message); }).finally(function () { $('save-dashboard').disabled = false; $('step-one-next').disabled = false; });
+    }).catch(function (error) { notice(hasIndia() ? 'step-two-error' : 'step-one-error', error.message); setSaving(false); });
   }
 
   function bind() {
