@@ -448,6 +448,28 @@ html[data-theme="dark"] .indian-personal-dashboard .ai-briefing { width: min(138
 .indian-personal-dashboard .ticker-section .ticker-price { font-size: 22px; font-weight: 600; }
 .indian-personal-dashboard .ticker-section .ticker-change { border-radius: 5px; }
 .indian-personal-dashboard .site-footer .section-inner { width: min(1380px, calc(100% - 40px)); max-width: none; padding: 20px 0 24px; border-top: 1px solid var(--border); }
+/* Match the density of the single-stock workspace without shrinking touch targets. */
+.indian-personal-dashboard .digest-stock-overview-grid { padding-top: 18px; padding-bottom: 16px; gap: 20px; }
+.indian-personal-dashboard .digest-stock-eyebrow { margin-bottom: 5px; }
+.indian-personal-dashboard .digest-stock-overview h1 { margin-bottom: 5px; }
+.indian-personal-dashboard .ai-briefing,
+html[data-theme="dark"] .indian-personal-dashboard .ai-briefing { margin: 10px auto; }
+.indian-personal-dashboard .ai-briefing .section-inner { padding: 12px 14px; }
+.indian-personal-dashboard #digest-sections,
+.indian-personal-dashboard #full-digest { gap: 10px; margin: 10px auto; }
+.indian-personal-dashboard #digest-sections .ticker-section > .section-inner,
+.indian-personal-dashboard #full-digest .ticker-section > .section-inner { padding: 14px; }
+.indian-personal-dashboard .ticker-section .ticker-head { padding-bottom: 8px; }
+.indian-personal-dashboard .indian-dashboard { margin-top: 10px; }
+.indian-personal-dashboard .dashboard-category-panel { padding-top: 10px; }
+.indian-personal-dashboard .dashboard-card-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+.indian-personal-dashboard .dashboard-card { padding: 12px; }
+.indian-personal-dashboard .dashboard-card-caption { margin-bottom: 6px; }
+.indian-personal-dashboard .dashboard-card-value { margin-top: 6px; }
+.indian-personal-dashboard .dashboard-card.is-wide { grid-column: 1 / -1; }
+@media (max-width: 900px) {
+  .indian-personal-dashboard .dashboard-card-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
 @media (max-width: 600px) {
   .indian-personal-dashboard { overflow-x: hidden; }
   .indian-personal-dashboard .digest-stock-shell,
@@ -469,4 +491,11 @@ html[data-theme="dark"] .indian-personal-dashboard .ai-briefing { width: min(138
   .indian-personal-dashboard #full-digest .ticker-section > .section-inner { padding: 13px; }
   .indian-personal-dashboard .ticker-section .ticker-head-main { width: 100%; min-width: 0; }
   .indian-personal-dashboard .ticker-section .ticker-quote { width: auto; min-width: 0; }
+  .indian-personal-dashboard .digest-stock-overview-grid { padding-top: 14px; padding-bottom: 12px; }
+  .indian-personal-dashboard .digest-stock-meta { margin-top: 8px; }
+  .indian-personal-dashboard #digest-sections .ticker-section > .section-inner,
+  .indian-personal-dashboard #full-digest .ticker-section > .section-inner { padding: 12px; }
+}
+@media (max-width: 439px) {
+  .indian-personal-dashboard .dashboard-card-grid { grid-template-columns: minmax(0, 1fr); }
 }
