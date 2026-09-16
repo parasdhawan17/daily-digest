@@ -153,16 +153,11 @@
       return '<label class="selection-card ' + (checked ? 'is-selected' : '') + '"><input type="checkbox" value="' + card.id + '" ' + (checked ? 'checked' : '') + '><span class="selection-check" aria-hidden="true"><svg viewBox="0 0 16 16"><path d="m3.5 8 3 3 6-6"/></svg></span>' + dashboardSample(card,category.id) + '</label>';
     }).join('');
     $('card-grid').querySelectorAll('input').forEach(function (input) { input.onchange = function () { if (input.checked) selectedCards.add(input.value); else selectedCards.delete(input.value); renderCustomizer(); }; });
-    renderPreview();
+    renderSelectionSummary();
   }
-  function renderPreview() {
-    var enabled = catalog.categories.map(function (category) { return {category:category,cards:categorySelected(category)}; }).filter(function (item) { return item.cards.length; });
-    var active = categoryById(activeCategory), activeCards = active ? categorySelected(active) : [];
-    $('preview-canvas').className = 'preview-canvas tone-' + (active ? active.id : 'overview');
-    $('preview-canvas').innerHTML = activeCards.length ? '<div class="preview-device-head"><span>' + icon(active.id,'preview-category-icon') + '<strong>' + active.title + '</strong></span></div><div class="dashboard-card-grid">' + activeCards.slice(0,2).map(function (card) { return dashboardSample(card,active.id); }).join('') + '</div>' : '<p class="preview-empty">Choose a card to see it here.</p>';
-    $('preview-list').innerHTML = enabled.length ? enabled.map(function (item) { return '<div class="preview-category tone-' + item.category.id + '">' + icon(item.category.id,'preview-list-icon') + '<span><strong>' + item.category.title + '</strong><small>' + item.cards.slice(0,2).map(function (card) { return card.title; }).join(' · ') + (item.cards.length > 2 ? ' +' + (item.cards.length - 2) : '') + '</small></span><b>' + item.cards.length + '</b></div>'; }).join('') : '<p class="preview-empty">Choose a category to begin.</p>';
-    var total = selectedCards.size; $('selection-count').textContent = enabled.length + ' categories · ' + total + ' cards selected';
-    $('preview-total').textContent = total + ' cards';
+  function renderSelectionSummary() {
+    var categoryCount = catalog.categories.filter(function (category) { return categorySelected(category).length; }).length;
+    $('selection-count').textContent = categoryCount + ' categories · ' + selectedCards.size + ' cards selected';
   }
   function showStep(step) {
     document.querySelectorAll('[data-step]').forEach(function (node) { node.hidden = Number(node.dataset.step) !== step; });

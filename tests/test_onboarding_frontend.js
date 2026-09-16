@@ -24,6 +24,9 @@ test('hierarchical selector has rail, card panel, and sticky summary', () => {
   assert.match(css, /\.category-rail/);
   assert.match(css, /\.selection-card/);
   assert.match(css, /@media\(max-width:720px\)/);
+  assert.doesNotMatch(html, /class="selection-preview"/);
+  assert.doesNotMatch(stepTwoCss, /\.card-picker\{[^}]*height:clamp/);
+  assert.doesNotMatch(stepTwoCss, /\.selection-grid\{[^}]*overflow-y:auto/);
 });
 
 test('card catalog uses stock dashboard cards with sample data', () => {
@@ -31,14 +34,14 @@ test('card catalog uses stock dashboard cards with sample data', () => {
   assert.match(html, /onboarding-step-two\.css/);
   assert.match(html, /dashboard-cards\.css/);
   assert.match(html, /class="onboarding-step indian-dashboard" data-step="2"/);
-  assert.match(html, /id="preview-canvas"/);
+  assert.match(html, /id="selection-count"/);
   assert.match(js, /function dashboardSample\(/);
   assert.match(js, /dashboardSample\(card,category\.id\)/);
-  assert.match(js, /dashboardSample\(card,active\.id\)/);
+  assert.match(js, /renderSelectionSummary\(\)/);
+  assert.doesNotMatch(js, /preview-canvas|preview-list|preview-total/);
   assert.match(js, /dashboard-card sample-dashboard-card/);
   assert.match(js, /dashboard-mini-table/);
   assert.match(js, /dashboard-ai-insight/);
-  assert.match(html, /Figures are examples/);
   assert.match(catalogCss, /\.tone-overview/);
   assert.match(catalogCss, /\.selection-card \.dashboard-card/);
   assert.match(catalogCss, /prefers-reduced-motion/);

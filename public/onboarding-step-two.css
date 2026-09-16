@@ -71,3 +71,68 @@
   .selection-footer-copy{text-align:center}
   .onboarding-step[data-step="2"] .selection-footer>div:last-child{width:100%}
 }
+
+/* Compact desktop customizer: keep navigation and save controls visible. */
+.step-two-intro{align-items:center;gap:20px;margin:0 0 16px;padding:0 2px 16px}
+.step-two-intro .step-copy{max-width:760px}
+.step-two-intro .step-copy .eyebrow{margin:0 0 6px}
+.step-two-intro .step-copy h1{margin:0 0 5px;font-size:clamp(32px,3vw,42px);letter-spacing:-1.5px}
+.step-two-intro .step-copy>p:last-child{font-size:13px;line-height:1.4}
+.step-two-guide{gap:5px;max-width:410px}
+.step-two-guide span{font-size:10px}
+.step-two-guide b{width:20px;height:20px}
+.onboarding-step[data-step="2"] .customizer{grid-template-columns:205px minmax(0,1fr);gap:12px}
+.onboarding-step[data-step="2"] .category-rail{padding:6px}
+.rail-heading{padding:8px 9px 9px}
+.onboarding-step[data-step="2"] .category-button{grid-template-columns:30px minmax(0,1fr) auto;min-height:51px;padding:7px 6px;gap:7px}
+.onboarding-step[data-step="2"] .category-button.is-active{background:color-mix(in srgb,var(--tone) 6%,var(--card-bg));border-color:color-mix(in srgb,var(--tone) 22%,var(--border));box-shadow:inset 2px 0 color-mix(in srgb,var(--tone) 75%,var(--border))}
+.onboarding-step[data-step="2"] .category-icon{width:30px;height:30px;border-radius:9px}
+.onboarding-step[data-step="2"] .category-icon svg{width:16px;height:16px}
+.onboarding-step[data-step="2"] .category-button strong{font-size:11px}
+.onboarding-step[data-step="2"] .category-button small{font-size:9px;line-height:1.2}
+.onboarding-step[data-step="2"] .category-button-copy small{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.onboarding-step[data-step="2"] .category-count{min-width:31px;padding:4px}
+.onboarding-step[data-step="2"] .card-picker{padding:15px}
+.onboarding-step[data-step="2"] .card-picker-head{padding-bottom:12px}
+.onboarding-step[data-step="2"] .card-picker-head h2{font-size:22px;margin-bottom:3px}
+.onboarding-step[data-step="2"] .card-picker-head p:not(.eyebrow){line-height:1.35}
+.onboarding-step[data-step="2"] .category-selection-count{margin-top:7px!important}
+.onboarding-step[data-step="2"] .picker-actions{margin-top:10px}
+.onboarding-step[data-step="2"] .selection-grid{gap:9px;padding:12px 2px}
+.onboarding-step[data-step="2"] .selection-card .dashboard-card{min-height:142px;padding:11px 38px 11px 11px}
+.onboarding-step[data-step="2"] .sample-dashboard-card .dashboard-card-caption{min-height:0;margin-bottom:6px}
+.onboarding-step[data-step="2"] .sample-dashboard-card .dashboard-card-value{margin-top:10px}
+.onboarding-step[data-step="2"] .sample-dashboard-card .dashboard-range{margin-top:13px}
+.onboarding-step[data-step="2"] .sample-stock-chart{height:52px}
+.onboarding-step[data-step="2"] .selection-footer{position:sticky;bottom:12px;margin-top:10px;padding:9px 12px}
+
+/* Keep the selected state clear without making the whole card glow. */
+.onboarding-step[data-step="2"] .selection-card .dashboard-card{border:1px solid var(--border-strong);background:var(--card-bg);transition:background .18s,border-color .18s,box-shadow .18s}
+.onboarding-step[data-step="2"] .selection-card:hover .dashboard-card{border-color:color-mix(in srgb,var(--link) 55%,var(--border-strong));box-shadow:0 5px 16px color-mix(in srgb,var(--link) 8%,transparent)}
+.onboarding-step[data-step="2"] .selection-card.is-selected .dashboard-card{border:1px solid color-mix(in srgb,var(--link) 65%,var(--border-strong));background:color-mix(in srgb,var(--link) 4%,var(--card-bg));box-shadow:none}
+.onboarding-step[data-step="2"] .selection-card .dashboard-card h3{padding-right:78px}
+.onboarding-step[data-step="2"] .selection-card .selection-check{display:flex!important;align-items:center;justify-content:center;gap:5px;width:auto;min-width:66px;height:26px;padding:0 8px;border-radius:7px;background:var(--muted-bg);color:var(--text-secondary);font-size:10px;font-weight:750;line-height:1}
+.onboarding-step[data-step="2"] .selection-card .selection-check::before{content:"+";font-size:16px;font-weight:500;line-height:0}
+.onboarding-step[data-step="2"] .selection-card .selection-check::after{content:"Select"}
+.onboarding-step[data-step="2"] .selection-card .selection-check svg{display:none}
+.onboarding-step[data-step="2"] .selection-card.is-selected .selection-check{background:color-mix(in srgb,var(--link) 12%,var(--card-bg));border-color:color-mix(in srgb,var(--link) 40%,var(--border));color:var(--link);box-shadow:none}
+.onboarding-step[data-step="2"] .selection-card.is-selected .selection-check::before{display:none}
+.onboarding-step[data-step="2"] .selection-card.is-selected .selection-check::after{content:"Selected"}
+.onboarding-step[data-step="2"] .selection-card.is-selected .selection-check svg{display:block;opacity:1}
+.onboarding-step[data-step="2"] .selection-card input:focus-visible+.selection-check{outline:3px solid var(--link);outline-offset:3px}
+html[data-theme=dark] .onboarding-step[data-step="2"] .selection-card.is-selected .dashboard-card{background:color-mix(in srgb,var(--link) 7%,var(--card-bg))}
+@media(min-width:1320px){
+  .onboarding-step[data-step="2"] .selection-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+@media(max-width:1100px){
+  .step-two-intro{align-items:start;gap:10px}
+  .onboarding-step[data-step="2"] .customizer{grid-template-columns:185px minmax(0,1fr)}
+}
+@media(max-width:720px){
+  .step-two-intro{margin-bottom:12px;padding-bottom:12px}
+  .onboarding-step[data-step="2"] .category-rail{padding:6px}
+  .onboarding-step[data-step="2"] #category-rail{overflow-x:auto}
+  .onboarding-step[data-step="2"] .category-button{min-width:175px}
+  .onboarding-step[data-step="2"] .card-picker{padding:14px}
+  .onboarding-step[data-step="2"] .selection-footer{position:sticky;bottom:8px}
+}
