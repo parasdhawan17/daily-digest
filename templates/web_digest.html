@@ -1763,7 +1763,9 @@
       }
 
       function loadTicker(ticker) {
-        return fetch("/api/digest-data?t=" + encodeURIComponent(token) + "&ticker=" + encodeURIComponent(ticker))
+        var controller = new AbortController();
+        var timeout = setTimeout(function () { controller.abort(); }, 15000);
+        return fetch("/api/digest-data?t=" + encodeURIComponent(token) + "&ticker=" + encodeURIComponent(ticker), {signal: controller.signal})
           .then(function (response) { return response.json(); })
           .then(function (result) {
             var placeholder = container.querySelector('[data-ticker="' + CSS.escape(ticker) + '"]');
@@ -1786,6 +1788,9 @@
             if (placeholder) placeholder.innerHTML = '<div class="section-inner"><p class="empty">Could not load ' + esc(ticker) + ' right now.</p></div>';
             status.textContent = loaded.length + " of " + tickers.length + " tickers loaded";
             return null;
+          })
+          .finally(function () {
+            clearTimeout(timeout);
           });
       }
 

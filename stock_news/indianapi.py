@@ -555,7 +555,9 @@ def _search_industry(
         f"{_api_root(base_url)}/industry_search",
         params={"query": query},
         headers=_headers(api_key),
-        timeout=30,
+        # Search should fail over to the local entity cache quickly when a
+        # plan-specific provider host is unavailable.
+        timeout=(4, 8),
     )
     response.raise_for_status()
     payload = response.json()
@@ -588,6 +590,19 @@ def search_symbols(
     if not entities:
         entities = [_normalize_entity(item) for item in _load_entities_cache()]
         entities = [item for item in entities if item]
+
+    # The stock endpoint is available on the Developer host even when the
+    # industry-search endpoint is temporarily unavailable. Use it as a
+    # targeted fallback for autocomplete queries not present in the cache.
+    if not entities and api_key:
+        try:
+            entity = _normalize_entity(
+                _fetch_stock(text, api_key, base_url=base_url) or {}
+            )
+            if entity:
+                entities = [entity]
+        except requests.RequestException:
+            pass
 
     scored: list[tuple[int, dict]] = []
     for item in entities:

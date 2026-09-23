@@ -31,6 +31,7 @@
   }
   async function search(query, version) {
     controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 10000);
     try {
       const response = await fetch('/api/tickers/search?market=IN&q=' + encodeURIComponent(query), {signal: controller.signal});
       const data = await response.json();
@@ -49,6 +50,8 @@
       status.textContent = items.length ? items.length + (items.length === 1 ? ' company' : ' companies') + ' · Use ↑ ↓ and Enter to open' : 'No companies found. Try another name or symbol.';
     } catch (error) {
       if (error.name !== 'AbortError' && version === generation) status.textContent = error.message;
+    } finally {
+      clearTimeout(timeout);
     }
   }
   input.addEventListener('input', () => {
