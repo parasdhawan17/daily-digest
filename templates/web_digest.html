@@ -1542,20 +1542,50 @@
   <section class="progressive-status" id="progressive-status" aria-live="polite">
     <div class="section-inner"><span class="status-spinner" aria-hidden="true"></span><span id="progressive-status-text">Loading your watchlist…</span></div>
   </section>
-  <section class="movers-bar progressive-movers" id="progressive-movers" aria-label="Subscribed tickers and session moves" hidden>
-    <div class="section-inner">
-      <div class="movers-toolbar">
-        <p class="movers-label">Watchlist <span class="watchlist-count" aria-label="{{ progressive_tickers|length }} tickers">{{ progressive_tickers|length }}</span></p>
-        {% if subscribe_enabled %}
-        <button type="button" class="movers-edit-btn" onclick="location.href='/onboarding'" aria-label="Edit watchlist and dashboard">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"></path><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4Z"></path></svg>
-          <span>Edit</span>
-        </button>
-        {% endif %}
+  {% endif %}
+
+  <div class="digest-dashboard-shell{% if progressive or movers_bar %} has-watchlist{% endif %}">
+  {% if progressive or movers_bar %}
+  <aside class="watchlist-sidebar" aria-label="Your watchlist">
+    <section class="movers-bar{% if progressive %} progressive-movers{% endif %}"{% if progressive %} id="progressive-movers"{% endif %} aria-label="Subscribed tickers and session moves">
+      <div class="section-inner">
+        <div class="movers-toolbar">
+          <p class="movers-label">Watchlist <span class="watchlist-count" aria-label="{{ (progressive_tickers|length) if progressive else ticker_count }} tickers">{{ (progressive_tickers|length) if progressive else ticker_count }}</span></p>
+          {% if subscribe_enabled %}
+          <button type="button" class="movers-edit-btn" onclick="location.href='/onboarding'" aria-label="Edit watchlist and dashboard">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"></path><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4Z"></path></svg>
+            <span>Edit</span>
+          </button>
+          {% endif %}
+        </div>
+        <div class="movers-wrap">
+          <nav class="movers" data-watchlist-nav tabindex="0" aria-label="Watchlist, scroll for more stocks">
+            <div class="movers-track"{% if progressive %} id="progressive-movers-track"{% endif %}>
+            {% if progressive %}
+              {% for ticker in progressive_tickers %}
+              <a href="#ticker-{{ ticker }}" class="pill flat is-loading" data-watchlist-ticker="{{ ticker }}" data-move-magnitude="-1"{% if loop.first %} aria-current="location"{% endif %}>
+                <span class="mover-identity"><span class="mover-symbol">{{ ticker.split(':')[-1] }}</span><span class="mover-market">{{ ticker.split(':')[0] }}</span></span>
+                <span class="mover-change" aria-label="Loading session move">—</span>
+              </a>
+              {% endfor %}
+            {% else %}
+              {% for mover in movers_bar %}
+              <a href="#ticker-{{ mover.ticker }}" class="pill {% if mover.is_positive == true %}up{% elif mover.is_positive == false %}down{% else %}flat{% endif %}" data-watchlist-ticker="{{ mover.ticker }}" data-move-magnitude="{{ mover.change_pct|abs if mover.change_pct is not none else -1 }}"{% if loop.first %} aria-current="location"{% endif %}>
+                <span class="mover-identity"><span class="mover-symbol">{{ mover.display_symbol or mover.ticker }}</span><span class="mover-market">{{ mover.ticker.split(':')[0] }}</span></span>
+                <span class="mover-change">{% if mover.change_pct is not none %}{% if mover.change_pct >= 0 %}+{% endif %}{{ "%.1f"|format(mover.change_pct) }}%{% else %}—{% endif %}</span>
+              </a>
+              {% endfor %}
+            {% endif %}
+            </div>
+          </nav>
+        </div>
       </div>
-      <div class="movers-wrap"><div class="movers" role="navigation" tabindex="0" aria-label="Watchlist, scroll for more stocks"><div class="movers-track" id="progressive-movers-track"></div></div></div>
-    </div>
-  </section>
+    </section>
+  </aside>
+  {% endif %}
+
+  <div class="digest-content">
+  {% if progressive %}
   <main id="digest-sections" class="progressive-sections" data-token="{{ progressive_token or '' }}" data-tickers='{{ progressive_tickers|tojson }}' data-dashboard-cards='{{ in_dashboard_cards|tojson }}'>
     {% for ticker in progressive_tickers %}
     <section class="ticker-section progressive-placeholder" id="ticker-{{ ticker }}" data-ticker="{{ ticker }}" aria-label="Loading {{ ticker }}">
@@ -1564,37 +1594,6 @@
     {% endfor %}
   </main>
   {% else %}
-  {% if movers_bar %}
-  <section class="movers-bar" aria-label="Subscribed tickers and session moves">
-    <div class="section-inner">
-      <div class="movers-toolbar">
-        <p class="movers-label">Watchlist <span class="watchlist-count" aria-label="{{ ticker_count }} tickers">{{ ticker_count }}</span></p>
-        {% if subscribe_enabled %}
-        <button type="button" class="movers-edit-btn" onclick="location.href='/onboarding'" aria-label="Edit watchlist and dashboard">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"></path><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4Z"></path></svg>
-          <span>Edit</span>
-        </button>
-        {% endif %}
-      </div>
-      <div class="movers-wrap">
-      <div class="movers" role="navigation" tabindex="0" aria-label="Watchlist, scroll for more stocks">
-        <div class="movers-track">
-        {% for row in range(2) %}
-        <div class="movers-row" role="presentation">
-        {% for mover in movers_bar[row::2] %}
-        <a href="#ticker-{{ mover.ticker }}" class="pill {% if mover.is_positive == true %}up{% elif mover.is_positive == false %}down{% else %}flat{% endif %}">
-          <span class="mover-symbol">{{ mover.display_symbol or mover.ticker }}</span><span class="mover-change">{% if mover.change_pct is not none %}{% if mover.change_pct >= 0 %}+{% endif %}{{ "%.1f"|format(mover.change_pct) }}%{% endif %}</span>
-        </a>
-        {% endfor %}
-        </div>
-        {% endfor %}
-        </div>
-      </div>
-      </div>
-    </div>
-  </section>
-  {% endif %}
-
   <main id="full-digest">
   {% if hero %}
   {{ render_section(hero, is_hero=true) }}
@@ -1605,6 +1604,8 @@
   {% endfor %}
   </main>
   {% endif %}
+  </div>
+  </div>
 
   <footer class="site-footer">
     <div class="section-inner">
@@ -1691,34 +1692,38 @@
         });
       }
 
-      function showMovers() {
+      function updateMover(item) {
         var list = document.getElementById("progressive-movers-track");
-        var bar = document.getElementById("progressive-movers");
-        if (!list || !bar) return;
-        var movers = loaded.slice().sort(function (a, b) {
-          var aChange = a.quote && a.quote.change_pct != null ? Math.abs(a.quote.change_pct) : -1;
-          var bChange = b.quote && b.quote.change_pct != null ? Math.abs(b.quote.change_pct) : -1;
-          return bChange - aChange;
-        });
-        if (!movers.length) return;
-        var content = movers.map(function (item) {
-          var hasChange = item.quote && item.quote.change_pct != null;
-          var change = hasChange ? Number(item.quote.change_pct) : 0;
-          var cls = hasChange && change > 0 ? "up" : hasChange && change < 0 ? "down" : "flat";
-          var move = hasChange ? ' ' + (change >= 0 ? "+" : "") + change.toFixed(1) + '%' : '';
-          return '<a href="#ticker-' + esc(item.ticker) + '" class="pill ' + cls + '"><span class="mover-symbol">' + esc(item.display_symbol || item.ticker) + '</span><span class="mover-change">' + move + '</span></a>';
-        }).join("");
-        list.innerHTML = content;
-        var pills = Array.from(list.children);
-        [0, 1].forEach(function (offset) {
-          var row = document.createElement("div");
-          row.className = "movers-row";
-          row.setAttribute("role", "presentation");
-          pills.forEach(function (pill, index) { if (index % 2 === offset) row.appendChild(pill); });
-          list.appendChild(row);
-        });
-        if (window.setupMoverMarquee) setupMoverMarquee(list);
-        bar.hidden = false;
+        if (!list || !item) return;
+        var link = list.querySelector('[data-watchlist-ticker="' + CSS.escape(item.ticker) + '"]');
+        if (!link) return;
+        var hasChange = item.quote && item.quote.change_pct != null;
+        var change = hasChange ? Number(item.quote.change_pct) : 0;
+        var cls = hasChange && change > 0 ? "up" : hasChange && change < 0 ? "down" : "flat";
+        link.classList.remove("up", "down", "flat", "is-loading", "is-unavailable");
+        link.classList.add(cls);
+        link.setAttribute("data-move-magnitude", String(hasChange ? Math.abs(change) : -1));
+        var symbol = link.querySelector(".mover-symbol");
+        var move = link.querySelector(".mover-change");
+        if (symbol) symbol.textContent = item.display_symbol || item.ticker;
+        if (move) {
+          move.textContent = hasChange ? (change >= 0 ? "+" : "") + change.toFixed(1) + "%" : "—";
+          move.removeAttribute("aria-label");
+        }
+      }
+
+      function markMoverUnavailable(ticker) {
+        var list = document.getElementById("progressive-movers-track");
+        var link = list && list.querySelector('[data-watchlist-ticker="' + CSS.escape(ticker) + '"]');
+        if (!link) return;
+        link.classList.remove("up", "down", "is-loading");
+        link.classList.add("flat", "is-unavailable");
+        link.setAttribute("data-move-magnitude", "-1");
+        var move = link.querySelector(".mover-change");
+        if (move) {
+          move.textContent = "Unavailable";
+          move.removeAttribute("aria-label");
+        }
       }
 
       function addAiSummary(summary) {
@@ -1779,13 +1784,17 @@
             if (window.setupIndianDashboard) window.setupIndianDashboard(rendered);
             if (rendered) rendered.setAttribute("data-move-magnitude", String(change));
             loaded.push(result.section);
-            showMovers();
+            updateMover(result.section);
             status.textContent = loaded.length + " of " + tickers.length + " tickers loaded";
             return result.section;
           })
           .catch(function () {
             var placeholder = container.querySelector('[data-ticker="' + CSS.escape(ticker) + '"]');
-            if (placeholder) placeholder.innerHTML = '<div class="section-inner"><p class="empty">Could not load ' + esc(ticker) + ' right now.</p></div>';
+            if (placeholder) {
+              placeholder.setAttribute("data-move-magnitude", "-1");
+              placeholder.innerHTML = '<div class="section-inner"><p class="empty">Could not load ' + esc(ticker) + ' right now.</p></div>';
+            }
+            markMoverUnavailable(ticker);
             status.textContent = loaded.length + " of " + tickers.length + " tickers loaded";
             return null;
           })
@@ -1795,12 +1804,20 @@
       }
 
       function sortTickerSectionsByMove() {
-        Array.prototype.slice.call(container.querySelectorAll(".ticker-section"))
+        var ordered = Array.prototype.slice.call(container.querySelectorAll(".ticker-section"))
           .sort(function (a, b) {
             return Number(b.getAttribute("data-move-magnitude") || -1)
               - Number(a.getAttribute("data-move-magnitude") || -1);
-          })
-          .forEach(function (section) { container.appendChild(section); });
+          });
+        ordered.forEach(function (section) { container.appendChild(section); });
+        var list = document.getElementById("progressive-movers-track");
+        if (list) {
+          ordered.forEach(function (section) {
+            var link = list.querySelector('[data-watchlist-ticker="' + CSS.escape(section.getAttribute("data-ticker")) + '"]');
+            if (link) list.appendChild(link);
+          });
+        }
+        document.dispatchEvent(new CustomEvent("watchlist:updated"));
       }
 
       Promise.all(tickers.map(loadTicker)).then(function () {
@@ -1877,6 +1894,98 @@
       window.addEventListener("resize", function () {
         document.querySelectorAll(".movers-track").forEach(window.setupMoverMarquee);
       });
+    })();
+  </script>
+  <script>
+    (function () {
+      var nav = document.querySelector("[data-watchlist-nav]");
+      if (!nav) return;
+      var activeTicker = "";
+      var scheduled = false;
+      var reducedMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+      function watchlistLinks() {
+        return Array.prototype.slice.call(nav.querySelectorAll("[data-watchlist-ticker]"));
+      }
+
+      function tickerSections() {
+        return Array.prototype.slice.call(document.querySelectorAll(".digest-content .ticker-section[data-ticker]"));
+      }
+
+      function keepLinkVisible(link) {
+        if (!link || typeof nav.scrollTo !== "function") return;
+        var behavior = reducedMotion ? "auto" : "smooth";
+        if (window.innerWidth >= 1024) {
+          var nextTop = link.offsetTop - Math.max(0, (nav.clientHeight - link.offsetHeight) / 2);
+          if (link.offsetTop < nav.scrollTop || link.offsetTop + link.offsetHeight > nav.scrollTop + nav.clientHeight) {
+            nav.scrollTo({top: Math.max(0, nextTop), behavior: behavior});
+          }
+          return;
+        }
+        var nextLeft = link.offsetLeft - Math.max(0, (nav.clientWidth - link.offsetWidth) / 2);
+        if (link.offsetLeft < nav.scrollLeft || link.offsetLeft + link.offsetWidth > nav.scrollLeft + nav.clientWidth) {
+          nav.scrollTo({left: Math.max(0, nextLeft), behavior: behavior});
+        }
+      }
+
+      function setActiveTicker(ticker, reveal) {
+        if (!ticker) return;
+        var activeLink = null;
+        watchlistLinks().forEach(function (link) {
+          var isActive = link.getAttribute("data-watchlist-ticker") === ticker;
+          link.classList.toggle("is-active", isActive);
+          if (isActive) {
+            link.setAttribute("aria-current", "location");
+            activeLink = link;
+          } else {
+            link.removeAttribute("aria-current");
+          }
+        });
+        if (!activeLink) return;
+        var changed = activeTicker !== ticker;
+        activeTicker = ticker;
+        if (changed && reveal !== false) keepLinkVisible(activeLink);
+      }
+
+      function readActiveTicker() {
+        var sections = tickerSections();
+        if (!sections.length) return "";
+        var line = window.innerWidth >= 1024
+          ? Math.min(112, Math.max(48, window.innerHeight * 0.14))
+          : nav.getBoundingClientRect().bottom + 24;
+        var active = sections[0];
+        sections.forEach(function (section) {
+          if (section.getBoundingClientRect().top <= line) active = section;
+        });
+        var root = document.documentElement;
+        if (window.scrollY + window.innerHeight >= root.scrollHeight - 2) active = sections[sections.length - 1];
+        return active.getAttribute("data-ticker") || "";
+      }
+
+      function update() {
+        scheduled = false;
+        setActiveTicker(readActiveTicker(), true);
+      }
+
+      function scheduleUpdate() {
+        if (scheduled) return;
+        scheduled = true;
+        window.requestAnimationFrame(update);
+      }
+
+      nav.addEventListener("click", function (event) {
+        var link = event.target.closest && event.target.closest("[data-watchlist-ticker]");
+        if (link && nav.contains(link)) setActiveTicker(link.getAttribute("data-watchlist-ticker"), true);
+      });
+      window.addEventListener("scroll", scheduleUpdate, {passive: true});
+      window.addEventListener("resize", scheduleUpdate);
+      window.addEventListener("hashchange", scheduleUpdate);
+      window.addEventListener("load", scheduleUpdate);
+      document.addEventListener("watchlist:updated", function () {
+        activeTicker = "";
+        scheduleUpdate();
+      });
+      update();
     })();
   </script>
   <script>

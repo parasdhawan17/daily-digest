@@ -34,15 +34,43 @@ class DigestDesignTest(unittest.TestCase):
         self.assertIn('$200.00', fragment)
         self.assertIn('https://example.com/apple', fragment)
 
-    def test_watchlist_is_scrollable_grid_and_keeps_unquoted_tickers(self):
+    def test_watchlist_is_responsive_navigation_and_keeps_unquoted_tickers(self):
         html = build_web_digest([], ['US:AAPL', 'IN:TCS'], progressive=True, progressive_token='test-token')
 
         self.assertIn('class="watchlist-count" aria-label="2 tickers">2</span>', html)
-        self.assertRegex(html, r"\.movers-track\s*\{[^}]*flex-direction:\s*column;")
-        self.assertRegex(html, r"\.movers-track\s*\{[^}]*height:\s*56px;")
-        self.assertRegex(html, r"\.movers\s*\{[^}]*overflow-x:\s*auto;")
-        self.assertIn("var movers = loaded.slice().sort", html)
+        self.assertIn('class="digest-dashboard-shell has-watchlist"', html)
+        self.assertIn('class="watchlist-sidebar"', html)
+        self.assertIn('data-watchlist-nav', html)
+        self.assertIn('data-watchlist-ticker="US:AAPL"', html)
+        self.assertIn('data-watchlist-ticker="IN:TCS"', html)
+        self.assertIn('aria-label="Loading session move"', html)
+        self.assertIn("function updateMover(item)", html)
+        self.assertIn("function markMoverUnavailable(ticker)", html)
+        self.assertIn('document.dispatchEvent(new CustomEvent("watchlist:updated"))', html)
         self.assertNotIn("loaded.filter(function (item) { return item.quote", html)
+
+    def test_watchlist_scrollspy_exposes_active_location(self):
+        html = build_web_digest([], ['US:AAPL', 'US:MSFT'], progressive=True, progressive_token='test-token')
+
+        self.assertEqual(html.count('data-move-magnitude="-1" aria-current="location"'), 1)
+        self.assertIn('function setActiveTicker(ticker, reveal)', html)
+        self.assertIn('function readActiveTicker()', html)
+        self.assertIn('link.setAttribute("aria-current", "location")', html)
+        self.assertIn('link.removeAttribute("aria-current")', html)
+        self.assertIn('window.addEventListener("scroll", scheduleUpdate, {passive: true})', html)
+        self.assertIn('(prefers-reduced-motion: reduce)', html)
+
+    def test_watchlist_shell_keeps_one_stock_per_row(self):
+        html = build_web_digest(sample_sections(), ['US:AAPL', 'US:MSFT'])
+
+        self.assertIn('grid-template-columns: 252px minmax(0, 1fr)', html)
+        self.assertIn('.digest-content #full-digest {', html)
+        self.assertRegex(
+            html,
+            r"\.digest-content #full-digest\s*\{[^}]*grid-template-columns:\s*minmax\(0, 1fr\)",
+        )
+        self.assertIn('data-watchlist-ticker="US:AAPL"', html)
+        self.assertIn('data-watchlist-ticker="US:MSFT"', html)
 
     def test_progressive_digest_sorts_rendered_sections_by_move_magnitude(self):
         html = build_web_digest([], ['US:AAPL', 'US:MSFT'], progressive=True, progressive_token='test-token')
