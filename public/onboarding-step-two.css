@@ -139,6 +139,7 @@ html[data-theme=dark] .onboarding-step[data-step="2"] .selection-card.is-selecte
   body{overflow-x:clip}
   .onboarding-step[data-step="2"] .category-rail{position:sticky;top:env(safe-area-inset-top, 0px);z-index:20;display:block;overflow:visible;padding:6px;background:var(--card-bg)}
   .onboarding-step[data-step="2"] #category-rail{overflow-x:auto}
+  .onboarding-step[data-step="2"] #category-rail::after{content:"";flex:0 0 max(0px,calc(100% - 175px))}
   .onboarding-step[data-step="2"] .category-button{min-width:175px}
   .onboarding-step[data-step="2"] .card-picker{padding:14px}
   .onboarding-step[data-step="2"] .selection-footer{position:sticky;bottom:8px}

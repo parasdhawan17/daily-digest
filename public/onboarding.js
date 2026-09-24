@@ -134,12 +134,25 @@
   function activateCategory(id) {
     var category = categoryById(id); if (!category) return;
     activeCategory = id; renderCustomizer();
+    if (window.matchMedia('(max-width:720px)').matches) {
+      var rail = document.querySelector('.onboarding-step[data-step="2"] .category-rail');
+      var categoryList = $('category-rail');
+      var activeButton = categoryList.querySelector('.category-button.is-active');
+      var picker = document.querySelector('.onboarding-step[data-step="2"] .card-picker');
+      var stickyTop = parseFloat(window.getComputedStyle(rail).top) || 0;
+      var top = window.scrollY + picker.getBoundingClientRect().top - rail.getBoundingClientRect().height - stickyTop - 12;
+      var behavior = window.matchMedia('(prefers-reduced-motion:reduce)').matches ? 'auto' : 'smooth';
+      categoryList.scrollTo({left:categoryList.scrollLeft + activeButton.getBoundingClientRect().left - categoryList.getBoundingClientRect().left,behavior:behavior});
+      window.scrollTo({top:Math.max(0,top),behavior:behavior});
+    }
   }
   function renderCustomizer() {
+    var railScrollLeft = $('category-rail').scrollLeft;
     $('category-rail').innerHTML = catalog.categories.map(function (category) {
       var count = categorySelected(category).length;
       return '<button type="button" class="category-button tone-' + category.id + ' ' + (category.id === activeCategory ? 'is-active ' : '') + (count ? 'has-selection' : '') + '" data-category="' + category.id + '" aria-current="' + (category.id === activeCategory ? 'true' : 'false') + '">' + icon(category.id,'category-icon') + '<span class="category-button-copy"><strong>' + category.title + '</strong><small>' + category.description + '</small></span><span class="category-count">' + count + '<small>/' + category.cards.length + '</small></span></button>';
     }).join('');
+    $('category-rail').scrollLeft = railScrollLeft;
     $('category-rail').querySelectorAll('[data-category]').forEach(function (button) { button.onclick = function () { activateCategory(button.dataset.category); }; });
     var category = categoryById(activeCategory) || catalog.categories[0];
     $('active-category-kicker').textContent = 'Choose cards'; $('active-category-title').textContent = category.title; $('active-category-description').textContent = category.description;
