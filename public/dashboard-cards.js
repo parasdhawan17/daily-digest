@@ -3,6 +3,22 @@
   var catalogPromise = fetch('/dashboard-catalog.json').then(function (r) { return r.json(); });
   var requests = new Map();
   var format = window.tickrStockFormat || {};
+  // Match the section symbols used while building a stock view.
+  var categoryIconPaths = {
+    overview:'<path d="M4 19V9m5 10V5m5 14v-7m5 7V3"/><path d="M3 19h18"/>',
+    ai:'<path d="m12 3 1.25 3.75L17 8l-3.75 1.25L12 13l-1.25-3.75L7 8l3.75-1.25L12 3Z"/><path d="m5.5 13 .8 2.2 2.2.8-2.2.8L5.5 19l-.8-2.2-2.2-.8 2.2-.8.8-2.2Zm13-1 .8 2.2 2.2.8-2.2.8-.8 2.2-.8-2.2-2.2-.8 2.2-.8.8-2.2Z"/>',
+    financials:'<path d="M4 20V10h4v10m4 0V4h4v16m4 0V7h-4"/><path d="M2 20h20"/>',
+    ownership:'<path d="M16 20v-1.5a4.5 4.5 0 0 0-4.5-4.5h-3A4.5 4.5 0 0 0 4 18.5V20"/><circle cx="10" cy="7" r="4"/><path d="M17 10a3 3 0 1 0 0-6m1 10a4 4 0 0 1 4 4v2"/>',
+    analysis:'<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/><path d="M12 2v3m0 14v3M2 12h3m14 0h3"/>',
+    actions:'<rect x="3" y="5" width="18" height="16" rx="3"/><path d="M7 3v4m10-4v4M3 10h18m-14 4h4m-4 3h7"/>',
+    news:'<path d="M5 4h14a2 2 0 0 1 2 2v13a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z"/><path d="M7 8h5v5H7zm8 0h2m-2 4h2M7 17h10"/>'
+  };
+  function categoryIcon(id) {
+    var icon = el('span','dashboard-category-icon');
+    icon.setAttribute('aria-hidden','true');
+    icon.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' + (categoryIconPaths[id] || categoryIconPaths.overview) + '</svg>';
+    return icon;
+  }
   function has(value) { return value !== null && value !== undefined && value !== '' && (typeof value !== 'object' || Object.keys(value).length); }
   function num(value) { return format.number ? format.number(value) : (value == null || String(value).trim()==='' ? null : Number(String(value).replace(/,/g,''))); }
   function fmt(value) { return format.fmt ? format.fmt(value) : (num(value) === null ? (value || '—') : num(value).toLocaleString('en-IN',{maximumFractionDigits:2})); }
@@ -190,7 +206,7 @@
       root.replaceChildren();if(!categories.length){state(root,'No company cards selected. Customize your dashboard to add some.');return;}
       var tabs=el('div','dashboard-category-tabs');tabs.setAttribute('role','tablist');var panels=el('div');
       function activate(index){Array.from(tabs.children).forEach(function(tab,i){tab.setAttribute('aria-selected',String(i===index));tab.tabIndex=i===index?0:-1;});Array.from(panels.children).forEach(function(panel,i){panel.hidden=i!==index;if(i===index&&!panel.dataset.loaded){panel.dataset.loaded='true';var grid=el('div','dashboard-card-grid'),tab=tabs.children[i];categories[i].cards.forEach(function(meta){var wide=['overview_price_history','overview_pe_history','overview_peer_comparison','news_company_coverage','ai_company_summary','ai_sources_freshness','analysis_market_snapshot'].indexOf(meta.id)>=0||['financial_','ownership_','actions_'].some(function(prefix){return meta.id.indexOf(prefix)===0;}),node=card(meta,wide),placeholder=['overview_price_history','overview_pe_history'].indexOf(meta.id)>=0?null:shimmer(node);grid.append(node);Promise.resolve(renderCard(meta,node,core,symbol)).then(function(rendered){if(placeholder)placeholder.remove();if(rendered===false){node.remove();if(!grid.childElementCount){tab.hidden=true;panel.hidden=true;var next=Array.from(tabs.children).find(function(item){return !item.hidden;});if(next)next.click();else{root.replaceChildren();state(root,'No reported data is available for the selected cards.');}}}});});panel.append(grid);}});}
-      categories.forEach(function(item,index){var tab=el('button','dashboard-category-tab',item.category.title);tab.type='button';tab.setAttribute('role','tab');tab.onclick=function(){activate(index);};tab.onkeydown=function(event){var next=event.key==='ArrowRight'?(index+1)%categories.length:event.key==='ArrowLeft'?(index+categories.length-1)%categories.length:-1;if(next>=0){event.preventDefault();activate(next);tabs.children[next].focus();}};tabs.append(tab);var panel=el('section','dashboard-category-panel');panel.setAttribute('role','tabpanel');panels.append(panel);});root.append(tabs,panels);activate(0);
+      categories.forEach(function(item,index){var tab=el('button','dashboard-category-tab tone-'+item.category.id);tab.append(categoryIcon(item.category.id),document.createTextNode(item.category.title));tab.type='button';tab.setAttribute('role','tab');tab.onclick=function(){activate(index);};tab.onkeydown=function(event){var next=event.key==='ArrowRight'?(index+1)%categories.length:event.key==='ArrowLeft'?(index+categories.length-1)%categories.length:-1;if(next>=0){event.preventDefault();activate(next);tabs.children[next].focus();}};tabs.append(tab);var panel=el('section','dashboard-category-panel');panel.setAttribute('role','tabpanel');panels.append(panel);});root.append(tabs,panels);activate(0);
     }).catch(function(error){root.replaceChildren();state(root,error.message||'Could not load your selected cards.');});
   }
   window.setupIndianDashboard=setup;

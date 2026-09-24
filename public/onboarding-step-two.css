@@ -136,7 +136,8 @@ html[data-theme=dark] .onboarding-step[data-step="2"] .selection-card.is-selecte
 }
 @media(max-width:720px){
   .step-two-intro{margin-bottom:12px;padding-bottom:12px}
-  .onboarding-step[data-step="2"] .category-rail{padding:6px}
+  body{overflow-x:clip}
+  .onboarding-step[data-step="2"] .category-rail{position:sticky;top:env(safe-area-inset-top, 0px);z-index:20;display:block;overflow:visible;padding:6px;background:var(--card-bg)}
   .onboarding-step[data-step="2"] #category-rail{overflow-x:auto}
   .onboarding-step[data-step="2"] .category-button{min-width:175px}
   .onboarding-step[data-step="2"] .card-picker{padding:14px}
