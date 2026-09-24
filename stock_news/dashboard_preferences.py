@@ -7,6 +7,14 @@ from functools import lru_cache
 from stock_news.config import REPO_ROOT
 
 CATALOG_PATH = REPO_ROOT / "public" / "dashboard-catalog.json"
+RETIRED_CARDS = frozenset({
+    "analysis_analyst_consensus",
+    "analysis_rating_history",
+    "analysis_recommendation_summary",
+    "analysis_price_target_summary",
+    "analysis_price_target_history",
+    "analysis_eps_forecasts",
+})
 
 
 @lru_cache(maxsize=1)
@@ -16,6 +24,11 @@ def catalog() -> dict:
 
 def allowed_cards() -> tuple[str, ...]:
     return tuple(card["id"] for category in catalog()["categories"] for card in category["cards"])
+
+
+def recognized_cards() -> frozenset[str]:
+    """Return current and retired IDs accepted from persisted client preferences."""
+    return frozenset(allowed_cards()) | RETIRED_CARDS
 
 
 def default_cards() -> list[str]:

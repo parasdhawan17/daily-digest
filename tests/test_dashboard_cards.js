@@ -44,19 +44,18 @@ function mockData(section, params) {
     snapshot: {marketCap: 10, pPerEBasicExcludingExtraordinaryItemsTTM: 12, currentDividendYieldCommonStockPrimaryIssueLTM: 1, priceYTDPricePercentChange: 2, high: 10, low: 8, close: 9, price5DayPercentChange: -1},
     year_low: 5, year_high: 15, prices: {NSE: 10, BSE: 9},
     profile: {companyDescription: 'Company profile', industry: 'Technology', officers: {officer: [{firstName: 'A', lastName: 'B', title: {Value: 'CEO'}}]}},
-    health: {end_date: '2026-06-30', groups: [{title: 'Growth', metrics: [{id: 'revenue', label: 'Revenue', value: 20, unit: '₹ cr', change_label: '+2%', value_tone: 'positive'}]}, {title: 'Profitability', metrics: []}, {title: 'Balance sheet', metrics: []}, {title: 'Cash generation', metrics: []}]},
+    health: {end_date: '2026-06-30', groups: [{title: 'Growth', metrics: [{id: 'revenue', label: 'Revenue', value: 20, unit: '₹ cr', change_label: '+2%', value_tone: 'positive'}]}, {title: 'Profitability', metrics: [{id: 'margin', label: 'Margin', value: 20}]}, {title: 'Balance sheet', metrics: [{id: 'debt', label: 'Debt', value: 10}]}, {title: 'Cash generation', metrics: [{id: 'fcf', label: 'Free cash flow', value: 5}]}]},
     financials: [{Type: 'Annual', EndDate: '2026-06-30', stockFinancialMap: {INC: [{key: 'Revenue', value: 20}], BAL: [{key: 'Assets', value: 40}], CAS: [{key: 'CashFlow', value: 5}]}}],
     ownership: [{displayName: 'Promoter', categoryName: 'Promoter', categories: [{holdingDate: '2026-06-30', percentage: 30}]}],
     peers: [{symbol: 'IN:TCS', companyName: 'TCS', price: 10}],
     ratings: [{ratingName: 'Buy', ratingValue: 1, numberOfAnalystsLatest: 3}], recommendations: {Buy: 3},
-    technical: {average: 8}, risk: {level: 'Low'}, futures: {expiry: '2026-09'}, actions: {dividend: [{remarks: 'Dividend', xdDate: '2026-08-01'}], bonus: [], rights: [], splits: [], annualGeneralMeeting: [], boardMeetings: []},
+    technical: [{days: 50, nsePrice: 8}], risk: {categoryName: 'Low', stdDev: 12.4}, futures: {expiryDates: ['2026-09']}, actions: {dividend: [{remarks: 'Dividend', xdDate: '2026-08-01'}], bonus: [{remarks: 'Bonus'}], rights: [{remarks: 'Rights'}], splits: [{remarks: 'Split'}], annualGeneralMeeting: [{remarks: 'AGM'}], boardMeetings: [{remarks: 'Board meeting'}]},
     metrics: {growth: [{key: 'Revenue', value: 20}]}, additional_financials: {cash: 4},
     news: [{headline: 'Company news', source: 'Example', date: '2026-09-01', url: 'https://example.com/story'}]
   };
   if (section === 'financials') return {Sales: {'Jun 2025': 10, 'Jun 2026': 20}, Expenses: {'Jun 2025': 5, 'Jun 2026': 9}};
+  if (section === 'history' && params.get('filter') === 'pe') return {datasets: [{metric: 'PE', label: 'P/E', values: [['2026-01-01', '10'], ['2026-02-01', 14], ['2026-03-01', 12]]}]};
   if (section === 'history') return {datasets: [{metric: 'Price', label: 'Price', values: [['2026-01-01', 10], ['2026-02-01', 12]]}]};
-  if (section === 'targets') return {priceTarget: {Low: 9, Mean: 12, High: 15, NumberOfEstimates: 3}, priceTargetSnapshots: [], recommendation: {}, recommendationSnapshots: []};
-  if (section === 'forecasts') return {periods: [{FiscalPeriod: {Year: 2026}, Estimates: {Estimate: [{Mean: 12, Low: 10, High: 14, NumberOfEstimates: 3}]}}]};
   return {};
 }
 
@@ -72,11 +71,16 @@ test('every selectable Indian dashboard card renders without a fallback or excep
     querySelectorAll: selector => selector === '.ticker-section' ? [section] : [],
     getElementById: id => id === 'digest-sections' ? container : null
   };
+  const requested = [];
   const context = {document, Node: Element, URL, URLSearchParams, Intl, Map, Set, Array, Object, Number, String, Date, Math, console,
     window: {tickrStockFormat: format},
-    fetch: async url => ({json: async () => url === '/dashboard-catalog.json' ? catalog
-      : url.startsWith('/api/stock-ai') ? {ok: true, data: {summary: {heading: 'Summary', text: 'Text', tone: 'positive'}, encouraging: [], attention: [], changes: [], catalysts: [], risks: [], watch_next: [], sources: [], generated_at: '2026-09-01'}}
-      : {ok: true, data: mockData(new URL(url, 'https://example.test').searchParams.get('section'), new URL(url, 'https://example.test').searchParams)}})};
+    fetch: async url => {
+      requested.push(url);
+      return {json: async () => url === '/dashboard-catalog.json' ? catalog
+        : url.startsWith('/api/stock-ai') ? {ok: true, data: {summary: {heading: 'Summary', text: 'Text', tone: 'positive'}, encouraging: [], attention: [], changes: [], catalysts: [], risks: [], watch_next: [], sources: [], generated_at: '2026-09-01'}}
+        : {ok: true, data: mockData(new URL(url, 'https://example.test').searchParams.get('section'), new URL(url, 'https://example.test').searchParams)}};
+    }
+  };
   vm.runInNewContext(source, context);
   for (let i = 0; i < 8; i++) await new Promise(resolve => setImmediate(resolve));
   const tabs = descendants(root, node => node.className === 'dashboard-category-tab');
@@ -91,17 +95,19 @@ test('every selectable Indian dashboard card renders without a fallback or excep
   assert.ok(descendants(card('ai_company_summary'), node => node.className?.includes('dashboard-ai-insight')).length);
   assert.ok(descendants(card('financial_quarterly_results'), node => node.attributes?.class === 'stock-chart').length);
   assert.ok(descendants(card('ownership_current_mix'), node => node.className === 'dashboard-stacked-bar').length);
-  assert.ok(descendants(card('analysis_price_target_summary'), node => node.className === 'dashboard-metrics').length);
+  assert.ok(descendants(card('overview_pe_history'), node => node.className === 'dashboard-metrics').length);
+  assert.ok(descendants(card('overview_pe_history'), node => node.attributes?.class === 'pe-median-line').length);
   assert.ok(descendants(card('news_company_coverage'), node => node.className === 'dashboard-news-card').length);
+  assert.equal(requested.some(url => /section=(targets|forecasts)/.test(url)), false);
   assert.equal(descendants(root, node => node.className === 'dashboard-card-state' && /is not defined|cannot read|could not load/i.test(node.textContent || '')).length, 0);
 });
 
-test('pending tab cards shimmer until their request settles', async () => {
+test('P/E history shimmers until its filtered history request settles', async () => {
   const root = new Element(); root.dataset.symbol = 'IN:INFY';
   const section = new Element(); section.append(root);
-  const container = new Element(); container.dataset.dashboardCards = JSON.stringify(['analysis_price_target_summary']);
-  let resolveTargets;
-  const targets = new Promise(resolve => { resolveTargets = resolve; });
+  const container = new Element(); container.dataset.dashboardCards = JSON.stringify(['overview_pe_history']);
+  let resolveHistory;
+  const history = new Promise(resolve => { resolveHistory = resolve; });
   const document = {
     createElement: tag => new Element(tag),
     createElementNS: (_, tag) => new Element(tag),
@@ -112,14 +118,32 @@ test('pending tab cards shimmer until their request settles', async () => {
   vm.runInNewContext(source, {document, Node: Element, URL, URLSearchParams, Intl, Map, Set, Array, Object, Number, String, Date, Math, console,
     window: {tickrStockFormat: format},
     fetch: url => url === '/dashboard-catalog.json' ? Promise.resolve({json: async () => catalog})
-      : url.includes('section=targets') ? targets
+      : url.includes('section=history') ? history
       : Promise.resolve({json: async () => ({ok: true, data: mockData('core')})})});
   for (let i = 0; i < 4; i++) await new Promise(resolve => setImmediate(resolve));
-  const card = descendants(root, node => node.dataset.card === 'analysis_price_target_summary')[0];
+  const card = descendants(root, node => node.dataset.card === 'overview_pe_history')[0];
   assert.ok(card);
   assert.equal(descendants(card, node => node.className === 'dashboard-shimmer').length, 1);
-  resolveTargets({json: async () => ({ok: true, data: mockData('targets')})});
+  resolveHistory({json: async () => ({ok: true, data: mockData('history', new URLSearchParams('filter=pe'))})});
   for (let i = 0; i < 4; i++) await new Promise(resolve => setImmediate(resolve));
   assert.equal(descendants(card, node => node.className === 'dashboard-shimmer').length, 0);
   assert.equal(descendants(card, node => node.className === 'dashboard-metrics').length, 1);
+});
+
+test('empty P/E history removes the card and reports no factual data', async () => {
+  const root = new Element(); root.dataset.symbol = 'IN:SPARSE';
+  const section = new Element(); section.append(root);
+  const container = new Element(); container.dataset.dashboardCards = JSON.stringify(['overview_pe_history']);
+  const document = {
+    createElement: tag => new Element(tag), createElementNS: (_, tag) => new Element(tag),
+    createTextNode: text => String(text), querySelectorAll: selector => selector === '.ticker-section' ? [section] : [],
+    getElementById: id => id === 'digest-sections' ? container : null
+  };
+  vm.runInNewContext(source, {document, Node: Element, URL, URLSearchParams, Intl, Map, Set, Array, Object, Number, String, Date, Math, console,
+    window: {tickrStockFormat: format},
+    fetch: url => Promise.resolve({json: async () => url === '/dashboard-catalog.json' ? catalog
+      : {ok: true, data: url.includes('section=history') ? {datasets: []} : mockData('core')}})});
+  for (let i = 0; i < 8; i++) await new Promise(resolve => setImmediate(resolve));
+  assert.equal(descendants(root, node => node.dataset.card === 'overview_pe_history').length, 0);
+  assert.equal(descendants(root, node => node.className === 'dashboard-card-state' && /No reported data/.test(node.textContent || '')).length, 1);
 });

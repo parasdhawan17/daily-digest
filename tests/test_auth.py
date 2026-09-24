@@ -148,6 +148,20 @@ class SubscribeTests(unittest.TestCase):
         handle_post(h)
         self.assertFalse(result(h)['ok'])
 
+        h = handler(payload={'tickers': ['IN:TCS'], 'in_dashboard_cards': [
+            'analysis_price_target_summary', 'overview_market_cap'
+        ]}, signed_in=True)
+        handle_post(h)
+        self.assertTrue(result(h)['ok'])
+        self.assertEqual(save.call_args.kwargs['dashboard_cards'], ['overview_market_cap'])
+
+        h = handler(payload={'tickers': ['IN:TCS'], 'in_dashboard_cards': [
+            'analysis_price_target_summary'
+        ]}, signed_in=True)
+        handle_post(h)
+        self.assertTrue(result(h)['ok'])
+        self.assertIn('overview_pe_history', save.call_args.kwargs['dashboard_cards'])
+
     @patch('api.subscribe.validate_symbol', return_value=True)
     @patch('api.subscribe.send_welcome_email')
     @patch('api.subscribe.subscribe_verified', return_value=True)

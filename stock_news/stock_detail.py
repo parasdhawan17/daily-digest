@@ -22,6 +22,7 @@ from stock_news.financial_health import build_financial_health, number
 from stock_news.markets import parse_ticker, format_prefixed
 
 PERIODS = ('1m', '6m', '1yr', '3yr', '5yr', '10yr', 'max')
+HISTORY_FILTERS = ('price', 'pe')
 SERIES = ('quarter_results', 'yoy_results', 'balancesheet', 'cashflow', 'ratios',
           'shareholding_pattern_quarterly', 'shareholding_pattern_yearly')
 TTLS = {'core': 300, 'history': 3600, 'financials': 21600, 'targets': 21600, 'forecasts': 21600}
@@ -39,11 +40,12 @@ class StockDataError(Exception):
         self.status, self.code = status, code
 
 
-def validate_request(symbol, section='core', period='1yr', series='quarter_results'):
+def validate_request(symbol, section='core', period='1yr', series='quarter_results', history_filter='price'):
     parsed = parse_ticker(symbol)
     if not parsed or parsed[0] != 'IN':
         raise StockDataError(400, 'invalid_symbol', 'Choose a valid Indian stock symbol.')
-    if section not in TTLS or period not in PERIODS or series not in SERIES:
+    if (section not in TTLS or period not in PERIODS or series not in SERIES
+            or history_filter not in HISTORY_FILTERS):
         raise StockDataError(400, 'invalid_section', 'This data selection is not supported.')
     return 'IN:' + parsed[1]
 
@@ -154,11 +156,11 @@ def normalize_core(payload, symbol):
     }
 
 
-def _fetch(symbol, section, period, series, key, root):
+def _fetch(symbol, section, period, series, history_filter, key, root):
     bare = symbol[3:]
     endpoint, params = {
         'core': ('stock', {'name': bare}),
-        'history': ('historical_data', {'stock_name': bare, 'period': period, 'filter': 'price'}),
+        'history': ('historical_data', {'stock_name': bare, 'period': period, 'filter': history_filter}),
         'financials': ('historical_stats', {'stock_name': bare, 'stats': series}),
         'targets': ('stock_target_price', {'stock_id': bare.lower()}),
         'forecasts': ('stock_forecasts', {'stock_id': bare.lower(), 'measure_code': 'EPS',
@@ -186,13 +188,15 @@ def _fetch(symbol, section, period, series, key, root):
         raise StockDataError(503, 'provider_error', 'Stock data is temporarily unavailable. Please try again.') from None
 
 
-def get_data(symbol, section, period, series, key, root=None):
-    symbol = validate_request(symbol, section, period, series)
+def get_data(symbol, section, period, series, key, root=None, history_filter='price'):
+    symbol = validate_request(symbol, section, period, series, history_filter)
     if not key:
         raise StockDataError(503, 'not_configured', 'Stock research is temporarily unavailable.')
     root = (root or indianapi._api_root()).rstrip('/')
     cache_key = (root, hashlib.sha256(key.encode()).hexdigest(), symbol, section,
-                 period if section == 'history' else '', series if section == 'financials' else '')
+                 period if section == 'history' else '',
+                 history_filter if section == 'history' else '',
+                 series if section == 'financials' else '')
     with _lock:
         cached = _cache.get(cache_key)
         if cached and cached[0] > time.monotonic():
@@ -210,7 +214,7 @@ def get_data(symbol, section, period, series, key, root=None):
         except TimeoutError:
             raise StockDataError(503, 'timeout', 'The provider is taking longer than expected. Please retry.') from None
     try:
-        data = _fetch(symbol, section, period, series, key, root)
+        data = _fetch(symbol, section, period, series, history_filter, key, root)
         envelope = {'ok': True, 'symbol': symbol, 'section': section, 'data': data,
                     'fetched_at': datetime.now(timezone.utc).isoformat(), 'source': 'IndianAPI'}
         ttl = TTLS[section]

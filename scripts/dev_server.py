@@ -40,6 +40,7 @@ from stock_news.config import (
     SITE_URL,
 )
 from stock_news.digest import collect_digest_data, filter_sections
+from stock_news.dashboard_preferences import default_cards
 from stock_news.formatting import format_fetched_at_label
 from stock_news.market_data import resolve_symbol_query, search_symbols, validate_symbol
 from stock_news.markets import market_of
@@ -302,6 +303,7 @@ class DevHandler(BaseHTTPRequestHandler):
                 fetched_at_label=fetched_at,
                 fetched_at_iso=fetched_at_instant.isoformat(),
                 ai_summary=ai_summary,
+                in_dashboard_cards=default_cards(),
             )
             self._html(200, html)
         except Exception:

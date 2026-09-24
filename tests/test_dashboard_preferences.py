@@ -7,6 +7,8 @@ from stock_news.dashboard_preferences import (
     catalog,
     default_cards,
     parse_dashboard_cards,
+    recognized_cards,
+    RETIRED_CARDS,
     serialize_dashboard_cards,
 )
 
@@ -21,6 +23,8 @@ class DashboardPreferencesTest(unittest.TestCase):
         self.assertNotIn("ai_watchlist_briefing", allowed_cards())
         self.assertIn("news_company_coverage", default_cards())
         self.assertNotIn("ownership_current_mix", default_cards())
+        self.assertIn("overview_pe_history", default_cards())
+        self.assertEqual(data["categories"][4]["title"], "Market Data")
         for category in data["categories"]:
             self.assertTrue(set(category["recommended"]).issubset({card["id"] for card in category["cards"]}))
 
@@ -31,6 +35,17 @@ class DashboardPreferencesTest(unittest.TestCase):
         )
         self.assertEqual(serialize_dashboard_cards(["news_company_coverage"]), "news_company_coverage")
         self.assertEqual(parse_dashboard_cards(""), default_cards())
+
+    def test_retired_cards_are_recognized_but_silently_removed(self):
+        retired = "analysis_price_target_summary"
+        self.assertIn(retired, RETIRED_CARDS)
+        self.assertIn(retired, recognized_cards())
+        self.assertNotIn(retired, allowed_cards())
+        self.assertEqual(
+            parse_dashboard_cards([retired, "overview_market_cap"], default_if_empty=False),
+            ["overview_market_cap"],
+        )
+        self.assertEqual(parse_dashboard_cards([retired]), default_cards())
 
     def test_vercel_function_bundles_the_catalog(self):
         config = json.loads(Path("vercel.json").read_text(encoding="utf-8"))

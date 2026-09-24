@@ -24,7 +24,7 @@ from stock_news.config import (
 from stock_news.market_data import validate_symbol
 from stock_news.markets import market_of
 from stock_news.relevance import parse_tickers
-from stock_news.dashboard_preferences import allowed_cards, default_cards, parse_dashboard_cards
+from stock_news.dashboard_preferences import default_cards, parse_dashboard_cards, recognized_cards
 
 EMAIL_PATTERN = re.compile(r"^[^\s@]+@[^\s@]+\.[^\s@]+$")
 LOGGER = logging.getLogger(__name__)
@@ -118,11 +118,13 @@ def handle_post(handler: BaseHTTPRequestHandler) -> None:
             send_json(handler, 400, {"ok": False, "error": "Choose valid dashboard cards."})
             return
         if isinstance(raw_dashboard_cards, list):
-            unknown = [str(item) for item in raw_dashboard_cards if str(item) not in allowed_cards()]
+            unknown = [str(item) for item in raw_dashboard_cards if str(item) not in recognized_cards()]
             dashboard_cards = parse_dashboard_cards(raw_dashboard_cards, default_if_empty=False)
             if unknown:
                 send_json(handler, 400, {"ok": False, "error": "Choose valid dashboard cards."})
                 return
+            if not dashboard_cards and raw_dashboard_cards:
+                dashboard_cards = default_cards()
             if not dashboard_cards:
                 send_json(handler, 400, {"ok": False, "error": "Select at least one Indian dashboard card."})
                 return

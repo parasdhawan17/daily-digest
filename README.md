@@ -34,9 +34,11 @@ theme and contain Overview, Financials, Ownership, Analysis, Corporate actions,
 and News tabs. Indian tickers in the digest and resolved peers link to these pages.
 
 `GET /api/stock-data?symbol=IN:TCS&section=core` returns the normalized company
-snapshot. Other allowlisted sections are `history` (`period=1m|6m|1yr|3yr|5yr|10yr|max`),
+snapshot. Other allowlisted sections are `history` (`period=1m|6m|1yr|3yr|5yr|10yr|max`,
+`filter=price|pe`),
 `financials` (`series=quarter_results|yoy_results|balancesheet|cashflow|ratios|shareholding_pattern_quarterly|shareholding_pattern_yearly`),
-`targets`, and `forecasts` (annual EPS). Supplemental requests load when needed.
+`targets`, and `forecasts` (annual EPS). The latter two remain API-compatible but are
+not shown in the facts-only digest dashboard. Supplemental requests load when needed.
 `GET /api/tickers/search?q=TCS&market=IN` limits autocomplete to Indian stocks;
 omitting `market` preserves mixed-market search.
 
@@ -45,7 +47,8 @@ request from a compact subset of the existing company snapshot, then caches succ
 results for six hours in-process and at the CDN. Evidence links lead back to the
 deterministic tabs; unavailable or malformed AI output never replaces factual content.
 
-The existing `INDIANAPI_API_KEY` and `INDIANAPI_BASE_URL` configure the feature.
+The existing `INDIANAPI_API_KEY` and `INDIANAPI_BASE_URL` configure the feature;
+Developer subscriptions must set `INDIANAPI_BASE_URL=https://dev.indianapi.in`.
 Only the backend receives the key. Successful public data is cached at the CDN
 and in a bounded process cache: snapshots for 5 minutes, history for 1 hour,
 and financial/analyst supplements for 6 hours. Process-local requests are coalesced;
@@ -98,7 +101,7 @@ python3 -m venv .venv
 |----------|--------------|-------|
 | `FINNHUB_API_KEY` | US digest + search/validation | |
 | `INDIANAPI_API_KEY` | India digest + search/validation | Free key at [IndianAPI.in](https://indianapi.in/indian-stock-market) |
-| `INDIANAPI_BASE_URL` | India API | Optional (default `https://stock.indianapi.in`) |
+| `INDIANAPI_BASE_URL` | India API | Developer tier: `https://dev.indianapi.in` |
 | `DIGEST_SIGNING_SECRET` | Signed digest links | Must match Railway cron service |
 | `SITE_URL` | Digest links + Brevo DOI redirect | `https://www.mydailydigest.online` |
 | `BREVO_API_KEY` | Subscribe form | |

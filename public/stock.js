@@ -4,7 +4,7 @@
   const $ = id => document.getElementById(id);
   const {number, fmt, money, pct, statementUnit, metricUnit, field, direction} = window.tickrStockFormat;
   const colors = ['#6f8aff', '#60b6b0', '#ce9c67', '#af8bcb', '#8093ac', '#ca8295'];
-  const labels = {mgmtEffectiveness: 'Management effectiveness', financialstrength: 'Financial strength', persharedata: 'Per-share data', priceandVolume: 'Price & volume', INC: 'Income statement', BAL: 'Balance sheet', CAS: 'Cash flow', isInId: 'ISIN', exchangeCodeBse: 'BSE code', exchangeCodeNse: 'NSE symbol', xdDate: 'Ex-date', yoy_results: 'Annual results', quarter_results: 'Quarterly results', balancesheet: 'Balance sheet', cashflow: 'Cash flow', ratios: 'Ratios', shareholding_pattern_quarterly: 'Quarterly ownership', shareholding_pattern_yearly: 'Yearly ownership', stockFinancialMap: 'Statements', qoQComp: 'Quarter-over-quarter comparison', yqoQComp: 'Year-over-year comparison', actions: 'Corporate actions', 'ai-overview': 'AI Overview'};
+  const labels = {mgmtEffectiveness: 'Management effectiveness', financialstrength: 'Financial strength', persharedata: 'Per-share data', priceandVolume: 'Price & volume', INC: 'Income statement', BAL: 'Balance sheet', CAS: 'Cash flow', isInId: 'ISIN', exchangeCodeBse: 'BSE code', exchangeCodeNse: 'NSE symbol', xdDate: 'Ex-date', yoy_results: 'Annual results', quarter_results: 'Quarterly results', balancesheet: 'Balance sheet', cashflow: 'Cash flow', ratios: 'Ratios', shareholding_pattern_quarterly: 'Quarterly ownership', shareholding_pattern_yearly: 'Yearly ownership', stockFinancialMap: 'Statements', qoQComp: 'Quarter-over-quarter comparison', yqoQComp: 'Year-over-year comparison', actions: 'Corporate actions', analysis: 'Market Data', 'ai-overview': 'AI Overview'};
   Object.assign(labels, {bsePrice: 'BSE price (₹)', nsePrice: 'NSE price (₹)', stdDev: 'Standard deviation (provider units)',
     yhigh: '52-week high (₹)', ylow: '52-week low (₹)', high: 'Day high (₹)', low: 'Day low (₹)', close: 'Previous close (₹)', price: 'Price (₹)',
     percentChange: 'Change (%)', marketCap: 'Market cap (₹ cr)', pPerEBasicExcludingExtraordinaryItemsTTM: 'P/E · trailing 12 months (×)',
@@ -15,6 +15,12 @@
   function label(key) { return labels[key] || String(key).replace(/([a-z\d])([A-Z])/g, '$1 $2').replace(/([A-Z])([A-Z][a-z])/g, '$1 $2').replace(/_/g, ' ').replace(/^./, c => c.toUpperCase()); }
   function node(tag, cls, text) { const n = document.createElement(tag); if (cls) n.className = cls; if (text !== undefined) n.textContent = text; return n; }
   function has(value) { return value !== null && value !== undefined && value !== '' && (typeof value !== 'object' || Object.values(value).some(has)); }
+  function finite(value) { return number(value) !== null; }
+  function numericOnly(value) {
+    if (Array.isArray(value)) { const values = value.map(numericOnly).filter(has); return values.length ? values : null; }
+    if (value && typeof value === 'object') { const result = Object.fromEntries(Object.entries(value).map(([key, item]) => [key, numericOnly(item)]).filter(([, item]) => has(item))); return has(result) ? result : null; }
+    return finite(value) ? value : null;
+  }
   function url(value) { try { const u = new URL(value); return ['https:', 'http:'].includes(u.protocol) && !u.username ? u.href : null; } catch (e) { return null; } }
   function date(value) { if (!value) return 'Date unavailable'; const d = new Date(value); return Number.isNaN(+d) ? String(value) : d.toLocaleDateString('en-IN', {day: 'numeric', month: 'short', year: 'numeric'}); }
   function stamp(value) { const d = new Date(value); return Number.isNaN(+d) ? 'Time unavailable' : d.toLocaleString('en-IN', {day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Kolkata'}) + ' IST'; }
@@ -74,7 +80,7 @@
     }).catch(error => { requests.delete(key); throw error; });
     requests.set(key, promise); return promise;
   }
-  async function loadInto(target, section, params, render) {
+  async function loadInto(target, section, params, render, onEmpty) {
     const version = (target._requestVersion || 0) + 1; target._requestVersion = version;
     target.replaceChildren(node('div', 'stock-state loading', 'Loading ' + label(section).toLowerCase() + '…'));
     target.setAttribute('aria-busy', 'true');
@@ -82,12 +88,14 @@
       const response = await request(section, params);
       if (version !== target._requestVersion) return;
       target.replaceChildren();
-      if (!has(response.data)) target.append(empty()); else render(target, response.data);
+      if (!has(response.data)) { if (onEmpty) onEmpty(); else target.append(empty()); return; }
+      const rendered = render(target, response.data);
+      if (rendered === false) { target.replaceChildren(); if (onEmpty) onEmpty(); else target.append(empty()); return; }
       target.append(node('p', 'stock-chart-note', 'Retrieved ' + stamp(response.fetched_at) + ' · IndianAPI'));
     } catch (error) {
       if (version !== target._requestVersion) return;
       const state = node('div', 'stock-state'); state.setAttribute('role', 'status'); state.append(node('p', '', error.message));
-      const retry = node('button', 'stock-retry', 'Try again'); retry.type = 'button'; retry.onclick = () => loadInto(target, section, params, render); state.append(retry); target.replaceChildren(state);
+      const retry = node('button', 'stock-retry', 'Try again'); retry.type = 'button'; retry.onclick = () => loadInto(target, section, params, render, onEmpty); state.append(retry); target.replaceChildren(state);
     } finally { if (version === target._requestVersion) target.removeAttribute('aria-busy'); }
   }
   function metric(title, value, note, tone = 'neutral') { const box = node('div', 'stock-metric tone-' + tone); box.append(node('span', '', title), node('strong', '', value)); if (note) box.append(node('small', '', note)); return box; }
@@ -103,7 +111,7 @@
   function chart(target, datasets, title = 'Price history', unit = '₹') {
     const series = (datasets || []).filter(x => Array.isArray(x.values)).map(s => ({...s, values: s.values.filter(v => Array.isArray(v) && number(v[1]) !== null && Number.isFinite(Date.parse(v[0]))).map(v => [v[0], number(v[1])]).sort((a, b) => Date.parse(a[0]) - Date.parse(b[0]))})).filter(s => s.values.length);
     const price = series.find(s => s.metric === 'Price') || series.find(s => s.metric !== 'Volume');
-    if (!price) { target.append(empty('No history is available for this range.')); return; }
+    if (!price) return false;
     const trend = price.metric === 'Price' ? direction(price.values.at(-1)[1] - price.values[0][1]) : 'neutral';
     const priceColor = trend === 'positive' ? 'var(--pill-up-fg)' : trend === 'negative' ? 'var(--pill-down-fg)' : colors[0];
     const W = 720, H = 245, left = 58, right = 12, top = 18, bottom = 171, plotW = W - left - right;
@@ -135,7 +143,41 @@
       tableBody.append(table(['Date', ...series.map(s => (s.label || s.metric) + (s.metric === 'Volume' ? ' (shares)' : ' (' + unit + ')'))],
         days.map(d => [date(d), ...indexes.map(index => fmt(index.get(d)))])));
     });
-    target.append(disclosure);
+    target.append(disclosure); return true;
+  }
+  function peChart(target, datasets) {
+    const source = (datasets || []).find(series => Array.isArray(series.values) && (/((^|[^a-z])pe([^a-z]|$)|earnings)/i.test(String(series.metric || '') + ' ' + String(series.label || '')) || datasets.length === 1));
+    if (!source) return false;
+    const points = source.values.filter(value => Array.isArray(value) && finite(value[1]) && number(value[1]) !== 0 && Number.isFinite(Date.parse(value[0])))
+      .map(value => [value[0], number(value[1])]).sort((a, b) => Date.parse(a[0]) - Date.parse(b[0]));
+    if (!points.length) return false;
+    const ordered = points.map(point => point[1]).sort((a, b) => a - b), middle = Math.floor(ordered.length / 2);
+    const median = ordered.length % 2 ? ordered[middle] : (ordered[middle - 1] + ordered[middle]) / 2;
+    const low = ordered[0], high = ordered.at(-1), current = points.at(-1)[1];
+    const metrics = node('div', 'stock-metrics stock-pe-metrics');
+    [['Current P/E', current], ['Median', median], ['Low', low], ['High', high]].forEach(([title, value]) => metrics.append(metric(title, fmt(value) + '×')));
+    target.append(metrics);
+
+    const W = 720, H = 245, left = 58, right = 12, top = 18, bottom = 210, plotW = W - left - right;
+    let min = low, max = high; const pad = (max - min) * .08 || Math.abs(max) * .05 || 1; min -= pad; max += pad;
+    const start = Date.parse(points[0][0]), end = Date.parse(points.at(-1)[0]);
+    const x = value => left + (Date.parse(value) - start) / (end - start || 1) * plotW;
+    const y = value => bottom - (value - min) / (max - min) * (bottom - top);
+    const svg = svgNode('svg', {viewBox: `0 0 ${W} ${H}`, class: 'stock-chart', tabindex: '0', role: 'img', 'aria-label': 'Historical price-to-earnings ratio. Use left and right arrows to explore values. Full data table follows.'});
+    svg.append(svgNode('title', {}, 'Historical price-to-earnings ratio'));
+    for (let i = 0; i < 5; i++) { const value = min + (max - min) * i / 4, yy = y(value); svg.append(svgNode('line', {x1: left, y1: yy, x2: W - right, y2: yy, class: 'grid-line'}), svgNode('text', {x: left - 8, y: yy + 3, 'text-anchor': 'end'}, fmt(value) + '×')); }
+    svg.append(svgNode('line', {x1: left, y1: y(median), x2: W - right, y2: y(median), class: 'pe-median-line'}));
+    svg.append(svgNode('path', {d: points.map((point, index) => (index ? 'L' : 'M') + x(point[0]).toFixed(2) + ',' + y(point[1]).toFixed(2)).join(' '), class: 'pe-history-line'}));
+    [0, .5, 1].forEach(t => svg.append(svgNode('text', {x: left + plotW * t, y: H - 7, 'text-anchor': t === 0 ? 'start' : t === 1 ? 'end' : 'middle'}, date(new Date(start + (end - start) * t).toISOString()))));
+    const cursor = svgNode('line', {x1: 0, y1: top, x2: 0, y2: bottom, stroke: 'var(--text-muted)', 'stroke-dasharray': '3 3', visibility: 'hidden'});
+    const dot = svgNode('circle', {r: 4, fill: 'var(--accent)', visibility: 'hidden'}); svg.append(cursor, dot);
+    const readout = node('p', 'stock-chart-readout'); readout.setAttribute('aria-live', 'polite'); let active = points.length - 1;
+    function inspect(index) { active = Math.max(0, Math.min(points.length - 1, index)); const point = points[active]; cursor.setAttribute('x1', x(point[0])); cursor.setAttribute('x2', x(point[0])); cursor.setAttribute('visibility', 'visible'); dot.setAttribute('cx', x(point[0])); dot.setAttribute('cy', y(point[1])); dot.setAttribute('visibility', 'visible'); readout.textContent = date(point[0]) + ' · P/E ' + fmt(point[1]) + '×'; }
+    svg.addEventListener('pointermove', event => { const rect = svg.getBoundingClientRect(), relative = (event.clientX - rect.left) / rect.width * W; let best = 0; points.forEach((point, index) => { if (Math.abs(x(point[0]) - relative) < Math.abs(x(points[best][0]) - relative)) best = index; }); inspect(best); });
+    svg.addEventListener('keydown', event => { if (['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) { event.preventDefault(); inspect(event.key === 'Home' ? 0 : event.key === 'End' ? points.length - 1 : active + (event.key === 'ArrowLeft' ? -1 : 1)); } });
+    const legend = node('div', 'stock-chart-legend'), seriesLabel = node('span', '', 'P/E ratio'), medianLabel = node('span', 'pe-median-legend', 'Median ' + fmt(median) + '×');
+    seriesLabel.style.setProperty('--series-color', 'var(--accent)'); legend.append(seriesLabel, medianLabel);
+    target.append(readout, svg, legend, details('View P/E data', table(['Date', 'P/E'], points.slice().reverse().map(point => [date(point[0]), fmt(point[1]) + '×'])))); inspect(active); return true;
   }
   let core;
   function historyCard() {
@@ -144,11 +186,21 @@
     [['1m','1M'],['6m','6M'],['1yr','1Y'],['3yr','3Y'],['5yr','5Y'],['10yr','10Y'],['max','Max']].forEach(([period, title]) => { const b = node('button', '', title); b.type = 'button'; b.setAttribute('aria-pressed', String(period === '1yr')); b.onclick = () => { controls.querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', String(x === b))); loadInto(target, 'history', {period}, (t, d) => chart(t, d.datasets)); }; controls.append(b); });
     c.append(controls, target); loadInto(target, 'history', {period: '1yr'}, (t, d) => chart(t, d.datasets)); return c;
   }
+  function peHistoryCard() {
+    const c = card('P/E valuation history', 'Historical price-to-earnings ratio with its median.'); c.classList.add('stock-history-card');
+    const controls = node('div', 'stock-controls'); controls.setAttribute('aria-label', 'P/E history range'); const target = node('div');
+    const load = (period, button) => { controls.querySelectorAll('button').forEach(item => item.setAttribute('aria-pressed', String(item === button))); loadInto(target, 'history', {period, filter: 'pe'}, (container, data) => peChart(container, data.datasets), () => c.remove()); };
+    [['1m','1M'],['6m','6M'],['1yr','1Y'],['3yr','3Y'],['5yr','5Y'],['10yr','10Y'],['max','Max']].forEach(([period, title]) => { const button = node('button', '', title); button.type = 'button'; button.setAttribute('aria-pressed', String(period === '1yr')); button.onclick = () => load(period, button); controls.append(button); });
+    c.append(controls, target); const initial = controls.querySelector('[aria-pressed=true]'); load('1yr', initial); return c;
+  }
   function overview() {
     const panel = $('panel-overview'), s = core.snapshot || {}, metrics = node('div', 'stock-metrics');
-    metrics.append(metric('Market cap', number(s.marketCap) === null ? '—' : '₹' + fmt(s.marketCap) + ' cr', 'Reported market capitalisation'), metric('P/E ratio', fmt(s.pPerEBasicExcludingExtraordinaryItemsTTM), 'Trailing 12 months · ×'), metric('Dividend yield', number(s.currentDividendYieldCommonStockPrimaryIssueLTM) === null ? '—' : fmt(s.currentDividendYieldCommonStockPrimaryIssueLTM) + '%', 'Last 12 months'), metric('Year to date', pct(s.priceYTDPricePercentChange), 'Price return', direction(s.priceYTDPricePercentChange)));
-    panel.append(metrics);
-    const grid = node('div', 'stock-grid'), left = node('div', 'stock-stack'), right = node('div', 'stock-stack'); left.append(historyCard());
+    if (finite(s.marketCap)) metrics.append(metric('Market cap', '₹' + fmt(s.marketCap) + ' cr', 'Reported market capitalisation'));
+    if (finite(s.pPerEBasicExcludingExtraordinaryItemsTTM)) metrics.append(metric('P/E ratio', fmt(s.pPerEBasicExcludingExtraordinaryItemsTTM) + '×', 'Trailing 12 months'));
+    if (finite(s.currentDividendYieldCommonStockPrimaryIssueLTM)) metrics.append(metric('Dividend yield', fmt(s.currentDividendYieldCommonStockPrimaryIssueLTM) + '%', 'Last 12 months'));
+    if (finite(s.priceYTDPricePercentChange)) metrics.append(metric('Year to date', pct(s.priceYTDPricePercentChange), 'Price return', direction(s.priceYTDPricePercentChange)));
+    if (metrics.childElementCount) panel.append(metrics);
+    const grid = node('div', 'stock-grid'), left = node('div', 'stock-stack'), right = node('div', 'stock-stack'); left.append(historyCard(), peHistoryCard());
     const range = card('Price context', 'Reported price landmarks · ₹');
     const low = core.year_low, high = core.year_high, current = core.prices.NSE ?? core.prices.BSE;
     if (number(low) !== null && number(high) !== null && high > low && current !== null) { const bar = node('div', 'stock-range'), dot = node('i'); dot.style.left = Math.max(0, Math.min(100, (current - low) / (high - low) * 100)) + '%'; bar.append(dot); range.append(bar); }
@@ -290,27 +342,18 @@
     const notes = card('Ownership detail', 'Inspect the underlying holding dates and category records.'); core.ownership.forEach(x => notes.append(details(x.categoryName || x.displayName, dataView(x.categories)))); if (!core.ownership.length) notes.append(empty());
     grid.append(c, notes); panel.append(grid); const historical = supplement('Ownership history', ['shareholding_pattern_quarterly', 'shareholding_pattern_yearly'], 'shareholding_pattern_quarterly'); historical.style.marginTop = '14px'; panel.append(historical);
   }
-  function targets(target, data) {
-    const p = data.priceTarget || {}, metrics = node('div', 'stock-metrics');
-    metrics.append(metric('Low target', money(p.Low)), metric('Mean target', money(p.Mean)), metric('High target', money(p.High)), metric('Estimates', fmt(p.NumberOfEstimates))); target.append(metrics);
-    target.append(details('Target statistics', dataView(p)), details('Target history', dataView(data.priceTargetSnapshots)), details('Recommendations', dataView(data.recommendation)), details('Recommendation history', dataView(data.recommendationSnapshots)));
-  }
-  function forecasts(target, data) {
-    const periods = Array.isArray(data.periods) ? data.periods : [];
-    const rows = periods.map(p => { const estimate = p.Estimates?.Estimate?.[0], actual = p.Actuals?.Actual?.[0]; return ['FY ' + (p.FiscalPeriod?.Year || p.CalendarYear || '—'), estimate ? 'Estimate' : actual ? 'Reported' : 'Unavailable', money(estimate ? estimate.Mean : actual?.Reported), money(estimate?.Low), money(estimate?.High), fmt(estimate?.NumberOfEstimates ?? actual?.NumberOfEstimates)]; });
-    target.append(table(['Fiscal year', 'Type', 'EPS (₹)', 'Low (₹)', 'High (₹)', 'Estimates'], rows));
-    periods.forEach(p => target.append(details('FY ' + (p.FiscalPeriod?.Year || p.CalendarYear || '—') + ' · Full forecast details', dataView(p))));
-  }
   function analysis() {
-    const panel = $('panel-analysis'), grid = node('div', 'stock-grid'), rating = card('The analyst view', 'Analyst recommendations supplied by IndianAPI.');
-    rating.append(bars((core.ratings || []).filter(x => x.ratingName !== 'Total').map(x => ({label: x.ratingName, value: x.numberOfAnalystsLatest, tone: x.ratingValue <= 2 ? 'positive' : x.ratingValue >= 4 ? 'negative' : 'neutral', color: ({1:'var(--signal-strong-green)',2:'var(--signal-green)',3:'var(--text-muted)',4:'var(--signal-red)',5:'var(--signal-strong-red)'})[x.ratingValue]})), ' analysts'), details('Ratings across time', dataView(core.ratings)), details('Recommendation summary', dataView(core.recommendations)));
-    const technical = card('Technical context', 'Reported technical prices in ₹; risk assessment supplied by IndianAPI.'); technical.append(details('Technical averages', dataView(core.technical), true), details('Risk assessment', dataView(core.risk), true));
-    grid.append(rating, technical); panel.append(grid);
-    const stack = node('div', 'stock-stack'); stack.style.marginTop = '14px';
-    const t = card('Price targets', 'Analyst target range in ₹. Estimates can change and are not guaranteed outcomes.'), tc = node('div'); t.append(tc); loadInto(tc, 'targets', {}, targets);
-    const f = card('Looking ahead: earnings per share', 'Annual EPS estimates and reported actuals are shown separately. Values in ₹ per share.'), fc = node('div'); f.append(fc); loadInto(fc, 'forecasts', {}, forecasts); stack.append(t, f);
-    if (has(core.futures)) { const futures = card('Futures', 'Available contract expiries and provider overview.'); futures.append(dataView(core.futures)); stack.append(futures); }
-    const snapshot = card('Additional market details', 'Provider-reported snapshot, with reporting periods and units.'); snapshot.append(details('All snapshot fields', dataView(core.snapshot))); stack.append(snapshot); panel.append(stack);
+    const panel = $('panel-analysis'), grid = node('div', 'stock-grid');
+    if (Array.isArray(core.technical) && core.technical.some(row => finite(row.nsePrice) || finite(row.bsePrice))) { const technical = card('Technical averages', 'Reported moving-average prices without trading interpretations.'); technical.append(table(['Period', 'NSE price', 'BSE price'], core.technical.filter(row => finite(row.nsePrice) || finite(row.bsePrice)).map(row => [finite(row.days) ? fmt(row.days) + ' days' : 'Reported period', finite(row.nsePrice) ? money(row.nsePrice) : '—', finite(row.bsePrice) ? money(row.bsePrice) : '—']))); grid.append(technical); }
+    const risk = numericOnly(core.risk);
+    if (has(risk)) { const volatility = card('Volatility statistics', 'Provider-reported numerical variability.'); volatility.append(dataView(risk)); grid.append(volatility); }
+    if (grid.childElementCount) panel.append(grid);
+    const stack = node('div', 'stock-stack'); if (grid.childElementCount) stack.style.marginTop = '14px';
+    if (has(core.futures)) { const futures = card('Futures', 'Available contract expiries and reported futures overview.'); futures.append(dataView(core.futures)); stack.append(futures); }
+    const snapshotKeys = ['marketCap','high','low','close','price','percentChange','price5DayPercentChange','priceYTDPricePercentChange','currentDividendYieldCommonStockPrimaryIssueLTM','totalDebtPerTotalEquityMostRecentQuarter','sectorPriceToEarningsValueRatio','yhigh','ylow','FiscalYear','NetIncome','interimNetIncome','mutualFundShareHolding','promoterShareHolding','date','time'];
+    const snapshot = Object.fromEntries(snapshotKeys.filter(key => has(core.snapshot && core.snapshot[key])).map(key => [key, core.snapshot[key]]));
+    if (has(snapshot)) { const market = card('Additional market details', 'Provider-reported market values and reporting periods.'); market.append(dataView(snapshot)); stack.append(market); }
+    if (stack.childElementCount) panel.append(stack);
   }
   function actions() {
     const panel = $('panel-actions'), c = card('The company calendar', 'Dividends, capital changes and meetings. Ex-dates and record dates are shown separately.');
@@ -330,15 +373,26 @@
     }); panel.append(core.news.length ? grid : empty('No recent company stories are available.'));
   }
   const built = new Set(); const builders = {overview, 'ai-overview': aiOverview, financials, ownership, analysis, actions, news};
+  function sectionAvailable(id) {
+    if (id === 'financials') return has(core.health) || has(core.financials) || has(core.metrics) || has(core.additional_financials);
+    if (id === 'ownership') return has(core.ownership);
+    if (id === 'analysis') return has(core.technical) || has(numericOnly(core.risk)) || has(core.futures) || ['marketCap','high','low','close','price','percentChange','price5DayPercentChange','priceYTDPricePercentChange','currentDividendYieldCommonStockPrimaryIssueLTM','totalDebtPerTotalEquityMostRecentQuarter','sectorPriceToEarningsValueRatio','yhigh','ylow','FiscalYear','NetIncome','interimNetIncome','mutualFundShareHolding','promoterShareHolding'].some(key => has(core.snapshot && core.snapshot[key]));
+    if (id === 'actions') return has(core.actions);
+    if (id === 'news') return has(core.news);
+    return true;
+  }
+  function syncAvailableSections() {
+    document.querySelectorAll('[data-tab]').forEach(tab => { const available = sectionAvailable(tab.dataset.tab); tab.hidden = !available; $('panel-' + tab.dataset.tab).hidden = !available; });
+  }
   function activate(id, focus) {
-    if (!builders[id]) id = 'overview';
+    if (!builders[id] || !sectionAvailable(id)) id = 'overview';
     document.querySelectorAll('[data-tab]').forEach(tab => { const selected = tab.dataset.tab === id; tab.setAttribute('aria-selected', String(selected)); tab.tabIndex = selected ? 0 : -1; $('panel-' + tab.dataset.tab).hidden = !selected; });
     if (core && !built.has(id)) { builders[id](); built.add(id); }
     if (focus) { history.replaceState(null, '', '#' + id); $('tab-' + id).focus(); }
   }
   document.querySelectorAll('[data-tab]').forEach(tab => {
     tab.onclick = () => activate(tab.dataset.tab, true);
-    tab.onkeydown = event => { const all = [...document.querySelectorAll('[data-tab]')], i = all.indexOf(tab); let next; if (event.key === 'ArrowRight') next = (i + 1) % all.length; if (event.key === 'ArrowLeft') next = (i + all.length - 1) % all.length; if (event.key === 'Home') next = 0; if (event.key === 'End') next = all.length - 1; if (next !== undefined) { event.preventDefault(); activate(all[next].dataset.tab, true); } };
+    tab.onkeydown = event => { const all = [...document.querySelectorAll('[data-tab]')].filter(item => !item.hidden), i = all.indexOf(tab); let next; if (event.key === 'ArrowRight') next = (i + 1) % all.length; if (event.key === 'ArrowLeft') next = (i + all.length - 1) % all.length; if (event.key === 'Home') next = 0; if (event.key === 'End') next = all.length - 1; if (next !== undefined) { event.preventDefault(); activate(all[next].dataset.tab, true); } };
   });
   window.addEventListener('hashchange', () => activate(location.hash.slice(1), false));
   const themeButton = $('theme-toggle');
@@ -357,7 +411,7 @@
       const change = $('company-change'); change.textContent = pct(core.change_percent); change.classList.toggle('positive', core.change_percent > 0); change.classList.toggle('negative', core.change_percent < 0);
       $('secondary-price').textContent = exchange === 'NSE' && core.prices.BSE !== null ? 'BSE ' + money(core.prices.BSE) : '';
       $('source-time').textContent = core.source_time ? 'Provider timestamp · ' + core.source_time : 'Retrieved ' + stamp(result.fetched_at) + ' · Provider timestamp unavailable';
-      status.hidden = true; $('stock-content').hidden = false; activate(location.hash.slice(1) || 'overview', false);
+      syncAvailableSections(); status.hidden = true; $('stock-content').hidden = false; activate(location.hash.slice(1) || 'overview', false);
     } catch (error) {
       status.replaceChildren(node('p', '', error.message)); const retry = node('button', 'stock-retry', 'Try again'); retry.onclick = init; status.append(retry);
     } finally { status.classList.remove('loading'); }

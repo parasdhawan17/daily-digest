@@ -31,7 +31,8 @@ def handle_data(handler):
     get = lambda key, default: (query.get(key) or [default])[0]
     try:
         payload, ttl = get_data(get('symbol', ''), get('section', 'core'), get('period', '1yr'),
-                                get('series', 'quarter_results'), os.environ.get('INDIANAPI_API_KEY', '').strip())
+                                get('series', 'quarter_results'), os.environ.get('INDIANAPI_API_KEY', '').strip(),
+                                history_filter=get('filter', 'price'))
         send_json(handler, 200, payload, headers={'Cache-Control': f'public, max-age=0, s-maxage={ttl}'})
     except StockDataError as error:
         send_json(handler, error.status, {'ok': False, 'code': error.code, 'error': str(error)})

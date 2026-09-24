@@ -75,7 +75,7 @@
   function icon(name, className) { return '<span class="' + (className || 'catalog-icon') + '" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' + (iconPaths[name] || iconPaths.overview) + '</svg></span>'; }
   function cardIcon(id, categoryId) {
     if (id.indexOf('company_') >= 0 || id.indexOf('leadership') >= 0 || id.indexOf('peer_') >= 0) return 'company';
-    if (id.indexOf('history') >= 0 || id.indexOf('forecast') >= 0 || id.indexOf('technical') >= 0 || id.indexOf('return') >= 0) return 'history';
+    if (id.indexOf('history') >= 0 || id.indexOf('technical') >= 0 || id.indexOf('return') >= 0) return 'history';
     if (id.indexOf('risk') >= 0 || id.indexOf('attention') >= 0) return 'risk';
     if (categoryId === 'actions') return 'calendar';
     if (id.indexOf('statement') >= 0 || id.indexOf('results') >= 0 || id.indexOf('additional') >= 0) return 'document';
@@ -87,9 +87,8 @@
     if (categoryId === 'ownership') return 'donut';
     if (categoryId === 'actions') return 'timeline';
     if (categoryId === 'news') return 'news';
-    if (id.indexOf('history') >= 0 || id.indexOf('results') >= 0 || id.indexOf('statement') >= 0 || id.indexOf('forecast') >= 0 || id.indexOf('technical') >= 0 || id.indexOf('growth') >= 0 || id.indexOf('profitability') >= 0 || id.indexOf('cash_') >= 0) return 'chart';
+    if (id.indexOf('history') >= 0 || id.indexOf('results') >= 0 || id.indexOf('statement') >= 0 || id.indexOf('technical') >= 0 || id.indexOf('growth') >= 0 || id.indexOf('profitability') >= 0 || id.indexOf('cash_') >= 0) return 'chart';
     if (id.indexOf('company_') >= 0 || id.indexOf('leadership') >= 0 || id.indexOf('peer_') >= 0 || id.indexOf('detail') >= 0) return 'profile';
-    if (id.indexOf('risk') >= 0 || id.indexOf('recommendation') >= 0 || id.indexOf('consensus') >= 0 || id.indexOf('target') >= 0) return 'range';
     return 'metric';
   }
   function metricSample(id) {
@@ -109,15 +108,14 @@
     if (kind === 'timeline') return '<div class="card-visual card-visual--timeline' + cls + '"><div class="timeline-date"><strong>18</strong><span>SEP</span></div><div class="timeline-copy"><strong>Upcoming event</strong><span>Record date · Confirmed</span><div><i></i><i></i><i></i></div></div></div>';
     if (kind === 'news') return '<div class="card-visual card-visual--news' + cls + '"><div class="news-thumb">' + icon('news','mini-inline-icon') + '</div><div><span class="source-pill">REUTERS</span><div class="preview-copy-line is-long"></div><div class="preview-copy-line"></div><small>2h ago · 4 min read</small></div></div>';
     if (kind === 'profile') return '<div class="card-visual card-visual--profile' + cls + '"><div class="profile-mark">RC</div><div class="profile-lines"><strong>Reliance Industries</strong><span>Energy · Retail · Digital</span><div><i></i><i></i><i></i><i></i></div></div></div>';
-    if (kind === 'range') return '<div class="card-visual card-visual--range' + cls + '"><div class="range-labels"><span>Low<br><b>₹2,420</b></span><span>Mean<br><b>₹3,080</b></span><span>High<br><b>₹3,540</b></span></div><div class="range-track"><i></i><i></i><i></i></div><small>Analyst range</small></div>';
     return '<div class="card-visual card-visual--metric' + cls + '"><div><strong>' + sample[0] + '</strong><span>' + sample[1] + '</span></div><svg viewBox="0 0 80 36" preserveAspectRatio="none" aria-hidden="true"><path d="M1 31 C14 27 15 18 27 22 S42 30 51 15 67 17 79 4"/></svg></div>';
   }
 
   // Keep the sample in the same card language as the stock page. Values here are illustrative.
   function dashboardSample(card, categoryId) {
     var id = card.id, kind = previewKind(card, categoryId), sample = metricSample(id);
-    var titles = {ai_company_summary:'The 60-second view',ai_encouraging_signals:'What looks encouraging',overview_price_history:'The price story',overview_price_landmarks:'Price context',overview_peer_comparison:'In good company',ownership_current_mix:'Who owns the company?',analysis_analyst_consensus:'The analyst view',analysis_eps_forecasts:'Looking ahead: earnings per share'};
-    var captions = {ai_company_summary:'A concise synthesis of the latest available company evidence.',overview_price_history:'Price, moving averages and trading volume.',overview_price_landmarks:'Reported price landmarks · ₹',overview_peer_comparison:'Peers reported by IndianAPI · Prices in ₹ · Market cap in ₹ crore',ownership_current_mix:'Shareholding categories as reported by IndianAPI.'};
+    var titles = {ai_company_summary:'The 60-second view',ai_encouraging_signals:'What looks encouraging',overview_price_history:'The price story',overview_pe_history:'P/E valuation history',overview_price_landmarks:'Price context',overview_peer_comparison:'In good company',ownership_current_mix:'Who owns the company?'};
+    var captions = {ai_company_summary:'A concise synthesis of the latest available company evidence.',overview_price_history:'Price, moving averages and trading volume.',overview_pe_history:'Historical price-to-earnings ratio with its median.',overview_price_landmarks:'Reported price landmarks · ₹',overview_peer_comparison:'Peers reported by IndianAPI · Prices in ₹ · Market cap in ₹ crore',ownership_current_mix:'Shareholding categories as reported by IndianAPI.'};
     var body;
     if (id === 'overview_price_landmarks') body = '<div class="dashboard-range"><i style="left:72%"></i></div><div class="dashboard-range-labels"><span>₹2,420<small>52-week low</small></span><span>₹3,012<small>52-week high</small></span></div>';
     else if (kind === 'chart') body = '<div class="stock-controls"><span class="sample-control is-active">1Y</span><span class="sample-control">3Y</span><span class="sample-control">5Y</span></div><p class="stock-chart-readout">Sep 2026 · ₹2,846</p><svg class="sample-stock-chart" viewBox="0 0 260 90" preserveAspectRatio="none" aria-hidden="true"><path class="sample-grid-line" d="M0 20H260M0 50H260M0 80H260"/><path class="sample-price-line" d="M0 74 C25 65 32 48 55 57 S88 72 110 44 142 58 163 34 194 43 214 22 242 30 260 12"/></svg><div class="stock-chart-legend"><span>Price</span><span class="stock-indicator positive">+12.8%</span></div>';
@@ -126,7 +124,6 @@
     else if (kind === 'timeline') body = '<div class="dashboard-table-wrap"><table class="dashboard-mini-table"><thead><tr><th>Event</th><th>Record date</th></tr></thead><tbody><tr><td>Dividend</td><td>18 Sep 2026</td></tr></tbody></table></div>';
     else if (kind === 'news') body = '<div class="dashboard-news-grid"><div class="dashboard-news-card"><div class="dashboard-news-body"><span class="dashboard-news-meta">Sample company news · Today</span><h4><span>Company announces its latest quarterly update</span></h4></div></div></div>';
     else if (kind === 'profile') body = '<dl class="dashboard-facts"><div class="dashboard-fact"><dt>Company</dt><dd>Example Industries</dd></div><div class="dashboard-fact"><dt>Sector</dt><dd>Energy &amp; Retail</dd></div></dl>';
-    else if (kind === 'range') body = '<div class="dashboard-metrics"><div class="dashboard-metric"><span>Low target</span><strong>₹2,420</strong></div><div class="dashboard-metric"><span>Mean target</span><strong>₹3,080</strong></div></div>';
     else body = '<strong class="dashboard-card-value">' + sample[0] + '</strong><small class="dashboard-card-note">' + sample[1] + '</small>';
     var tone = id === 'ai_company_summary' ? ' dashboard-ai-summary' : id === 'ai_key_risks' ? ' dashboard-ai-negative' : id === 'ai_attention_signals' || id === 'ai_recent_changes' ? ' dashboard-ai-caution' : id === 'ai_encouraging_signals' || id === 'ai_potential_catalysts' ? ' dashboard-ai-positive' : '';
     return '<div class="dashboard-card sample-dashboard-card' + tone + '" data-card="' + id + '"><h3>' + (titles[id] || card.title) + '</h3><p class="dashboard-card-caption">' + (captions[id] || card.description) + '</p>' + body + '</div>';

@@ -95,11 +95,15 @@ class RequestTests(unittest.TestCase):
             detail._pending.clear()
 
     def test_allowlists_prevent_arbitrary_requests(self):
-        for symbol, section, period, series in [('US:TCS', 'core', '1yr', 'ratios'),
-                ('IN:../../x', 'core', '1yr', 'ratios'), ('IN:TCS', 'secrets', '1yr', 'ratios'),
-                ('IN:TCS', 'history', '1day', 'ratios'), ('IN:TCS', 'financials', '1yr', 'unknown')]:
+        for symbol, section, period, series, history_filter in [('US:TCS', 'core', '1yr', 'ratios', 'price'),
+                ('IN:../../x', 'core', '1yr', 'ratios', 'price'),
+                ('IN:TCS', 'secrets', '1yr', 'ratios', 'price'),
+                ('IN:TCS', 'history', '1day', 'ratios', 'price'),
+                ('IN:TCS', 'financials', '1yr', 'unknown', 'price')]:
             with self.assertRaises(detail.StockDataError):
-                detail.validate_request(symbol, section, period, series)
+                detail.validate_request(symbol, section, period, series, history_filter)
+        with self.assertRaises(detail.StockDataError):
+            detail.validate_request('IN:TCS', 'history', '1yr', 'ratios', 'targets')
         self.assertEqual(detail.validate_request('in:m&m'), 'IN:M&M')
 
     @patch.object(detail, '_fetch')
@@ -113,10 +117,11 @@ class RequestTests(unittest.TestCase):
         self.assertLessEqual(remaining, ttl)
         detail.get_data('IN:TCS', 'history', '1m', 'ratios', 'test-key')
         detail.get_data('IN:TCS', 'history', '1yr', 'ratios', 'test-key')
-        self.assertEqual(fetch.call_count, 3)
+        detail.get_data('IN:TCS', 'history', '1yr', 'ratios', 'test-key', history_filter='pe')
+        self.assertEqual(fetch.call_count, 4)
         with patch.object(detail.time, 'monotonic', return_value=time.monotonic() + 400):
             detail.get_data('IN:TCS', 'core', '1yr', 'ratios', 'test-key')
-        self.assertEqual(fetch.call_count, 4)
+        self.assertEqual(fetch.call_count, 5)
 
     @patch.object(detail, '_fetch')
     def test_errors_are_not_cached(self, fetch):
@@ -150,13 +155,13 @@ class RequestTests(unittest.TestCase):
         for status, code in [(401, 'unavailable'), (403, 'unavailable'), (429, 'rate_limited'), (404, 'not_found')]:
             get.return_value = Mock(status_code=status)
             with self.assertRaises(detail.StockDataError) as error:
-                detail._fetch('IN:TCS', 'core', '1yr', 'ratios', 'secret', 'https://example.com')
+                detail._fetch('IN:TCS', 'core', '1yr', 'ratios', 'price', 'secret', 'https://example.com')
             self.assertEqual(error.exception.code, code)
         self.assertEqual(get.call_args.kwargs['headers']['x-api-key'], 'secret')
         self.assertNotIn('secret', get.call_args.args[0])
         get.side_effect = requests.Timeout('request with private details')
         with self.assertRaises(detail.StockDataError) as error:
-            detail._fetch('IN:TCS', 'history', '1yr', 'ratios', 'secret', 'https://example.com')
+            detail._fetch('IN:TCS', 'history', '1yr', 'ratios', 'price', 'secret', 'https://example.com')
         self.assertNotIn('private', str(error.exception))
 
 
@@ -194,6 +199,12 @@ class EndpointTests(unittest.TestCase):
         stock.handle_data(h)
         cache = [call.args for call in h.send_header.call_args_list if call.args[0] == 'Cache-Control']
         self.assertEqual(cache, [('Cache-Control', 'public, max-age=0, s-maxage=300')])
+
+    @patch.object(stock, 'get_data', return_value=({'ok': True, 'data': {}}, 3600))
+    def test_history_filter_reaches_data_layer(self, get):
+        h = handler('/api/stock-data?symbol=IN:TCS&section=history&period=3yr&filter=pe')
+        stock.handle_data(h)
+        self.assertEqual(get.call_args.kwargs['history_filter'], 'pe')
 
     @patch.object(stock, 'get_data', side_effect=detail.StockDataError(503, 'provider_error', 'Unavailable'))
     def test_errors_have_no_store(self, get):

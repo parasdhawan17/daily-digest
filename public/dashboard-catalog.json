@@ -10,6 +10,7 @@
       "cards": [
         {"id":"overview_market_cap","title":"Market cap","description":"Reported market capitalisation."},
         {"id":"overview_pe_ratio","title":"P/E ratio","description":"Trailing twelve-month valuation."},
+        {"id":"overview_pe_history","title":"P/E history","description":"Historical price-to-earnings valuation."},
         {"id":"overview_dividend_yield","title":"Dividend yield","description":"Latest twelve-month dividend yield."},
         {"id":"overview_ytd_return","title":"Year-to-date return","description":"Price return since the start of the year."},
         {"id":"overview_price_history","title":"Price history","description":"Interactive historical price chart."},
@@ -77,19 +78,13 @@
     },
     {
       "id": "analysis",
-      "title": "Analysis",
-      "description": "Analyst, technical and forward-looking context.",
+      "title": "Market Data",
+      "description": "Reported technical, volatility and market context.",
       "default": false,
-      "recommended": ["analysis_analyst_consensus", "analysis_technical_averages", "analysis_risk_assessment", "analysis_price_target_summary", "analysis_eps_forecasts"],
+      "recommended": ["analysis_technical_averages", "analysis_risk_assessment", "analysis_market_snapshot"],
       "cards": [
-        {"id":"analysis_analyst_consensus","title":"Analyst consensus","description":"Latest distribution of analyst ratings."},
-        {"id":"analysis_rating_history","title":"Rating history","description":"How analyst ratings changed over time."},
-        {"id":"analysis_recommendation_summary","title":"Recommendation summary","description":"Provider recommendation breakdown."},
         {"id":"analysis_technical_averages","title":"Technical averages","description":"Reported technical price measures."},
-        {"id":"analysis_risk_assessment","title":"Risk assessment","description":"Provider-reported risk context."},
-        {"id":"analysis_price_target_summary","title":"Price-target summary","description":"Low, mean and high analyst targets."},
-        {"id":"analysis_price_target_history","title":"Price-target history","description":"Historical target and recommendation snapshots."},
-        {"id":"analysis_eps_forecasts","title":"EPS forecasts","description":"Annual estimates and reported actuals."},
+        {"id":"analysis_risk_assessment","title":"Volatility statistics","description":"Provider-reported numerical variability."},
         {"id":"analysis_futures","title":"Futures","description":"Available expiries and futures overview."},
         {"id":"analysis_market_snapshot","title":"Additional market snapshot","description":"Provider-reported market detail and periods."}
       ]
