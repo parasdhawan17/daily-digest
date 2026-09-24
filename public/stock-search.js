@@ -3,7 +3,11 @@
   const icon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/></svg>';
   document.querySelectorAll('[data-stock-search]').forEach(button => {
     button.classList.add('stock-search-button');
-    button.innerHTML = icon + '<span>Search a stock</span>';
+    const label = button.dataset.stockSearchLabel || 'Search a stock';
+    button.innerHTML = icon;
+    const text = document.createElement('span');
+    text.textContent = label;
+    button.append(text);
   });
   const dialog = document.createElement('dialog');
   dialog.className = 'stock-search-dialog';

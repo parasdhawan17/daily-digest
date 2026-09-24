@@ -31,11 +31,27 @@
     state = data;
     window.tickrAuth.state = data;
     window.dispatchEvent(new CustomEvent('tickr-auth', {detail: data}));
+    var homeLink = document.querySelector ? document.querySelector('.home-page .nav-dashboard-link') : null;
+    if (homeLink && data.authenticated) {
+      homeLink.href = data.needs_subscription ? '/onboarding' : '/digest';
+      homeLink.textContent = data.needs_subscription ? 'Finish your watchlist' : 'My dashboard';
+    }
+    var homeHeroLink = document.querySelector ? document.querySelector('.home-page #home-watchlist-cta') : null;
+    if (homeHeroLink && data.authenticated) {
+      homeHeroLink.href = data.needs_subscription ? '/onboarding' : '/digest';
+      homeHeroLink.firstChild.textContent = data.needs_subscription ? 'Finish my watchlist ' : 'Open my dashboard ';
+    }
+    var homeSignInCopy = document.querySelector ? document.querySelector('.home-page .home-signin > p') : null;
+    if (homeSignInCopy && data.authenticated) {
+      homeSignInCopy.textContent = data.needs_subscription ? 'Finish choosing your stocks and dashboard cards.' : 'Your personal dashboard is ready whenever you are.';
+    }
     if (!controls || !data.authenticated) return;
     controls.replaceChildren();
     if (location.pathname !== '/digest') {
       var digest = document.createElement('a');
-      digest.href = '/digest'; digest.textContent = 'My digest'; controls.appendChild(digest);
+      digest.href = homeLink && data.needs_subscription ? '/onboarding' : '/digest';
+      digest.textContent = homeLink ? (data.needs_subscription ? 'Finish setup' : 'Open my dashboard') : 'My digest';
+      controls.appendChild(digest);
     }
     var logout = document.createElement('button');
     logout.type = 'button'; logout.textContent = 'Sign out';

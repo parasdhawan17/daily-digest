@@ -1,283 +1,94 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<script src="/design-flag.js"></script>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Tickr Digest — Your personal stock dashboard</title>
-<meta name="description" content="Follow US and Indian stocks in one personal dashboard with market moves, price context, earnings, financial health, AI insights, and company news.">
-<meta property="og:title" content="Tickr Digest — Your personal stock dashboard">
-<meta property="og:description" content="Your stocks, in perspective. One dashboard for market moves, price landmarks, earnings, financial health, AI context, and company news.">
-<meta property="og:url" content="https://www.mydailydigest.online/">
-<meta property="og:type" content="website">
-<link rel="canonical" href="https://www.mydailydigest.online/">
-<meta name="color-scheme" content="light dark">
-<script>
-    (function () {
-      try {
-        var stored = localStorage.getItem("daily-digest-theme");
-        var theme = stored === "light" || stored === "dark"
-          ? stored
-          : (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
-        document.documentElement.setAttribute("data-theme", theme);
-        document.documentElement.style.colorScheme = theme;
-      } catch (e) {}
-    })();
-  </script>
-<link rel="stylesheet" href="/subscribe-form.css">
-<link rel="stylesheet" href="/landing.css">
-<link rel="stylesheet" href="/auth.css">
-<link rel="stylesheet" href="/stock-search.css">
-<script src="/stock-search.js" defer></script>
+  <script src="/design-flag.js"></script>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Tickr Digest — Research Indian stocks with clarity</title>
+  <meta name="description" content="Explore Indian companies in depth, then build a personal watchlist dashboard with the stock information that matters to you.">
+  <meta property="og:title" content="Tickr Digest — Research Indian stocks with clarity">
+  <meta property="og:description" content="Explore Indian companies and shape a personal stock dashboard around what matters to you.">
+  <meta property="og:url" content="https://www.mydailydigest.online/">
+  <meta property="og:type" content="website">
+  <link rel="canonical" href="https://www.mydailydigest.online/">
+  <meta name="color-scheme" content="light dark">
+  <script>(function(){try{var t=localStorage.getItem('daily-digest-theme');if(t!=='light'&&t!=='dark')t=matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light';document.documentElement.dataset.theme=t;document.documentElement.style.colorScheme=t}catch(e){}})();</script>
+  <link rel="stylesheet" href="/subscribe-form.css">
+  <link rel="stylesheet" href="/landing.css">
+  <link rel="stylesheet" href="/auth.css">
+  <link rel="stylesheet" href="/home.css?v=20260924-typewriter-speed">
+  <script src="/home-search.js?v=20260924-typewriter-erase" defer></script>
 </head>
-<body>
+<body class="home-page">
 <a class="skip-link" href="#main">Skip to content</a>
 <header class="masthead">
-<div class="container">
-<nav class="nav" aria-label="Main navigation">
-<a class="brand" href="/" aria-label="Tickr Digest home">
-<img class="brand-icon" src="/assets/tickr-digest-icon.svg" alt="">
-<span>tickr digest<span style="color:var(--accent)">.</span></span>
-</a>
-<div class="nav-links">
-<a href="#how-it-works">How it works</a>
-<a href="#markets">Markets</a>
-<a href="#faq">FAQ</a>
-</div>
-<div class="nav-actions">
-<button type="button" data-stock-search>Search a stock</button>
-<button class="theme-toggle" id="theme-toggle" type="button" aria-label="Switch color theme">
-<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
-<path d="M20 15A8 8 0 019 4a8 8 0 1011 11Z"/>
-</svg>
-</button>
-</div>
-</nav>
-<p id="auth-notice" class="auth-notice" role="status" hidden></p>
-<div class="hero">
-<div class="hero-copy">
-<p class="eyebrow">Your personal stock dashboard</p>
-<h1>Follow your stocks.<br>
-<em>See the whole<br>picture.</em>
-</h1>
-<p class="intro">Sign in, choose the US and Indian stocks you follow, and open one clear view of market moves, price landmarks, earnings, financial health, AI context, and company news.</p>
-<div id="auth-controls" class="auth-controls hero-auth"></div>
-</div>
-<div class="component-showcase" aria-label="What your stock dashboard shows">
-<div class="component-showcase-head">
-<span>WHAT YOU’LL SEE</span>
-<span>Six signals. One clearer view.</span>
-</div>
-<div class="component-grid">
-<article class="component-card component-card-moves">
-<div class="component-card-top"><span class="component-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 16l5-5 4 4 7-8M16 7h4v4"/></svg></span><span class="component-label">Watchlist moves</span></div>
-<div class="component-example"><strong>NVDA</strong><span class="component-positive">+2.40%</span></div>
-<p>See which stocks are moving today and where your attention may be useful.</p>
-</article>
-<article class="component-card component-card-price">
-<div class="component-card-top"><span class="component-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 19V9M12 19V5M19 19v-7"/></svg></span><span class="component-label">Price context</span></div>
-<div class="component-example"><strong>$184.32</strong><span>Current price</span></div>
-<div class="component-stat-list">
-<div class="component-stat-row"><span><b>52W high</b> $195.62</span><strong class="metric-distance">−5.8%</strong></div>
-<div class="component-stat-row"><span><b>All-time high</b> $212.19</span><strong class="metric-distance">−13.1%</strong></div>
-</div>
-<p>See the percentage distance from both recent and all-time highs.</p>
-</article>
-<article class="component-card">
-<div class="component-card-top"><span class="component-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M8 3v4M16 3v4M4 10h16"/></svg></span><span class="component-label">Earnings</span></div>
-<div class="component-example"><strong>Q2 FY26</strong><span>Latest results</span></div>
-<div class="component-stat-list">
-<div class="component-stat-row"><span><b>EPS</b> $1.05</span><strong class="status-chip status-beat">BEAT +4.0%</strong></div>
-<div class="component-stat-row"><span><b>Revenue</b> $46.7B</span><strong class="status-chip status-miss">MISS −0.8%</strong></div>
-</div>
-<p>Spot beats and misses, then compare the latest four quarters.</p>
-</article>
-<article class="component-card">
-<div class="component-card-top"><span class="component-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 12h4l3-7 4 14 3-7h4"/></svg></span><span class="component-label">Financial health</span></div>
-<div class="health-mini-grid">
-<div><span>Revenue</span><strong>$130.5B</strong><small class="component-positive">↑ 24%</small></div>
-<div><span>Net profit</span><strong>$72.9B</strong><small class="component-positive">↑ 35%</small></div>
-<div><span>Free cash flow</span><strong>$60.9B</strong><small class="component-positive">↑ 42%</small></div>
-<div><span>Net debt</span><strong>Net cash</strong><small>Healthy</small></div>
-</div>
-<p>Read the core fundamentals and their direction without digging through filings.</p>
-</article>
-<article class="component-card component-card-wide component-card-ai">
-<div class="component-card-top"><span class="component-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3l1.4 4.1L17.5 8.5l-4.1 1.4L12 14l-1.4-4.1-4.1-1.4 4.1-1.4L12 3ZM18.5 14l.8 2.2 2.2.8-2.2.8-.8 2.2-.8-2.2-2.2-.8 2.2-.8.8-2.2Z"/></svg></span><span class="component-label">AI context</span></div>
-<strong class="component-insight">Chip demand and product investment lead today’s coverage.</strong>
-<p>Connect the themes across your watchlist, then get focused context for each company.</p>
-</article>
-<article class="component-card component-card-wide component-card-news">
-<div class="component-card-top"><span class="component-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 4h14v16H5zM8 8h8M8 12h8M8 16h5"/></svg></span><span class="component-label">Company coverage</span></div>
-<div class="component-example"><strong>4 recent stories</strong><span>Headlines · excerpts · sources</span></div>
-<p>See what’s behind the move and follow every story back to its original source.</p>
-</article>
-</div>
-<p class="component-disclaimer">Illustrative examples. Market data may be delayed.</p>
-</div>
-</div>
-</div>
+  <div class="container">
+    <nav class="nav" aria-label="Main navigation">
+      <a class="brand" href="/" aria-label="Tickr Digest home"><img class="brand-icon" src="/assets/tickr-digest-icon.svg" alt="" width="33" height="33"><span>tickr digest<span class="brand-dot">.</span></span></a>
+      <div class="nav-links"><a href="#research">Stock research</a><a href="#watchlist">Your dashboard</a><a href="#how-it-works">How it works</a></div>
+      <div class="nav-actions">
+        <a class="nav-dashboard-link" href="#watchlist">Build your watchlist</a>
+        <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Switch color theme"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M20 15A8 8 0 019 4a8 8 0 1011 11Z"/></svg></button>
+      </div>
+    </nav>
+    <p id="auth-notice" class="auth-notice" role="status" hidden></p>
+    <div class="home-hero">
+      <div class="home-hero-copy">
+        <p class="home-eyebrow">Indian stocks, in perspective</p>
+        <h1>Know the company.<br><span>See the bigger picture.</span></h1>
+        <p class="home-hero-intro">Explore the details behind an Indian stock, from price and financials to ownership, company news, and AI context. Then keep the companies you follow in a dashboard shaped by you.</p>
+        <div class="home-hero-actions">
+          <div class="home-search-area">
+            <form class="home-search-form" role="search" autocomplete="off">
+              <label class="home-search-label" for="home-stock-query">Search Indian stocks</label>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/></svg>
+              <input id="home-stock-query" type="search" placeholder="Company or ticker" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="home-stock-results" aria-describedby="home-stock-status" maxlength="100" autocomplete="off">
+              <span class="fx-typewriter" aria-hidden="true"></span>
+              <button type="submit" aria-label="Search Indian stocks"><span aria-hidden="true">↗</span></button>
+            </form>
+            <div class="home-search-popover" hidden><p id="home-stock-status" role="status">Search Indian companies by name or ticker.</p><ul id="home-stock-results" role="listbox" aria-label="Indian stock search results"></ul></div>
+          </div>
+          <a class="home-secondary-cta" id="home-watchlist-cta" href="#watchlist">Build my watchlist <span aria-hidden="true">→</span></a>
+        </div>
+        <p class="home-hero-note">Explore a company without signing in. Save a watchlist when you’re ready.</p>
+      </div>
+      <div class="home-preview-wrap">
+        <div class="home-preview">
+          <div class="preview-toolbar"><span class="preview-toolbar-mark"><img src="/assets/tickr-digest-icon.svg" alt="" width="18" height="18"> Research</span><span>Indian equities</span></div>
+          <div class="preview-company"><div><p class="preview-kicker">Technology · NSE</p><h2>Tata Consultancy Services</h2><span>TCS · Indian equity</span></div><span class="preview-company-badge">TCS</span></div>
+          <div class="preview-price"><div><span>Price</span><strong>₹3,412.50</strong></div><span class="preview-positive">↑ 1.24%</span></div>
+          <div class="preview-chart" aria-hidden="true"><svg viewBox="0 0 440 94" preserveAspectRatio="none"><defs><linearGradient id="preview-fill" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#8ea2ff" stop-opacity=".3"/><stop offset="1" stop-color="#8ea2ff" stop-opacity="0"/></linearGradient></defs><path d="M0 77 L33 70 L64 75 L97 53 L126 57 L155 48 L187 55 L216 40 L248 45 L278 29 L310 34 L341 20 L370 26 L403 10 L440 14 L440 94 L0 94Z" fill="url(#preview-fill)"/><path d="M0 77 L33 70 L64 75 L97 53 L126 57 L155 48 L187 55 L216 40 L248 45 L278 29 L310 34 L341 20 L370 26 L403 10 L440 14" fill="none" stroke="#8ea2ff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="preview-tabs"><span class="is-active">Overview</span><span>Financials</span><span>Ownership</span><span>News</span></div>
+          <div class="preview-facts"><div><span>Market cap</span><strong>₹12.4L cr</strong></div><div><span>P/E ratio</span><strong>27.8×</strong></div><div><span>52-week range</span><strong>₹2,900–3,750</strong></div></div>
+          <div class="preview-insight"><span>✦ AI overview</span><p>Understand the business, recent changes, and what to watch next.</p></div>
+        </div>
+        <p class="preview-caption">Illustrative preview · Sample figures, not live market data</p>
+      </div>
+    </div>
+  </div>
 </header>
 <main id="main">
-<div class="container proof-strip">
-<span><strong>One dashboard</strong> Open it anytime</span>
-<span><strong>AI context</strong> See the bigger picture</span>
-<span><strong>Company fundamentals</strong> Earnings &amp; financial health</span>
-<span><strong>US + India</strong> One watchlist</span>
-</div>
-<section class="section tinted" id="how-it-works">
-<div class="container">
-<div class="section-heading">
-<p class="eyebrow">A clearer way to follow your portfolio</p>
-<h2>Sign in once. Check in anytime.</h2>
-</div>
-<div class="steps">
-<article>
-<span class="step-num">01 — SIGN IN</span>
-<h3>Continue with Google.</h3>
-<p>Use your Google account to securely access the same personal dashboard whenever you return.</p>
-</article>
-<article>
-<span class="step-num">02 — BUILD YOUR WATCHLIST</span>
-<h3>Choose the stocks you follow.</h3>
-<p>Search by ticker or company name and combine US stocks, ETFs, and NSE equities in one watchlist.</p>
-</article>
-<article>
-<span class="step-num">03 — OPEN YOUR DASHBOARD</span>
-<h3>See the full picture.</h3>
-<p>Return anytime for current moves, AI context, price landmarks, earnings, financial health, and company coverage.</p>
-</article>
-</div>
-<div class="optional-briefing">
-<span class="optional-badge">OPTIONAL</span>
-<div><h3>Want updates delivered to you?</h3><p>Turn on email briefings for the market sessions you care about. Your dashboard remains available whether email is on or off.</p></div>
-</div>
-</div>
-</section>
-<section class="section" id="markets">
-<div class="container">
-<div class="section-heading">
-<p class="eyebrow">Two markets. One dashboard.</p>
-<h2>From Wall Street to Dalal Street.</h2>
-<p>Follow either market or both in the same account. Open your dashboard anytime; add scheduled email briefings only if you want them.</p>
-</div>
-<div class="markets">
-<article class="market-card">
-<p class="eyebrow">United States · NYSE &amp; NASDAQ</p>
-<h3>Stocks &amp; ETFs</h3>
-<p>From technology companies to broad-market funds.</p>
-<div class="movers">
-<span class="pill up">AAPL</span>
-<span class="pill up">NVDA</span>
-<span class="pill up">MSFT</span>
-<span class="pill up">VOO</span>
-</div>
-<div class="schedule">
-<span>Dashboard<strong>Anytime</strong>
-</span>
-<span>Optional emails<strong>9:15 AM &amp; 4:15 PM ET</strong>
-</span>
-</div>
-</article>
-<article class="market-card">
-<p class="eyebrow">India · National Stock Exchange</p>
-<h3>NSE-listed equities</h3>
-<p>Follow Indian companies across sectors, quoted in rupees.</p>
-<div class="movers">
-<span class="pill up">RELIANCE</span>
-<span class="pill up">TCS</span>
-<span class="pill up">NMDC</span>
-</div>
-<div class="schedule">
-<span>Dashboard<strong>Anytime</strong>
-</span>
-<span>Optional emails<strong>9:15 AM &amp; 3:45 PM IST</strong>
-</span>
-</div>
-</article>
-</div>
-<p class="market-note">Optional briefings are scheduled on trading days and exclude market holidays.</p>
-</div>
-</section>
-<section class="section tinted" id="faq">
-<div class="container faq-layout">
-<div class="section-heading">
-<p class="eyebrow">Good to know</p>
-<h2>A few details,<br>before you sign in.</h2>
-<p>Your dashboard starts with a Google account and the tickers you care about.</p>
-</div>
-<div>
-<details class="faq-item">
-<summary>Is Tickr Digest free?</summary>
-<p>Yes. Your personal stock dashboard is free. Sign in with Google, choose your tickers, and start exploring immediately.</p>
-</details>
-<details class="faq-item">
-<summary>What’s included in my dashboard?</summary>
-<p>Your dashboard includes watchlist moves, AI context, quotes, 52-week highs, available all-time highs, earnings dates and history, financial health metrics, and sourced company coverage. Data availability varies by stock and market.</p>
-</details>
-<details class="faq-item">
-<summary>Can I follow both US and Indian stocks?</summary>
-<p>Yes. Keep US stocks, ETFs, and NSE equities together in one watchlist and view them from the same dashboard.</p>
-</details>
-<details class="faq-item">
-<summary>Are email briefings required?</summary>
-<p>No. Email briefings are optional. If you turn them on, each market’s email covers the stocks you follow around its opening and closing sessions. You can unsubscribe from email without losing your dashboard.</p>
-</details>
-<details class="faq-item">
-<summary>Can I change my watchlist?</summary>
-<p>Yes. Use Edit in your dashboard to add or remove tickers whenever your interests change.</p>
-</details>
-<details class="faq-item">
-<summary>How should I use the AI summaries and market data?</summary>
-<p>AI summaries are generated from linked headlines and excerpts and may be incomplete or inaccurate. Quotes and earnings depend on source availability and may be delayed. Read the original sources for context. Tickr Digest provides information, not investment advice.</p>
-</details>
-</div>
-</div>
-</section>
-<section class="section">
-<div class="container final-cta">
-<div>
-<p class="eyebrow" style="color:var(--accent);margin-bottom:16px">Your watchlist. Ready when you are.</p>
-<h2>One sign-in. Your stocks in context.</h2>
-<p>Use the Google sign-in at the top to create your dashboard, then return whenever you want the bigger picture.</p>
-</div>
-</div>
-</section>
+  <section class="home-section home-research" id="research" aria-labelledby="research-title"><div class="container">
+    <div class="home-section-heading"><p class="home-eyebrow">A clearer company view</p><h2 id="research-title">Go beyond the ticker.</h2><p>Start with one Indian company. Move from a quick overview to the underlying details at your own pace.</p></div>
+    <div class="home-feature-grid">
+      <article class="home-feature"><span class="home-feature-icon" aria-hidden="true">↗</span><h3>Price in context</h3><p>See price history, key landmarks, and the latest available market measures together.</p></article>
+      <article class="home-feature"><span class="home-feature-icon" aria-hidden="true">▦</span><h3>Business and financials</h3><p>Explore reported results, financial health, ownership, and corporate actions.</p></article>
+      <article class="home-feature"><span class="home-feature-icon" aria-hidden="true">✦</span><h3>News with context</h3><p>Read sourced company coverage and an AI overview grounded in available evidence.</p></article>
+    </div>
+    <a class="home-text-link" href="#home-stock-query">Find an Indian stock</a>
+  </div></section>
+  <section class="home-section home-watchlist-section" id="watchlist" aria-labelledby="watchlist-title"><div class="container home-watchlist-grid">
+    <div class="home-watchlist-copy"><p class="home-eyebrow">Your space for the stocks you follow</p><h2 id="watchlist-title">Make the dashboard yours.</h2><p>Choose the Indian stocks you care about. Select the research cards you want to see, then return to your watchlist whenever you need a fresh view.</p>
+      <ul><li><span aria-hidden="true">✓</span> Pick the companies you follow</li><li><span aria-hidden="true">✓</span> Choose the cards that matter to you</li><li><span aria-hidden="true">✓</span> Open your dashboard anytime</li></ul>
+      <div class="home-signin"><p>Sign in with Google to build your watchlist.</p><div id="auth-controls" class="auth-controls hero-auth"></div></div>
+    </div>
+    <div class="watchlist-preview"><div class="watchlist-preview-head"><div><span>PERSONAL DASHBOARD</span><strong>My watchlist</strong></div><span class="watchlist-preview-count">3 stocks</span></div><div class="watchlist-preview-row"><span><b>TCS</b><small>Tata Consultancy Services</small></span><span class="watchlist-preview-up">+1.24%</span></div><div class="watchlist-preview-row"><span><b>RELIANCE</b><small>Reliance Industries</small></span><span class="watchlist-preview-down">−0.58%</span></div><div class="watchlist-preview-row"><span><b>INFY</b><small>Infosys</small></span><span class="watchlist-preview-up">+0.76%</span></div><div class="watchlist-preview-customize"><span>YOUR CHOSEN VIEW</span><div><span>Price history</span><span>Financial health</span><span>Company news</span></div></div><p class="preview-caption">Illustrative preview · Sample changes</p></div>
+  </div></section>
+  <section class="home-section home-steps-section" id="how-it-works" aria-labelledby="steps-title"><div class="container"><div class="home-section-heading"><p class="home-eyebrow">Simple from the start</p><h2 id="steps-title">Research first. Follow what matters.</h2></div><div class="home-steps"><article><span>01</span><h3>Find a company</h3><p>Search Indian equities by company name or ticker and open a detailed stock page.</p></article><article><span>02</span><h3>Shape your view</h3><p>Sign in, add the stocks you follow, and choose your dashboard cards.</p></article><article><span>03</span><h3>Come back anytime</h3><p>Check your watchlist, revisit company details, and adjust your choices as they change.</p></article></div><p class="home-email-note">Prefer an inbox update? Email briefings are optional when you set up your dashboard.</p></div></section>
+  <section class="home-section home-final-section"><div class="container home-final"><div><p class="home-eyebrow">Start with a question</p><h2>Which company are you looking at?</h2><p>Search a stock now. Build your watchlist whenever you’re ready.</p></div><a class="home-final-button" href="#home-stock-query">Search Indian stocks</a></div></section>
 </main>
-<footer class="site-footer container">
-<div class="footer-top">
-<a class="brand" href="/"><img class="brand-icon" src="/assets/tickr-digest-icon.svg" alt=""><span>tickr digest<span style="color:var(--accent)">.</span></span></a>
-<div class="footer-links">
-<a href="/sample-digest.html">Sample dashboard</a>
-<a href="#how-it-works">How it works</a>
-</div>
-</div>
-<div class="footer-bottom">
-<span>© 2026 Tickr Digest</span>
-<span>A broader view of your stocks. For information, not investment advice.</span>
-</div>
-</footer>
-<!-- Subscribe modal -->
-<div class="subscribe-modal" id="subscribe-modal" hidden>
-<div class="subscribe-modal-backdrop" onclick="closeSubscribeModal()">
-</div>
-<div class="subscribe-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="subscribe-modal-title">
-<div class="subscribe-modal-header">
-<h2 id="subscribe-modal-title">Set up or update your watchlist</h2>
-<button type="button" class="subscribe-modal-close" onclick="closeSubscribeModal()" aria-label="Close">&times;</button>
-</div>
-<div class="subscribe-modal-body" id="subscribe-modal-body">
-</div>
-<div class="subscribe-success" id="subscribe-success" hidden>
-<h3>Almost there</h3>
-<p>Check your inbox for a confirmation email from Tickr Digest and click Confirm subscription to finish signing up.</p>
-</div>
-</div>
-</div>
-<script src="/landing.js" defer>
-</script>
-<script src="/subscribe-form.js" defer>
-</script>
-<script src="/auth.js" defer></script>
+<footer class="site-footer container"><div class="footer-top"><a class="brand" href="/"><img class="brand-icon" src="/assets/tickr-digest-icon.svg" alt="" width="33" height="33"><span>tickr digest<span class="brand-dot">.</span></span></a><div class="footer-links"><a href="#research">Stock research</a><a href="#watchlist">Your dashboard</a><a href="#how-it-works">How it works</a></div></div><div class="footer-bottom"><span>© 2026 Tickr Digest</span><span>Market data may be delayed. Information, not investment advice.</span></div></footer>
+<div class="subscribe-modal" id="subscribe-modal" hidden><div class="subscribe-modal-backdrop" onclick="closeSubscribeModal()"></div><div class="subscribe-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="subscribe-modal-title"><div class="subscribe-modal-header"><h2 id="subscribe-modal-title">Set up or update your watchlist</h2><button type="button" class="subscribe-modal-close" onclick="closeSubscribeModal()" aria-label="Close">&times;</button></div><div class="subscribe-modal-body" id="subscribe-modal-body"></div><div class="subscribe-success" id="subscribe-success" hidden><h3>Almost there</h3><p>Check your inbox for a confirmation email from Tickr Digest and click Confirm subscription to finish signing up.</p></div></div></div>
+<script src="/landing.js" defer></script><script src="/subscribe-form.js" defer></script><script src="/auth.js" defer></script>
 </body>
 </html>
