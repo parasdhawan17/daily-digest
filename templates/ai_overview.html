@@ -7,9 +7,9 @@
   <meta name="color-scheme" content="light dark">
   <script>(function(){try{var t=localStorage.getItem('daily-digest-theme');if(t!=='light'&&t!=='dark')t=matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light';document.documentElement.dataset.theme=t;document.documentElement.style.colorScheme=t;}catch(e){}})();</script>
   <link rel="stylesheet" href="/landing.css">
-  <link rel="stylesheet" href="/ai-overview.css?v=20260925-all-signals-robot">
+  <link rel="stylesheet" href="/ai-overview.css?v=20260926-nonempty-signals">
   <script src="/stock-format.js" defer></script>
-  <script src="/ai-overview.js?v=20260925-all-signals-robot" defer></script>
+  <script src="/ai-overview.js?v=20260926-nonempty-signals" defer></script>
 </head>
 <body class="ai-overview-page" data-symbol="{{ symbol }}">
 <a class="skip-link" href="#overview-main">Skip to AI overview</a>
@@ -21,16 +21,18 @@
   <nav class="ai-breadcrumb" aria-label="Breadcrumb"><a href="/">Home</a><span aria-hidden="true">/</span><span>AI overview</span><span aria-hidden="true">/</span><span>{{ symbol|replace('IN:', '') }}</span></nav>
   <div id="page-status" class="ai-page-status" role="status">{{ error or 'Gathering company evidence…' }}</div>
   <div id="overview-content" hidden>
-    <header class="ai-company-bar"><div><p class="ai-kicker"><span aria-hidden="true">✦</span> AI overview <span class="ai-live-dot" aria-hidden="true"></span> Indian equities</p><h1 id="company-name"></h1><p class="ai-company-meta"><span id="company-symbol"></span><span id="company-industry"></span></p></div><div class="ai-company-price"><span>Latest available price</span><strong id="company-price">—</strong><span id="company-change" class="ai-change" hidden></span><small id="price-meta">Market data may be delayed</small></div></header>
-    <section class="ai-metrics-section" aria-labelledby="metrics-title"><div class="ai-metrics-heading"><h2 id="metrics-title">Market facts</h2><span id="data-freshness"></span></div><div id="metrics-grid" class="ai-metrics-grid"></div><div id="range-card" class="ai-range-card" hidden></div></section>
+    <header class="ai-company-bar">
+      <div class="ai-company-headline"><div><h1 id="company-name"></h1><p class="ai-company-meta"><span id="company-symbol"></span><span id="company-industry"></span></p></div><div class="ai-company-price"><span>Latest available price</span><strong id="company-price">—</strong><span id="company-change" class="ai-change" hidden></span><small id="price-meta">Market data may be delayed</small></div></div>
+      <section class="ai-metrics-section" aria-label="Market facts"><div id="metrics-grid" class="ai-metrics-grid"></div><div id="range-card" class="ai-range-card" hidden></div></section>
+    </header>
     <section class="ai-dashboard" id="ai-insights" aria-label="AI company perspective">
       <div id="ai-status" class="ai-loading" role="status" aria-live="polite">Connecting the evidence…</div>
       <div id="ai-content" hidden>
         <div class="ai-insight-explorer">
-          <article id="ai-summary" class="ai-summary"></article>
+          <article id="ai-summary" class="ai-summary"><aside id="ai-robot-guide" class="ai-robot-guide" aria-label="Overall AI signal"><div id="ai-robot-guide-face" class="ai-robot-guide-face"></div><div class="ai-robot-guide-copy"><span class="ai-robot-eyebrow">Overall signal</span><strong id="ai-robot-reading" class="ai-robot-reading"></strong><span id="ai-robot-tone" class="ai-robot-tone"></span></div></aside></article>
           <div class="ai-insight-body">
-            <div class="ai-insight-heading"><div class="ai-insight-intro"><p class="ai-kicker">Explore the synthesis</p><h2 id="signals-title">Signals and what to watch</h2><span id="ai-generated"></span><p id="ai-signal-count" class="ai-signal-count"></p></div><aside id="ai-robot-guide" class="ai-robot-guide" aria-label="Selected AI insight"><div id="ai-robot-guide-face" class="ai-robot-guide-face"></div><div class="ai-robot-guide-copy"><span class="ai-robot-eyebrow">Selected signal</span><strong id="ai-robot-reading" class="ai-robot-reading" aria-live="polite"></strong><span id="ai-robot-tone" class="ai-robot-tone"></span></div></aside></div>
-            <div id="ai-categories" class="ai-categories" aria-labelledby="signals-title"></div>
+            <div class="ai-insight-meta"><span id="ai-generated"></span><p id="ai-signal-count" class="ai-signal-count"></p></div>
+            <div id="ai-categories" class="ai-categories" role="group" aria-label="AI signals"></div>
           </div>
         </div>
       </div>

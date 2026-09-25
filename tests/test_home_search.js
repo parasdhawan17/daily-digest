@@ -24,6 +24,9 @@ function setup(results) {
     removeAttribute(key) { delete this.attributes[key]; }
     scrollIntoView() {}
     focus() { this.focused = true; }
+    showModal() { this.open = true; }
+    close() { this.open = false; this.fire('close'); }
+    getBoundingClientRect() { return {left: 100, right: 500, top: 100, bottom: 500}; }
   }
   const area = new Element();
   const form = new Element();
@@ -32,16 +35,18 @@ function setup(results) {
   const list = new Element();
   const status = new Element();
   const choice = new Element();
-  choice.hidden = true;
+  choice.open = false;
+  const choiceClose = new Element();
   const choiceTitle = new Element();
   const choiceSymbol = new Element();
   const choiceAI = new Element();
   const choiceDetails = new Element();
   const choiceParts = {'#home-choice-title': choiceTitle, '#home-choice-symbol': choiceSymbol,
-    '#home-choice-ai': choiceAI, '#home-choice-details': choiceDetails};
+    '#home-choice-ai': choiceAI, '#home-choice-details': choiceDetails,
+    '.home-choice-close': choiceClose};
   choice.querySelector = selector => choiceParts[selector];
   const links = [new Element(), new Element()];
-  const parts = {'form': form, 'input': input, '.home-search-popover': popover, '.home-search-choice': choice,
+  const parts = {'form': form, 'input': input, '.home-search-popover': popover,
     'ul': list, '[role="status"]': status};
   area.querySelector = selector => parts[selector];
   area.contains = target => target !== null;
@@ -49,7 +54,7 @@ function setup(results) {
   let nextTimer = 0;
   const calls = [];
   const document = {
-    querySelector: () => area,
+    querySelector: selector => selector === '.home-search-choice' ? choice : area,
     querySelectorAll: () => links,
     createElement: () => new Element(),
     addEventListener() {}
@@ -67,7 +72,7 @@ function setup(results) {
   };
   vm.runInNewContext(source, context);
   return {
-    input, form, list, popover, links, calls, choice, choiceTitle, choiceSymbol, choiceAI, choiceDetails,
+    input, form, list, popover, links, calls, choice, choiceClose, choiceTitle, choiceSymbol, choiceAI, choiceDetails,
     async search(query) {
       input.value = query;
       input.fire('input');
@@ -86,11 +91,11 @@ test('typing in the homepage field shows Indian results and both navigation choi
   assert.equal(app.list.children.length, 1);
   assert.equal(app.input.attributes['aria-expanded'], 'true');
   app.list.children[0].fire('click');
-  assert.equal(app.choice.hidden, false);
+  assert.equal(app.choice.open, true);
   assert.equal(app.choiceTitle.textContent, 'Tata Consultancy Services');
   assert.equal(app.choiceAI.href, '/ai-overview/IN:TCS');
   assert.equal(app.choiceDetails.href, '/stocks/IN:TCS');
-  assert.equal(app.choiceAI.focused, true);
+  assert.equal(app.choiceTitle.focused, true);
 });
 
 test('keyboard selection opens the chosen company actions', async () => {
@@ -114,7 +119,7 @@ test('ambiguous submitted names require an explicit selection', async () => {
   ]);
   await app.search('Techn');
   app.form.fire('submit', {preventDefault() {}});
-  assert.equal(app.choice.hidden, true);
+  assert.equal(app.choice.open, false);
   assert.equal(app.list.children.length, 2);
   app.list.children[1].fire('click');
   assert.equal(app.choiceAI.href, '/ai-overview/IN:TECH');
@@ -124,10 +129,23 @@ test('editing the chosen company resets both actions', async () => {
   const app = setup([{market: 'IN', symbol: 'IN:TCS', name: 'Tata Consultancy Services'}]);
   await app.search('TCS');
   app.list.children[0].fire('click');
-  assert.equal(app.choice.hidden, false);
+  assert.equal(app.choice.open, true);
   app.input.value = 'INFY';
   app.input.fire('input');
-  assert.equal(app.choice.hidden, true);
+  assert.equal(app.choice.open, false);
+});
+
+test('company dialog closes and can be reopened from the selected search', async () => {
+  const app = setup([{market: 'IN', symbol: 'IN:TCS', name: 'Tata Consultancy Services'}]);
+  await app.search('TCS');
+  app.list.children[0].fire('click');
+  app.choiceClose.fire('click');
+  assert.equal(app.choice.open, false);
+  assert.equal(app.input.focused, true);
+  app.form.fire('submit', {preventDefault() {}});
+  assert.equal(app.choice.open, true);
+  app.choice.fire('click', {target: app.choice, clientX: 0, clientY: 0});
+  assert.equal(app.choice.open, false);
 });
 
 test('an exact ticker submitted before suggestions return advances to the choice', async () => {

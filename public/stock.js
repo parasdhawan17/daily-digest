@@ -243,14 +243,15 @@
         ['catalysts', 'Catalysts'], ['risks', 'Key risks'], ['watch_next', 'Watch next']];
       groups.forEach(([key, label]) => {
         const items = Array.isArray(data[key]) ? data[key] : [];
+        if (!items.length) return;
         const area = node('div', 'stock-signals-preview-area');
         area.append(node('span', '', label), node('strong', '', String(items.length)));
-        if (items.length) area.append(node('p', '', items[0].heading || 'Company signal'));
+        area.append(node('p', '', items[0].heading || 'Company signal'));
         areas.append(area);
       });
       const link = node('a', 'stock-signals-preview-link', 'See all signals and sources →');
       link.href = '/ai-overview/' + encodeURIComponent(symbol).replace('%3A', ':');
-      target.replaceChildren(lead, areas, link);
+      target.replaceChildren(...(areas.children.length ? [lead, areas, link] : [lead, link]));
     } catch (error) {
       const retry = node('button', 'stock-text-button', 'Retry company signals');
       retry.type = 'button'; retry.onclick = () => loadSignalPreview(target);
@@ -278,8 +279,7 @@
     if (item) body.append(aiEvidence(item.evidence_ids, sources));
     signal.append(head, body); return signal;
   }
-  function aiInsightList(items, sources, emptyText, fallbackHeading, fallbackTone) {
-    if (!Array.isArray(items) || !items.length) return empty(emptyText || 'The available evidence does not support a reliable item here.');
+  function aiInsightList(items, sources, fallbackHeading, fallbackTone) {
     const list = node('ul', 'stock-ai-list');
     items.forEach(item => { const li = node('li'); li.append(aiSignal(item, sources, fallbackHeading, fallbackTone, false)); list.append(li); });
     return list;
@@ -289,23 +289,31 @@
     const intro = card('The 60-second view', 'A concise synthesis of the latest available company evidence.'); intro.classList.add('stock-ai-summary');
     intro.append(aiSignal(data.summary, sources, 'Overall picture', 'caution', true)); panel.append(intro);
 
-    const balance = node('div', 'stock-grid stock-ai-balance'), encouraging = card('What looks encouraging'), attention = card('What needs attention');
-    encouraging.classList.add('stock-ai-positive'); attention.classList.add('stock-ai-caution');
-    encouraging.append(aiInsightList(data.encouraging, sources, '', 'Positive signal', 'positive'));
-    attention.append(aiInsightList(data.attention, sources, '', 'Downside signal', 'negative'));
-    balance.append(encouraging, attention); panel.append(balance);
+    function signalGroup(key, title, caption, className, fallbackHeading, fallbackTone) {
+      const items = Array.isArray(data[key]) ? data[key] : [];
+      if (!items.length) return null;
+      const group = card(title, caption);
+      if (className) group.classList.add(className);
+      group.append(aiInsightList(items, sources, fallbackHeading, fallbackTone));
+      return group;
+    }
+    function appendPair(first, second, className = 'stock-grid') {
+      const groups = [first, second].filter(Boolean);
+      if (groups.length === 1) panel.append(groups[0]);
+      else if (groups.length === 2) { const grid = node('div', className); grid.append(...groups); panel.append(grid); }
+    }
 
-    const changes = card('What changed recently', 'Only explicit period-over-period changes are included.');
-    changes.append(aiInsightList(data.changes, sources, 'No reliable period comparison was available.', 'Recent movement', 'caution')); panel.append(changes);
-
-    const outlook = node('div', 'stock-grid'), catalysts = card('Potential catalysts', 'Reported events, plans or developments—not predictions.'), risks = card('Key risks');
-    catalysts.classList.add('stock-ai-positive'); risks.classList.add('stock-ai-negative');
-    catalysts.append(aiInsightList(data.catalysts, sources, '', 'Potential catalyst', 'positive'));
-    risks.append(aiInsightList(data.risks, sources, '', 'Risk factor', 'negative'));
-    outlook.append(catalysts, risks); panel.append(outlook);
-
-    const watch = card('What to watch next', 'Measurable questions for future results and disclosures.');
-    watch.append(aiInsightList(data.watch_next, sources, '', 'Monitoring point', 'neutral')); panel.append(watch);
+    appendPair(
+      signalGroup('encouraging', 'What looks encouraging', '', 'stock-ai-positive', 'Positive signal', 'positive'),
+      signalGroup('attention', 'What needs attention', '', 'stock-ai-caution', 'Downside signal', 'negative'),
+      'stock-grid stock-ai-balance');
+    const changes = signalGroup('changes', 'What changed recently', 'Only explicit period-over-period changes are included.', '', 'Recent movement', 'caution');
+    if (changes) panel.append(changes);
+    appendPair(
+      signalGroup('catalysts', 'Potential catalysts', 'Reported events, plans or developments—not predictions.', 'stock-ai-positive', 'Potential catalyst', 'positive'),
+      signalGroup('risks', 'Key risks', '', 'stock-ai-negative', 'Risk factor', 'negative'));
+    const watch = signalGroup('watch_next', 'What to watch next', 'Measurable questions for future results and disclosures.', '', 'Monitoring point', 'neutral');
+    if (watch) panel.append(watch);
 
     const sourceCard = card('Sources and freshness'); sourceCard.classList.add('stock-ai-sources');
     const sourceList = node('ol');

@@ -16,8 +16,8 @@
   <link rel="stylesheet" href="/subscribe-form.css">
   <link rel="stylesheet" href="/landing.css">
   <link rel="stylesheet" href="/auth.css">
-  <link rel="stylesheet" href="/home.css?v=20260925-ai-choice">
-  <script src="/home-search.js?v=20260925-ai-choice" defer></script>
+  <link rel="stylesheet" href="/home.css?v=20260926-choice-dialog">
+  <script src="/home-search.js?v=20260926-choice-dialog" defer></script>
 </head>
 <body class="home-page">
 <a class="skip-link" href="#main">Skip to content</a>
@@ -47,11 +47,6 @@
               <button type="submit" aria-label="Find a company"><span aria-hidden="true">↗</span></button>
             </form>
             <div class="home-search-popover" hidden><p id="home-stock-status" role="status">Search Indian companies by name or ticker.</p><ul id="home-stock-results" role="listbox" aria-label="Indian stock search results"></ul></div>
-            <section class="home-search-choice" aria-labelledby="home-choice-title" hidden>
-              <div class="home-search-choice-heading"><span class="home-search-choice-mark" aria-hidden="true">✦</span><div><p>Selected company</p><h2 id="home-choice-title"></h2><span id="home-choice-symbol"></span></div></div>
-              <p>How would you like to explore it?</p>
-              <div class="home-search-choice-actions"><a id="home-choice-ai" href="#">View AI overview <span aria-hidden="true">↗</span></a><a id="home-choice-details" href="#">Stock details <span aria-hidden="true">→</span></a></div>
-            </section>
           </div>
           <a class="home-secondary-cta" id="home-watchlist-cta" href="#watchlist">Build my watchlist <span aria-hidden="true">→</span></a>
         </div>
@@ -93,6 +88,15 @@
   <section class="home-section home-final-section"><div class="container home-final"><div><p class="home-eyebrow">Start with a question</p><h2>Which company are you looking at?</h2><p>Search a stock now. Build your watchlist whenever you’re ready.</p></div><a class="home-final-button" href="#home-stock-query">Search Indian stocks</a></div></section>
 </main>
 <footer class="site-footer container"><div class="footer-top"><a class="brand" href="/"><img class="brand-icon" src="/assets/tickr-digest-icon.svg" alt="" width="33" height="33"><span>tickr digest<span class="brand-dot">.</span></span></a><div class="footer-links"><a href="#research">Stock research</a><a href="#watchlist">Your dashboard</a><a href="#how-it-works">How it works</a></div></div><div class="footer-bottom"><span>© 2026 Tickr Digest</span><span>Market data may be delayed. Information, not investment advice.</span></div></footer>
+<dialog class="home-search-choice" aria-labelledby="home-choice-title" aria-describedby="home-choice-description">
+  <button class="home-choice-close" type="button" aria-label="Close company choices"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M5 5l14 14M19 5L5 19"/></svg></button>
+  <div class="home-choice-company"><span class="home-choice-kicker">Your selected company</span><h2 id="home-choice-title" tabindex="-1"></h2><span id="home-choice-symbol"></span></div>
+  <p id="home-choice-description" class="home-choice-prompt">What would you like to explore?</p>
+  <div class="home-search-choice-actions">
+    <a id="home-choice-ai" href="#"><span class="home-choice-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m12 2 1.7 6.3L20 10l-6.3 1.7L12 18l-1.7-6.3L4 10l6.3-1.7L12 2ZM19 17l.7 2.3L22 20l-2.3.7L19 23l-.7-2.3L16 20l2.3-.7L19 17Z"/></svg></span><span class="home-choice-action-copy"><strong>AI overview</strong><small>Get the key signals in a quick visual read</small></span><span class="home-choice-arrow" aria-hidden="true">↗</span></a>
+    <a id="home-choice-details" href="#"><span class="home-choice-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V5m0 14h16M8 15l4-4 3 2 5-6"/></svg></span><span class="home-choice-action-copy"><strong>Stock details</strong><small>Explore price, financials, news, and more</small></span><span class="home-choice-arrow" aria-hidden="true">→</span></a>
+  </div>
+</dialog>
 <div class="subscribe-modal" id="subscribe-modal" hidden><div class="subscribe-modal-backdrop" onclick="closeSubscribeModal()"></div><div class="subscribe-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="subscribe-modal-title"><div class="subscribe-modal-header"><h2 id="subscribe-modal-title">Set up or update your watchlist</h2><button type="button" class="subscribe-modal-close" onclick="closeSubscribeModal()" aria-label="Close">&times;</button></div><div class="subscribe-modal-body" id="subscribe-modal-body"></div><div class="subscribe-success" id="subscribe-success" hidden><h3>Almost there</h3><p>Check your inbox for a confirmation email from Tickr Digest and click Confirm subscription to finish signing up.</p></div></div></div>
 <script src="/landing.js" defer></script><script src="/subscribe-form.js" defer></script><script src="/auth.js" defer></script>
 </body>

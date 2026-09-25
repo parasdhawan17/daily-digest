@@ -186,21 +186,45 @@
 .home-page .home-search-popover li strong { display: block; font-size: 13px; font-weight: 650; }
 .home-page .home-search-popover li small { display: block; margin-top: 2px; color: #a9b7c6; font-size: 11px; }
 .home-page .home-search-popover li > span:last-child { flex: 0 0 auto; color: #b6c4ff; font-size: 11px; font-weight: 700; }
-.home-page .home-search-choice { margin-top: 12px; padding: 18px; border: 1px solid rgba(142,162,255,.36); border-radius: 18px; background: linear-gradient(135deg,#182a43,#111e31); box-shadow: 0 18px 40px #02081255; color: #f3f7fa; animation: home-choice-enter .32s ease-out both; }
-.home-page .home-search-choice[hidden] { display: none; }
-.home-page .home-search-choice-heading { display: flex; align-items: center; gap: 12px; }
-.home-page .home-search-choice-mark { display: grid; place-items: center; flex: 0 0 40px; height: 40px; border-radius: 12px; background: #8ea2ff24; color: #b3c0ff; font-size: 23px; }
-.home-page .home-search-choice-heading p { margin: 0 0 3px; color: #aabaff; font-size: 10px; font-weight: 750; letter-spacing: .13em; text-transform: uppercase; }
-.home-page .home-search-choice h2 { margin: 0; color: #fff; font-size: 18px; letter-spacing: -.02em; }
-.home-page .home-search-choice-heading span:last-child { display: block; margin-top: 2px; color: #a9b7c6; font-size: 11px; }
-.home-page .home-search-choice > p { margin: 16px 0 10px; color: #c2cfdd; font-size: 12px; }
-.home-page .home-search-choice-actions { display: flex; flex-wrap: wrap; gap: 8px; }
-.home-page .home-search-choice-actions a { display: inline-flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 43px; padding: 9px 13px; border: 1px solid #6c83a5; border-radius: 10px; color: #f3f7fa; font-size: 12px; font-weight: 700; text-decoration: none; }
-.home-page .home-search-choice-actions a:first-child { border-color: #aabaff; background: #8ea2ff; color: #0b1420; }
-.home-page .home-search-choice-actions a:hover { background: #8ea2ff35; }
-.home-page .home-search-choice-actions a:first-child:hover { background: #b3c0ff; }
-.home-page .home-search-choice-actions a:focus-visible { outline: 3px solid #c5d0ff; outline-offset: 3px; }
-@keyframes home-choice-enter { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+.home-page .home-search-choice {
+  position: fixed;
+  width: min(480px, calc(100% - 32px));
+  max-height: calc(100dvh - 32px);
+  margin: auto;
+  padding: 32px;
+  overflow-y: auto;
+  border: 1px solid rgba(178,195,255,.28);
+  border-radius: 24px;
+  background: linear-gradient(155deg, #1b2b46, #111c2d 75%);
+  box-shadow: 0 32px 90px rgba(1,7,18,.48), 0 0 0 1px rgba(255,255,255,.04) inset;
+  color: #f3f7fa;
+  animation: home-choice-enter .24s ease-out both;
+}
+.home-page .home-search-choice::backdrop { background: rgba(3,10,22,.7); backdrop-filter: blur(6px); }
+.home-page .home-choice-close { position: absolute; top: 20px; right: 20px; display: grid; place-items: center; width: 36px; height: 36px; padding: 0; border: 1px solid rgba(191,205,230,.3); border-radius: 50%; background: rgba(255,255,255,.06); color: #d2ddeb; cursor: pointer; transition: background .2s ease, border-color .2s ease; }
+.home-page .home-choice-close svg { width: 17px; height: 17px; }
+.home-page .home-choice-close:hover { background: rgba(255,255,255,.14); border-color: rgba(191,205,230,.55); }
+.home-page .home-choice-kicker { display: block; margin-bottom: 10px; color: #aabaff; font-size: 11px; font-weight: 750; letter-spacing: .14em; text-transform: uppercase; }
+.home-page .home-choice-company { padding-right: 40px; }
+.home-page .home-choice-company h2 { margin: 0; color: #fff; font-size: clamp(28px, 6vw, 34px); font-weight: 680; letter-spacing: -.04em; line-height: 1.13; overflow-wrap: anywhere; }
+.home-page #home-choice-symbol { display: inline-block; margin-top: 11px; padding: 5px 10px; border: 1px solid rgba(173,188,228,.3); border-radius: 999px; color: #c5d0e1; font-size: 12px; font-weight: 600; }
+.home-page .home-choice-prompt { margin: 27px 0 14px; color: #d4deed; font-size: 14px; font-weight: 600; }
+.home-page .home-search-choice-actions { display: grid; gap: 10px; }
+.home-page .home-search-choice-actions a { display: flex; align-items: center; gap: 14px; min-height: 76px; padding: 14px 16px; border: 1px solid rgba(172,190,220,.35); border-radius: 15px; color: #f3f7fa; text-decoration: none; cursor: pointer; transition: background .2s ease, border-color .2s ease; }
+.home-page .home-search-choice-actions a:first-child { border-color: #afbdff; background: #9eb0ff; color: #101d37; }
+.home-page .home-search-choice-actions a:hover { border-color: #b9c8f2; background: rgba(142,162,255,.15); }
+.home-page .home-search-choice-actions a:first-child:hover { background: #bac7ff; }
+.home-page .home-choice-icon { display: grid; place-items: center; flex: 0 0 38px; height: 38px; border-radius: 11px; background: rgba(255,255,255,.1); }
+.home-page .home-search-choice-actions a:first-child .home-choice-icon { background: rgba(20,39,85,.12); }
+.home-page .home-choice-icon svg { width: 21px; height: 21px; }
+.home-page .home-choice-action-copy { display: grid; flex: 1; gap: 3px; min-width: 0; }
+.home-page .home-choice-action-copy strong { font-size: 15px; line-height: 1.2; }
+.home-page .home-choice-action-copy small { color: #b9c8da; font-size: 12px; line-height: 1.35; }
+.home-page .home-search-choice-actions a:first-child small { color: #273d6b; }
+.home-page .home-choice-arrow { flex: 0 0 auto; font-size: 22px; line-height: 1; }
+.home-page .home-search-choice :focus-visible { outline: 3px solid #f2f5ff; outline-offset: 3px; }
+.home-page .home-choice-company h2:focus { outline: none; }
+@keyframes home-choice-enter { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
 .home-page .home-final-button {
   display: inline-flex;
   align-items: center;
@@ -387,6 +411,8 @@ html[data-theme="dark"] .home-page .home-signin .auth-controls a { background: #
   .home-page .home-hero-intro { font-size: 16px; }
   .home-page .home-hero-actions { margin-top: 27px; }
   .home-page .home-search-area { width: 100%; }
+  .home-page .home-search-choice { padding: 26px 20px 20px; border-radius: 20px; }
+  .home-page .home-choice-close { top: 16px; right: 16px; }
   .home-page .home-secondary-cta { display: flex; justify-content: center; }
   .home-page .home-hero-note { margin-top: 12px; text-align: center; }
   .home-page .home-preview { border-radius: 18px; }

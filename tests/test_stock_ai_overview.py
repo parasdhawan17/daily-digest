@@ -83,6 +83,8 @@ class EvidenceTests(unittest.TestCase):
         prompt = overview._prompt("IN:EXAMPLE", overview.build_evidence(core_data()))
         self.assertIn("historical actuals", prompt)
         self.assertIn("future-dated", prompt)
+        self.assertIn("summary.heading as the overall takeaway", prompt)
+        self.assertIn('Avoid "Overview"', prompt)
 
 
 class GenerationTests(unittest.TestCase):

@@ -116,20 +116,58 @@
     return null;
   }
 
-  function renderRange(core, price) {
+  function allTimeHighFromHistory(data) {
+    let high = null;
+    const datasets = data && Array.isArray(data.datasets) ? data.datasets : [];
+    for (const dataset of datasets) {
+      if (!dataset || !Array.isArray(dataset.values)) continue;
+      const metric = String(dataset.metric || '').trim().toLowerCase();
+      const label = String(dataset.label || '').trim().toLowerCase();
+      if (metric !== 'price' && !label.startsWith('price')) continue;
+      for (const row of dataset.values) {
+        const value = Array.isArray(row) ? number(row[1]) : null;
+        if (value !== null && (high === null || value > high)) high = value;
+      }
+    }
+    return high;
+  }
+
+  function renderRange(core, price, allTimeHigh = null) {
     const card = $('range-card');
     const low = number(core.year_low), high = number(core.year_high);
-    if (low === null || high === null || high <= low || price === null) { card.hidden = true; return; }
-    const position = Math.max(0, Math.min(100, (price - low) / (high - low) * 100));
+    const hasRange = low !== null && high !== null && high > low && price !== null;
+    if (!hasRange) { card.hidden = true; return; }
+    const ceiling = Math.max(high, allTimeHigh ?? high, price);
+    const position = value => Math.max(0, Math.min(100, (value - low) / (ceiling - low) * 100));
     const head = node('div', 'ai-range-head');
-    head.append(node('strong', '', '52-week price range'), node('span', '', 'Current position ' + Math.round(position) + '% of range'));
+    head.append(node('strong', '', 'Price range'), node('span', '', 'Current position ' + Math.round(position(price)) + '% of range'));
+    const plot = node('div', 'ai-range-plot');
     const track = node('div', 'ai-range-track');
-    const marker = node('span', 'ai-range-marker');
-    marker.style.left = position + '%';
-    track.append(marker);
+    const currentPoint = node('span', 'ai-range-marker');
+    currentPoint.style.left = position(price) + '%';
+    currentPoint.setAttribute('title', 'Current price ' + money(price));
+    const yearPoint = node('span', 'ai-range-point ai-range-year-point');
+    yearPoint.style.left = position(high) + '%';
+    yearPoint.setAttribute('title', '52-week high ' + money(high));
+    track.append(yearPoint);
+    if (allTimeHigh !== null) {
+      const athPoint = node('span', 'ai-range-point ai-range-ath-point');
+      athPoint.style.left = position(ceiling) + '%';
+      athPoint.setAttribute('title', 'All-time high ' + money(ceiling));
+      track.append(athPoint);
+    }
+    track.append(currentPoint);
     const labels = node('div', 'ai-range-labels');
-    labels.append(node('span', '', money(low) + ' low'), node('span', '', money(high) + ' high'));
-    card.replaceChildren(head, track, labels);
+    if (allTimeHigh === null) labels.classList.add('without-ath');
+    const landmark = (className, value, caption) => {
+      const label = node('span', className);
+      label.append(node('strong', '', money(value)), node('small', '', caption));
+      return label;
+    };
+    labels.append(landmark('ai-range-low-label', low, '52-week low'), landmark('ai-range-year-label', high, '52-week high'));
+    if (allTimeHigh !== null) labels.append(landmark('ai-range-ath-label', ceiling, 'All-time high'));
+    plot.append(track, labels);
+    card.replaceChildren(head, plot);
     card.hidden = false;
   }
 
@@ -144,7 +182,8 @@
     $('company-symbol').textContent = symbol.slice(3);
     $('company-industry').textContent = core.industry || 'Indian equity';
     $('company-price').textContent = price === null ? '—' : money(price);
-    $('price-meta').textContent = exchange ? exchange + ' · Market data may be delayed' : 'Price unavailable';
+    const sourceTime = core.source_time || (response.fetched_at ? dateTime(response.fetched_at) : 'Time unavailable');
+    $('price-meta').textContent = (exchange || 'Price unavailable') + ' · As of ' + sourceTime;
     document.title = name + ' AI Overview — Tickr Digest';
     const change = $('company-change');
     change.hidden = !present(core.change_percent);
@@ -169,7 +208,6 @@
     }
     if (!grid.children.length) grid.append(node('p', 'ai-empty', 'No comparable market or financial measures are available for this company.'));
     renderRange(core, price);
-    $('data-freshness').textContent = 'IndianAPI · ' + (core.source_time || 'Retrieved ' + dateTime(response.fetched_at));
     $('page-status').hidden = true;
     $('overview-content').hidden = false;
   }
@@ -188,21 +226,17 @@
     return wrap;
   }
 
-  function signal(item, sources, onSelect) {
+  function signal(item, sources) {
     const tone = Object.hasOwn(tones, item.tone) ? item.tone : 'neutral';
     const card = node('article', 'ai-signal ' + tone);
-    const button = node('button', 'ai-signal-select');
-    button.type = 'button';
-    button.setAttribute('aria-label', 'Read ' + (item.heading || 'company signal') + ', ' + tones[tone].toLowerCase() + ' insight');
-    button.setAttribute('aria-pressed', 'false');
     const head = node('span', 'ai-signal-head');
     head.append(node('span', 'ai-signal-title', item.heading || 'Company signal'), node('span', 'ai-tone', tones[tone]));
-    button.append(robotFace(tone), head);
-    button.addEventListener('click', onSelect);
+    const title = node('div', 'ai-signal-heading');
+    title.append(robotFace(tone), head);
     const body = node('p', '', item.text || '');
     body.append(citations(item.evidence_ids, sources));
-    card.append(button, body);
-    return {card, button};
+    card.append(title, body);
+    return card;
   }
 
   function renderAI(response) {
@@ -214,49 +248,42 @@
     summaryBody.append(citations(data.summary.evidence_ids, sources));
     const summaryCopy = node('div', 'ai-summary-copy');
     summaryCopy.append(node('span', 'ai-summary-label', '✦ The AI take'), node('h2', '', data.summary.heading || 'Company perspective'), summaryBody);
-    summary.replaceChildren(summaryCopy);
+    const guide = $('ai-robot-guide'), guideFace = $('ai-robot-guide-face');
+    const reading = $('ai-robot-reading'), toneLabel = $('ai-robot-tone');
+    const summaryTone = Object.hasOwn(tones, data.summary.tone) ? data.summary.tone : 'neutral';
+    guide.dataset.tone = summaryTone;
+    guideFace.replaceChildren(robotFace(summaryTone, true));
+    reading.textContent = data.summary.heading || 'Company perspective';
+    toneLabel.textContent = ({positive: 'Encouraging evidence', negative: 'Needs attention',
+      caution: 'Mixed or uncertain', neutral: 'Monitoring point'})[summaryTone];
+    summary.replaceChildren(summaryCopy, guide);
 
     const container = $('ai-categories');
     container.replaceChildren();
-    const guide = $('ai-robot-guide'), guideFace = $('ai-robot-guide-face');
-    const reading = $('ai-robot-reading'), toneLabel = $('ai-robot-tone');
-    const selectable = [];
-    function selectInsight(selectedIndex) {
-      selectable.forEach(({card, button}, index) => {
-        card.classList.toggle('is-selected', index === selectedIndex);
-        button.setAttribute('aria-pressed', String(index === selectedIndex));
-      });
-      const item = selectable[selectedIndex]?.item;
-      const tone = item && Object.hasOwn(tones, item.tone) ? item.tone : 'neutral';
-      guide.dataset.tone = tone;
-      guideFace.replaceChildren(robotFace(tone, true));
-      reading.textContent = item ? item.heading || 'Company signal' : 'No supported signal yet';
-      toneLabel.textContent = item ? ({positive: 'Encouraging evidence', negative: 'Needs attention',
-        caution: 'Mixed or uncertain', neutral: 'Monitoring point'})[tone] : 'Awaiting evidence';
-    }
     let total = 0;
+    let visibleAreas = 0;
     categories.forEach(([key, label]) => {
       const items = Array.isArray(data[key]) ? data[key] : [];
+      if (!items.length) return;
       total += items.length;
+      visibleAreas++;
       const group = node('section', 'ai-category');
       const heading = node('h3', '', label);
       heading.append(node('span', 'ai-category-count', String(items.length)));
       group.append(heading);
-      if (items.length) {
-        const list = node('ul');
-        items.forEach(item => {
-          const row = node('li'), index = selectable.length;
-          const insight = signal(item, sources, () => selectInsight(index));
-          selectable.push({...insight, item});
-          row.append(insight.card);
-          list.append(row);
-        });
-        group.append(list);
-      } else group.append(node('p', 'ai-empty', 'No supported insight in the available evidence.'));
+      const list = node('ul');
+      items.forEach(item => {
+        const row = node('li');
+        row.append(signal(item, sources));
+        list.append(row);
+      });
+      group.append(list);
       container.append(group);
     });
-    $('ai-signal-count').textContent = total + ' supported ' + (total === 1 ? 'signal' : 'signals') + ' across ' + categories.length + ' areas';
-    selectInsight(0);
+    container.hidden = visibleAreas === 0;
+    $('ai-signal-count').textContent = visibleAreas
+      ? total + ' supported ' + (total === 1 ? 'signal' : 'signals') + ' across ' + visibleAreas + ' ' + (visibleAreas === 1 ? 'area' : 'areas')
+      : 'No supported signals in the available evidence.';
 
     const sourceList = $('sources-list');
     sourceList.replaceChildren();
@@ -279,13 +306,27 @@
     status.textContent = 'Gathering company evidence…';
     status.hidden = false;
     try {
-      renderCore(await request('/api/stock-data?' + new URLSearchParams({symbol, section: 'core'})));
+      const response = await request('/api/stock-data?' + new URLSearchParams({symbol, section: 'core'}));
+      renderCore(response);
+      loadAllTimeHigh(response.data);
     } catch (error) {
       const retry = node('button', '', 'Try again');
       retry.type = 'button';
       retry.addEventListener('click', loadCore);
       status.replaceChildren(node('span', '', errorMessage(error, 'Company data is unavailable.')), retry);
     }
+  }
+
+  async function loadAllTimeHigh(core) {
+    try {
+      const response = await request('/api/stock-data?' + new URLSearchParams({symbol, section: 'history', period: 'max', filter: 'price'}));
+      const high = allTimeHighFromHistory(response.data);
+      if (high !== null) {
+        const prices = core.prices || {};
+        const price = number(prices.NSE) ?? number(prices.BSE);
+        renderRange(core, price, Math.max(high, number(core.year_high) ?? high, price ?? high));
+      }
+    } catch (error) { /* The 52-week range remains available if history is unavailable. */ }
   }
 
   async function loadAI() {

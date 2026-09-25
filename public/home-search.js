@@ -9,11 +9,12 @@
   const list = area.querySelector('ul');
   const status = area.querySelector('[role="status"]');
   const preview = area.querySelector('.fx-typewriter');
-  const choice = area.querySelector('.home-search-choice');
+  const choice = document.querySelector('.home-search-choice');
   const choiceTitle = choice.querySelector('#home-choice-title');
   const choiceSymbol = choice.querySelector('#home-choice-symbol');
   const choiceAI = choice.querySelector('#home-choice-ai');
   const choiceDetails = choice.querySelector('#home-choice-details');
+  const choiceClose = choice.querySelector('.home-choice-close');
   const validSymbol = /^IN:[A-Z][A-Z0-9&-]{0,19}$/;
   let timer;
   let controller;
@@ -56,8 +57,8 @@
     choiceSymbol.textContent = item.symbol.slice(3) + ' · Indian equity';
     choiceAI.href = '/ai-overview/' + encoded;
     choiceDetails.href = '/stocks/' + encoded;
-    choice.hidden = false;
-    choiceAI.focus();
+    choice.showModal();
+    choiceTitle.focus();
   }
 
   function select(index) {
@@ -94,7 +95,7 @@
     list.replaceChildren();
     close();
     selected = null;
-    choice.hidden = true;
+    if (choice.open) choice.close();
   }
 
   function render() {
@@ -180,7 +181,7 @@
 
   form.addEventListener('submit', event => {
     event.preventDefault();
-    if (selected) { choiceAI.focus(); return; }
+    if (selected) { choice.showModal(); choiceTitle.focus(); return; }
     if (active >= 0) return choose(items[active]);
     if (items.length) {
       const exact = items.find(item => item.symbol.slice(3) === input.value.trim().toUpperCase());
@@ -201,6 +202,15 @@
   document.addEventListener('pointerdown', event => {
     if (!area.contains(event.target)) close();
   });
+
+  choiceClose.addEventListener('click', () => choice.close());
+  choice.addEventListener('click', event => {
+    if (event.target !== choice) return;
+    const bounds = choice.getBoundingClientRect();
+    if (event.clientX < bounds.left || event.clientX > bounds.right ||
+        event.clientY < bounds.top || event.clientY > bounds.bottom) choice.close();
+  });
+  choice.addEventListener('close', () => input.focus());
 
   document.querySelectorAll('a[href="#home-stock-query"]').forEach(link => {
     link.addEventListener('click', event => {
