@@ -9,7 +9,6 @@
   const stockUrl = '/stocks/' + encodeURIComponent(symbol).replace('%3A', ':');
   const sections = new Set(['overview', 'financials', 'ownership', 'analysis', 'actions', 'news']);
   const categories = [
-    ['financials', 'Financial overview'],
     ['encouraging', 'What looks encouraging'],
     ['attention', 'What needs attention'],
     ['changes', 'What changed recently'],
@@ -18,8 +17,6 @@
     ['watch_next', 'What to watch next'],
   ];
   const tones = {positive: 'Positive', negative: 'Negative', caution: 'Watch', neutral: 'Neutral'};
-  let coreData = null;
-  let refreshFinancialOverview = () => {};
 
   function node(tag, className, value) {
     const element = document.createElement(tag);
@@ -110,46 +107,13 @@
     return card;
   }
 
-  function renderFinancialOverview(panel) {
-    const health = coreData && coreData.health;
-    const groups = health && Array.isArray(health.groups) ? health.groups.filter(group => Array.isArray(group.metrics) && group.metrics.length) : [];
-    if (!coreData) {
-      panel.replaceChildren(node('p', 'ai-empty', 'Loading reported financials…'));
-      return;
-    }
-    if (!groups.length) {
-      panel.replaceChildren(node('p', 'ai-empty', 'No reported financial overview is available for this company.'));
-      return;
-    }
-    const intro = node('div', 'ai-financial-intro');
-    intro.append(node('div', '', 'Reported fundamentals'), node('span', '', [health.period, health.end_date].filter(Boolean).join(' · ')));
-    const grid = node('div', 'ai-financial-grid');
-    for (const group of groups) {
-      const card = node('section', 'ai-financial-group');
-      card.append(node('h3', '', group.title || 'Financial measures'));
-      const metrics = node('dl', 'ai-financial-metrics');
-      for (const entry of group.metrics) {
-        const row = node('div', 'ai-financial-metric');
-        const label = node('dt', '', entry.label || 'Metric');
-        if (entry.period && entry.period !== health.period) label.append(node('small', '', entry.period));
-        const value = node('dd');
-        if (entry.sparkline) {
-          const sparkline = svgNode('svg', {class: 'ai-financial-sparkline', viewBox: '0 0 64 24', 'aria-hidden': 'true'});
-          sparkline.append(svgNode('polyline', {points: entry.sparkline, fill: 'none', stroke: 'currentColor', 'stroke-width': '1.8', 'stroke-linecap': 'round', 'stroke-linejoin': 'round'}));
-          value.append(sparkline);
-        }
-        const unit = entry.unit || '';
-        const display = entry.display || (present(entry.value) ? fmt(entry.value) : '—');
-        value.append(node('strong', 'ai-financial-value tone-' + (entry.value_tone || 'neutral'), display + (unit ? ' ' + unit : '')));
-        if (entry.change_label) value.append(node('small', 'ai-financial-change tone-' + (entry.change_tone || 'neutral'), entry.change_label));
-        row.append(label, value);
-        metrics.append(row);
+  function healthMetric(core, pattern) {
+    for (const group of (core.health && core.health.groups) || []) {
+      for (const entry of group.metrics || []) {
+        if (pattern.test(entry.label || '') && present(entry.value)) return entry;
       }
-      card.append(metrics);
-      grid.append(card);
     }
-    const footnote = node('p', 'ai-financial-footnote', [health.end_date ? 'Year ended ' + health.end_date : '', 'Changes vs prior FY where available', health.note || ''].filter(Boolean).join(' · '));
-    panel.replaceChildren(intro, grid, footnote);
+    return null;
   }
 
   function renderRange(core, price) {
@@ -172,7 +136,6 @@
   function renderCore(response) {
     const core = response.data;
     if (!core || typeof core !== 'object') throw new Error('Company data is unavailable.');
-    coreData = core;
     const name = core.name || symbol.slice(3);
     const prices = core.prices || {};
     const exchange = present(prices.NSE) ? 'NSE' : present(prices.BSE) ? 'BSE' : '';
@@ -197,12 +160,18 @@
     if (present(snapshot.pPerEBasicExcludingExtraordinaryItemsTTM)) grid.append(metric('P/E ratio', fmt(snapshot.pPerEBasicExcludingExtraordinaryItemsTTM) + '×', 'Trailing 12 months'));
     if (present(snapshot.sectorPriceToEarningsValueRatio)) grid.append(metric('Sector P/E', fmt(snapshot.sectorPriceToEarningsValueRatio) + '×', 'Provider-reported'));
     if (present(snapshot.priceYTDPricePercentChange)) grid.append(metric('Year-to-date return', pct(snapshot.priceYTDPricePercentChange), 'Price return'));
-    if (!grid.children.length) grid.append(node('p', 'ai-empty', 'No comparable market measures are available for this company.'));
+    const revenue = healthMetric(core, /^(revenue|sales|total income)$/i);
+    const profit = healthMetric(core, /^(net (income|profit)|profit after tax)$/i);
+    for (const entry of [revenue, profit]) {
+      if (!entry) continue;
+      const value = (entry.unit || '').trim() === '₹ cr' ? '₹' + fmt(entry.value) + ' cr' : fmt(entry.value) + (entry.unit ? ' ' + entry.unit : '');
+      grid.append(metric(entry.label, value, [entry.period, entry.change_label].filter(Boolean).join(' · ') || 'Reported actual'));
+    }
+    if (!grid.children.length) grid.append(node('p', 'ai-empty', 'No comparable market or financial measures are available for this company.'));
     renderRange(core, price);
     $('data-freshness').textContent = 'IndianAPI · ' + (core.source_time || 'Retrieved ' + dateTime(response.fetched_at));
     $('page-status').hidden = true;
     $('overview-content').hidden = false;
-    refreshFinancialOverview();
   }
 
   function citations(ids, sources) {
@@ -270,15 +239,6 @@
         tab.tabIndex = position === index ? 0 : -1;
       });
       panel.setAttribute('aria-labelledby', tabs[index].id);
-      guide.hidden = key === 'financials';
-      panel.classList.toggle('is-financial', key === 'financials');
-      if (key === 'financials') {
-        refreshFinancialOverview = () => renderFinancialOverview(panel);
-        refreshFinancialOverview();
-        if (focus) tabs[index].focus();
-        return;
-      }
-      refreshFinancialOverview = () => {};
       const list = node('ul');
       const selectable = [];
       for (const item of items) {
@@ -307,7 +267,7 @@
       tab.id = 'ai-tab-' + key;
       tab.setAttribute('role', 'tab');
       tab.setAttribute('aria-controls', 'ai-active-panel');
-      if (key !== 'financials') tab.append(node('span', 'ai-category-count', String(items.length)));
+      tab.append(node('span', 'ai-category-count', String(items.length)));
       tab.addEventListener('click', () => activate(index, false));
       tab.addEventListener('keydown', event => {
         let next = index;
@@ -320,7 +280,7 @@
       tabs.push(tab);
       container.append(tab);
     });
-    activate(0, false);
+    activate(Math.max(0, categories.findIndex(([key]) => Array.isArray(data[key]) && data[key].length)), false);
 
     const sourceList = $('sources-list');
     sourceList.replaceChildren();

@@ -7,9 +7,9 @@
   <meta name="color-scheme" content="light dark">
   <script>(function(){try{var t=localStorage.getItem('daily-digest-theme');if(t!=='light'&&t!=='dark')t=matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light';document.documentElement.dataset.theme=t;document.documentElement.style.colorScheme=t;}catch(e){}})();</script>
   <link rel="stylesheet" href="/landing.css">
-  <link rel="stylesheet" href="/ai-overview.css?v=20260925-financial-synthesis">
+  <link rel="stylesheet" href="/ai-overview.css?v=20260925-signal-colors">
   <script src="/stock-format.js" defer></script>
-  <script src="/ai-overview.js?v=20260925-financial-synthesis" defer></script>
+  <script src="/ai-overview.js?v=20260925-no-signal-map" defer></script>
 </head>
 <body class="ai-overview-page" data-symbol="{{ symbol }}">
 <a class="skip-link" href="#overview-main">Skip to AI overview</a>
@@ -22,8 +22,8 @@
   <div id="page-status" class="ai-page-status" role="status">{{ error or 'Gathering company evidence…' }}</div>
   <div id="overview-content" hidden>
     <header class="ai-company-bar"><div><p class="ai-kicker"><span aria-hidden="true">✦</span> AI overview <span class="ai-live-dot" aria-hidden="true"></span> Indian equities</p><h1 id="company-name"></h1><p class="ai-company-meta"><span id="company-symbol"></span><span id="company-industry"></span></p></div><div class="ai-company-price"><span>Latest available price</span><strong id="company-price">—</strong><span id="company-change" class="ai-change" hidden></span><small id="price-meta">Market data may be delayed</small></div></header>
-    <section class="ai-metrics-section" aria-labelledby="metrics-title"><div class="ai-metrics-heading"><h2 id="metrics-title">Market facts</h2><span id="data-freshness"></span></div><div id="metrics-grid" class="ai-metrics-grid"></div><div id="range-card" class="ai-range-card" hidden></div></section>
     <section class="ai-dashboard" id="ai-insights" aria-label="AI company perspective"><div id="ai-status" class="ai-loading" role="status" aria-live="polite">Connecting the evidence…</div><div id="ai-content" hidden><article id="ai-summary" class="ai-summary"></article><div class="ai-insight-explorer"><div class="ai-insight-heading"><div class="ai-insight-intro"><p class="ai-kicker">Explore the synthesis</p><h2>Signals and what to watch</h2><span id="ai-generated"></span></div><aside id="ai-robot-guide" class="ai-robot-guide" aria-label="Selected AI insight"><div id="ai-robot-guide-face" class="ai-robot-guide-face"></div><div class="ai-robot-guide-copy"><span class="ai-robot-eyebrow">Selected signal</span><strong id="ai-robot-reading" class="ai-robot-reading" aria-live="polite"></strong><span id="ai-robot-tone" class="ai-robot-tone"></span></div></aside></div><div id="ai-categories" class="ai-categories" role="tablist" aria-label="AI insight categories"></div><div id="ai-active-panel" class="ai-active-panel" role="tabpanel" tabindex="0"></div></div></div></section>
+    <section class="ai-metrics-section" aria-labelledby="metrics-title"><div class="ai-metrics-heading"><h2 id="metrics-title">Market facts</h2><span id="data-freshness"></span></div><div id="metrics-grid" class="ai-metrics-grid"></div><div id="range-card" class="ai-range-card" hidden></div></section>
     <div class="ai-bottom-row"><details id="ai-sources" class="ai-sources"><summary>Evidence and freshness <span aria-hidden="true">↗</span></summary><ol id="sources-list"></ol><p id="ai-coverage"></p></details><a id="footer-stock-details" href="/">Full stock details <span aria-hidden="true">↗</span></a></div>
     <p class="ai-disclaimer">AI-generated synthesis · Not investment advice · Coverage may be incomplete or delayed.</p>
   </div>

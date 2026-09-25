@@ -108,18 +108,14 @@ test('renders available metrics and links AI citations to stock evidence', async
   assert.match(app.calls[0], /^\/api\/stock-data\?symbol=IN%3AEXAMPLE&section=core$/);
   assert.match(app.calls[1], /^\/api\/stock-ai\?symbol=IN%3AEXAMPLE&schema=2$/);
   assert.equal(e['company-name'].textContent, 'Example Ltd');
-  assert.equal(e['metrics-grid'].children.length, 2);
+  assert.equal(e['metrics-grid'].children.length, 3);
   assert.equal(e['range-card'].hidden, false);
   assert.equal(e['ai-content'].hidden, false);
   assert.equal(e['nav-stock-details'].href, '/stocks/IN:EXAMPLE');
   assert.equal(e['ai-summary'].children[0].children[2].children[0].children[0].href, '/stocks/IN:EXAMPLE#financials');
   assert.equal(e['ai-summary'].children.length, 1);
-  assert.equal(e['ai-categories'].children.length, 7);
-  assert.equal(e['ai-categories'].children[0].textContent, 'Financial overview');
-  assert.match(e['ai-active-panel'].textContent, /Reported fundamentals/);
-  assert.match(e['ai-active-panel'].textContent, /Revenue/);
-  assert.match(e['ai-active-panel'].textContent, /900 ₹ cr/);
-  assert.equal(e['ai-robot-guide'].hidden, true);
+  assert.equal(e['ai-categories'].children.length, 6);
+  assert.equal(e['ai-robot-guide-face'].children[0].dataset.tone, 'positive');
   assert.equal(e['sources-list'].children[0].children[0].href, '/stocks/IN:EXAMPLE#financials');
   assert.match(e['ai-generated'].textContent, /Generated 25 Sep(?:t)? 2026/);
 });
@@ -129,7 +125,6 @@ test('removes only the color bar card and keeps the signals explorer', () => {
   assert.match(template, /class="ai-insight-heading"[^>]*>[\s\S]*id="ai-robot-guide"[\s\S]*id="ai-categories"/);
   assert.match(template, /<article id="ai-summary" class="ai-summary"><\/article>/);
   assert.match(template, /id="metrics-title">Market facts/);
-  assert.ok(template.indexOf('id="metrics-title"') < template.indexOf('id="ai-insights"'));
 });
 
 test('signal tabs support keyboard navigation and source citations', async () => {
@@ -137,14 +132,14 @@ test('signal tabs support keyboard navigation and source citations', async () =>
   result.data.risks = [{heading: 'Execution risk', text: 'A risk was reported.', tone: 'negative', evidence_ids: ['S1']}];
   const app = await setup(core(), [result]);
   const e = app.elements;
-  e['ai-categories'].children[5].fire('click');
-  assert.equal(e['ai-categories'].children[5].attributes['aria-selected'], 'true');
+  e['ai-categories'].children[4].fire('click');
+  assert.equal(e['ai-categories'].children[4].attributes['aria-selected'], 'true');
   assert.match(e['ai-active-panel'].textContent, /Execution risk/);
   assert.equal(e['ai-robot-guide-face'].children[0].dataset.tone, 'negative');
   assert.equal(e['ai-active-panel'].children[0].children[0].children[0].children[1].children[0].children[0].href, '/stocks/IN:EXAMPLE#financials');
-  e['ai-categories'].children[5].fire('keydown', {key: 'ArrowRight', preventDefault() {}});
-  assert.equal(e['ai-categories'].children[6].attributes['aria-selected'], 'true');
-  assert.equal(e['ai-categories'].children[6].focused, true);
+  e['ai-categories'].children[4].fire('keydown', {key: 'ArrowRight', preventDefault() {}});
+  assert.equal(e['ai-categories'].children[5].attributes['aria-selected'], 'true');
+  assert.equal(e['ai-categories'].children[5].focused, true);
   assert.equal(e['ai-robot-guide-face'].children[0].dataset.tone, 'neutral');
 });
 
@@ -153,7 +148,6 @@ test('selecting a second insight updates the expression', async () => {
   result.data.encouraging.push({heading: 'Mixed outlook', text: 'Evidence is mixed.', tone: 'caution', evidence_ids: ['S1']});
   const app = await setup(core(), [result]);
   const e = app.elements;
-  e['ai-categories'].children[1].fire('click');
   const rows = e['ai-active-panel'].children[0].children;
   const secondButton = rows[1].children[0].children[0];
   let prevented = false;
@@ -179,7 +173,7 @@ test('AI failure preserves factual metrics and retry renders the summary', async
   const app = await setup(core(), [{ok: false, error: 'The AI overview is temporarily unavailable.'}, ai()]);
   const e = app.elements;
   assert.equal(e['overview-content'].hidden, false);
-  assert.equal(e['metrics-grid'].children.length, 2);
+  assert.equal(e['metrics-grid'].children.length, 3);
   assert.equal(e['ai-content'].hidden, true);
   assert.match(e['ai-status'].textContent, /temporarily unavailable/);
   e['ai-status'].children[1].fire('click');
