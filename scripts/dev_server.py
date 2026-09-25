@@ -64,6 +64,10 @@ class DevHandler(BaseHTTPRequestHandler):
             from api.stock import handle_page
             handle_page(self)
             return
+        if path.startswith('/ai-overview/'):
+            from api.ai_overview_page import handle_page
+            handle_page(self)
+            return
         if path == '/api/stock-data':
             from api.stock import handle_data
             handle_data(self)

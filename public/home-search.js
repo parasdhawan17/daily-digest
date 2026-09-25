@@ -9,12 +9,18 @@
   const list = area.querySelector('ul');
   const status = area.querySelector('[role="status"]');
   const preview = area.querySelector('.fx-typewriter');
+  const choice = area.querySelector('.home-search-choice');
+  const choiceTitle = choice.querySelector('#home-choice-title');
+  const choiceSymbol = choice.querySelector('#home-choice-symbol');
+  const choiceAI = choice.querySelector('#home-choice-ai');
+  const choiceDetails = choice.querySelector('#home-choice-details');
   const validSymbol = /^IN:[A-Z][A-Z0-9&-]{0,19}$/;
   let timer;
   let controller;
   let requestId = 0;
   let items = [];
   let active = -1;
+  let selected = null;
 
   if (preview) {
     const examples = ['TCS', 'RELIANCE', 'INFY', 'HDFCBANK'];
@@ -39,10 +45,19 @@
     showExample();
   }
 
-  function navigate(item) {
-    if (item && validSymbol.test(item.symbol)) {
-      window.location.assign('/stocks/' + encodeURIComponent(item.symbol).replace('%3A', ':'));
-    }
+  function choose(item) {
+    if (!item || !validSymbol.test(item.symbol)) return;
+    reset();
+    selected = item;
+    const encoded = encodeURIComponent(item.symbol).replace('%3A', ':');
+    input.value = item.name || item.symbol.slice(3);
+    area.classList.add('has-query');
+    choiceTitle.textContent = item.name || item.symbol.slice(3);
+    choiceSymbol.textContent = item.symbol.slice(3) + ' · Indian equity';
+    choiceAI.href = '/ai-overview/' + encoded;
+    choiceDetails.href = '/stocks/' + encoded;
+    choice.hidden = false;
+    choiceAI.focus();
   }
 
   function select(index) {
@@ -78,6 +93,8 @@
     items = [];
     list.replaceChildren();
     close();
+    selected = null;
+    choice.hidden = true;
   }
 
   function render() {
@@ -93,10 +110,10 @@
       option.setAttribute('aria-selected', 'false');
       name.textContent = item.name || item.symbol.slice(3);
       symbol.textContent = item.symbol.slice(3);
-      badge.textContent = 'India ↗';
+      badge.textContent = 'Choose ↗';
       identity.append(name, symbol);
       option.append(identity, badge);
-      option.addEventListener('click', () => navigate(item));
+      option.addEventListener('click', () => choose(item));
       list.append(option);
     });
     select(-1);
@@ -116,14 +133,13 @@
       if (openExactMatch && items.length) {
         const exact = items.find(item => item.symbol.slice(3) === query.toUpperCase());
         if (exact || items.length === 1) {
-          navigate(exact || items[0]);
+          choose(exact || items[0]);
           return;
         }
       }
       show(items.length
-        ? items.length + (items.length === 1 ? ' company found' : ' companies found') + ' · Use ↑ ↓ and Enter to open'
+        ? items.length + (items.length === 1 ? ' company found' : ' companies found') + ' · Use ↑ ↓ and Enter to choose'
         : 'No companies found. Try another name or ticker.');
-      if (openExactMatch && items.length) select(0);
     } catch (error) {
       if (error.name !== 'AbortError' && id === requestId) {
         show(error.message || 'Search is unavailable. Please try again.');
@@ -144,7 +160,7 @@
   });
 
   input.addEventListener('focus', () => {
-    if (input.value.trim() && items.length) {
+    if (!selected && input.value.trim() && items.length) {
       popover.hidden = false;
       input.setAttribute('aria-expanded', 'true');
     }
@@ -164,10 +180,13 @@
 
   form.addEventListener('submit', event => {
     event.preventDefault();
-    if (active >= 0) return navigate(items[active]);
+    if (selected) { choiceAI.focus(); return; }
+    if (active >= 0) return choose(items[active]);
     if (items.length) {
       const exact = items.find(item => item.symbol.slice(3) === input.value.trim().toUpperCase());
-      return navigate(exact || items[0]);
+      if (exact || items.length === 1) return choose(exact || items[0]);
+      show('Choose a company from the results to continue.');
+      return;
     }
     const query = input.value.trim();
     if (!query) {
@@ -180,7 +199,7 @@
   });
 
   document.addEventListener('pointerdown', event => {
-    if (!area.contains(event.target)) reset();
+    if (!area.contains(event.target)) close();
   });
 
   document.querySelectorAll('a[href="#home-stock-query"]').forEach(link => {

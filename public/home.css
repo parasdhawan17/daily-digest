@@ -186,6 +186,21 @@
 .home-page .home-search-popover li strong { display: block; font-size: 13px; font-weight: 650; }
 .home-page .home-search-popover li small { display: block; margin-top: 2px; color: #a9b7c6; font-size: 11px; }
 .home-page .home-search-popover li > span:last-child { flex: 0 0 auto; color: #b6c4ff; font-size: 11px; font-weight: 700; }
+.home-page .home-search-choice { margin-top: 12px; padding: 18px; border: 1px solid rgba(142,162,255,.36); border-radius: 18px; background: linear-gradient(135deg,#182a43,#111e31); box-shadow: 0 18px 40px #02081255; color: #f3f7fa; animation: home-choice-enter .32s ease-out both; }
+.home-page .home-search-choice[hidden] { display: none; }
+.home-page .home-search-choice-heading { display: flex; align-items: center; gap: 12px; }
+.home-page .home-search-choice-mark { display: grid; place-items: center; flex: 0 0 40px; height: 40px; border-radius: 12px; background: #8ea2ff24; color: #b3c0ff; font-size: 23px; }
+.home-page .home-search-choice-heading p { margin: 0 0 3px; color: #aabaff; font-size: 10px; font-weight: 750; letter-spacing: .13em; text-transform: uppercase; }
+.home-page .home-search-choice h2 { margin: 0; color: #fff; font-size: 18px; letter-spacing: -.02em; }
+.home-page .home-search-choice-heading span:last-child { display: block; margin-top: 2px; color: #a9b7c6; font-size: 11px; }
+.home-page .home-search-choice > p { margin: 16px 0 10px; color: #c2cfdd; font-size: 12px; }
+.home-page .home-search-choice-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.home-page .home-search-choice-actions a { display: inline-flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 43px; padding: 9px 13px; border: 1px solid #6c83a5; border-radius: 10px; color: #f3f7fa; font-size: 12px; font-weight: 700; text-decoration: none; }
+.home-page .home-search-choice-actions a:first-child { border-color: #aabaff; background: #8ea2ff; color: #0b1420; }
+.home-page .home-search-choice-actions a:hover { background: #8ea2ff35; }
+.home-page .home-search-choice-actions a:first-child:hover { background: #b3c0ff; }
+.home-page .home-search-choice-actions a:focus-visible { outline: 3px solid #c5d0ff; outline-offset: 3px; }
+@keyframes home-choice-enter { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
 .home-page .home-final-button {
   display: inline-flex;
   align-items: center;
@@ -397,6 +412,7 @@ html[data-theme="dark"] .home-page .home-signin .auth-controls a { background: #
   .home-page .watchlist-preview { padding: 20px; }
 }
 @media (prefers-reduced-motion: reduce) {
+  .home-page .home-search-choice { animation: none; }
   .home-page .home-search-area.has-search-preview .fx-typewriter { animation: none; border-color: transparent; }
   .home-page .home-feature, .home-page .home-search-form, .home-page .home-search-form button, .home-page .home-final-button { transition: none; }
   .home-page .home-feature:hover, .home-page .home-search-form button:hover, .home-page .home-final-button:hover { transform: none; }

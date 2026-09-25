@@ -7,6 +7,7 @@
   "rewrites": [
     {"source": "/onboarding", "destination": "/onboarding.html"},
     {"source": "/stocks/:symbol", "destination": "/api/index?route=stock&symbol=:symbol"},
+    {"source": "/ai-overview/:symbol", "destination": "/api/index?route=ai-overview-page&symbol=:symbol"},
     {"source": "/api/stock-data", "destination": "/api/index?route=stock-data"},
     {"source": "/api/stock-ai", "destination": "/api/index?route=stock-ai"},
     {

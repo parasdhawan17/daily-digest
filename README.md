@@ -28,8 +28,9 @@ Bare symbols from existing subscribers (e.g. `AAPL`) are normalized to `US:AAPL`
 
 ## Stock research
 
-Use **Search a stock** on the homepage or digest to open a public company page,
-such as `/stocks/IN:TCS`. No sign-in is required. Pages use the existing light/dark
+Use the homepage search to choose between a visual AI overview at
+`/ai-overview/IN:TCS` and full company details at `/stocks/IN:TCS`.
+**Search a stock** on the digest still opens the full company page. No sign-in is required. Pages use the existing light/dark
 theme and contain Overview, Financials, Ownership, Analysis, Corporate actions,
 and News tabs. Indian tickers in the digest and resolved peers link to these pages.
 
