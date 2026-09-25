@@ -96,11 +96,11 @@ html[data-theme=dark] .ai-overview-page {
 .ai-robot-eye { fill: #fff; transform-box: fill-box; transform-origin: center; animation: ai-robot-blink 6s infinite; }
 .ai-insight-explorer { overflow: hidden; border: 1px solid #7b92f855; border-radius: 18px; background: var(--ai-surface); box-shadow: 0 12px 32px #24488b0d; animation: ai-rise .55s .15s ease-out both; }
 .ai-insight-body { padding: 18px 20px 16px; background: linear-gradient(135deg, color-mix(in srgb, var(--ai-blue) 7%, var(--ai-surface)), var(--ai-surface) 44%); }
-.ai-insight-heading, .ai-categories, .ai-active-panel { position: relative; z-index: 1; }
-.ai-insight-heading { display: flex; justify-content: space-between; align-items: end; gap: 20px; }
+.ai-insight-heading, .ai-categories { position: relative; z-index: 1; }
+.ai-insight-heading { display: grid; grid-template-columns: minmax(0, 1fr) minmax(280px, 360px); align-items: center; gap: 20px; }
 .ai-insight-heading h2 { margin: 7px 0 6px; color: var(--ai-ink); font-size: clamp(20px, 2.1vw, 27px); letter-spacing: -.035em; }
 .ai-insight-intro > span { color: var(--ai-muted); font-size: 10px; }
-.ai-signal-count { margin: 0 0 5px; color: var(--ai-muted); font-size: 11px; font-weight: 700; text-align: right; }
+.ai-signal-count { margin: 8px 0 0; color: var(--ai-muted); font-size: 11px; font-weight: 700; }
 .ai-categories { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 16px; padding-top: 15px; border-top: 1px solid var(--ai-border); }
 .ai-category { min-width: 0; padding: 13px; border: 1px solid var(--ai-border); border-radius: 12px; background: color-mix(in srgb, var(--ai-bg) 72%, var(--ai-surface)); }
 .ai-category h3 { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin: 0 0 11px; color: var(--ai-ink); font-size: 14px; }
@@ -111,13 +111,15 @@ html[data-theme=dark] .ai-overview-page {
 .ai-signal.positive { --signal-color: var(--ai-green); border-color: color-mix(in srgb, var(--signal-color) 48%, var(--ai-border)); border-left-color: var(--signal-color); background: linear-gradient(120deg, color-mix(in srgb, var(--signal-color) 19%, var(--ai-surface)), color-mix(in srgb, var(--signal-color) 8%, var(--ai-surface))); }
 .ai-signal.negative { --signal-color: var(--ai-red); border-color: color-mix(in srgb, var(--signal-color) 48%, var(--ai-border)); border-left-color: var(--signal-color); background: linear-gradient(120deg, color-mix(in srgb, var(--signal-color) 19%, var(--ai-surface)), color-mix(in srgb, var(--signal-color) 8%, var(--ai-surface))); }
 .ai-signal.caution { --signal-color: var(--ai-amber); }
+.ai-signal.is-selected { border-color: color-mix(in srgb, var(--signal-color) 65%, var(--ai-border)); border-left-color: var(--signal-color); box-shadow: 0 8px 20px color-mix(in srgb, var(--signal-color) 20%, transparent); }
+.ai-signal-select { display: flex; align-items: center; gap: 7px; width: 100%; margin: 0; padding: 0; border: 0; background: transparent; color: inherit; cursor: pointer; text-align: left; }
 .ai-signal-head { display: flex; align-items: baseline; justify-content: space-between; flex: 1; gap: 10px; min-width: 0; }
 .ai-signal-title { color: var(--ai-ink); font-size: 13px; font-weight: 750; line-height: 1.3; }
 .ai-tone { color: var(--ai-violet); font-size: 9px; font-weight: 800; text-transform: uppercase; }
 .ai-signal.positive .ai-tone { color: var(--ai-green); }
 .ai-signal.negative .ai-tone { color: var(--ai-red); }
 .ai-signal.caution .ai-tone { color: var(--ai-amber); }
-.ai-signal p { margin: 6px 0 0; color: var(--ai-muted); font-size: 12px; line-height: 1.5; }
+.ai-signal p { margin: 6px 0 0 40px; color: var(--ai-muted); font-size: 12px; line-height: 1.5; }
 .ai-empty { margin: 0; color: var(--ai-muted); font-size: 11px; line-height: 1.4; }
 .ai-evidence { display: inline-flex; gap: 5px; margin-left: 5px; }
 .ai-evidence a { color: var(--ai-blue); font-size: 10px; font-weight: 800; text-decoration: none; }
@@ -176,8 +178,7 @@ html[data-theme=dark] .ai-overview-page {
   .ai-company-price { justify-content: flex-start; min-width: 0; text-align: left; }
   .ai-company-price > span:first-child, .ai-company-price small { flex-basis: auto; align-self: center; }
   .ai-summary { padding: 20px; }
-  .ai-insight-heading { align-items: flex-start; flex-direction: column; gap: 6px; }
-  .ai-signal-count { text-align: left; }
+  .ai-insight-heading { grid-template-columns: 1fr; gap: 11px; }
   .ai-categories { grid-template-columns: 1fr; }
   .ai-robot-guide { min-height: 88px; }
   .ai-robot-guide-face { flex-basis: 67px; width: 67px; height: 67px; }

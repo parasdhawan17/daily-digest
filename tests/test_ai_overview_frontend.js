@@ -44,6 +44,7 @@ const ids = [
   'company-name', 'company-symbol', 'company-industry', 'company-price', 'company-change',
   'price-meta', 'metrics-grid', 'range-card', 'data-freshness', 'page-status',
   'overview-content', 'ai-status', 'ai-content', 'ai-summary', 'ai-categories', 'ai-signal-count',
+  'ai-robot-guide', 'ai-robot-guide-face', 'ai-robot-reading', 'ai-robot-tone',
   'sources-list', 'ai-generated', 'ai-coverage'
 ];
 
@@ -115,6 +116,7 @@ test('renders available metrics and links AI citations to stock evidence', async
   assert.equal(e['ai-summary'].children.length, 1);
   assert.equal(e['ai-categories'].children.length, 6);
   assert.equal(e['ai-signal-count'].textContent, '1 supported signal across 6 areas');
+  assert.equal(e['ai-robot-guide-face'].children[0].dataset.tone, 'positive');
   assert.equal(e['sources-list'].children[0].children[0].href, '/stocks/IN:EXAMPLE#financials');
   assert.match(e['ai-generated'].textContent, /Generated 25 Sep(?:t)? 2026/);
 });
@@ -122,6 +124,7 @@ test('renders available metrics and links AI citations to stock evidence', async
 test('shows the company summary followed by all six signal groups', () => {
   assert.doesNotMatch(template, /ai-signal-board|ai-signal-bar|ai-signal-counts/);
   assert.match(template, /id="ai-signal-count"[\s\S]*id="ai-categories"/);
+  assert.match(template, /id="ai-robot-guide"/);
   assert.doesNotMatch(template, /role="tablist"|id="ai-active-panel"/);
   assert.match(template, /<article id="ai-summary" class="ai-summary"><\/article>/);
   assert.match(template, /id="metrics-title">Market facts/);
@@ -139,7 +142,13 @@ test('all signal groups remain visible with source citations', async () => {
   assert.match(e['ai-categories'].textContent, /Revenue momentum/);
   assert.match(e['ai-categories'].textContent, /Execution risk/);
   assert.equal(e['ai-signal-count'].textContent, '2 supported signals across 6 areas');
-  assert.equal(e['ai-categories'].children[4].children[1].children[0].children[0].children[1].children[0].children[0].href, '/stocks/IN:EXAMPLE#financials');
+  const risk = e['ai-categories'].children[4].children[1].children[0].children[0];
+  assert.equal(risk.children[1].children[0].children[0].href, '/stocks/IN:EXAMPLE#financials');
+  risk.children[0].fire('click');
+  assert.equal(e['ai-robot-guide-face'].children[0].dataset.tone, 'negative');
+  assert.equal(e['ai-robot-reading'].textContent, 'Execution risk');
+  assert.equal(risk.children[0].attributes['aria-pressed'], 'true');
+  assert.match(e['ai-categories'].textContent, /Revenue momentum/);
 });
 
 test('multiple insights in a group render together', async () => {
@@ -151,6 +160,8 @@ test('multiple insights in a group render together', async () => {
   assert.equal(rows.length, 2);
   assert.match(rows[0].textContent, /Revenue momentum/);
   assert.match(rows[1].textContent, /Mixed outlook/);
+  rows[1].children[0].children[0].fire('click');
+  assert.equal(e['ai-robot-guide-face'].children[0].dataset.tone, 'caution');
 });
 
 test('omits unavailable numbers and the 52-week range', async () => {

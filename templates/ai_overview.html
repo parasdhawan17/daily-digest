@@ -7,9 +7,9 @@
   <meta name="color-scheme" content="light dark">
   <script>(function(){try{var t=localStorage.getItem('daily-digest-theme');if(t!=='light'&&t!=='dark')t=matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light';document.documentElement.dataset.theme=t;document.documentElement.style.colorScheme=t;}catch(e){}})();</script>
   <link rel="stylesheet" href="/landing.css">
-  <link rel="stylesheet" href="/ai-overview.css?v=20260925-all-signals">
+  <link rel="stylesheet" href="/ai-overview.css?v=20260925-all-signals-robot">
   <script src="/stock-format.js" defer></script>
-  <script src="/ai-overview.js?v=20260925-all-signals" defer></script>
+  <script src="/ai-overview.js?v=20260925-all-signals-robot" defer></script>
 </head>
 <body class="ai-overview-page" data-symbol="{{ symbol }}">
 <a class="skip-link" href="#overview-main">Skip to AI overview</a>
@@ -29,7 +29,7 @@
         <div class="ai-insight-explorer">
           <article id="ai-summary" class="ai-summary"></article>
           <div class="ai-insight-body">
-            <div class="ai-insight-heading"><div class="ai-insight-intro"><p class="ai-kicker">Explore the synthesis</p><h2 id="signals-title">Signals and what to watch</h2><span id="ai-generated"></span></div><p id="ai-signal-count" class="ai-signal-count"></p></div>
+            <div class="ai-insight-heading"><div class="ai-insight-intro"><p class="ai-kicker">Explore the synthesis</p><h2 id="signals-title">Signals and what to watch</h2><span id="ai-generated"></span><p id="ai-signal-count" class="ai-signal-count"></p></div><aside id="ai-robot-guide" class="ai-robot-guide" aria-label="Selected AI insight"><div id="ai-robot-guide-face" class="ai-robot-guide-face"></div><div class="ai-robot-guide-copy"><span class="ai-robot-eyebrow">Selected signal</span><strong id="ai-robot-reading" class="ai-robot-reading" aria-live="polite"></strong><span id="ai-robot-tone" class="ai-robot-tone"></span></div></aside></div>
             <div id="ai-categories" class="ai-categories" aria-labelledby="signals-title"></div>
           </div>
         </div>
