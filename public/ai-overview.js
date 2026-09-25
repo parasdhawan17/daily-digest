@@ -25,40 +25,6 @@
     return element;
   }
 
-  function svgNode(tag, attributes) {
-    const element = document.createElementNS('http://www.w3.org/2000/svg', tag);
-    for (const [name, value] of Object.entries(attributes)) element.setAttribute(name, String(value));
-    return element;
-  }
-
-  function robotFace(tone, large = false) {
-    const mood = Object.hasOwn(tones, tone) ? tone : 'neutral';
-    const face = node('span', 'ai-robot ' + mood + (large ? ' is-large' : ''));
-    face.setAttribute('aria-hidden', 'true');
-    face.dataset.tone = mood;
-    const svg = svgNode('svg', {viewBox: '0 0 88 88', focusable: 'false'});
-    svg.append(
-      svgNode('path', {class: 'ai-robot-antenna', d: 'M44 18V9'}),
-      svgNode('circle', {class: 'ai-robot-antenna-tip', cx: 44, cy: 7, r: 4}),
-      svgNode('rect', {class: 'ai-robot-ear', x: 5, y: 39, width: 8, height: 16, rx: 4}),
-      svgNode('rect', {class: 'ai-robot-ear', x: 75, y: 39, width: 8, height: 16, rx: 4}),
-      svgNode('rect', {class: 'ai-robot-shell', x: 10, y: 18, width: 68, height: 60, rx: 21}),
-      svgNode('rect', {class: 'ai-robot-screen', x: 16, y: 25, width: 56, height: 46, rx: 15}),
-      svgNode('path', {class: 'ai-robot-brows', d: {
-        positive: 'M27 36h10 M51 36h10', negative: 'M27 35l10 3 M51 38l10-3',
-        caution: 'M27 38l10-3 M51 35l10 3', neutral: 'M27 36h10 M51 36h10'
-      }[mood]}),
-      svgNode('circle', {class: 'ai-robot-eye', cx: 32, cy: 45, r: 3}),
-      svgNode('circle', {class: 'ai-robot-eye', cx: 56, cy: 45, r: 3}),
-      svgNode('path', {class: 'ai-robot-mouth', d: {
-        positive: 'M31 55q13 14 26 0', negative: 'M31 64q13-14 26 0',
-        caution: 'M31 59q7-6 13 0t13 0', neutral: 'M33 58h22'
-      }[mood]})
-    );
-    face.append(svg);
-    return face;
-  }
-
   function present(value) { return number(value) !== null; }
   function dateTime(value) {
     const date = new Date(value);
@@ -188,24 +154,15 @@
     return wrap;
   }
 
-  function signal(item, sources, onSelect) {
+  function signal(item, sources) {
     const tone = Object.hasOwn(tones, item.tone) ? item.tone : 'neutral';
-    const card = node('div', 'ai-signal ' + tone);
-    const button = node('button', 'ai-signal-select');
-    button.type = 'button';
-    button.setAttribute('aria-label', 'Read ' + (item.heading || 'company signal') + ', ' + tones[tone].toLowerCase() + ' insight');
-    button.setAttribute('aria-pressed', 'false');
-    const head = node('span', 'ai-signal-head');
+    const card = node('article', 'ai-signal ' + tone);
+    const head = node('div', 'ai-signal-head');
     head.append(node('span', 'ai-signal-title', item.heading || 'Company signal'), node('span', 'ai-tone', tones[tone]));
-    button.append(robotFace(tone), head);
-    button.addEventListener('click', onSelect);
-    button.addEventListener('keydown', event => {
-      if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); onSelect(); }
-    });
     const body = node('p', '', item.text || '');
     body.append(citations(item.evidence_ids, sources));
-    card.append(button, body);
-    return {card, button};
+    card.append(head, body);
+    return card;
   }
 
   function renderAI(response) {
@@ -221,66 +178,22 @@
 
     const container = $('ai-categories');
     container.replaceChildren();
-    const panel = $('ai-active-panel'), tabs = [];
-    const guide = $('ai-robot-guide'), guideFace = $('ai-robot-guide-face');
-    const reading = $('ai-robot-reading'), toneLabel = $('ai-robot-tone');
-    function showReading(item) {
-      const tone = item && Object.hasOwn(tones, item.tone) ? item.tone : 'neutral';
-      guide.dataset.tone = tone;
-      guideFace.replaceChildren(robotFace(tone, true));
-      reading.textContent = item ? item.heading : 'No supported signal here';
-      toneLabel.textContent = item ? ({positive: 'Encouraging evidence', negative: 'Needs attention',
-        caution: 'Mixed or uncertain', neutral: 'Monitoring point'})[tone] : 'Awaiting evidence';
-    }
-    function activate(index, focus) {
-      const [key] = categories[index], items = Array.isArray(data[key]) ? data[key] : [];
-      tabs.forEach((tab, position) => {
-        tab.setAttribute('aria-selected', String(position === index));
-        tab.tabIndex = position === index ? 0 : -1;
-      });
-      panel.setAttribute('aria-labelledby', tabs[index].id);
-      const list = node('ul');
-      const selectable = [];
-      for (const item of items) {
-        const row = node('li');
-        const itemIndex = selectable.length;
-        const insight = signal(item, sources, () => selectInsight(itemIndex));
-        selectable.push({...insight, item});
-        row.append(insight.card);
-        list.append(row);
-      }
-      function selectInsight(selectedIndex) {
-        selectable.forEach(({card, button}, position) => {
-          card.classList.toggle('is-selected', position === selectedIndex);
-          button.setAttribute('aria-pressed', String(position === selectedIndex));
-        });
-        showReading(selectable[selectedIndex].item);
-      }
-      panel.replaceChildren(items.length ? list : node('p', 'ai-empty', 'No supported insight in the available evidence.'));
-      if (items.length) selectInsight(0); else showReading(null);
-      if (focus) tabs[index].focus();
-    }
-    categories.forEach(([key, label], index) => {
+    let total = 0;
+    categories.forEach(([key, label]) => {
       const items = Array.isArray(data[key]) ? data[key] : [];
-      const tab = node('button', '', label);
-      tab.type = 'button';
-      tab.id = 'ai-tab-' + key;
-      tab.setAttribute('role', 'tab');
-      tab.setAttribute('aria-controls', 'ai-active-panel');
-      tab.append(node('span', 'ai-category-count', String(items.length)));
-      tab.addEventListener('click', () => activate(index, false));
-      tab.addEventListener('keydown', event => {
-        let next = index;
-        if (event.key === 'ArrowRight') next = (index + 1) % categories.length;
-        if (event.key === 'ArrowLeft') next = (index + categories.length - 1) % categories.length;
-        if (event.key === 'Home') next = 0;
-        if (event.key === 'End') next = categories.length - 1;
-        if (next !== index) { event.preventDefault(); activate(next, true); }
-      });
-      tabs.push(tab);
-      container.append(tab);
+      total += items.length;
+      const group = node('section', 'ai-category');
+      const heading = node('h3', '', label);
+      heading.append(node('span', 'ai-category-count', String(items.length)));
+      group.append(heading);
+      if (items.length) {
+        const list = node('ul');
+        items.forEach(item => { const row = node('li'); row.append(signal(item, sources)); list.append(row); });
+        group.append(list);
+      } else group.append(node('p', 'ai-empty', 'No supported insight in the available evidence.'));
+      container.append(group);
     });
-    activate(Math.max(0, categories.findIndex(([key]) => Array.isArray(data[key]) && data[key].length)), false);
+    $('ai-signal-count').textContent = total + ' supported ' + (total === 1 ? 'signal' : 'signals') + ' across ' + categories.length + ' areas';
 
     const sourceList = $('sources-list');
     sourceList.replaceChildren();

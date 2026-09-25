@@ -200,6 +200,12 @@
     if (finite(s.currentDividendYieldCommonStockPrimaryIssueLTM)) metrics.append(metric('Dividend yield', fmt(s.currentDividendYieldCommonStockPrimaryIssueLTM) + '%', 'Last 12 months'));
     if (finite(s.priceYTDPricePercentChange)) metrics.append(metric('Year to date', pct(s.priceYTDPricePercentChange), 'Price return', direction(s.priceYTDPricePercentChange)));
     if (metrics.childElementCount) panel.append(metrics);
+    const signals = card('Company signals', 'A quick read of the latest evidence-backed AI overview.');
+    signals.classList.add('stock-signals-preview');
+    const signalBody = node('div', 'stock-signals-preview-body');
+    signals.append(signalBody);
+    panel.append(signals);
+    loadSignalPreview(signalBody);
     const grid = node('div', 'stock-grid'), left = node('div', 'stock-stack'), right = node('div', 'stock-stack'); left.append(historyCard(), peHistoryCard());
     const range = card('Price context', 'Reported price landmarks · ₹');
     const low = core.year_low, high = core.year_high, current = core.prices.NSE ?? core.prices.BSE;
@@ -220,6 +226,36 @@
       peers.append(table(['Company', 'Price', 'Change', 'Market cap', 'P/E', 'P/B'], core.peers.map(p => { const link = node(p.symbol ? 'a' : 'button', p.symbol ? '' : 'stock-text-button', p.companyName); if (p.symbol) link.href = '/stocks/' + encodeURIComponent(p.symbol).replace('%3A', ':'); else link.onclick = () => window.tickrStockSearch.openPeer(link, p.companyName); return [link, money(p.price), indicator(pct(p.percentChange), direction(p.percentChange)), fmt(p.marketCap), fmt(p.priceToEarningsValueRatio), fmt(p.priceToBookValueRatio)]; })));
       peers.append(details('Full peer metrics', dataView(core.peers)));
     } else peers.append(empty()); panel.append(peers);
+  }
+  async function loadSignalPreview(target) {
+    target.replaceChildren(node('p', 'stock-caption', 'Gathering company signals…'));
+    try {
+      const response = await requestAI(), data = response.data || {};
+      if (!data.summary || !data.summary.text) throw new Error('Company signals are unavailable.');
+      const sources = new Map((data.sources || []).map(source => [source.id, source]));
+      const lead = node('div', 'stock-signals-preview-lead');
+      lead.append(node('strong', '', data.summary.heading || 'Company perspective'));
+      const description = node('p', '', data.summary.text);
+      description.append(aiEvidence(data.summary.evidence_ids, sources));
+      lead.append(description);
+      const areas = node('div', 'stock-signals-preview-grid');
+      const groups = [['encouraging', 'Encouraging'], ['attention', 'Needs attention'], ['changes', 'Recent changes'],
+        ['catalysts', 'Catalysts'], ['risks', 'Key risks'], ['watch_next', 'Watch next']];
+      groups.forEach(([key, label]) => {
+        const items = Array.isArray(data[key]) ? data[key] : [];
+        const area = node('div', 'stock-signals-preview-area');
+        area.append(node('span', '', label), node('strong', '', String(items.length)));
+        if (items.length) area.append(node('p', '', items[0].heading || 'Company signal'));
+        areas.append(area);
+      });
+      const link = node('a', 'stock-signals-preview-link', 'See all signals and sources →');
+      link.href = '/ai-overview/' + encodeURIComponent(symbol).replace('%3A', ':');
+      target.replaceChildren(lead, areas, link);
+    } catch (error) {
+      const retry = node('button', 'stock-text-button', 'Retry company signals');
+      retry.type = 'button'; retry.onclick = () => loadSignalPreview(target);
+      target.replaceChildren(node('p', 'stock-caption', error.message), retry);
+    }
   }
   function aiEvidence(ids, sources) {
     const links = node('span', 'stock-ai-evidence');
