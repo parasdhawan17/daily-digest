@@ -125,6 +125,9 @@ test('removes only the color bar card and keeps the signals explorer', () => {
   assert.match(template, /class="ai-insight-heading"[^>]*>[\s\S]*id="ai-robot-guide"[\s\S]*id="ai-categories"/);
   assert.match(template, /<article id="ai-summary" class="ai-summary"><\/article>/);
   assert.match(template, /id="metrics-title">Market facts/);
+  assert.ok(template.indexOf('class="ai-company-bar"') < template.indexOf('id="metrics-title"'));
+  assert.ok(template.indexOf('id="metrics-title"') < template.indexOf('id="ai-insights"'));
+  assert.match(template, /class="ai-insight-explorer">\s*<article id="ai-summary" class="ai-summary"><\/article>\s*<div class="ai-insight-body">/);
 });
 
 test('signal tabs support keyboard navigation and source citations', async () => {
