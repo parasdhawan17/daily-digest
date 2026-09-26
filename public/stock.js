@@ -24,7 +24,8 @@
   function url(value) { try { const u = new URL(value); return ['https:', 'http:'].includes(u.protocol) && !u.username ? u.href : null; } catch (e) { return null; } }
   function date(value) { if (!value) return 'Date unavailable'; const d = new Date(value); return Number.isNaN(+d) ? String(value) : d.toLocaleDateString('en-IN', {day: 'numeric', month: 'short', year: 'numeric'}); }
   function stamp(value) { const d = new Date(value); return Number.isNaN(+d) ? 'Time unavailable' : d.toLocaleString('en-IN', {day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Kolkata'}) + ' IST'; }
-  function card(title, caption) { const c = node('article', 'stock-card'); c.append(node('h2', '', title)); if (caption) c.append(node('p', 'stock-caption', caption)); return c; }
+  function aiCardId(title) { return String(title || '').toLowerCase().replace(/&/g, ' and ').replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, ''); }
+  function card(title, caption) { const c = node('article', 'stock-card stock-ai-target'); c.dataset.aiCardId = aiCardId(title); c.append(node('h2', '', title)); if (caption) c.append(node('p', 'stock-caption', caption)); return c; }
   function empty(text) { return node('p', 'stock-caption', text || 'Not available for this company.'); }
   function indicator(text, tone = 'neutral', hint = '') { const value = node('span', 'stock-indicator tone-' + tone, text); if (hint) value.title = hint; return value; }
   function factList(entries) { const dl = node('dl', 'stock-facts'); entries.forEach(([key, value]) => { const row = node('div', 'stock-fact'); const dd = node('dd'); if (value instanceof Node) dd.append(value); else dd.textContent = value; row.append(node('dt', '', key), dd); dl.append(row); }); return dl; }
@@ -73,12 +74,27 @@
   function requestAI() {
     const key = 'ai-overview:' + symbol;
     if (requests.has(key)) return requests.get(key);
-    const promise = fetch('/api/stock-ai?' + new URLSearchParams({symbol, schema: '2'})).then(async response => {
+    const promise = fetch('/api/stock-ai?' + new URLSearchParams({symbol, schema: '3'})).then(async response => {
       const data = await response.json();
       if (!response.ok || !data.ok) throw new Error(data.error || 'Unable to generate the AI overview.');
       return data;
     }).catch(error => { requests.delete(key); throw error; });
     requests.set(key, promise); return promise;
+  }
+  function requestSectionAI(payload, signal) {
+    return fetch('/api/stock-section-ai', {
+      method: 'POST', signal, headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload)
+    }).then(async response => {
+      let data = {};
+      try { data = await response.json(); } catch (error) {}
+      if (!response.ok || !data.ok) {
+        const fallback = response.status === 404
+          ? 'The AI section endpoint is not loaded. Restart the local server, then reload this page.'
+          : 'Unable to explain this section right now (server ' + response.status + ').';
+        throw new Error(data.error || fallback);
+      }
+      return data;
+    });
   }
   async function loadInto(target, section, params, render, onEmpty) {
     const version = (target._requestVersion || 0) + 1; target._requestVersion = version;
@@ -98,7 +114,7 @@
       const retry = node('button', 'stock-retry', 'Try again'); retry.type = 'button'; retry.onclick = () => loadInto(target, section, params, render, onEmpty); state.append(retry); target.replaceChildren(state);
     } finally { if (version === target._requestVersion) target.removeAttribute('aria-busy'); }
   }
-  function metric(title, value, note, tone = 'neutral') { const box = node('div', 'stock-metric tone-' + tone); box.append(node('span', '', title), node('strong', '', value)); if (note) box.append(node('small', '', note)); return box; }
+  function metric(title, value, note, tone = 'neutral') { const box = node('div', 'stock-metric stock-ai-target tone-' + tone); box.dataset.aiCardId = aiCardId(title); box.append(node('span', '', title), node('strong', '', value)); if (note) box.append(node('small', '', note)); return box; }
   function bars(rows, unit, stacked = false) {
     const box = node('div', 'stock-bars'); const valid = rows.filter(x => number(x.value) !== null);
     if (!valid.length) return empty();
@@ -200,12 +216,6 @@
     if (finite(s.currentDividendYieldCommonStockPrimaryIssueLTM)) metrics.append(metric('Dividend yield', fmt(s.currentDividendYieldCommonStockPrimaryIssueLTM) + '%', 'Last 12 months'));
     if (finite(s.priceYTDPricePercentChange)) metrics.append(metric('Year to date', pct(s.priceYTDPricePercentChange), 'Price return', direction(s.priceYTDPricePercentChange)));
     if (metrics.childElementCount) panel.append(metrics);
-    const signals = card('Company signals', 'A quick read of the latest evidence-backed AI overview.');
-    signals.classList.add('stock-signals-preview');
-    const signalBody = node('div', 'stock-signals-preview-body');
-    signals.append(signalBody);
-    panel.append(signals);
-    loadSignalPreview(signalBody);
     const grid = node('div', 'stock-grid'), left = node('div', 'stock-stack'), right = node('div', 'stock-stack'); left.append(historyCard(), peHistoryCard());
     const range = card('Price context', 'Reported price landmarks · ₹');
     const low = core.year_low, high = core.year_high, current = core.prices.NSE ?? core.prices.BSE;
@@ -227,37 +237,6 @@
       peers.append(details('Full peer metrics', dataView(core.peers)));
     } else peers.append(empty()); panel.append(peers);
   }
-  async function loadSignalPreview(target) {
-    target.replaceChildren(node('p', 'stock-caption', 'Gathering company signals…'));
-    try {
-      const response = await requestAI(), data = response.data || {};
-      if (!data.summary || !data.summary.text) throw new Error('Company signals are unavailable.');
-      const sources = new Map((data.sources || []).map(source => [source.id, source]));
-      const lead = node('div', 'stock-signals-preview-lead');
-      lead.append(node('strong', '', data.summary.heading || 'Company perspective'));
-      const description = node('p', '', data.summary.text);
-      description.append(aiEvidence(data.summary.evidence_ids, sources));
-      lead.append(description);
-      const areas = node('div', 'stock-signals-preview-grid');
-      const groups = [['encouraging', 'Encouraging'], ['attention', 'Needs attention'], ['changes', 'Recent changes'],
-        ['catalysts', 'Catalysts'], ['risks', 'Key risks'], ['watch_next', 'Watch next']];
-      groups.forEach(([key, label]) => {
-        const items = Array.isArray(data[key]) ? data[key] : [];
-        if (!items.length) return;
-        const area = node('div', 'stock-signals-preview-area');
-        area.append(node('span', '', label), node('strong', '', String(items.length)));
-        area.append(node('p', '', items[0].heading || 'Company signal'));
-        areas.append(area);
-      });
-      const link = node('a', 'stock-signals-preview-link', 'See all signals and sources →');
-      link.href = '/ai-overview/' + encodeURIComponent(symbol).replace('%3A', ':');
-      target.replaceChildren(...(areas.children.length ? [lead, areas, link] : [lead, link]));
-    } catch (error) {
-      const retry = node('button', 'stock-text-button', 'Retry company signals');
-      retry.type = 'button'; retry.onclick = () => loadSignalPreview(target);
-      target.replaceChildren(node('p', 'stock-caption', error.message), retry);
-    }
-  }
   function aiEvidence(ids, sources) {
     const links = node('span', 'stock-ai-evidence');
     (ids || []).forEach(id => {
@@ -269,60 +248,74 @@
     });
     return links;
   }
-  function aiTone(value, fallback) { return ['positive', 'negative', 'caution', 'neutral'].includes(value) ? value : fallback; }
-  function aiSignal(item, sources, fallbackHeading, fallbackTone, lead) {
-    const tone = aiTone(item && item.tone, fallbackTone), signal = node('div', 'stock-ai-insight signal-' + tone);
-    const head = node('div', 'stock-ai-insight-head'), heading = node('h3', '', item && item.heading || fallbackHeading);
-    const toneLabel = node('span', 'stock-ai-tone', ({positive: 'Positive', negative: 'Negative', caution: 'Watch', neutral: 'Neutral'})[tone]);
-    head.append(heading, toneLabel);
-    const body = node('p', lead ? 'stock-ai-lead' : '', item && item.text || 'A reliable insight could not be generated.');
-    if (item) body.append(aiEvidence(item.evidence_ids, sources));
-    signal.append(head, body); return signal;
+  const aiCategories = [['encouraging', 'What looks encouraging'], ['attention', 'What needs attention'],
+    ['changes', 'What changed recently'], ['catalysts', 'Potential catalysts'], ['risks', 'Key risks'], ['watch_next', 'What to watch next']];
+  const aiTones = {positive: 'Positive', negative: 'Negative', caution: 'Watch', neutral: 'Neutral'};
+  function aiRobotFace(tone, large = false) {
+    const mood = Object.hasOwn(aiTones, tone) ? tone : 'neutral';
+    const face = node('span', 'ai-robot ' + mood + (large ? ' is-large' : ''));
+    face.setAttribute('aria-hidden', 'true'); face.dataset.tone = mood;
+    const svg = svgNode('svg', {viewBox: '0 0 88 88', focusable: 'false'});
+    svg.append(
+      svgNode('path', {class: 'ai-robot-antenna', d: 'M44 18V9'}),
+      svgNode('circle', {class: 'ai-robot-antenna-tip', cx: 44, cy: 7, r: 4}),
+      svgNode('rect', {class: 'ai-robot-ear', x: 5, y: 39, width: 8, height: 16, rx: 4}),
+      svgNode('rect', {class: 'ai-robot-ear', x: 75, y: 39, width: 8, height: 16, rx: 4}),
+      svgNode('rect', {class: 'ai-robot-shell', x: 10, y: 18, width: 68, height: 60, rx: 21}),
+      svgNode('rect', {class: 'ai-robot-screen', x: 16, y: 25, width: 56, height: 46, rx: 15}),
+      svgNode('path', {class: 'ai-robot-brows', d: {positive: 'M27 36h10 M51 36h10', negative: 'M27 35l10 3 M51 38l10-3', caution: 'M27 38l10-3 M51 35l10 3', neutral: 'M27 36h10 M51 36h10'}[mood]}),
+      svgNode('circle', {class: 'ai-robot-eye', cx: 32, cy: 45, r: 3}),
+      svgNode('circle', {class: 'ai-robot-eye', cx: 56, cy: 45, r: 3}),
+      svgNode('path', {class: 'ai-robot-mouth', d: {positive: 'M31 55q13 14 26 0', negative: 'M31 64q13-14 26 0', caution: 'M31 59q7-6 13 0t13 0', neutral: 'M33 58h22'}[mood]})
+    );
+    face.append(svg); return face;
   }
-  function aiInsightList(items, sources, fallbackHeading, fallbackTone) {
-    const list = node('ul', 'stock-ai-list');
-    items.forEach(item => { const li = node('li'); li.append(aiSignal(item, sources, fallbackHeading, fallbackTone, false)); list.append(li); });
-    return list;
+  function aiSignal(item, sources) {
+    const tone = Object.hasOwn(aiTones, item.tone) ? item.tone : 'neutral';
+    const signal = node('article', 'ai-signal ' + tone), head = node('span', 'ai-signal-head');
+    head.append(node('span', 'ai-signal-title', item.heading || 'Company signal'), node('span', 'ai-tone', aiTones[tone]));
+    const title = node('div', 'ai-signal-heading'); title.append(aiRobotFace(tone), head);
+    const facts = node('div', 'ai-signal-facts');
+    (Array.isArray(item.facts) ? item.facts : []).forEach(fact => {
+      if (!fact || !fact.label || !fact.value) return;
+      const chip = node('span', 'ai-signal-fact');
+      chip.append(node('span', 'ai-signal-fact-label', fact.label), node('strong', '', fact.value)); facts.append(chip);
+    });
+    const body = node('p', '', item.text || ''); body.append(aiEvidence(item.evidence_ids, sources));
+    signal.append(title); if (facts.children.length) signal.append(facts); signal.append(body); return signal;
   }
   function renderAIOverview(panel, response) {
-    const data = response.data || {}, sources = new Map((data.sources || []).map(source => [source.id, source]));
-    const intro = card('The 60-second view', 'A concise synthesis of the latest available company evidence.'); intro.classList.add('stock-ai-summary');
-    intro.append(aiSignal(data.summary, sources, 'Overall picture', 'caution', true)); panel.append(intro);
+    const data = response.data || {};
+    if (!data.summary || !data.summary.text) throw new Error('The AI overview could not be read.');
+    const sources = new Map((data.sources || []).map(source => [source.id, source]));
+    const explorer = node('div', 'ai-insight-explorer');
+    const summary = node('article', 'ai-summary'), guide = node('aside', 'ai-robot-guide');
+    guide.setAttribute('aria-label', 'Overall AI signal');
+    const guideFace = node('div', 'ai-robot-guide-face'), summaryTone = Object.hasOwn(aiTones, data.summary.tone) ? data.summary.tone : 'neutral';
+    guideFace.append(aiRobotFace(summaryTone, true));
+    guide.dataset.tone = summaryTone;
+    guide.append(guideFace, node('span', 'ai-robot-tone', ({positive: 'Encouraging evidence', negative: 'Needs attention', caution: 'Mixed or uncertain', neutral: 'Monitoring point'})[summaryTone]));
+    const summaryBody = node('p', '', data.summary.text); summaryBody.append(aiEvidence(data.summary.evidence_ids, sources));
+    const summaryCopy = node('div', 'ai-summary-copy');
+    summaryCopy.append(node('span', 'ai-summary-label', '✦ The AI take'), node('h2', '', data.summary.heading || 'Company perspective'), summaryBody);
+    summary.dataset.tone = summaryTone; summary.append(guide, summaryCopy);
 
-    function signalGroup(key, title, caption, className, fallbackHeading, fallbackTone) {
+    const insightBody = node('div', 'ai-insight-body'), meta = node('div', 'ai-insight-meta');
+    meta.append(node('span', '', 'Generated ' + stamp(data.generated_at)));
+    const count = node('p', 'ai-signal-count'), categories = node('div', 'ai-categories');
+    categories.setAttribute('role', 'group'); categories.setAttribute('aria-label', 'AI signals');
+    let total = 0, visibleAreas = 0;
+    aiCategories.forEach(([key, title]) => {
       const items = Array.isArray(data[key]) ? data[key] : [];
-      if (!items.length) return null;
-      const group = card(title, caption);
-      if (className) group.classList.add(className);
-      group.append(aiInsightList(items, sources, fallbackHeading, fallbackTone));
-      return group;
-    }
-    function appendPair(first, second, className = 'stock-grid') {
-      const groups = [first, second].filter(Boolean);
-      if (groups.length === 1) panel.append(groups[0]);
-      else if (groups.length === 2) { const grid = node('div', className); grid.append(...groups); panel.append(grid); }
-    }
-
-    appendPair(
-      signalGroup('encouraging', 'What looks encouraging', '', 'stock-ai-positive', 'Positive signal', 'positive'),
-      signalGroup('attention', 'What needs attention', '', 'stock-ai-caution', 'Downside signal', 'negative'),
-      'stock-grid stock-ai-balance');
-    const changes = signalGroup('changes', 'What changed recently', 'Only explicit period-over-period changes are included.', '', 'Recent movement', 'caution');
-    if (changes) panel.append(changes);
-    appendPair(
-      signalGroup('catalysts', 'Potential catalysts', 'Reported events, plans or developments—not predictions.', 'stock-ai-positive', 'Potential catalyst', 'positive'),
-      signalGroup('risks', 'Key risks', '', 'stock-ai-negative', 'Risk factor', 'negative'));
-    const watch = signalGroup('watch_next', 'What to watch next', 'Measurable questions for future results and disclosures.', '', 'Monitoring point', 'neutral');
-    if (watch) panel.append(watch);
-
-    const sourceCard = card('Sources and freshness'); sourceCard.classList.add('stock-ai-sources');
-    const sourceList = node('ol');
-    (data.sources || []).forEach(source => { const item = node('li'), link = node('a', '', source.label); link.href = '#' + source.section; item.append(link, node('span', '', ' · ' + label(source.section))); sourceList.append(item); });
-    sourceCard.append(sourceList);
-    const coverage = response.coverage || {}, meta = node('p', 'stock-caption');
-    meta.textContent = 'Generated ' + stamp(data.generated_at) + ' · ' + fmt(coverage.sources) + ' evidence groups · ' + fmt(coverage.news_stories) + ' available news stories · Cached for up to 6 hours';
-    sourceCard.append(meta, node('p', 'stock-ai-disclaimer', 'AI-generated synthesis · Not investment advice · Coverage may be incomplete or delayed.'));
-    panel.append(sourceCard);
+      if (!items.length) return;
+      total += items.length; visibleAreas++;
+      const group = node('section', 'ai-category'), heading = node('h3', '', title);
+      heading.append(node('span', 'ai-category-count', String(items.length))); group.append(heading);
+      const list = node('ul'); items.forEach(item => { const row = node('li'); row.append(aiSignal(item, sources)); list.append(row); });
+      group.append(list); categories.append(group);
+    });
+    count.textContent = visibleAreas ? total + ' supported ' + (total === 1 ? 'signal' : 'signals') + ' across ' + visibleAreas + ' ' + (visibleAreas === 1 ? 'area' : 'areas') : 'No supported signals in the available evidence.';
+    categories.hidden = visibleAreas === 0; meta.append(count); insightBody.append(meta, categories); explorer.append(summary, insightBody); panel.append(explorer);
   }
   async function aiOverview() {
     const panel = $('panel-ai-overview');
@@ -334,6 +327,131 @@
       const state = node('div', 'stock-state'); state.setAttribute('role', 'status'); state.append(node('p', '', error.message));
       const retry = node('button', 'stock-retry', 'Try again'); retry.type = 'button'; retry.onclick = aiOverview; state.append(retry); panel.replaceChildren(state);
     } finally { panel.removeAttribute('aria-busy'); }
+  }
+  let sectionAssistant, sectionAssistantBody, sectionAssistantLauncher, sectionAIController, sectionAIRequestVersion = 0;
+  let sectionWelcomeTimer, sectionCollapseTimer, sectionOpenTimer, sectionLauncherTimer, sectionAssistantWelcomeOpen = false;
+  function assistantIcon(path) {
+    const svg = svgNode('svg', {viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', 'stroke-width': '1.8', 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'aria-hidden': 'true'});
+    svg.append(svgNode('path', {d: path})); return svg;
+  }
+  function showSectionAssistant() {
+    if (!sectionAssistant) return;
+    clearTimeout(sectionWelcomeTimer); clearTimeout(sectionCollapseTimer); clearTimeout(sectionOpenTimer); clearTimeout(sectionLauncherTimer);
+    const reducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const attachFromLauncher = !sectionAssistantLauncher.hidden;
+    sectionAssistant.hidden = false;
+    sectionAssistant.classList.remove('is-minimized', 'is-collapsing', 'is-opening');
+    sectionAssistantLauncher.classList.remove('is-entering', 'is-attaching');
+    if (!attachFromLauncher || reducedMotion) { sectionAssistantLauncher.hidden = true; return; }
+    sectionAssistant.classList.add('is-opening');
+    sectionAssistantLauncher.classList.add('is-attaching');
+    sectionLauncherTimer = setTimeout(() => {
+      sectionAssistantLauncher.hidden = true;
+      sectionAssistantLauncher.classList.remove('is-attaching');
+    }, 220);
+    sectionOpenTimer = setTimeout(() => sectionAssistant.classList.remove('is-opening'), 460);
+  }
+  function collapseSectionAssistant() {
+    if (!sectionAssistant || sectionAssistant.hidden || sectionAssistant.classList.contains('is-collapsing')) return;
+    clearTimeout(sectionWelcomeTimer); clearTimeout(sectionOpenTimer); clearTimeout(sectionLauncherTimer); sectionAssistantWelcomeOpen = false;
+    sectionAssistant.classList.remove('is-opening'); sectionAssistantLauncher.classList.remove('is-attaching');
+    const finish = () => {
+      sectionAssistant.classList.remove('is-collapsing'); sectionAssistant.hidden = true;
+      sectionAssistantLauncher.hidden = false; sectionAssistantLauncher.classList.add('is-entering');
+      sectionLauncherTimer = setTimeout(() => sectionAssistantLauncher.classList.remove('is-entering'), 420);
+    };
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) { finish(); return; }
+    sectionAssistant.classList.add('is-collapsing'); sectionCollapseTimer = setTimeout(finish, 380);
+  }
+  function assistantWelcome() {
+    sectionAssistantWelcomeOpen = true; sectionAssistantBody.replaceChildren();
+    const welcome = node('div', 'stock-section-ai-welcome');
+    welcome.append(node('strong', '', 'Ask about any section'), node('p', '', 'Long press a section to have an AI summary for it.'));
+    sectionAssistantBody.append(welcome);
+  }
+  function assistantThinking(title) {
+    sectionAssistantWelcomeOpen = false; showSectionAssistant(); sectionAssistant.setAttribute('aria-busy', 'true'); sectionAssistantBody.replaceChildren();
+    const state = node('div', 'stock-section-ai-thinking');
+    const face = node('div', 'stock-section-ai-thinking-face'); face.append(aiRobotFace('neutral', true));
+    const copy = node('div'); copy.append(node('span', 'stock-section-ai-kicker', title), node('strong', '', 'Reading this section'));
+    const dots = node('span', 'stock-section-ai-dots'); dots.setAttribute('aria-hidden', 'true'); dots.append(node('i'), node('i'), node('i'));
+    copy.append(dots); state.append(face, copy); sectionAssistantBody.append(state);
+  }
+  function assistantResult(title, response) {
+    sectionAssistantWelcomeOpen = false;
+    const data = response.data || {}, tone = Object.hasOwn(aiTones, data.tone) ? data.tone : 'neutral';
+    sectionAssistant.removeAttribute('aria-busy'); sectionAssistantBody.replaceChildren();
+    const result = node('article', 'stock-section-ai-result tone-' + tone);
+    const intro = node('div', 'stock-section-ai-result-head'); intro.append(aiRobotFace(tone), node('span', 'stock-section-ai-kicker', title));
+    result.append(intro, node('h3', '', data.heading || 'Section summary'), node('p', 'stock-section-ai-summary', data.summary || ''));
+    const meaning = node('div', 'stock-section-ai-meaning'); meaning.append(node('strong', '', 'What this means'), node('p', '', data.meaning || '')); result.append(meaning);
+    const facts = node('div', 'stock-section-ai-facts');
+    (data.facts || []).forEach(fact => { if (!fact || !fact.label || !fact.value) return; const chip = node('span'); chip.append(node('small', '', fact.label), node('strong', '', fact.value)); facts.append(chip); });
+    if (facts.childElementCount) result.append(facts);
+    result.append(node('p', 'stock-section-ai-meta', 'Selected section · IndianAPI · Generated ' + stamp(data.generated_at)),
+      node('p', 'stock-section-ai-disclaimer', 'AI-generated synthesis · Not investment advice · Data may be incomplete or delayed.'));
+    sectionAssistantBody.append(result);
+  }
+  function assistantError(message) {
+    sectionAssistantWelcomeOpen = false;
+    sectionAssistant.removeAttribute('aria-busy'); sectionAssistantBody.replaceChildren();
+    const error = node('div', 'stock-section-ai-error'); error.append(aiRobotFace('caution'), node('strong', '', 'I could not explain that section'),
+      node('p', '', message || 'Please long press the section and try again.'));
+    sectionAssistantBody.append(error);
+  }
+  async function explainSection(target) {
+    const panel = target.closest('.stock-panel');
+    if (!panel || panel.id === 'panel-ai-overview') return;
+    const heading = target.querySelector('h2, .stock-news-body h2, span');
+    const title = 'innerText' in (heading || {}) ? heading.innerText : (heading ? heading.textContent : 'Selected section');
+    const visibleText = ('innerText' in target ? target.innerText : target.textContent || '').replace(/\s+/g, ' ').trim().slice(0, 8000);
+    const payload = {symbol, section: panel.id.replace('panel-', ''), card_id: target.dataset.aiCardId, title: String(title || 'Selected section').trim().slice(0, 100), text: visibleText};
+    if (sectionAIController) sectionAIController.abort();
+    sectionAIController = new AbortController(); const version = ++sectionAIRequestVersion;
+    assistantThinking(payload.title);
+    try {
+      const response = await requestSectionAI(payload, sectionAIController.signal);
+      if (version === sectionAIRequestVersion) assistantResult(payload.title, response);
+    } catch (error) {
+      if (error.name !== 'AbortError' && version === sectionAIRequestVersion) assistantError(error.message);
+    }
+  }
+  function initSectionAssistant() {
+    sectionAssistant = node('aside', 'stock-section-assistant is-initial'); sectionAssistant.id = 'stock-section-assistant';
+    sectionAssistant.setAttribute('aria-label', 'AI section explainer');
+    const head = node('header', 'stock-section-ai-header'), identity = node('div', 'stock-section-ai-identity'), face = node('span', 'stock-section-ai-avatar');
+    face.append(aiRobotFace('neutral')); const name = node('span'); name.append(node('strong', '', 'Tickr AI'), node('small', '', 'Section explainer')); identity.append(face, name);
+    const actions = node('div', 'stock-section-ai-actions'), minimize = node('button'), close = node('button');
+    minimize.type = close.type = 'button'; minimize.setAttribute('aria-label', 'Minimize AI section explainer'); close.setAttribute('aria-label', 'Close AI section explainer');
+    minimize.append(assistantIcon('M5 12h14')); close.append(assistantIcon('M6 6l12 12M18 6 6 18')); actions.append(minimize, close); head.append(identity, actions);
+    sectionAssistantBody = node('div', 'stock-section-ai-body'); sectionAssistantBody.id = 'stock-section-ai-live'; sectionAssistantBody.setAttribute('aria-live', 'polite');
+    sectionAssistant.append(head, sectionAssistantBody); document.body.append(sectionAssistant);
+    setTimeout(() => sectionAssistant.classList.remove('is-initial'), 340);
+    sectionAssistantLauncher = node('button', 'stock-section-ai-launcher'); sectionAssistantLauncher.type = 'button'; sectionAssistantLauncher.hidden = true; sectionAssistantLauncher.setAttribute('aria-label', 'Open AI section explainer'); sectionAssistantLauncher.append(aiRobotFace('neutral')); document.body.append(sectionAssistantLauncher);
+    minimize.onclick = collapseSectionAssistant;
+    close.onclick = collapseSectionAssistant;
+    sectionAssistantLauncher.onclick = () => { sectionAssistantWelcomeOpen = false; showSectionAssistant(); };
+    assistantWelcome(); sectionWelcomeTimer = setTimeout(collapseSectionAssistant, 5000);
+
+    const content = $('stock-content'); let hold = null, suppressTarget = null, suppressUntil = 0;
+    function cancelHold() { if (!hold) return; clearTimeout(hold.timer); hold.target.classList.remove('is-ai-holding'); hold = null; }
+    content.addEventListener('pointerdown', event => {
+      if (event.isPrimary === false || (event.button !== undefined && event.button !== 0)) return;
+      if (event.target.closest('a,button,input,select,textarea,summary,[role=button],.stock-chart')) return;
+      const target = event.target.closest('[data-ai-card-id]');
+      if (!target || target.closest('#panel-ai-overview')) return;
+      cancelHold(); const startX = event.clientX, startY = event.clientY; target.classList.add('is-ai-holding');
+      hold = {target, pointerId: event.pointerId, startX, startY, timer: setTimeout(() => {
+        const selected = hold && hold.target; if (!selected) return;
+        selected.classList.remove('is-ai-holding'); document.querySelectorAll('.is-ai-selected').forEach(item => item.classList.remove('is-ai-selected'));
+        selected.classList.add('is-ai-selected'); suppressTarget = selected; suppressUntil = Date.now() + 900; hold = null; explainSection(selected);
+      }, 600)};
+    });
+    content.addEventListener('pointermove', event => { if (hold && event.pointerId === hold.pointerId && Math.hypot(event.clientX - hold.startX, event.clientY - hold.startY) > 10) cancelHold(); });
+    ['pointerup', 'pointercancel', 'lostpointercapture'].forEach(type => content.addEventListener(type, cancelHold));
+    window.addEventListener('scroll', () => { cancelHold(); if (sectionAssistantWelcomeOpen) collapseSectionAssistant(); }, true);
+    content.addEventListener('click', event => { if (suppressTarget && Date.now() < suppressUntil && suppressTarget.contains(event.target)) { event.preventDefault(); event.stopPropagation(); suppressTarget = null; } }, true);
+    content.addEventListener('contextmenu', event => { const target = hold && hold.target || suppressTarget; if (target && target.contains(event.target)) event.preventDefault(); });
   }
   function periodSort(a, b) { const aa = Date.parse('1 ' + a), bb = Date.parse('1 ' + b); return Number.isFinite(aa) && Number.isFinite(bb) ? aa - bb : a.localeCompare(b); }
   function historyTable(target, data, series) {
@@ -410,7 +528,7 @@
   }
   function news() {
     const panel = $('panel-news'); panel.append(node('p', 'stock-caption', core.news.length + ' stories returned by IndianAPI. Open a headline to read the original coverage.'));
-    const grid = node('div', 'stock-news-grid'); core.news.forEach(story => { const c = node('article', 'stock-card stock-news-card'); const imageUrl = url(story.image); if (imageUrl) { const img = node('img'); img.src = imageUrl; img.alt = ''; img.loading = 'lazy'; img.referrerPolicy = 'no-referrer'; img.onerror = () => img.remove(); c.append(img); }
+    const grid = node('div', 'stock-news-grid'); core.news.forEach(story => { const c = node('article', 'stock-card stock-news-card stock-ai-target'); c.dataset.aiCardId = 'news_story'; const imageUrl = url(story.image); if (imageUrl) { const img = node('img'); img.src = imageUrl; img.alt = ''; img.loading = 'lazy'; img.referrerPolicy = 'no-referrer'; img.onerror = () => img.remove(); c.append(img); }
       const body = node('div', 'stock-news-body'), sourceUrl = url(story.url); body.append(node('span', 'stock-news-meta', (story.source || (sourceUrl ? new URL(sourceUrl).hostname.replace('www.', '') : 'Company news')) + ' · ' + date(story.date)));
       const h = node('h2'); if (sourceUrl) { const a = node('a', '', story.headline); a.href = sourceUrl; a.target = '_blank'; a.rel = 'noopener noreferrer'; h.append(a); } else h.textContent = story.headline; body.append(h);
       if (story.summary) body.append(node('p', '', story.summary)); c.append(body); grid.append(c);
@@ -444,6 +562,7 @@
   themeButton.onclick = () => { const theme = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark'; document.documentElement.dataset.theme = theme; document.documentElement.style.colorScheme = theme; try { localStorage.setItem('daily-digest-theme', theme); } catch (e) {} themeLabel(); }; themeLabel();
   async function init() {
     if (!symbol) return;
+    if (!sectionAssistant) initSectionAssistant();
     const status = $('stock-status'); status.hidden = false; status.classList.add('loading'); status.textContent = 'Loading your company overview…';
     try {
       const result = await request('core'); core = result.data;

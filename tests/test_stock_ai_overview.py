@@ -34,15 +34,19 @@ def model_result():
                     "tone": "positive",
                     "evidence_ids": ["S1", "S2"]},
         "encouraging": [{"heading": "Revenue momentum", "text": "Revenue rose year over year.",
-                         "tone": "positive", "evidence_ids": ["S2"]}],
+                         "tone": "positive", "evidence_ids": ["S2"],
+                         "facts": [{"label": "Revenue", "value": "+12.0% YoY"}]}],
         "attention": [],
         "changes": [{"heading": "Growth accelerated", "text": "Revenue increased 12% year over year.",
-                     "tone": "positive", "evidence_ids": ["S2"]}],
+                     "tone": "positive", "evidence_ids": ["S2"],
+                     "facts": [{"label": "Revenue", "value": "+12.0% YoY"}]}],
         "catalysts": [{"heading": "New contract", "text": "The reported contract could support future activity.",
-                       "tone": "positive", "evidence_ids": ["S3"]}],
+                       "tone": "positive", "evidence_ids": ["S3"],
+                       "facts": [{"label": "Status", "value": "Contract announced"}]}],
         "risks": [],
         "watch_next": [{"heading": "Revenue durability", "text": "Does revenue growth persist next period?",
-                        "tone": "neutral", "evidence_ids": ["S2"]}],
+                        "tone": "neutral", "evidence_ids": ["S2"],
+                        "facts": [{"label": "Current growth", "value": "+12.0% YoY"}]}],
     }
 
 
@@ -79,6 +83,12 @@ class EvidenceTests(unittest.TestCase):
         parsed = overview._parse(json.dumps(raw), {"S1", "S2", "S3"})
         self.assertEqual(parsed["encouraging"], [])
 
+    def test_parser_requires_grounded_fact_figures_for_signal_cards(self):
+        raw = model_result()
+        raw["encouraging"][0]["facts"] = []
+        parsed = overview._parse(json.dumps(raw), {"S1", "S2", "S3"})
+        self.assertEqual(parsed["encouraging"], [])
+
     def test_prompt_labels_reported_actuals_and_dates_catalysts(self):
         prompt = overview._prompt("IN:EXAMPLE", overview.build_evidence(core_data()))
         self.assertIn("historical actuals", prompt)
@@ -102,12 +112,12 @@ class GenerationTests(unittest.TestCase):
 
         self.assertIs(first, second)
         self.assertEqual(request.call_count, 1)
-        self.assertEqual(request.call_args.kwargs["max_tokens"], 900)
+        self.assertEqual(request.call_args.kwargs["max_tokens"], 1200)
         self.assertEqual(request.call_args.kwargs["retries"], 0)
         self.assertEqual(ttl, overview.TTL_SECONDS)
         self.assertLessEqual(remaining, ttl)
         self.assertEqual(first["data"]["sources"][0]["id"], "S1")
-        self.assertEqual(first["schema_version"], 2)
+        self.assertEqual(first["schema_version"], 3)
         self.assertNotIn("data", first["data"]["sources"][0])
 
     @patch.object(overview.ai_summary, "OPENROUTER_API_KEY", "")

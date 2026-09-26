@@ -5,9 +5,10 @@ from urllib.parse import parse_qs, unquote, urlparse
 
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
-from api._responses import send_json, send_html
+from api._responses import read_json, send_json, send_html
 from stock_news.stock_detail import StockDataError, get_data, validate_request
 from stock_news.stock_ai_overview import get_stock_ai_overview
+from stock_news.stock_section_ai import get_stock_section_explanation
 
 _env = Environment(loader=FileSystemLoader(Path(__file__).resolve().parent.parent / 'templates'),
                    autoescape=select_autoescape(['html']))
@@ -58,3 +59,32 @@ def handle_ai(handler):
     except Exception:
         send_json(handler, 503, {'ok': False, 'code': 'ai_unavailable',
                                  'error': 'The AI overview is temporarily unavailable.'})
+
+
+def handle_section_ai(handler):
+    try:
+        if int(handler.headers.get('Content-Length') or 0) > 12000:
+            send_json(handler, 413, {'ok': False, 'code': 'request_too_large',
+                                     'error': 'The selected section is too large to summarize.'})
+            return
+        body = read_json(handler)
+    except (ValueError, TypeError):
+        send_json(handler, 400, {'ok': False, 'code': 'invalid_request',
+                                 'error': 'The section summary request is invalid.'})
+        return
+    try:
+        symbol = validate_request(body.get('symbol', ''))
+        payload, _ = get_stock_section_explanation(
+            symbol, body.get('section'), body.get('card_id'), body.get('title'), body.get('text'))
+        if not payload:
+            send_json(handler, 503, {'ok': False, 'code': 'ai_unavailable',
+                                     'error': 'The AI section explainer is temporarily unavailable.'})
+            return
+        send_json(handler, 200, payload)
+    except ValueError as error:
+        send_json(handler, 400, {'ok': False, 'code': 'invalid_section', 'error': str(error)})
+    except StockDataError as error:
+        send_json(handler, error.status, {'ok': False, 'code': error.code, 'error': str(error)})
+    except Exception:
+        send_json(handler, 503, {'ok': False, 'code': 'ai_unavailable',
+                                 'error': 'The AI section explainer is temporarily unavailable.'})

@@ -5,7 +5,23 @@ const vm = require('node:vm');
 
 const catalog = JSON.parse(fs.readFileSync('public/dashboard-catalog.json', 'utf8'));
 const source = fs.readFileSync('public/dashboard-cards.js', 'utf8');
+const styles = fs.readFileSync('public/dashboard-cards.css', 'utf8');
+const template = fs.readFileSync('templates/web_digest.html', 'utf8');
 const format = require('../public/stock-format.js');
+
+test('dashboard cards expose the floating AI explainer flow', () => {
+  assert.match(source, /dashboard-section-assistant/);
+  assert.match(source, /Ask about any dashboard card/);
+  assert.match(source, /fetch\('\/api\/stock-section-ai'/);
+  assert.match(source, /node\.dataset\.aiCardId=meta\.id/);
+  assert.match(source, /node\.dataset\.aiSymbol=symbol/);
+  assert.match(source, /setTimeout\(function\(\)\{var selected=[\s\S]*\},600\)/);
+  assert.match(source, /Math\.hypot\([\s\S]*>10/);
+  assert.match(styles, /\.dashboard-section-assistant/);
+  assert.match(styles, /\.stock-section-ai-launcher/);
+  assert.match(styles, /env\(safe-area-inset-bottom\)/);
+  assert.match(template, /dashboard-cards\.css\?v=20260927-shared-ai-overview/);
+});
 
 class Element {
   constructor(tag = 'div') {
@@ -24,6 +40,7 @@ class Element {
   }
   replaceChildren(...children) { this.children = []; this.append(...children); }
   setAttribute(name, value) { this.attributes[name] = String(value); }
+  removeAttribute(name) { delete this.attributes[name]; }
   querySelector(selector) {
     if (selector === '[aria-pressed=true]') return this.children.find(child => child.attributes?.['aria-pressed'] === 'true');
     if (selector === '[data-indian-dashboard]') return this.children.find(child => child.dataset?.symbol);
@@ -83,16 +100,18 @@ test('every selectable Indian dashboard card renders without a fallback or excep
   };
   vm.runInNewContext(source, context);
   for (let i = 0; i < 8; i++) await new Promise(resolve => setImmediate(resolve));
-  const tabs = descendants(root, node => node.className === 'dashboard-category-tab');
+  const tabs = descendants(root, node => node.className?.split(/\s+/).includes('dashboard-category-tab'));
   assert.equal(tabs.length, catalog.categories.length, JSON.stringify(root.children.map(child => child.textContent || child.className)));
   for (const tab of tabs) {
     tab.onclick();
     for (let i = 0; i < 8; i++) await new Promise(resolve => setImmediate(resolve));
   }
   const cards = descendants(root, node => node.tagName === 'ARTICLE' && node.dataset.card);
-  assert.deepEqual(cards.map(card => card.dataset.card).sort(), selected.sort());
+  const selectedNonAI = selected.filter(id => !id.startsWith('ai_'));
+  assert.deepEqual(cards.map(card => card.dataset.card).sort(), selectedNonAI.sort());
   const card = id => cards.find(node => node.dataset.card === id);
-  assert.ok(descendants(card('ai_company_summary'), node => node.className?.includes('dashboard-ai-insight')).length);
+  assert.ok(descendants(root, node => node.className === 'ai-insight-explorer').length);
+  assert.ok(descendants(root, node => node.className === 'ai-summary').length);
   assert.ok(descendants(card('financial_quarterly_results'), node => node.attributes?.class === 'stock-chart').length);
   assert.ok(descendants(card('ownership_current_mix'), node => node.className === 'dashboard-stacked-bar').length);
   assert.ok(descendants(card('overview_pe_history'), node => node.className === 'dashboard-metrics').length);

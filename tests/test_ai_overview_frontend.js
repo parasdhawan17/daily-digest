@@ -44,7 +44,7 @@ const ids = [
   'company-name', 'company-symbol', 'company-industry', 'company-price', 'company-change',
   'price-meta', 'metrics-grid', 'range-card', 'page-status',
   'overview-content', 'ai-status', 'ai-content', 'ai-summary', 'ai-categories', 'ai-signal-count',
-  'ai-robot-guide', 'ai-robot-guide-face', 'ai-robot-reading', 'ai-robot-tone',
+  'ai-robot-guide', 'ai-robot-guide-face', 'ai-robot-tone',
   'sources-list', 'ai-generated', 'ai-coverage'
 ];
 
@@ -61,7 +61,8 @@ function core(overrides = {}) {
 function ai() {
   return {ok: true, data: {
     summary: {heading: 'Revenue is growing', text: 'Revenue rose in the reported period.', tone: 'positive', evidence_ids: ['S1']},
-    encouraging: [{heading: 'Revenue momentum', text: 'Revenue rose.', tone: 'positive', evidence_ids: ['S1']}],
+    encouraging: [{heading: 'Revenue momentum', text: 'Revenue rose.', tone: 'positive', evidence_ids: ['S1'],
+      facts: [{label: 'Revenue', value: '+12% YoY'}, {label: 'Operating cash', value: '+6.5%'}]}],
     attention: [], changes: [], catalysts: [], risks: [], watch_next: [],
     sources: [{id: 'S1', section: 'financials', label: 'Reported financial health'}],
     generated_at: '2026-09-25T05:00:00Z'
@@ -114,7 +115,7 @@ test('renders available metrics and links AI citations to stock evidence', async
   const e = app.elements;
   assert.equal(e['overview-content'].hidden, false);
   assert.match(app.calls[0], /^\/api\/stock-data\?symbol=IN%3AEXAMPLE&section=core$/);
-  assert.match(app.calls[1], /^\/api\/stock-ai\?symbol=IN%3AEXAMPLE&schema=2$/);
+  assert.match(app.calls[1], /^\/api\/stock-ai\?symbol=IN%3AEXAMPLE&schema=3$/);
   assert.equal(e['company-name'].textContent, 'Example Ltd');
   assert.match(e['price-meta'].textContent, /^NSE · As of 25 Sep(?:t)? 2026/);
   assert.doesNotMatch(e['price-meta'].textContent, /IndianAPI/);
@@ -133,13 +134,18 @@ test('renders available metrics and links AI citations to stock evidence', async
   assert.ok(app.calls.some(url => url.includes('section=history&period=max&filter=price')));
   assert.equal(e['ai-content'].hidden, false);
   assert.equal(e['nav-stock-details'].href, '/stocks/IN:EXAMPLE');
-  assert.equal(e['ai-summary'].children[0].children[2].children[0].children[0].href, '/stocks/IN:EXAMPLE#financials');
+  assert.equal(e['ai-summary'].children[1].children[2].children[0].children[0].href, '/stocks/IN:EXAMPLE#financials');
   assert.equal(e['ai-summary'].children.length, 2);
   assert.equal(e['ai-categories'].children.length, 1);
   assert.equal(e['ai-categories'].hidden, false);
   assert.equal(e['ai-signal-count'].textContent, '1 supported signal across 1 area');
   assert.equal(e['ai-robot-guide-face'].children[0].dataset.tone, 'positive');
-  assert.equal(e['ai-robot-reading'].textContent, 'Revenue is growing');
+  assert.equal(e['ai-summary'].dataset.tone, 'positive');
+  assert.equal(e['ai-summary'].children[1].children[1].textContent, 'Revenue is growing');
+  const facts = e['ai-categories'].children[0].children[1].children[0].children[0].children[1];
+  assert.equal(facts.className, 'ai-signal-facts');
+  assert.equal(facts.children.length, 2);
+  assert.equal(facts.textContent, 'Revenue+12% YoYOperating cash+6.5%');
   assert.equal(e['sources-list'].children[0].children[0].href, '/stocks/IN:EXAMPLE#financials');
   assert.match(e['ai-generated'].textContent, /Generated 25 Sep(?:t)? 2026/);
 });
@@ -150,6 +156,7 @@ test('shows the company summary followed by supported signal groups', () => {
   assert.doesNotMatch(template, /Explore the synthesis|Signals and what to watch|signals-title/);
   assert.match(template, /id="ai-categories" class="ai-categories" role="group" aria-label="AI signals"/);
   assert.match(template, /id="ai-robot-guide"/);
+  assert.doesNotMatch(template, /id="ai-robot-reading"|class="ai-robot-reading"/);
   assert.doesNotMatch(template, /role="tablist"|id="ai-active-panel"/);
   assert.match(template, /<article id="ai-summary" class="ai-summary"><aside id="ai-robot-guide"[\s\S]*<\/aside><\/article>/);
   assert.ok(template.indexOf('id="ai-robot-guide"') < template.indexOf('class="ai-insight-body"'));
@@ -162,7 +169,8 @@ test('shows the company summary followed by supported signal groups', () => {
 test('nonempty signal groups remain visible with source citations', async () => {
   const result = ai();
   result.data.summary = {...result.data.summary, heading: 'Mixed outlook overall', tone: 'caution'};
-  result.data.risks = [{heading: 'Execution risk', text: 'A risk was reported.', tone: 'negative', evidence_ids: ['S1']}];
+  result.data.risks = [{heading: 'Execution risk', text: 'A risk was reported.', tone: 'negative', evidence_ids: ['S1'],
+    facts: [{label: 'Risk level', value: 'Elevated'}]}];
   const app = await setup(core(), [result]);
   const e = app.elements;
   assert.equal(e['ai-categories'].children.length, 2);
@@ -170,9 +178,9 @@ test('nonempty signal groups remain visible with source citations', async () => 
   assert.match(e['ai-categories'].textContent, /Execution risk/);
   assert.equal(e['ai-signal-count'].textContent, '2 supported signals across 2 areas');
   const risk = e['ai-categories'].children[1].children[1].children[0].children[0];
-  assert.equal(risk.children[1].children[0].children[0].href, '/stocks/IN:EXAMPLE#financials');
+  assert.equal(risk.children[2].children[0].children[0].href, '/stocks/IN:EXAMPLE#financials');
   assert.equal(e['ai-robot-guide-face'].children[0].dataset.tone, 'caution');
-  assert.equal(e['ai-robot-reading'].textContent, 'Mixed outlook overall');
+  assert.equal(e['ai-summary'].dataset.tone, 'caution');
   assert.equal(e['ai-robot-tone'].textContent, 'Mixed or uncertain');
   assert.match(e['ai-categories'].textContent, /Revenue momentum/);
 });
@@ -188,7 +196,8 @@ test('no empty signal grid appears when only the summary is supported', async ()
 
 test('multiple insights in a group render together', async () => {
   const result = ai();
-  result.data.encouraging.push({heading: 'Mixed outlook', text: 'Evidence is mixed.', tone: 'caution', evidence_ids: ['S1']});
+  result.data.encouraging.push({heading: 'Mixed outlook', text: 'Evidence is mixed.', tone: 'caution', evidence_ids: ['S1'],
+    facts: [{label: 'Signal', value: 'Mixed'}]});
   const app = await setup(core(), [result]);
   const e = app.elements;
   const rows = e['ai-categories'].children[0].children[1].children;

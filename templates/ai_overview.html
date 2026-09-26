@@ -7,9 +7,9 @@
   <meta name="color-scheme" content="light dark">
   <script>(function(){try{var t=localStorage.getItem('daily-digest-theme');if(t!=='light'&&t!=='dark')t=matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light';document.documentElement.dataset.theme=t;document.documentElement.style.colorScheme=t;}catch(e){}})();</script>
   <link rel="stylesheet" href="/landing.css">
-  <link rel="stylesheet" href="/ai-overview.css?v=20260926-nonempty-signals">
+  <link rel="stylesheet" href="/ai-overview.css?v=20260927-compact-type">
   <script src="/stock-format.js" defer></script>
-  <script src="/ai-overview.js?v=20260926-nonempty-signals" defer></script>
+  <script src="/ai-overview.js?v=20260927-signal-facts-v2" defer></script>
 </head>
 <body class="ai-overview-page" data-symbol="{{ symbol }}">
 <a class="skip-link" href="#overview-main">Skip to AI overview</a>
@@ -29,7 +29,7 @@
       <div id="ai-status" class="ai-loading" role="status" aria-live="polite">Connecting the evidence…</div>
       <div id="ai-content" hidden>
         <div class="ai-insight-explorer">
-          <article id="ai-summary" class="ai-summary"><aside id="ai-robot-guide" class="ai-robot-guide" aria-label="Overall AI signal"><div id="ai-robot-guide-face" class="ai-robot-guide-face"></div><div class="ai-robot-guide-copy"><span class="ai-robot-eyebrow">Overall signal</span><strong id="ai-robot-reading" class="ai-robot-reading"></strong><span id="ai-robot-tone" class="ai-robot-tone"></span></div></aside></article>
+          <article id="ai-summary" class="ai-summary"><aside id="ai-robot-guide" class="ai-robot-guide" aria-label="Overall AI signal"><div id="ai-robot-guide-face" class="ai-robot-guide-face"></div><span id="ai-robot-tone" class="ai-robot-tone"></span></aside></article>
           <div class="ai-insight-body">
             <div class="ai-insight-meta"><span id="ai-generated"></span><p id="ai-signal-count" class="ai-signal-count"></p></div>
             <div id="ai-categories" class="ai-categories" role="group" aria-label="AI signals"></div>

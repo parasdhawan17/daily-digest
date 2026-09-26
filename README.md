@@ -48,6 +48,12 @@ request from a compact subset of the existing company snapshot, then caches succ
 results for six hours in-process and at the CDN. Evidence links lead back to the
 deterministic tabs; unavailable or malformed AI output never replaces factual content.
 
+Stock-page cards and metric tiles can also be held for 600 ms to open the floating AI
+section explainer. `POST /api/stock-section-ai` accepts one allowlisted card and a bounded
+snapshot of its visible public data, returning a short structured summary, explanation,
+and highlighted facts. Successful identical explanations are cached in-process for six
+hours; failures and HTTP responses are not cached.
+
 The existing `INDIANAPI_API_KEY` and `INDIANAPI_BASE_URL` configure the feature;
 Developer subscriptions must set `INDIANAPI_BASE_URL=https://dev.indianapi.in`.
 Only the backend receives the key. Successful public data is cached at the CDN
@@ -110,7 +116,7 @@ python3 -m venv .venv
 | `BREVO_DOI_TEMPLATE_ID` | New subscribers | Double opt-in template ID from Brevo |
 | `BREVO_TICKERS_ATTRIBUTE` | Subscribe + email cron | Optional (default `US_TICKERS` — text, comma-separated) |
 | `BREVO_IN_DASHBOARD_ATTRIBUTE` | Indian dashboard customization | Optional (default `IN_DASHBOARD_CARDS` — create this text attribute in Brevo before deployment) |
-| `OPENROUTER_API_KEY` | Optional AI briefing and stock overview | If unset, AI features remain unavailable while deterministic content continues to work |
+| `OPENROUTER_API_KEY` | Optional AI briefing, stock overview, and section explainer | If unset, AI features remain unavailable while deterministic content continues to work |
 | `OPENROUTER_MODEL` | Optional AI email briefing | Default `google/gemini-2.5-flash-lite`; choose a low-cost text model |
 | `OPENROUTER_SITE_URL` | Optional AI email briefing | Optional attribution URL; defaults to `SITE_URL` |
 | `OPENROUTER_APP_NAME` | Optional AI email briefing | Optional attribution name; defaults to `Tickr Digest` |
@@ -121,7 +127,8 @@ python3 -m venv .venv
 | `AI_SUMMARY_RETRIES` | Optional AI email briefing | Default `2`; retries transient or unusable responses with backoff |
 | `AI_SUMMARY_MAX_OUTPUT_TOKENS` | Optional AI email briefing | Default `1800` per ticker batch |
 | `AI_SUMMARY_MARKET_MAX_OUTPUT_TOKENS` | Optional AI email briefing | Default `400` for final headline and market context |
-| `AI_STOCK_OVERVIEW_MAX_OUTPUT_TOKENS` | Optional stock AI overview | Default `900` for one bounded, structured company overview |
+| `AI_STOCK_OVERVIEW_MAX_OUTPUT_TOKENS` | Optional stock AI overview | Default `1200` for one bounded, structured company overview |
+| `AI_STOCK_SECTION_MAX_OUTPUT_TOKENS` | Optional stock section explainer | Default `500` for one bounded card explanation |
 
 Copy from sibling `stock-news-bot/.env` via `./scripts/setup_vercel_env.sh`.
 

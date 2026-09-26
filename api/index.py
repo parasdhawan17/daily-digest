@@ -15,6 +15,7 @@ from api.stock import (
     handle_ai as handle_stock_ai,
     handle_page as handle_stock_page,
     handle_data as handle_stock_data,
+    handle_section_ai as handle_stock_section_ai,
 )
 
 from api.digest import (
@@ -48,7 +49,7 @@ def route(handler: BaseHTTPRequestHandler) -> str | None:
     explicit = (query.get("route") or [""])[0].strip().lower()
     if explicit in ("auth-config", "auth-session", "auth-google", "auth-logout"):
         return explicit
-    if explicit in ("digest", "digest-data", "digest-ai", "subscription", "subscribe", "search", "validate", "stock", "stock-data", "stock-ai", "ai-overview-page"):
+    if explicit in ("digest", "digest-data", "digest-ai", "subscription", "subscribe", "search", "validate", "stock", "stock-data", "stock-ai", "stock-section-ai", "ai-overview-page"):
         return explicit
 
     normalized = request_path(handler).rstrip("/") or "/"
@@ -60,6 +61,8 @@ def route(handler: BaseHTTPRequestHandler) -> str | None:
         return 'stock-data'
     if normalized == '/api/stock-ai':
         return 'stock-ai'
+    if normalized == '/api/stock-section-ai':
+        return 'stock-section-ai'
     if normalized in ("/api/auth/config", "/api/auth/session", "/api/auth/google", "/api/auth/logout"):
         return "auth-" + normalized.rsplit("/", 1)[1]
     if normalized in ("/digest", "/api/digest", "/api/index"):
@@ -113,6 +116,8 @@ class handler(BaseHTTPRequestHandler):
             handle_subscribe(self)
         elif matched == "digest-ai":
             handle_ai_post(self)
+        elif matched == "stock-section-ai":
+            handle_stock_section_ai(self)
         elif matched == "validate":
             handle_validate_post(self)
         else:

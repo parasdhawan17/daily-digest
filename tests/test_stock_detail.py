@@ -171,6 +171,7 @@ class EndpointTests(unittest.TestCase):
         self.assertEqual(route(handler('/api/index?route=stock&symbol=IN:TCS')), 'stock')
         self.assertEqual(route(handler('/api/stock-data?symbol=IN:TCS')), 'stock-data')
         self.assertEqual(route(handler('/api/stock-ai?symbol=IN:TCS')), 'stock-ai')
+        self.assertEqual(route(handler('/api/stock-section-ai')), 'stock-section-ai')
 
     def test_page_is_public_and_escaped(self):
         h = handler('/stocks/IN:M%26M')
@@ -221,6 +222,26 @@ class EndpointTests(unittest.TestCase):
         h.send_response.assert_called_with(200)
         h.send_header.assert_any_call('Cache-Control', 'public, max-age=0, s-maxage=21600, stale-while-revalidate=3600')
         get_overview.assert_called_once_with('IN:TCS', {'name': 'TCS'})
+
+    @patch.object(stock, 'get_stock_section_explanation', return_value=({'ok': True, 'data': {}}, 21600))
+    def test_section_ai_endpoint_accepts_bounded_post_and_is_not_http_cached(self, explain):
+        body = json.dumps({'symbol': 'IN:TCS', 'section': 'overview', 'card_id': 'price_context',
+                           'title': 'Price context', 'text': 'Current price ₹100'}).encode()
+        h = handler('/api/stock-section-ai')
+        h.headers = {'Content-Length': str(len(body))}
+        h.rfile = io.BytesIO(body)
+        stock.handle_section_ai(h)
+        h.send_response.assert_called_with(200)
+        h.send_header.assert_any_call('Cache-Control', 'no-store')
+        explain.assert_called_once_with('IN:TCS', 'overview', 'price_context', 'Price context',
+                                        'Current price ₹100')
+
+    def test_section_ai_endpoint_rejects_oversized_posts_before_reading(self):
+        h = handler('/api/stock-section-ai')
+        h.headers = {'Content-Length': '12001'}
+        stock.handle_section_ai(h)
+        h.send_response.assert_called_with(413)
+        self.assertEqual(json.loads(h.wfile.getvalue())['code'], 'request_too_large')
 
     @patch.dict('os.environ', {'INDIANAPI_API_KEY': 'key'})
     @patch.object(tickers_search, 'search_symbols', return_value=[])

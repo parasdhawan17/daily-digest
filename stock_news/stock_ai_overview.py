@@ -147,35 +147,53 @@ def build_evidence(core: dict) -> list[dict]:
     return sources
 
 
-def _item_schema() -> dict:
+def _fact_schema() -> dict:
     return {
         "type": "object",
         "properties": {
-            "heading": {"type": "string"},
-            "text": {"type": "string"},
-            "tone": {"type": "string", "enum": ["positive", "negative", "caution", "neutral"]},
-            "evidence_ids": {"type": "array", "items": {"type": "string"}, "maxItems": 3},
+            "label": {"type": "string"},
+            "value": {"type": "string"},
         },
-        "required": ["heading", "text", "tone", "evidence_ids"],
+        "required": ["label", "value"],
+        "additionalProperties": False,
+    }
+
+
+def _item_schema(with_facts: bool = False) -> dict:
+    properties = {
+        "heading": {"type": "string"},
+        "text": {"type": "string"},
+        "tone": {"type": "string", "enum": ["positive", "negative", "caution", "neutral"]},
+        "evidence_ids": {"type": "array", "items": {"type": "string"}, "maxItems": 3},
+    }
+    required = ["heading", "text", "tone", "evidence_ids"]
+    if with_facts:
+        properties["facts"] = {"type": "array", "items": _fact_schema(), "minItems": 1, "maxItems": 2}
+        required.append("facts")
+    return {
+        "type": "object",
+        "properties": properties,
+        "required": required,
         "additionalProperties": False,
     }
 
 
 def _schema() -> dict:
-    item = _item_schema()
+    summary_item = _item_schema()
+    signal_item = _item_schema(with_facts=True)
     return {
         "name": "stock_ai_overview",
         "strict": True,
         "schema": {
             "type": "object",
             "properties": {
-                "summary": item,
-                "encouraging": {"type": "array", "items": item, "maxItems": 2},
-                "attention": {"type": "array", "items": item, "maxItems": 2},
-                "changes": {"type": "array", "items": item, "maxItems": 2},
-                "catalysts": {"type": "array", "items": item, "maxItems": 2},
-                "risks": {"type": "array", "items": item, "maxItems": 2},
-                "watch_next": {"type": "array", "items": item, "maxItems": 3},
+                "summary": summary_item,
+                "encouraging": {"type": "array", "items": signal_item, "maxItems": 2},
+                "attention": {"type": "array", "items": signal_item, "maxItems": 2},
+                "changes": {"type": "array", "items": signal_item, "maxItems": 2},
+                "catalysts": {"type": "array", "items": signal_item, "maxItems": 2},
+                "risks": {"type": "array", "items": signal_item, "maxItems": 2},
+                "watch_next": {"type": "array", "items": signal_item, "maxItems": 3},
             },
             "required": ["summary", "encouraging", "attention", "changes", "catalysts", "risks", "watch_next"],
             "additionalProperties": False,
@@ -195,6 +213,7 @@ Rules:
 - Write for a general investor in plain English. Be balanced, specific and concise.
 - Write summary.heading as the overall takeaway in 4-8 plain-English words. Synthesize the most important supported business or financial signal, including a tension or change when the evidence supports one. It must say something about the company now, not merely identify its industry, business type or the page. Avoid "Overview", "Company overview", "Provider overview", "IT services provider" and the company name as filler. If the evidence is mixed or thin, say that plainly without inventing a directional claim. Examples of the desired style, only when supported by the packet: "Growth continues as margins tighten"; "Steady demand, with profitability under pressure".
 - Give each category item a specific 3-7 word heading describing its signal, such as "Revenue momentum" or "Balance-sheet pressure". Do not use generic headings such as "Key point".
+- Give every category item a facts array containing one or two short, decision-useful facts from its cited evidence. Prefer exact numeric figures. Keep each label to 1-3 words and each value to 1-4 words, including its unit or comparison (for example, {{"label":"Revenue","value":"+11.6% YoY"}}). If no number supports the item, use a concise dated or status fact. Never calculate or invent a figure.
 - Assign every item one tone: positive for a supported favorable signal, negative for a supported adverse signal, caution for mixed or uncertain evidence, or neutral for non-directional context and questions.
 - The summary must be 55-90 words. Every other item must be one sentence, at most 28 words.
 - Return no more than two items per list, except watch_next may contain three; an empty list is better than an unsupported claim.
@@ -219,7 +238,7 @@ def _parse(content: Any, evidence_ids: set[str]) -> dict | None:
     if not isinstance(raw, dict):
         return None
 
-    def item(value: Any, limit: int) -> dict | None:
+    def item(value: Any, limit: int, require_facts: bool = False) -> dict | None:
         if not isinstance(value, dict):
             return None
         heading = _text(value.get("heading"), 80)
@@ -229,9 +248,21 @@ def _parse(content: Any, evidence_ids: set[str]) -> dict | None:
         for source_id in value.get("evidence_ids") or []:
             if source_id in evidence_ids and source_id not in ids:
                 ids.append(source_id)
-        if not heading or not text or tone not in {"positive", "negative", "caution", "neutral"} or not ids:
+        facts = []
+        for fact in value.get("facts") or []:
+            if not isinstance(fact, dict):
+                continue
+            label = _text(fact.get("label"), 36)
+            fact_value = _text(fact.get("value"), 48)
+            if label and fact_value:
+                facts.append({"label": label, "value": fact_value})
+        if (not heading or not text or tone not in {"positive", "negative", "caution", "neutral"}
+                or not ids or (require_facts and not facts)):
             return None
-        return {"heading": heading, "text": text, "tone": tone, "evidence_ids": ids[:3]}
+        parsed = {"heading": heading, "text": text, "tone": tone, "evidence_ids": ids[:3]}
+        if require_facts:
+            parsed["facts"] = facts[:2]
+        return parsed
 
     summary = item(raw.get("summary"), MAX_TEXT)
     if not summary:
@@ -243,7 +274,7 @@ def _parse(content: Any, evidence_ids: set[str]) -> dict | None:
             return None
         max_items = 3 if key == "watch_next" else 2
         result[key] = [parsed for value in values[:max_items]
-                       if (parsed := item(value, MAX_ITEM_TEXT))]
+                       if (parsed := item(value, MAX_ITEM_TEXT, require_facts=True))]
     return result
 
 
@@ -284,7 +315,7 @@ def get_stock_ai_overview(symbol: str, core: dict) -> tuple[dict | None, int]:
     try:
         evidence = build_evidence(core)
         result = _generate(symbol, evidence) if evidence else None
-        envelope = ({"ok": True, "symbol": symbol, "schema_version": 2, "data": result,
+        envelope = ({"ok": True, "symbol": symbol, "schema_version": 3, "data": result,
                      "coverage": {"sources": len(evidence),
                                   "news_stories": len(core.get("news") or [])}}
                     if result else None)

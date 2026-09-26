@@ -233,9 +233,18 @@
     head.append(node('span', 'ai-signal-title', item.heading || 'Company signal'), node('span', 'ai-tone', tones[tone]));
     const title = node('div', 'ai-signal-heading');
     title.append(robotFace(tone), head);
+    const facts = node('div', 'ai-signal-facts');
+    for (const fact of Array.isArray(item.facts) ? item.facts : []) {
+      if (!fact || !fact.label || !fact.value) continue;
+      const chip = node('span', 'ai-signal-fact');
+      chip.append(node('span', 'ai-signal-fact-label', fact.label), node('strong', '', fact.value));
+      facts.append(chip);
+    }
     const body = node('p', '', item.text || '');
     body.append(citations(item.evidence_ids, sources));
-    card.append(title, body);
+    card.append(title);
+    if (facts.children.length) card.append(facts);
+    card.append(body);
     return card;
   }
 
@@ -249,14 +258,14 @@
     const summaryCopy = node('div', 'ai-summary-copy');
     summaryCopy.append(node('span', 'ai-summary-label', '✦ The AI take'), node('h2', '', data.summary.heading || 'Company perspective'), summaryBody);
     const guide = $('ai-robot-guide'), guideFace = $('ai-robot-guide-face');
-    const reading = $('ai-robot-reading'), toneLabel = $('ai-robot-tone');
+    const toneLabel = $('ai-robot-tone');
     const summaryTone = Object.hasOwn(tones, data.summary.tone) ? data.summary.tone : 'neutral';
+    summary.dataset.tone = summaryTone;
     guide.dataset.tone = summaryTone;
     guideFace.replaceChildren(robotFace(summaryTone, true));
-    reading.textContent = data.summary.heading || 'Company perspective';
     toneLabel.textContent = ({positive: 'Encouraging evidence', negative: 'Needs attention',
       caution: 'Mixed or uncertain', neutral: 'Monitoring point'})[summaryTone];
-    summary.replaceChildren(summaryCopy, guide);
+    summary.replaceChildren(guide, summaryCopy);
 
     const container = $('ai-categories');
     container.replaceChildren();
@@ -336,7 +345,7 @@
     status.hidden = false;
     status.setAttribute('aria-busy', 'true');
     try {
-      renderAI(await request('/api/stock-ai?' + new URLSearchParams({symbol, schema: '2'})));
+      renderAI(await request('/api/stock-ai?' + new URLSearchParams({symbol, schema: '3'})));
     } catch (error) {
       const retry = node('button', '', 'Retry AI overview');
       retry.type = 'button';

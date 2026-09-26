@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Local dev server: static public/ + subscribe/search API (no Vercel CLI required)."""
+"""Local dev server for static pages and API routes (no Vercel CLI required)."""
 
 import json
 import mimetypes
@@ -103,6 +103,10 @@ class DevHandler(BaseHTTPRequestHandler):
 
     def do_POST(self) -> None:
         path = urlparse(self.path).path
+        if path == "/api/stock-section-ai":
+            from api.stock import handle_section_ai
+            handle_section_ai(self)
+            return
         if path in ("/api/auth/google", "/api/auth/logout"):
             from api.auth import handle_auth
             handle_auth(self, path.rsplit("/", 1)[1])

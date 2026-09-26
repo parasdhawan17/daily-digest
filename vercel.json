@@ -10,6 +10,7 @@
     {"source": "/ai-overview/:symbol", "destination": "/api/index?route=ai-overview-page&symbol=:symbol"},
     {"source": "/api/stock-data", "destination": "/api/index?route=stock-data"},
     {"source": "/api/stock-ai", "destination": "/api/index?route=stock-ai"},
+    {"source": "/api/stock-section-ai", "destination": "/api/index?route=stock-section-ai"},
     {
       "source": "/digest",
       "destination": "/api/index?route=digest"
