@@ -5,6 +5,13 @@ from stock_news.render import build_email_digest, build_web_digest, build_web_se
 
 
 class DigestDesignTest(unittest.TestCase):
+    def test_web_digest_declares_browser_and_touch_icons(self):
+        html = build_web_digest([], ['US:AAPL'], progressive=True, progressive_token='test-token')
+
+        self.assertIn('rel="icon" href="/assets/tickr-digest-icon.svg" type="image/svg+xml"', html)
+        self.assertIn('rel="icon" href="/assets/tickr-digest-icon-t-concept.png" type="image/png"', html)
+        self.assertIn('rel="apple-touch-icon" href="/assets/tickr-digest-icon-t-concept.png"', html)
+
     def test_email_without_ai_keeps_company_news_and_personal_links(self):
         html, text, _ = build_email_digest(
             sample_sections(), ['US:AAPL', 'US:MSFT'], 2, 'pre_open',
