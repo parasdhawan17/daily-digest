@@ -76,6 +76,10 @@ class DevHandler(BaseHTTPRequestHandler):
             from api.stock import handle_ai
             handle_ai(self)
             return
+        if path == "/api/analytics/config":
+            from api.analytics import handle_get
+            handle_get(self)
+            return
 
         if path in ("/api/auth/config", "/api/auth/session"):
             from api.auth import handle_auth

@@ -48,6 +48,9 @@
 
   function choose(item) {
     if (!item || !validSymbol.test(item.symbol)) return;
+    if (window.tickrAnalytics) window.tickrAnalytics.capture('feature_used', {
+      feature: 'stock_search_result_selected', selected_symbol: item.symbol
+    });
     reset();
     selected = item;
     const encoded = encodeURIComponent(item.symbol).replace('%3A', ':');

@@ -23,8 +23,10 @@ test('dashboard cards expose the floating AI explainer flow', () => {
   assert.match(source, /Math\.hypot\([\s\S]*>10/);
   assert.match(styles, /\.dashboard-section-assistant/);
   assert.match(styles, /\.stock-section-ai-launcher/);
+  assert.match(source, /stock-section-ai-launcher-tip','Long press a section to let Tickr AI explain'/);
+  assert.match(styles, /\.stock-section-ai-launcher-tip::after/);
   assert.match(styles, /env\(safe-area-inset-bottom\)/);
-  assert.match(template, /dashboard-cards\.css\?v=20260927-shared-ai-overview/);
+  assert.match(template, /dashboard-cards\.css\?v=20260928-launcher-tip/);
 });
 
 class Element {

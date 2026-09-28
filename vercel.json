@@ -11,6 +11,7 @@
     {"source": "/api/stock-data", "destination": "/api/index?route=stock-data"},
     {"source": "/api/stock-ai", "destination": "/api/index?route=stock-ai"},
     {"source": "/api/stock-section-ai", "destination": "/api/index?route=stock-section-ai"},
+    {"source": "/api/analytics/config", "destination": "/api/index?route=analytics-config"},
     {
       "source": "/digest",
       "destination": "/api/index?route=digest"

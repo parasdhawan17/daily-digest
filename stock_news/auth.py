@@ -123,7 +123,9 @@ def subscription(identity):
     active = bool(contact and tickers)
     email_briefings = bool(contact and not contact.get('emailBlacklisted') and
                            int(BREVO_LIST_ID) in (contact.get('listIds') or []))
-    return {'ok': True, 'authenticated': True, 'email': identity['email'], 'tickers': tickers,
+    analytics_id = hashlib.sha256(('tickr-user:' + identity['sub']).encode('utf-8')).hexdigest()
+    return {'ok': True, 'authenticated': True, 'email': identity['email'],
+            'analytics_id': analytics_id, 'tickers': tickers,
             'in_dashboard_cards': dashboard_cards,
             'needs_subscription': not active, 'email_briefings': email_briefings,
             'suppressed': bool(contact and contact.get('emailBlacklisted'))}

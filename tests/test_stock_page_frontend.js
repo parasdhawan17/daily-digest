@@ -27,8 +27,8 @@ test('standalone research page renders accessible filtered P\/E history', () => 
 
 test('standalone research page versions the new assets', () => {
   assert.match(template, /ai-overview\.css\?v=20260927-compact-type/);
-  assert.match(template, /stock\.css\?v=20260927-single-open/);
-  assert.match(template, /stock\.js\?v=20260927-single-open/);
+  assert.match(template, /stock\.css\?v=20260928-launcher-tip/);
+  assert.match(template, /stock\.js\?v=20260928-launcher-tip/);
 });
 
 test('Overview tab does not render company signals', () => {
@@ -47,6 +47,8 @@ test('stock cards and metrics expose the floating section explainer', () => {
   assert.match(source, /AI-generated synthesis · Not investment advice/);
   assert.match(styles, /\.stock-section-assistant/);
   assert.match(styles, /\.stock-section-ai-launcher/);
+  assert.match(source, /stock-section-ai-launcher-tip', 'Long press a section to let Tickr AI explain'/);
+  assert.match(styles, /\.stock-section-ai-launcher-tip::after/);
   assert.match(styles, /env\(safe-area-inset-bottom\)/);
 });
 

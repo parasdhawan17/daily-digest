@@ -129,8 +129,16 @@ python3 -m venv .venv
 | `AI_SUMMARY_MARKET_MAX_OUTPUT_TOKENS` | Optional AI email briefing | Default `400` for final headline and market context |
 | `AI_STOCK_OVERVIEW_MAX_OUTPUT_TOKENS` | Optional stock AI overview | Default `1200` for one bounded, structured company overview |
 | `AI_STOCK_SECTION_MAX_OUTPUT_TOKENS` | Optional stock section explainer | Default `500` for one bounded card explanation |
+| `POSTHOG_PROJECT_KEY` | Optional website analytics | Public PostHog project key. When unset, analytics stays disabled. |
+| `POSTHOG_HOST` | Optional website analytics | Defaults to `https://us.i.posthog.com`; use `https://eu.i.posthog.com` for an EU project. |
 
 Copy from sibling `stock-news-bot/.env` via `./scripts/setup_vercel_env.sh`.
+
+Analytics uses a shared browser client with manual, versioned events rather than
+text autocapture. It records page and section views, stable feature identifiers,
+API outcome/latency, AI feature requests, and uncaught browser errors. Form
+values, prompts, responses, email addresses, and digest tokens are never added
+to event properties. Session replay masks all input and editable fields.
 
 **Finding `BREVO_DOI_TEMPLATE_ID`:** In Brevo, open the double opt-in email template used for your subscribe form → Settings → template ID (numeric).
 

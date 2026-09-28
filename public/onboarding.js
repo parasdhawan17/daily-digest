@@ -162,7 +162,13 @@
       var checked = selectedCards.has(card.id);
       return '<label class="selection-card ' + (checked ? 'is-selected' : '') + '"><input type="checkbox" value="' + card.id + '" ' + (checked ? 'checked' : '') + '><span class="selection-check" aria-hidden="true"><svg viewBox="0 0 16 16"><path d="m3.5 8 3 3 6-6"/></svg></span>' + dashboardSample(card,category.id) + '</label>';
     }).join('');
-    $('card-grid').querySelectorAll('input').forEach(function (input) { input.onchange = function () { if (input.checked) selectedCards.add(input.value); else selectedCards.delete(input.value); renderCustomizer(); }; });
+    $('card-grid').querySelectorAll('input').forEach(function (input) { input.onchange = function () {
+      if (input.checked) selectedCards.add(input.value); else selectedCards.delete(input.value);
+      if (window.tickrAnalytics) window.tickrAnalytics.capture('feature_used', {
+        feature: 'dashboard_card_toggled', card: input.value, category: activeCategory, enabled: input.checked
+      });
+      renderCustomizer();
+    }; });
     renderSelectionSummary();
   }
   function renderSelectionSummary() {

@@ -30,6 +30,9 @@
   function applyState(data) {
     state = data;
     window.tickrAuth.state = data;
+    if (data.authenticated && data.analytics_id && window.tickrAnalytics) {
+      window.tickrAnalytics.identify(data.analytics_id, {account_type: 'google'});
+    }
     window.dispatchEvent(new CustomEvent('tickr-auth', {detail: data}));
     var homeLink = document.querySelector ? document.querySelector('.home-page .nav-dashboard-link') : null;
     if (homeLink && data.authenticated) {

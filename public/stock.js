@@ -427,7 +427,8 @@
     sectionAssistantBody = node('div', 'stock-section-ai-body'); sectionAssistantBody.id = 'stock-section-ai-live'; sectionAssistantBody.setAttribute('aria-live', 'polite');
     sectionAssistant.append(head, sectionAssistantBody); document.body.append(sectionAssistant);
     setTimeout(() => sectionAssistant.classList.remove('is-initial'), 340);
-    sectionAssistantLauncher = node('button', 'stock-section-ai-launcher'); sectionAssistantLauncher.type = 'button'; sectionAssistantLauncher.hidden = true; sectionAssistantLauncher.setAttribute('aria-label', 'Open AI section explainer'); sectionAssistantLauncher.append(aiRobotFace('neutral')); document.body.append(sectionAssistantLauncher);
+    sectionAssistantLauncher = node('button', 'stock-section-ai-launcher'); sectionAssistantLauncher.type = 'button'; sectionAssistantLauncher.hidden = true; sectionAssistantLauncher.setAttribute('aria-label', 'Open AI section explainer');
+    sectionAssistantLauncher.append(node('span', 'stock-section-ai-launcher-tip', 'Long press a section to let Tickr AI explain'), aiRobotFace('neutral')); document.body.append(sectionAssistantLauncher);
     minimize.onclick = collapseSectionAssistant;
     close.onclick = collapseSectionAssistant;
     sectionAssistantLauncher.onclick = () => { sectionAssistantWelcomeOpen = false; showSectionAssistant(); };
