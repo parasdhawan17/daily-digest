@@ -250,6 +250,7 @@ def _request_structured_json(
     parser: Callable[[Any], dict | None],
     system_prompt: str = SYSTEM_PROMPT,
     retries: int | None = None,
+    reasoning_effort: str | None = None,
 ) -> dict | None:
     request_body = {
         "model": OPENROUTER_MODEL,
@@ -262,6 +263,8 @@ def _request_structured_json(
         "temperature": 0.1,
         "max_tokens": max_tokens,
     }
+    if reasoning_effort:
+        request_body["reasoning_effort"] = reasoning_effort
     headers = {
         "Authorization": f"Bearer {OPENROUTER_API_KEY}",
         "Content-Type": "application/json",

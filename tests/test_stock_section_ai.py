@@ -63,11 +63,33 @@ class ValidationTests(unittest.TestCase):
         bad["facts"] = []
         self.assertIsNone(section_ai._parse(json.dumps(bad), EVIDENCE))
 
+    def test_parser_accepts_positive_figure_without_repeated_plus_sign(self):
+        result = model_result()
+        result["summary"] = "The reported annual change was 9.55%."
+        result["facts"][0] = {"label": "Annual change", "value": "+9.55%"}
+        evidence = EVIDENCE + " Annual change +9.55%"
+        self.assertIsNotNone(section_ai._parse(json.dumps(result), evidence))
+
+    def test_number_validation_treats_year_ranges_as_positive_years(self):
+        self.assertEqual(section_ai._numbers("OPM trend (2015-2026)"), {"2015", "2026"})
+        self.assertIn("-5%", section_ai._numbers("Latest change -5%"))
+
+    def test_number_validation_normalizes_percentage_spacing(self):
+        self.assertEqual(section_ai._numbers("OPM 17 % and margin 18%"), {"17%", "18%"})
+
     def test_prompt_marks_page_text_untrusted_and_forbids_advice(self):
         prompt = section_ai._prompt("IN:EXAMPLE", "overview", "Price context", EVIDENCE)
         self.assertIn("untrusted external evidence", prompt)
         self.assertIn("Never calculate, infer or invent", prompt)
         self.assertIn("investment advice", prompt)
+
+    def test_prompt_requires_company_specific_data_insight(self):
+        prompt = section_ai._prompt("IN:EXAMPLE", "financials", "Annual results", EVIDENCE)
+        self.assertIn("company-specific takeaway", prompt)
+        self.assertIn("what the supplied data says about this stock", prompt)
+        self.assertIn("Do not merely describe what the card contains", prompt)
+        self.assertIn("Keep this educational explanation separate", prompt)
+        self.assertIn("Keep these fact chips focused on reported card values", prompt)
 
 
 class GenerationTests(unittest.TestCase):
@@ -86,8 +108,9 @@ class GenerationTests(unittest.TestCase):
             "IN:EXAMPLE", "overview", "price_context", "Price context", EVIDENCE)
         self.assertIs(first, second)
         self.assertEqual(request.call_count, 1)
-        self.assertEqual(request.call_args.kwargs["max_tokens"], 500)
-        self.assertEqual(request.call_args.kwargs["retries"], 0)
+        self.assertEqual(request.call_args.kwargs["max_tokens"], 900)
+        self.assertEqual(request.call_args.kwargs["retries"], 1)
+        self.assertEqual(request.call_args.kwargs["reasoning_effort"], "none")
         self.assertEqual(ttl, section_ai.TTL_SECONDS)
         self.assertLessEqual(remaining, ttl)
         self.assertEqual(first["card_id"], "price_context")

@@ -15,6 +15,10 @@ test('dashboard cards expose the floating AI explainer flow', () => {
   assert.match(source, /fetch\('\/api\/stock-section-ai'/);
   assert.match(source, /node\.dataset\.aiCardId=meta\.id/);
   assert.match(source, /node\.dataset\.aiSymbol=symbol/);
+  assert.match(source, /target\.dataset\.aiEvidence/);
+  assert.match(source, /dataset\.aiEvidence=timeSeriesAIContext/);
+  assert.match(source, /Earliest to latest change/);
+  assert.match(source, /\/%\|margin\/i\.test\(selection\[0\]\)\?'%'/);
   assert.match(source, /setTimeout\(function\(\)\{var selected=[\s\S]*\},600\)/);
   assert.match(source, /Math\.hypot\([\s\S]*>10/);
   assert.match(styles, /\.dashboard-section-assistant/);
