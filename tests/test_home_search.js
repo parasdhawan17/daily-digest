@@ -4,6 +4,16 @@ const fs = require('node:fs');
 const vm = require('node:vm');
 
 const source = fs.readFileSync('public/home-search.js', 'utf8');
+const pageSource = fs.readFileSync('public/index.html', 'utf8');
+const homeStyles = fs.readFileSync('public/home.css', 'utf8');
+
+test('homepage presents Tickr AI with the shared animated robot companion', () => {
+  assert.match(pageSource, /AI-powered Indian stock research/);
+  assert.match(pageSource, /class="home-ai-companion"/);
+  assert.match(pageSource, /class="ai-robot-shell"/);
+  assert.match(homeStyles, /\.home-ai-companion[^}]*animation:\s*home-ai-companion-float/);
+  assert.match(homeStyles, /@media \(prefers-reduced-motion:\s*reduce\)[\s\S]*\.home-page \.home-ai-companion/);
+});
 
 function setup(results) {
   class Element {
