@@ -7,6 +7,7 @@ from concurrent.futures import Future
 from datetime import datetime, timezone
 import hashlib
 import json
+import logging
 import re
 import threading
 import time
@@ -62,6 +63,15 @@ CARDS = {
 _cache: OrderedDict = OrderedDict()
 _pending: dict[str, Future] = {}
 _lock = threading.Lock()
+_logger = logging.getLogger(__name__)
+
+_NEGATIVE_WORDS = re.compile(
+    r"\b(?:decrease(?:d|s|ing)?|decline(?:d|s|ing)?|drop(?:ped|s|ping)?|"
+    r"fell|fall(?:en|ing|s)?|down|lower|negative|narrow(?:ed|s|ing)?|"
+    r"reduc(?:e|ed|es|ing|tion)|contract(?:ed|s|ing|ion))\b",
+    re.IGNORECASE,
+)
+_NUMBER_PATTERN = re.compile(r"(?<![\d,])[+-]?\d[\d,]*(?:\.\d+)?(?:\s*%)?")
 
 
 def _text(value: Any, limit: int) -> str:
@@ -138,7 +148,63 @@ def _numbers(value: str) -> set[str]:
     # negative values from positive ones.
     return {
         match.replace(",", "").replace(" ", "").removeprefix("+")
-        for match in re.findall(r"(?<![\d,])[+-]?\d[\d,]*(?:\.\d+)?(?:\s*%)?", value)
+        for match in _NUMBER_PATTERN.findall(value)
+    }
+
+
+def _numbers_are_grounded(value: str, supplied_numbers: set[str]) -> bool:
+    """Allow a negative source value to be restated as an unsigned decrease."""
+    for match in _NUMBER_PATTERN.finditer(value):
+        number = match.group().replace(",", "").replace(" ", "").removeprefix("+")
+        if number in supplied_numbers:
+            continue
+        negative = "-" + number
+        context = value[max(0, match.start() - 45):min(len(value), match.end() + 45)]
+        if negative in supplied_numbers and _NEGATIVE_WORDS.search(context):
+            continue
+        return False
+    return True
+
+
+def _fallback_facts(evidence: str, title: str) -> list[dict[str, str]]:
+    facts = []
+    seen = set()
+    for match in re.finditer(
+        r"(?<![\d,])[+-]?\d[\d,]*(?:\.\d+)?\s*(?:%|pp|×|₹\s*cr|₹|cr)?",
+        evidence,
+        re.IGNORECASE,
+    ):
+        value = " ".join(match.group().split())
+        bare = value.replace(",", "").removeprefix("+")
+        if re.fullmatch(r"(?:FY)?(?:19|20)\d{2}", bare, re.IGNORECASE) or bare in seen:
+            continue
+        seen.add(bare)
+        facts.append({"label": f"Reported value {len(facts) + 1}", "value": value})
+        if len(facts) == 4:
+            break
+    supplements = [("Selected card", title), ("Source", "Displayed dashboard data")]
+    for label, value in supplements:
+        if len(facts) >= 2:
+            break
+        facts.append({"label": label, "value": value})
+    return facts
+
+
+def _fallback_result(title: str, evidence: str) -> dict:
+    return {
+        "heading": f"{title} data is available",
+        "summary": (
+            "The AI interpretation could not be verified, so these values are copied "
+            "directly from the selected card without adding conclusions."
+        ),
+        "meaning": (
+            "Use the reported figures in the card while a fresh explanation is generated. "
+            "No additional calculation or investment conclusion has been applied."
+        ),
+        "facts": _fallback_facts(evidence, title),
+        "tone": "neutral",
+        "fallback": True,
+        "generated_at": datetime.now(timezone.utc).isoformat(),
     }
 
 
@@ -163,8 +229,8 @@ def _parse(content: Any, evidence: str) -> dict | None:
     if not 2 <= len(facts) <= 4:
         return None
     supplied_numbers = _numbers(evidence)
-    output_numbers = _numbers(" ".join([heading, summary, meaning] + [f["value"] for f in facts]))
-    if not output_numbers.issubset(supplied_numbers):
+    output_parts = [heading, summary, meaning] + [f'{fact["label"]} {fact["value"]}' for fact in facts]
+    if not all(_numbers_are_grounded(part, supplied_numbers) for part in output_parts):
         return None
     return {"heading": heading, "summary": summary, "meaning": meaning, "facts": facts[:4], "tone": tone}
 
@@ -174,7 +240,8 @@ def get_stock_section_explanation(symbol: str, section: Any, card_id: Any, title
     """Generate and cache one explanation, keyed by the exact visible evidence."""
     section, card_id, title, evidence = validate_input(section, card_id, title, evidence)
     if not ai_summary.OPENROUTER_API_KEY:
-        return None, 0
+        return {"ok": True, "symbol": symbol, "card_id": card_id,
+                "data": _fallback_result(title, evidence)}, 0
     digest = hashlib.sha256(evidence.encode("utf-8")).hexdigest()
     cache_key = f"{symbol}:{section}:{card_id}:{digest}"
     now = time.monotonic()
@@ -200,19 +267,24 @@ def get_stock_section_explanation(symbol: str, section: Any, card_id: Any, title
         )
         if result:
             result["generated_at"] = datetime.now(timezone.utc).isoformat()
-        envelope = ({"ok": True, "symbol": symbol, "card_id": card_id, "data": result}
-                    if result else None)
-        if envelope:
+        if not result:
+            _logger.warning("Using evidence-only fallback for %s %s", symbol, card_id)
+            result = _fallback_result(title, evidence)
+        envelope = {"ok": True, "symbol": symbol, "card_id": card_id, "data": result}
+        if not result.get("fallback"):
             with _lock:
                 _cache[cache_key] = (time.monotonic() + TTL_SECONDS, envelope)
                 while len(_cache) > MAX_CACHE:
                     _cache.popitem(last=False)
-        response = (envelope, TTL_SECONDS if envelope else 0)
+        response = (envelope, TTL_SECONDS if not result.get("fallback") else 0)
         future.set_result(response)
         return response
-    except Exception as error:
-        future.set_exception(error)
-        raise
+    except Exception:
+        _logger.exception("Section explanation failed for %s %s", symbol, card_id)
+        response = ({"ok": True, "symbol": symbol, "card_id": card_id,
+                     "data": _fallback_result(title, evidence)}, 0)
+        future.set_result(response)
+        return response
     finally:
         with _lock:
             _pending.pop(cache_key, None)

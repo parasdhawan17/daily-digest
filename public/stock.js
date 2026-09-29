@@ -384,12 +384,12 @@
     const result = node('article', 'stock-section-ai-result tone-' + tone);
     const intro = node('div', 'stock-section-ai-result-head'); intro.append(aiRobotFace(tone), node('span', 'stock-section-ai-kicker', title));
     result.append(intro, node('h3', '', data.heading || 'Section summary'), node('p', 'stock-section-ai-summary', data.summary || ''));
-    const meaning = node('div', 'stock-section-ai-meaning'); meaning.append(node('strong', '', 'What this means'), node('p', '', data.meaning || '')); result.append(meaning);
+    const meaning = node('div', 'stock-section-ai-meaning'); meaning.append(node('strong', '', data.fallback ? 'What you can use' : 'What this means'), node('p', '', data.meaning || '')); result.append(meaning);
     const facts = node('div', 'stock-section-ai-facts');
     (data.facts || []).forEach(fact => { if (!fact || !fact.label || !fact.value) return; const chip = node('span'); chip.append(node('small', '', fact.label), node('strong', '', fact.value)); facts.append(chip); });
     if (facts.childElementCount) result.append(facts);
-    result.append(node('p', 'stock-section-ai-meta', 'Selected section · IndianAPI · Generated ' + stamp(data.generated_at)),
-      node('p', 'stock-section-ai-disclaimer', 'AI-generated synthesis · Not investment advice · Data may be incomplete or delayed.'));
+    result.append(node('p', 'stock-section-ai-meta', data.fallback ? 'Evidence-only fallback' : 'Selected section · IndianAPI · Generated ' + stamp(data.generated_at)),
+      node('p', 'stock-section-ai-disclaimer', data.fallback ? 'A fresh AI explanation will be attempted next time.' : 'AI-generated synthesis · Not investment advice · Data may be incomplete or delayed.'));
     sectionAssistantBody.append(result);
   }
   function assistantError(message) {

@@ -70,6 +70,18 @@ class ValidationTests(unittest.TestCase):
         evidence = EVIDENCE + " Annual change +9.55%"
         self.assertIsNotNone(section_ai._parse(json.dumps(result), evidence))
 
+    def test_parser_accepts_negative_figure_written_as_a_decrease(self):
+        result = model_result()
+        result["summary"] = "Operating margin decreased by 0.2 percentage points."
+        evidence = EVIDENCE + " Operating margin change -0.2 pp YoY"
+        self.assertIsNotNone(section_ai._parse(json.dumps(result), evidence))
+
+    def test_parser_rejects_unsigned_negative_figure_without_direction(self):
+        result = model_result()
+        result["summary"] = "Operating margin changed by 0.2 percentage points."
+        evidence = EVIDENCE + " Operating margin change -0.2 pp YoY"
+        self.assertIsNone(section_ai._parse(json.dumps(result), evidence))
+
     def test_number_validation_treats_year_ranges_as_positive_years(self):
         self.assertEqual(section_ai._numbers("OPM trend (2015-2026)"), {"2015", "2026"})
         self.assertIn("-5%", section_ai._numbers("Latest change -5%"))
@@ -144,9 +156,21 @@ class GenerationTests(unittest.TestCase):
         self.assertEqual(request.call_count, 1)
 
     @patch.object(section_ai.ai_summary, "OPENROUTER_API_KEY", "")
-    def test_disabled_ai_returns_unavailable(self):
-        self.assertEqual(section_ai.get_stock_section_explanation(
-            "IN:EXAMPLE", "overview", "price_context", "Price context", EVIDENCE), (None, 0))
+    def test_disabled_ai_returns_uncached_evidence_fallback(self):
+        payload, ttl = section_ai.get_stock_section_explanation(
+            "IN:EXAMPLE", "overview", "price_context", "Price context", EVIDENCE)
+        self.assertTrue(payload["ok"])
+        self.assertTrue(payload["data"]["fallback"])
+        self.assertEqual(ttl, 0)
+
+    @patch.object(section_ai.ai_summary, "OPENROUTER_API_KEY", "test-key")
+    @patch.object(section_ai.ai_summary, "_request_structured_json", return_value=None)
+    def test_invalid_model_response_returns_uncached_evidence_fallback(self, request):
+        payload, ttl = section_ai.get_stock_section_explanation(
+            "IN:EXAMPLE", "overview", "price_context", "Price context", EVIDENCE)
+        self.assertTrue(payload["data"]["fallback"])
+        self.assertGreaterEqual(len(payload["data"]["facts"]), 2)
+        self.assertEqual(ttl, 0)
 
 
 if __name__ == "__main__":
