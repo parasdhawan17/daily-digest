@@ -77,14 +77,13 @@
     els.email.classList.toggle("is-readonly", accountEmail);
     els.email.value = String(email || "");
     if (els.emailOption && els.emailBriefings) {
-      els.emailOption.hidden = !(identity && identity.authenticated);
-      els.emailBriefings.checked = identity && identity.authenticated
-        ? !!(data && data.email_briefings)
-        : true;
+      els.emailOption.hidden = true;
+      els.emailBriefings.disabled = true;
+      els.emailBriefings.checked = false;
     }
     selectedTickers = tickers
       .map(function (value) { return String(value).trim().toUpperCase(); })
-      .filter(function (value, index, values) { return value && values.indexOf(value) === index; });
+      .filter(function (value, index, values) { return value.indexOf("IN:") === 0 && values.indexOf(value) === index; });
     renderChips();
   }
 
@@ -107,7 +106,7 @@
       '<ul class="subscribe-suggestions" id="subscribe-suggestions" hidden></ul>' +
       "</div>" +
       '<div class="subscribe-chips" id="subscribe-chips"></div>' +
-      '<p class="subscribe-hint">US stocks, ETFs, and NSE listings are validated before they are added.</p>' +
+      '<p class="subscribe-hint">Indian stocks are validated against NSE listings before they are added.</p>' +
       '<div class="subscribe-email-option" id="subscribe-email-option" hidden>' +
       '<input type="checkbox" id="subscribe-email-briefings" name="email_briefings">' +
       '<label for="subscribe-email-briefings"><strong>Email briefings <em>Optional</em></strong><span>Get a concise update on your saved stocks around each market session. You can turn these emails off anytime.</span></label>' +
@@ -172,15 +171,8 @@
     return parts.length > 1 ? parts[1] : value;
   }
 
-  function marketBadge(symbol) {
-    var value = (symbol || "").trim().toUpperCase();
-    if (value.indexOf("IN:") === 0) {
-      return "NSE";
-    }
-    if (value.indexOf("US:") === 0) {
-      return "US";
-    }
-    return "US";
+  function marketBadge() {
+    return "NSE";
   }
 
   function bareSymbol(symbol) {
@@ -284,7 +276,7 @@
           '"><strong>' +
           displaySymbol(item.symbol) +
           "</strong> · " +
-          (item.market === "IN" ? "NSE" : "US") +
+          "NSE" +
           " — " +
           item.name +
           "</li>"
@@ -371,7 +363,7 @@
     setFieldStatus("loading", "Searching...");
     var requestId = ++searchRequestId;
     searchTimer = window.setTimeout(function () {
-      fetch("/api/tickers/search?q=" + encodeURIComponent(query))
+      fetch("/api/tickers/search?market=IN&q=" + encodeURIComponent(query))
         .then(function (response) {
           return parseJsonResponse(response).then(function (data) {
             return { status: response.status, data: data };
@@ -392,7 +384,7 @@
           var results = result.data.results || [];
           if (!results.length) {
             hideSuggestions();
-            setFieldStatus("error", "No US or NSE listings found for \"" + query + "\".");
+            setFieldStatus("error", "No NSE listings found for \"" + query + "\".");
             return;
           }
           renderSuggestions(results);
@@ -585,7 +577,7 @@
       body: JSON.stringify({
         email: email,
         tickers: selectedTickers,
-        email_briefings: identity && identity.authenticated ? !!els.emailBriefings.checked : true
+        email_briefings: false
       }),
     })
       .then(function (response) {

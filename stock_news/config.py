@@ -75,6 +75,12 @@ BREVO_IN_DASHBOARD_ATTRIBUTE = os.environ.get(
 ).strip().upper()
 EMAIL_FROM = os.environ.get("EMAIL_FROM", "").strip()
 EMAIL_FROM_NAME = os.environ.get("EMAIL_FROM_NAME", "Tickr Digest").strip()
+# Temporary product switch. Keep the email implementation in place while email
+# signup, preferences, and scheduled delivery are unavailable to every user.
+EMAIL_BRIEFINGS_ENABLED = False
+# Temporary product switch. U.S. integrations remain implemented, but all
+# user-facing discovery and watchlists are limited to Indian stocks.
+US_STOCKS_ENABLED = False
 
 # Optional Phase 1 AI briefing. AI is disabled unless an OpenRouter key is set.
 OPENROUTER_API_KEY = os.environ.get("OPENROUTER_API_KEY", "").strip()

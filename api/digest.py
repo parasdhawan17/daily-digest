@@ -23,7 +23,7 @@ from stock_news.config import BREVO_IN_DASHBOARD_ATTRIBUTE, BREVO_TICKERS_ATTRIB
 from stock_news.dashboard_preferences import default_cards, parse_dashboard_cards
 from stock_news.digest import collect_digest_data, filter_sections
 from stock_news.formatting import format_fetched_at_label
-from stock_news.markets import market_of
+from stock_news.markets import market_of, user_visible_tickers
 from stock_news.relevance import parse_tickers
 from stock_news.render import build_digest_error, build_web_digest, build_web_section
 from stock_news.tokens import TokenError, verify_digest_claims, verify_digest_token
@@ -48,7 +48,7 @@ def _verify_token(handler: BaseHTTPRequestHandler) -> tuple[str | None, list[str
         state = subscription(identity) if identity else None
         return ("session", state['tickers']) if state and not state['needs_subscription'] else (None, None)
     try:
-        return token, verify_digest_token(token)
+        return token, user_visible_tickers(verify_digest_token(token))
     except TokenError:
         return token, None
 
@@ -84,7 +84,7 @@ def handle_get(handler: BaseHTTPRequestHandler) -> None:
     else:
         try:
             claims = verify_digest_claims(token)
-            tickers = claims.tickers
+            tickers = user_visible_tickers(claims.tickers)
             dashboard_cards = default_cards()
             if claims.subscriber_id and os.environ.get("BREVO_API_KEY", "").strip():
                 try:
@@ -111,6 +111,13 @@ def handle_get(handler: BaseHTTPRequestHandler) -> None:
             status = 403 if "expired" in message.lower() or "signature" in message.lower() else 400
             send_html(handler, status, html)
             return
+
+    if not tickers:
+        send_html(handler, 404, build_digest_error(
+            "No Indian stocks saved",
+            "Add an Indian stock to open your dashboard.",
+        ))
+        return
 
     missing = _missing_data_keys(tickers)
     if missing:
@@ -243,7 +250,7 @@ def handle_subscription_get(handler: BaseHTTPRequestHandler) -> None:
     # Older links did not carry a contact identifier. They can still prefill the
     # tickers embedded in the digest, while leaving email entry to the user.
     if claims.subscriber_id is None:
-        send_json(handler, 200, {"ok": True, "email": "", "tickers": claims.tickers,
+        send_json(handler, 200, {"ok": True, "email": "", "tickers": user_visible_tickers(claims.tickers),
                                  "in_dashboard_cards": default_cards()})
         return
     if not api_key:
@@ -270,7 +277,7 @@ def handle_subscription_get(handler: BaseHTTPRequestHandler) -> None:
             {
                 "ok": True,
                 "email": str(contact.get("email") or "").strip().lower(),
-                "tickers": parse_tickers(raw_tickers) or claims.tickers,
+                "tickers": user_visible_tickers(parse_tickers(raw_tickers) or claims.tickers),
                 "in_dashboard_cards": parse_dashboard_cards(
                     next((value for key, value in attributes.items()
                           if str(key).upper() == BREVO_IN_DASHBOARD_ATTRIBUTE.upper()), "")

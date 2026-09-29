@@ -12,6 +12,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from api._responses import send_json
+from stock_news.config import US_STOCKS_ENABLED
 from stock_news.market_data import search_symbols
 
 
@@ -22,6 +23,11 @@ def handle_get(handler: BaseHTTPRequestHandler) -> None:
     if market not in (None, 'IN', 'US') or len(q) > 100:
         send_json(handler, 400, {"ok": False, "error": "Invalid search query."})
         return
+    if market == "US" and not US_STOCKS_ENABLED:
+        send_json(handler, 400, {"ok": False, "error": "Only Indian stocks are available."})
+        return
+    if not US_STOCKS_ENABLED:
+        market = "IN"
 
     finnhub_key = os.environ.get("FINNHUB_API_KEY", "").strip()
     indianapi_key = os.environ.get("INDIANAPI_API_KEY", "").strip()

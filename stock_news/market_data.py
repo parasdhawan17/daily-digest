@@ -223,6 +223,7 @@ def resolve_symbol_query(
     *,
     finnhub_key: str,
     indianapi_key: str,
+    market: Market | None = None,
 ) -> dict | None:
     text = query.strip()
     if not text:
@@ -230,21 +231,29 @@ def resolve_symbol_query(
 
     upper = text.upper()
     if upper.startswith("US:") or upper.startswith("IN:"):
+        if market and market_of(upper) != market:
+            return None
         return lookup_symbol(upper, finnhub_key=finnhub_key, indianapi_key=indianapi_key)
 
     us_prefixed = format_prefixed("US", upper)
-    if us_prefixed and finnhub_key:
+    if market in (None, "US") and us_prefixed and finnhub_key:
         us_match = lookup_symbol(us_prefixed, finnhub_key=finnhub_key, indianapi_key=indianapi_key)
         if us_match:
             return us_match
 
     in_prefixed = format_prefixed("IN", upper)
-    if in_prefixed and indianapi_key:
+    if market in (None, "IN") and in_prefixed and indianapi_key:
         in_match = lookup_symbol(in_prefixed, finnhub_key=finnhub_key, indianapi_key=indianapi_key)
         if in_match:
             return in_match
 
-    results = search_symbols(text, finnhub_key=finnhub_key, indianapi_key=indianapi_key, limit=8)
+    results = search_symbols(
+        text,
+        finnhub_key=finnhub_key,
+        indianapi_key=indianapi_key,
+        limit=8,
+        market=market,
+    )
     if not results:
         return None
 

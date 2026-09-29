@@ -11,7 +11,7 @@ class SubscriptionPrefillHandlerTest(unittest.TestCase):
     @patch("api.digest.send_json")
     @patch("api.digest.verify_digest_claims")
     def test_old_link_falls_back_to_digest_tickers(self, verify_claims, send_json) -> None:
-        verify_claims.return_value = DigestTokenClaims(["US:AAPL"])
+        verify_claims.return_value = DigestTokenClaims(["US:AAPL", "IN:TCS"])
         handler = SimpleNamespace(path="/api/subscription?t=old-token")
 
         handle_subscription_get(handler)
@@ -19,7 +19,7 @@ class SubscriptionPrefillHandlerTest(unittest.TestCase):
         send_json.assert_called_once_with(
             handler,
             200,
-            {"ok": True, "email": "", "tickers": ["US:AAPL"],
+            {"ok": True, "email": "", "tickers": ["IN:TCS"],
              "in_dashboard_cards": default_cards()},
         )
 
@@ -49,7 +49,7 @@ class SubscriptionPrefillHandlerTest(unittest.TestCase):
             {
                 "ok": True,
                 "email": "investor@example.com",
-                "tickers": ["US:AAPL", "IN:TCS"],
+                "tickers": ["IN:TCS"],
                 "in_dashboard_cards": default_cards(),
             },
         )

@@ -7,6 +7,7 @@ import binascii
 import json
 import re
 import time
+from difflib import SequenceMatcher
 from datetime import date, datetime, timedelta, timezone
 from email.utils import parsedate_to_datetime
 
@@ -587,9 +588,12 @@ def search_symbols(
         except requests.RequestException:
             entities = []
 
-    if not entities:
-        entities = [_normalize_entity(item) for item in _load_entities_cache()]
-        entities = [item for item in entities if item]
+    # Always include the bundled NSE candidates. Some provider searches return
+    # a non-empty but unrelated industry list for partial company names; using
+    # that response alone would incorrectly hide obvious matches such as
+    # "reliac" → RELIANCE.
+    cached_entities = [_normalize_entity(item) for item in _load_entities_cache()]
+    entities.extend(item for item in cached_entities if item)
 
     # The stock endpoint is available on the Developer host even when the
     # industry-search endpoint is temporarily unavailable. Use it as a
@@ -619,6 +623,15 @@ def search_symbols(
             score = 70
         elif lower in name:
             score = 50
+        elif len(lower) >= 3:
+            symbol_ratio = SequenceMatcher(None, lower, symbol.lower()).ratio()
+            name_ratio = max(
+                SequenceMatcher(None, lower, candidate).ratio()
+                for candidate in re.findall(r"[a-z0-9]+", name)
+            )
+            fuzzy_ratio = max(symbol_ratio, name_ratio)
+            if fuzzy_ratio >= 0.72:
+                score = 40 + int(fuzzy_ratio * 20) + (10 if symbol_ratio >= 0.72 else 0)
         if score > 0:
             scored.append((score, item))
 

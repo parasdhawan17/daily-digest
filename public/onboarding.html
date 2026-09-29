@@ -11,7 +11,7 @@
   <script>(function(){try{var t=localStorage.getItem('daily-digest-theme');if(t!=='light'&&t!=='dark')t=matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light';document.documentElement.dataset.theme=t;document.documentElement.style.colorScheme=t}catch(e){}})()</script>
   <link rel="stylesheet" href="/landing.css">
   <link rel="stylesheet" href="/auth.css">
-  <link rel="stylesheet" href="/onboarding.css">
+  <link rel="stylesheet" href="/onboarding.css?v=20260929-hide-email">
   <link rel="stylesheet" href="/dashboard-cards.css">
   <link rel="stylesheet" href="/onboarding-catalog.css">
   <link rel="stylesheet" href="/onboarding-step-two.css?v=20260924-section-scroll-2">
@@ -32,18 +32,18 @@
     </div>
 
     <section class="onboarding-step" data-step="1" aria-labelledby="step-one-title">
-      <div class="step-copy"><p class="eyebrow">Step 1 of 2</p><h1 id="step-one-title">Which stocks do you follow?</h1><p>Search by ticker or company name. US and NSE listings can live in the same watchlist.</p></div>
+      <div class="step-copy"><p class="eyebrow">Step 1 of 2</p><h1 id="step-one-title">Which stocks do you follow?</h1><p>Search Indian stocks by NSE ticker or company name.</p></div>
       <div class="setup-card stock-setup-card">
         <label class="field-label" for="onboarding-email">Signed-in email</label>
         <input id="onboarding-email" class="setup-input" type="email" readonly aria-readonly="true">
         <label class="field-label" for="ticker-input">Add stocks</label>
         <div class="ticker-search">
-          <div class="ticker-search-row"><input id="ticker-input" class="setup-input" type="search" autocomplete="off" placeholder="Search TCS, Reliance, Apple…" role="combobox" aria-autocomplete="list" aria-controls="ticker-suggestions" aria-expanded="false"><button id="ticker-add" type="button" class="secondary-button">Add</button></div>
+          <div class="ticker-search-row"><input id="ticker-input" class="setup-input" type="search" autocomplete="off" placeholder="Search TCS, Reliance, Infosys…" role="combobox" aria-autocomplete="list" aria-controls="ticker-suggestions" aria-expanded="false"><button id="ticker-add" type="button" class="secondary-button">Add</button></div>
           <p id="ticker-status" class="field-help" role="status">Search, choose a match, or press Enter to validate.</p>
           <ul id="ticker-suggestions" class="ticker-suggestions" role="listbox" hidden></ul>
         </div>
         <div id="ticker-chips" class="ticker-chips" aria-live="polite"></div>
-        <label class="email-choice"><input id="email-briefings" type="checkbox"><span><strong>Email briefings <small>Optional</small></strong><em>Receive concise updates around the market sessions you follow.</em></span></label>
+        <label class="email-choice" hidden><input id="email-briefings" type="checkbox" disabled><span><strong>Email briefings <small>Optional</small></strong><em>Receive concise updates around the market sessions you follow.</em></span></label>
       </div>
       <p id="step-one-error" class="form-error" role="alert" hidden></p>
       <div class="step-actions"><a class="text-button" href="/">Cancel</a><button id="step-one-next" class="primary-button" type="button">Continue</button></div>
@@ -63,6 +63,6 @@
     </section>
   </main>
   <script src="/auth.js" defer></script>
-  <script src="/onboarding.js?v=20260924-section-scroll-2" defer></script>
+  <script src="/onboarding.js?v=20260929-india-only" defer></script>
 </body>
 </html>

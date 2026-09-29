@@ -12,6 +12,7 @@ from stock_news.brevo import get_contact, _get_contact_attribute
 from stock_news.config import (BREVO_IN_DASHBOARD_ATTRIBUTE, BREVO_LIST_ID,
                                BREVO_TICKERS_ATTRIBUTE, SITE_URL)
 from stock_news.dashboard_preferences import parse_dashboard_cards
+from stock_news.markets import user_visible_tickers
 from stock_news.relevance import parse_tickers
 
 SESSION_COOKIE = 'tickr_session'
@@ -106,7 +107,7 @@ def verify_google(credential):
     if not claims.get('sub') or claims.get('email_verified') is not True:
         raise AuthError('Google must verify your email address first.')
     if not (email.endswith('@gmail.com') or claims.get('hd')):
-        raise AuthError('Use email signup and confirmation for this email domain, or sign in with Gmail or Google Workspace.')
+        raise AuthError('Sign in with a Gmail or Google Workspace account.')
     return {'sub': claims['sub'], 'email': email}
 
 
@@ -117,6 +118,7 @@ def subscription(identity):
     contact = get_contact(identity['email'], api_key)
     attributes = (contact or {}).get('attributes') or {}
     tickers = parse_tickers(_get_contact_attribute(attributes, BREVO_TICKERS_ATTRIBUTE))
+    tickers = user_visible_tickers(tickers)
     dashboard_cards = parse_dashboard_cards(
         _get_contact_attribute(attributes, BREVO_IN_DASHBOARD_ATTRIBUTE)
     )

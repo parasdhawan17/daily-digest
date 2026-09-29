@@ -92,14 +92,15 @@ class AuthTests(unittest.TestCase):
             self.assertEqual(state['email_briefings'], bool(contact and not contact.get('emailBlacklisted') and
                                                             7 in (contact.get('listIds') or [])))
         lookup.return_value = {**CONTACT, 'attributes': {'US_TICKERS': 'AAPL'}}
-        self.assertEqual(auth.subscription(IDENTITY)['tickers'], ['US:AAPL'])
+        self.assertEqual(auth.subscription(IDENTITY)['tickers'], [])
+        self.assertTrue(auth.subscription(IDENTITY)['needs_subscription'])
 
     @patch('api.auth.verify_google', return_value=IDENTITY)
     @patch('stock_news.auth.get_contact', return_value=CONTACT)
     def test_login_sets_cookie_and_full_watchlist(self, lookup, verify):
         h = handler(payload={'credential': 'google-token'})
         handle_auth(h, 'google')
-        self.assertEqual(result(h)['tickers'], ['US:AAPL', 'IN:TCS'])
+        self.assertEqual(result(h)['tickers'], ['IN:TCS'])
         self.assertFalse(result(h)['needs_subscription'])
         cookie = next(c.args[1] for c in h.send_header.call_args_list if c.args[0] == 'Set-Cookie')
         self.assertIn('Max-Age=604800', cookie)
@@ -165,11 +166,12 @@ class SubscribeTests(unittest.TestCase):
     @patch('api.subscribe.validate_symbol', return_value=True)
     @patch('api.subscribe.send_welcome_email')
     @patch('api.subscribe.subscribe_verified', return_value=True)
-    def test_us_only_update_preserves_indian_preferences(self, save, welcome, validate):
+    def test_us_only_update_is_rejected(self, save, welcome, validate):
         h = handler(payload={'tickers': ['US:AAPL'], 'in_dashboard_cards': ['unknown']}, signed_in=True)
         handle_post(h)
-        self.assertTrue(result(h)['ok'])
-        self.assertIsNone(save.call_args.kwargs['dashboard_cards'])
+        self.assertFalse(result(h)['ok'])
+        self.assertIn('Only Indian stocks', result(h)['error'])
+        save.assert_not_called()
 
     @patch('api.subscribe.validate_symbol', return_value=True)
     @patch('api.subscribe.LOGGER.exception')
@@ -180,16 +182,25 @@ class SubscribeTests(unittest.TestCase):
             save.return_value = active
             welcome.reset_mock(); log_exception.reset_mock()
             welcome.side_effect = BrevoError('offline') if failure else None
-            h = handler(payload={'email': IDENTITY['email'], 'tickers': ['US:AAPL', 'IN:TCS']}, signed_in=True)
+            h = handler(payload={'email': IDENTITY['email'], 'tickers': ['IN:TCS']}, signed_in=True)
             handle_post(h)
             self.assertEqual(result(h)['redirect'], '/digest')
-            self.assertEqual(bool(result(h)['warning']), failure)
-            self.assertEqual(welcome.call_count, 0 if active else 1)
-            self.assertEqual(log_exception.call_count, 1 if failure else 0)
+            self.assertFalse(result(h)['email_briefings'])
+            self.assertIsNone(result(h)['warning'])
+            self.assertFalse(save.call_args.kwargs['email_briefings'])
+            welcome.assert_not_called()
+            log_exception.assert_not_called()
 
         welcome.reset_mock()
-        h = handler(payload={'email': IDENTITY['email'], 'tickers': ['US:AAPL'],
+        h = handler(payload={'email': IDENTITY['email'], 'tickers': ['IN:TCS'],
                              'email_briefings': False}, signed_in=True)
+        handle_post(h)
+        self.assertFalse(result(h)['email_briefings'])
+        self.assertFalse(save.call_args.kwargs['email_briefings'])
+        welcome.assert_not_called()
+
+        h = handler(payload={'email': IDENTITY['email'], 'tickers': ['IN:TCS'],
+                             'email_briefings': True}, signed_in=True)
         handle_post(h)
         self.assertFalse(result(h)['email_briefings'])
         self.assertFalse(save.call_args.kwargs['email_briefings'])
@@ -207,10 +218,12 @@ class SubscribeTests(unittest.TestCase):
     @patch('api.subscribe.validate_symbol', return_value=True)
     @patch('api.subscribe.subscribe_or_update', return_value={'ok': True, 'mode': 'doi'})
     @patch('api.subscribe.subscribe_verified')
-    def test_email_only_cannot_claim_verification(self, verified, doi, validate):
+    def test_email_only_signup_is_paused(self, verified, doi, validate):
         h = handler(payload={'email': IDENTITY['email'], 'tickers': ['AAPL'], 'verified': True})
         handle_post(h)
-        self.assertEqual(result(h)['mode'], 'doi'); verified.assert_not_called(); doi.assert_called_once()
+        self.assertFalse(result(h)['ok'])
+        self.assertIn('temporarily unavailable', result(h)['error'])
+        verified.assert_not_called(); doi.assert_not_called(); validate.assert_not_called()
 
     @patch('api.subscribe.validate_symbol', return_value=True)
     @patch('api.subscribe.subscribe_verified', side_effect=BrevoError('save failed'))
@@ -244,7 +257,7 @@ class DigestSessionTests(unittest.TestCase):
     @patch('api.digest.build_web_digest', return_value='<html>digest</html>')
     def test_digest_uses_full_current_watchlist(self, render, lookup):
         h = handler('/digest', signed_in=True); handle_get(h)
-        self.assertEqual(render.call_args.args[1], ['US:AAPL', 'IN:TCS'])
+        self.assertEqual(render.call_args.args[1], ['IN:TCS'])
         self.assertIsNone(render.call_args.kwargs['progressive_token'])
         self.assertTrue(render.call_args.kwargs['progressive'])
 
@@ -268,7 +281,7 @@ class DigestSessionTests(unittest.TestCase):
     def test_subscription_prefill_and_ai_csrf(self, lookup):
         h = handler('/api/subscription', signed_in=True); handle_subscription_get(h)
         self.assertEqual(result(h)['email'], IDENTITY['email'])
-        self.assertEqual(result(h)['tickers'], ['US:AAPL', 'IN:TCS'])
+        self.assertEqual(result(h)['tickers'], ['IN:TCS'])
         h = handler('/api/digest-ai', signed_in=True); h.headers['X-CSRF-Token'] = 'bad'
         handle_ai_post(h); self.assertFalse(result(h)['ok'])
 

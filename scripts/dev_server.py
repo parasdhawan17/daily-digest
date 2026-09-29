@@ -38,6 +38,7 @@ from stock_news.config import (
     BREVO_LIST_ID,
     BREVO_TICKERS_ATTRIBUTE,
     SITE_URL,
+    US_STOCKS_ENABLED,
 )
 from stock_news.digest import collect_digest_data, filter_sections
 from stock_news.dashboard_preferences import default_cards
@@ -156,11 +157,15 @@ class DevHandler(BaseHTTPRequestHandler):
         if not ticker.strip():
             self._json(400, {"ok": False, "valid": False, "error": "Enter a ticker or company name."})
             return
+        if not US_STOCKS_ENABLED and ticker.strip().upper().startswith("US:"):
+            self._json(200, {"ok": True, "valid": False, "error": "Only Indian stocks are available."})
+            return
         try:
             match = resolve_symbol_query(
                 ticker,
                 finnhub_key=finnhub_key,
                 indianapi_key=indianapi_key,
+                market=None if US_STOCKS_ENABLED else "IN",
             )
             if not match:
                 self._json(

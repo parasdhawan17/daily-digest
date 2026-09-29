@@ -2,10 +2,16 @@ import unittest
 from types import SimpleNamespace
 from unittest.mock import patch
 
-from scripts.send_digests import send_for_market
+from scripts.send_digests import main, send_for_market
 
 
 class MarketDigestLinkTest(unittest.TestCase):
+    @patch("scripts.send_digests.parse_args", return_value=SimpleNamespace(email=True))
+    @patch("scripts.send_digests.missing_email_env")
+    def test_email_cron_stops_at_feature_switch(self, missing_email_env, _parse_args) -> None:
+        main()
+        missing_email_env.assert_not_called()
+
     @patch("scripts.send_digests.build_email_digest", return_value=("html", "text", "subject"))
     @patch("scripts.send_digests.build_digest_url", return_value="https://example.com/digest?t=token")
     @patch("scripts.send_digests.generate_ai_summary", return_value=None)

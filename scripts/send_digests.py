@@ -43,6 +43,7 @@ from stock_news.ai_summary import filter_ai_summary, generate_ai_summary
 from stock_news.config import (
     BREVO_API_KEY,
     BREVO_LIST_ID,
+    EMAIL_BRIEFINGS_ENABLED,
     EMAIL_FROM,
     EMAIL_FROM_NAME,
     FINNHUB_KEY,
@@ -307,6 +308,10 @@ def main() -> None:
     if not args.email:
         print("Error: pass --email to send digest emails.", file=sys.stderr)
         sys.exit(1)
+
+    if not EMAIL_BRIEFINGS_ENABLED:
+        print("Email briefings are temporarily disabled — skipping send.")
+        return
 
     missing = missing_email_env()
     if missing:

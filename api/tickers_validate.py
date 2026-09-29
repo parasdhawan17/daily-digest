@@ -12,6 +12,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from api._responses import read_json, send_json
+from stock_news.config import US_STOCKS_ENABLED
 from stock_news.market_data import resolve_symbol_query
 
 
@@ -43,11 +44,16 @@ def validate_symbol(handler: BaseHTTPRequestHandler, symbol: str) -> None:
         send_json(handler, 400, {"ok": False, "valid": False, "error": "Enter a ticker or company name."})
         return
 
+    if not US_STOCKS_ENABLED and ticker.upper().startswith("US:"):
+        send_json(handler, 200, {"ok": True, "valid": False, "error": "Only Indian stocks are available."})
+        return
+
     try:
         match = resolve_symbol_query(
             ticker,
             finnhub_key=finnhub_key,
             indianapi_key=indianapi_key,
+            market=None if US_STOCKS_ENABLED else "IN",
         )
         if not match:
             send_json(

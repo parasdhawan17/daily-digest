@@ -11,7 +11,7 @@ import requests
 
 from api import stock, tickers_search
 from api.index import route
-from stock_news import stock_detail as detail
+from stock_news import indianapi, stock_detail as detail
 
 
 def company():
@@ -86,6 +86,20 @@ class NormalizationTests(unittest.TestCase):
             self.assertIsNone(detail.safe_url(value))
         self.assertEqual(detail.safe_url('https://example.com/a'), 'https://example.com/a')
         self.assertIsNone(detail.clean(float('nan')))
+
+
+class IndianSearchTests(unittest.TestCase):
+    @patch.object(indianapi, '_load_entities_cache', return_value=[
+        {'symbol': 'RELIANCE', 'name': 'Reliance Industries'}
+    ])
+    @patch.object(indianapi, '_search_industry', return_value=[
+        {'symbol': 'IN:UNRELATED', 'name': 'Unrelated Company'}
+    ])
+    def test_partial_name_uses_cache_when_provider_results_are_irrelevant(self, _remote, _cache):
+        self.assertEqual(
+            indianapi.search_symbols('reliac', 'key'),
+            [{'symbol': 'IN:RELIANCE', 'name': 'Reliance Industries', 'market': 'IN'}],
+        )
 
 
 class RequestTests(unittest.TestCase):
@@ -245,12 +259,17 @@ class EndpointTests(unittest.TestCase):
 
     @patch.dict('os.environ', {'INDIANAPI_API_KEY': 'key'})
     @patch.object(tickers_search, 'search_symbols', return_value=[])
-    def test_market_filter_and_backward_compatibility(self, search):
-        for path, expected in [('/api/tickers/search?q=tcs&market=IN', 'IN'), ('/api/tickers/search?q=tcs', None)]:
+    def test_market_filter_is_always_india_only(self, search):
+        for path in ['/api/tickers/search?q=tcs&market=IN', '/api/tickers/search?q=tcs']:
             h = handler(path)
             tickers_search.handle_get(h)
-            self.assertEqual(search.call_args.kwargs['market'], expected)
+            self.assertEqual(search.call_args.kwargs['market'], 'IN')
             h.send_response.assert_called_with(200)
+
+        h = handler('/api/tickers/search?q=aapl&market=US')
+        tickers_search.handle_get(h)
+        h.send_response.assert_called_with(400)
+        self.assertIn('Only Indian stocks', json.loads(h.wfile.getvalue())['error'])
 
 
 if __name__ == '__main__':

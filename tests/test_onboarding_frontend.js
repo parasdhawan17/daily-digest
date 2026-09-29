@@ -17,6 +17,21 @@ test('onboarding exposes two accessible full-page steps', () => {
   assert.doesNotMatch(html, /role="dialog"/);
 });
 
+test('email briefings stay hidden and disabled while the feature is paused', () => {
+  assert.match(html, /class="email-choice" hidden/);
+  assert.match(html, /id="email-briefings" type="checkbox" disabled/);
+  assert.match(css, /\.email-choice\[hidden\]\{display:none\}/);
+  assert.match(js, /email_briefings:false/);
+  assert.doesNotMatch(js, /email_briefings:\$\('email-briefings'\)\.checked/);
+});
+
+test('onboarding only exposes Indian stock discovery', () => {
+  assert.match(html, /Search Indian stocks by NSE ticker or company name/);
+  assert.match(js, /\/api\/tickers\/search\?market=IN&/);
+  assert.match(js, /indexOf\('IN:'\) === 0/);
+  assert.doesNotMatch(html, /US and NSE listings/);
+});
+
 test('hierarchical selector has rail, card panel, and sticky summary', () => {
   assert.match(html, /id="category-rail"/);
   assert.match(html, /id="card-grid"/);

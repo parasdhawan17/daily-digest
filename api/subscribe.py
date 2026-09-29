@@ -17,9 +17,11 @@ from stock_news.brevo import BrevoError, subscribe_or_update, subscribe_verified
 from stock_news.auth import AuthError, get_session, require_csrf
 from stock_news.config import (
     BREVO_DOI_TEMPLATE_ID,
+    EMAIL_BRIEFINGS_ENABLED,
     BREVO_LIST_ID,
     BREVO_TICKERS_ATTRIBUTE,
     SITE_URL,
+    US_STOCKS_ENABLED,
 )
 from stock_news.market_data import validate_symbol
 from stock_news.markets import market_of
@@ -28,7 +30,6 @@ from stock_news.dashboard_preferences import default_cards, parse_dashboard_card
 
 EMAIL_PATTERN = re.compile(r"^[^\s@]+@[^\s@]+\.[^\s@]+$")
 LOGGER = logging.getLogger(__name__)
-
 
 def handle_post(handler: BaseHTTPRequestHandler) -> None:
     api_key = os.environ.get("BREVO_API_KEY", "").strip()
@@ -43,6 +44,14 @@ def handle_post(handler: BaseHTTPRequestHandler) -> None:
             require_csrf(handler)
     except AuthError as exc:
         send_json(handler, 403, {"ok": False, "error": str(exc)})
+        return
+
+    if not identity and not EMAIL_BRIEFINGS_ENABLED:
+        send_json(
+            handler,
+            503,
+            {"ok": False, "error": "Email signup is temporarily unavailable. Sign in with Google to build your watchlist."},
+        )
         return
 
     if not api_key or (not identity and not template_id):
@@ -92,6 +101,9 @@ def handle_post(handler: BaseHTTPRequestHandler) -> None:
     if not tickers:
         send_json(handler, 400, {"ok": False, "error": "Select at least one valid ticker."})
         return
+    if not US_STOCKS_ENABLED and any(market_of(symbol) != "IN" for symbol in tickers):
+        send_json(handler, 400, {"ok": False, "error": "Only Indian stocks can be added right now."})
+        return
     invalid = [
         symbol
         for symbol in tickers
@@ -133,7 +145,10 @@ def handle_post(handler: BaseHTTPRequestHandler) -> None:
 
     try:
         if identity:
-            email_briefings = payload.get("email_briefings", True) is True
+            email_briefings = (
+                EMAIL_BRIEFINGS_ENABLED
+                and payload.get("email_briefings", True) is True
+            )
             already_active = subscribe_verified(
                 email, tickers, api_key, int(list_id), email_briefings=email_briefings,
                 dashboard_cards=dashboard_cards

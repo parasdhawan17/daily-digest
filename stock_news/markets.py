@@ -66,6 +66,15 @@ def market_of(value: str) -> Market | None:
     return None
 
 
+def user_visible_tickers(tickers: list[str]) -> list[str]:
+    """Apply temporary product-level market availability without deleting support."""
+    from stock_news.config import US_STOCKS_ENABLED
+
+    if US_STOCKS_ENABLED:
+        return list(tickers)
+    return [ticker for ticker in tickers if market_of(ticker) == "IN"]
+
+
 def market_badge(market: Market) -> str:
     return MARKET_BADGES[market]
 

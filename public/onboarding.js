@@ -8,7 +8,7 @@
   function csrf() { return window.tickrAuth ? window.tickrAuth.csrf() : ''; }
   function json(response) { return response.text().then(function (text) { try { return JSON.parse(text); } catch (e) { return {ok:false,error:'Unexpected server response.'}; } }); }
   function displaySymbol(symbol) { return String(symbol || '').split(':').pop(); }
-  function market(symbol) { return String(symbol).indexOf('IN:') === 0 ? 'NSE' : 'US'; }
+  function market() { return 'NSE'; }
   function hasIndia() { return selectedTickers.some(function (ticker) { return ticker.indexOf('IN:') === 0; }); }
 
   function renderTickers() {
@@ -31,7 +31,7 @@
   function hideSuggestions() { suggestions = []; activeSuggestion = -1; $('ticker-suggestions').hidden = true; $('ticker-suggestions').innerHTML = ''; $('ticker-input').setAttribute('aria-expanded', 'false'); }
   function renderSuggestions(items) {
     suggestions = items; activeSuggestion = -1;
-    $('ticker-suggestions').innerHTML = items.map(function (item, index) { return '<li role="option" data-index="' + index + '"><strong>' + displaySymbol(item.symbol) + '</strong> · ' + (item.market === 'IN' ? 'NSE' : 'US') + '<br><small>' + item.name + '</small></li>'; }).join('');
+    $('ticker-suggestions').innerHTML = items.map(function (item, index) { return '<li role="option" data-index="' + index + '"><strong>' + displaySymbol(item.symbol) + '</strong> · NSE<br><small>' + item.name + '</small></li>'; }).join('');
     $('ticker-suggestions').hidden = !items.length; $('ticker-input').setAttribute('aria-expanded', String(!!items.length));
   }
   function search() {
@@ -39,9 +39,9 @@
     if (!query) { hideSuggestions(); $('ticker-status').textContent = 'Search, choose a match, or press Enter to validate.'; return; }
     $('ticker-status').textContent = 'Searching…'; var generation = ++searchGeneration;
     searchTimer = setTimeout(function () {
-      fetch('/api/tickers/search?q=' + encodeURIComponent(query)).then(json).then(function (data) {
+      fetch('/api/tickers/search?market=IN&q=' + encodeURIComponent(query)).then(json).then(function (data) {
         if (generation !== searchGeneration) return;
-        if (!data.ok || !(data.results || []).length) { hideSuggestions(); $('ticker-status').textContent = data.error || 'No US or NSE listings found.'; return; }
+        if (!data.ok || !(data.results || []).length) { hideSuggestions(); $('ticker-status').textContent = data.error || 'No NSE listings found.'; return; }
         renderSuggestions(data.results); $('ticker-status').textContent = 'Choose a matching listing.';
       }).catch(function () { $('ticker-status').textContent = 'Search is unavailable. Try again.'; });
     }, 280);
@@ -196,7 +196,7 @@
     }
     setSaving(true);
     fetch('/api/subscribe', {method:'POST',headers:{'Content-Type':'application/json','X-CSRF-Token':csrf()},body:JSON.stringify({
-      email:$('onboarding-email').value,tickers:selectedTickers,email_briefings:$('email-briefings').checked,
+      email:$('onboarding-email').value,tickers:selectedTickers,email_briefings:false,
       in_dashboard_cards:hasIndia()?Array.from(selectedCards):undefined
     })}).then(json).then(function (data) {
       if (!data.ok) throw new Error(data.error || 'Could not save your dashboard.');
@@ -228,8 +228,8 @@
   Promise.all([fetch('/dashboard-catalog.json').then(json), window.tickrAuth.ready]).then(function (values) {
     catalog = values[0]; var state = values[1];
     if (!state.authenticated) { location.assign('/?signin=1'); return; }
-    $('onboarding-email').value = state.email || ''; $('email-briefings').checked = !!state.email_briefings;
-    selectedTickers = Array.isArray(state.tickers) ? state.tickers.slice() : [];
+    $('onboarding-email').value = state.email || ''; $('email-briefings').checked = false;
+    selectedTickers = Array.isArray(state.tickers) ? state.tickers.filter(function (ticker) { return String(ticker).indexOf('IN:') === 0; }) : [];
     var saved = Array.isArray(state.in_dashboard_cards) ? state.in_dashboard_cards : [];
     if (saved.length) saved.forEach(function (id) { selectedCards.add(id); });
     else catalog.categories.filter(function (category) { return category.default; }).forEach(function (category) { category.cards.forEach(function (card) { selectedCards.add(card.id); }); });

@@ -98,14 +98,14 @@
         unavailable.type = 'button';
         unavailable.textContent = 'Sign in with Google';
         unavailable.disabled = true;
-        unavailable.title = 'Google sign-in is not available yet. You can subscribe with email.';
+        unavailable.title = 'Google sign-in is not available right now. Please try again later.';
         controls.replaceChildren();
         controls.appendChild(unavailable);
         return data;
       }
       var script = document.createElement('script');
       script.src = 'https://accounts.google.com/gsi/client'; script.async = true;
-      script.onerror = function () { message('Google sign-in could not load. You can still subscribe with email.', true); };
+      script.onerror = function () { message('Google sign-in could not load. Please try again later.', true); };
       script.onload = function () {
         google.accounts.id.initialize({client_id: config.client_id, callback: function (result) {
           message('Signing in…');

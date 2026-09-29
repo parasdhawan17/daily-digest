@@ -30,3 +30,4 @@
   .stock-setup-card{padding:16px}
   .onboarding-step[data-step="1"] .step-copy h1{font-size:clamp(32px,8vw,42px)}
 }
+.email-choice[hidden]{display:none}
