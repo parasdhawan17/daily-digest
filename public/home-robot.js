@@ -5,8 +5,9 @@
 
   const motion = matchMedia('(prefers-reduced-motion: reduce)');
   const random = (min, max) => min + Math.random() * (max - min);
-  const robotWidth = walker.offsetWidth;
-  const position = fraction => `translateX(calc(${fraction * 100}cqw - ${fraction * robotWidth}px))`;
+  const travelWidth = () => Math.max(0, track.clientWidth - walker.offsetWidth);
+  // Pixel keyframes avoid Safari inconsistencies with container units in animations.
+  const position = fraction => `translateX(${fraction * travelWidth()}px)`;
   const gestures = ['idle', 'wobble', 'wave', 'look'];
   let fraction = .12, visible = true, active = false, timer, movement;
   let previous = 'idle';
@@ -18,7 +19,7 @@
     if (previous !== 'walk' || Math.random() < .35) {
       const destination = Math.max(.04, Math.min(.96,
         fraction + (Math.random() < .5 ? -1 : 1) * random(.12, .55)));
-      const distance = Math.abs(destination - fraction) * Math.max(0, track.clientWidth - robotWidth);
+      const distance = Math.abs(destination - fraction) * travelWidth();
       if (distance > 3) {
         track.dataset.action = previous = 'walk';
         movement = walker.animate([
@@ -55,7 +56,7 @@
     } else {
       clearTimeout(timer);
       if (movement) {
-        const width = track.clientWidth - robotWidth;
+        const width = travelWidth();
         const offset = walker.getBoundingClientRect().left - track.getBoundingClientRect().left;
         fraction = width > 0 ? Math.max(0, Math.min(1, offset / width)) : 0;
         walker.style.transform = position(fraction);
@@ -67,7 +68,24 @@
   }
 
   document.addEventListener('visibilitychange', sync);
-  motion.addEventListener('change', sync);
+  if (motion.addEventListener) motion.addEventListener('change', sync);
+  else motion.addListener(sync);
+  if ('ResizeObserver' in window) {
+    new ResizeObserver(() => {
+      if (movement) {
+        // Freeze the current visual position before recomputing the runway.
+        const width = travelWidth();
+        const offset = walker.getBoundingClientRect().left - track.getBoundingClientRect().left;
+        fraction = width > 0 ? Math.max(0, Math.min(1, offset / width)) : 0;
+        movement.cancel();
+        movement = null;
+        track.dataset.action = previous = 'idle';
+        clearTimeout(timer);
+        if (active) timer = setTimeout(next, 300);
+      }
+      walker.style.transform = position(fraction);
+    }).observe(track);
+  }
   if ('IntersectionObserver' in window) {
     new IntersectionObserver(([entry]) => {
       visible = entry.isIntersecting;

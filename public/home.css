@@ -301,7 +301,6 @@
   align-self: center;
   width: 100%;
   height: 56px;
-  container-type: inline-size;
   pointer-events: none;
 }
 .home-page .home-ai-companion-copy { grid-column: 1 / 3; grid-row: 1; color: #283c60; }
