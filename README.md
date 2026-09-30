@@ -234,3 +234,27 @@ sign-in on the configured origin with an existing mixed-market subscriber and a
 new account. Confirm the new contact appears in Brevo immediately and receives
 its welcome email. Credentials and email delivery require live configuration;
 unit tests mock those external services.
+
+### Search discovery and indexing
+
+The homepage links directly to four starter company pages. `public/sitemap.xml`
+lists home and those company URLs; `public/robots.txt` advertises the sitemap and
+allows crawlers to read page-level indexing directives. Utility, preview and
+personalized digest HTML includes `noindex`.
+
+Company pages resolve a cached core snapshot before returning HTML. Initial HTML
+contains the company name, business description, available prices, reported
+financial metrics, recent news and related-company links. The browser reuses the
+embedded snapshot; charts and AI insights still load on demand. Metadata uses the
+resolved company name, with the bundled catalog available as a fallback. A cold
+page request waits for the existing bounded provider request. Confirmed missing
+companies return 404; transient provider failures return 503. A successful core
+snapshot can be served for up to one hour past its normal five-minute cache
+lifetime during a temporary outage, with its original timestamp and an explicit
+stale-data warning. The process cache is bounded and is not shared across instances. The sitemap is curated: add
+only working canonical public pages after verifying their data coverage.
+
+When changing the production domain, update `stock_news/seo.py`, the homepage
+(and legacy homepage) canonical/social URLs, `public/robots.txt` and
+`public/sitemap.xml` together. Submit the deployed sitemap in Search Console;
+this repository does not submit it automatically.

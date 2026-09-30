@@ -180,6 +180,18 @@ class RequestTests(unittest.TestCase):
 
 
 class EndpointTests(unittest.TestCase):
+    def setUp(self):
+        def snapshot(symbol, key):
+            from stock_news.seo import company_names
+            payload = company()
+            payload['companyName'] = company_names().get(symbol[3:], symbol[3:])
+            payload['companyProfile']['exchangeCodeNse'] = symbol[3:]
+            return {'ok': True, 'symbol': symbol, 'data': detail.normalize_core(payload, symbol),
+                    'fetched_at': '2026-09-30T00:00:00+00:00'}
+        patcher = patch.object(stock, 'get_page_snapshot', side_effect=snapshot)
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
     def test_routes_local_and_vercel_rewrites(self):
         self.assertEqual(route(handler('/stocks/IN:TCS')), 'stock')
         self.assertEqual(route(handler('/api/index?route=stock&symbol=IN:TCS')), 'stock')
@@ -192,6 +204,7 @@ class EndpointTests(unittest.TestCase):
         stock.handle_page(h)
         h.send_response.assert_called_with(200)
         self.assertIn(b'data-symbol="IN:M&amp;M"', h.wfile.getvalue())
+        self.assertIn(b'https://www.mydailydigest.online/stocks/IN:M%26M', h.wfile.getvalue())
         self.assertNotIn(b'credential', h.wfile.getvalue())
         self.assertIn(b'AI Overview', h.wfile.getvalue())
 
@@ -204,9 +217,13 @@ class EndpointTests(unittest.TestCase):
         h = handler('/stocks/IN:TCS?symbol=IN:INFY')
         stock.handle_page(h)
         self.assertIn(b'data-symbol="IN:TCS"', h.wfile.getvalue())
+        self.assertIn(b'Tata Consultancy Services (TCS) Share Price, Financials &amp; News', h.wfile.getvalue())
+        self.assertIn(b'rel="canonical" href="https://www.mydailydigest.online/stocks/IN:TCS"', h.wfile.getvalue())
         h = handler('/api/index?route=stock&symbol=IN:TCS')
         stock.handle_page(h)
         self.assertIn(b'data-symbol="IN:TCS"', h.wfile.getvalue())
+        self.assertIn(b'Tata Consultancy Services (TCS) Share Price, Financials &amp; News', h.wfile.getvalue())
+        self.assertIn(b'rel="canonical" href="https://www.mydailydigest.online/stocks/IN:TCS"', h.wfile.getvalue())
 
     @patch.object(stock, 'get_data', return_value=({'ok': True, 'data': {}}, 300))
     def test_only_one_public_cache_header(self, get):

@@ -63,6 +63,11 @@
   const requests = new Map();
   function request(section, params = {}) {
     const query = new URLSearchParams({symbol, section, ...params}), key = query.toString();
+    if (section === 'core' && !requests.has(key)) {
+      try { const seed = $('company-bootstrap'); const payload = seed && JSON.parse(seed.textContent);
+        if (payload && payload.ok && payload.symbol === symbol) requests.set(key, Promise.resolve(payload));
+      } catch (error) { /* Fall back to the normal request if bootstrap data is invalid. */ }
+    }
     if (requests.has(key)) return requests.get(key);
     const promise = fetch('/api/stock-data?' + key).then(async response => {
       const data = await response.json();
@@ -572,7 +577,7 @@
     const status = $('stock-status'); status.hidden = false; status.classList.add('loading'); status.textContent = 'Loading your company overview…';
     try {
       const result = await request('core'); core = result.data;
-      $('company-name').textContent = core.name; document.title = core.name + ' (' + symbol.replace('IN:', '') + ') — Tickr Digest';
+      $('company-name').textContent = core.name; document.title = core.name + ' (' + symbol.replace('IN:', '') + ') Share Price, Financials & News | Tickr Digest';
       $('company-industry').textContent = core.industry || 'Indian equities';
       const identifiers = [symbol.replace('IN:', ''), core.profile.isInId, core.profile.exchangeCodeBse ? 'BSE ' + core.profile.exchangeCodeBse : ''].filter(Boolean); $('company-identifiers').replaceChildren(...identifiers.map(x => node('span', 'stock-tag', x)));
       const exchange = core.prices.NSE !== null ? 'NSE' : core.prices.BSE !== null ? 'BSE' : null;

@@ -1,0 +1,15 @@
+{% if snapshot is defined %}
+<section class="company-snapshot" aria-labelledby="company-snapshot-title">
+  <h2 id="company-snapshot-title">{{ page_core.name }} research snapshot</h2>
+  <p class="snapshot-freshness">Source: IndianAPI · {% if page_core.source_time %}Provider timestamp: {{ page_core.source_time }} · {% endif %}Retrieved {{ snapshot.fetched_at }}. Market data may be delayed.</p>
+  {% if snapshot.stale %}<p role="status">The provider is temporarily unavailable. Showing the last successful snapshot; figures may be out of date.</p>{% endif %}
+  {% if page_core.profile.companyDescription %}<p>{{ page_core.profile.companyDescription }}</p>{% endif %}
+  <dl class="snapshot-facts">
+    {% for exchange, price in page_core.prices.items() if price is not none %}<div><dt>{{ exchange }} share price</dt><dd>₹{{ format_number(price) }}</dd></div>{% endfor %}
+    {% for metric in facts %}<div><dt>{{ metric.label }}{% if metric.period %} · {{ metric.period }}{% endif %}</dt><dd>{{ format_number(metric.value) }} {{ metric.unit }}</dd></div>{% endfor %}
+  </dl>
+  {% if stories %}<h3>Recent company news</h3><ul class="snapshot-news">{% for story in stories %}<li>{% if story.url %}<a href="{{ story.url }}" rel="noopener">{{ story.headline }}</a>{% else %}<strong>{{ story.headline }}</strong>{% endif %}{% if story.source or story.date %}<p class="snapshot-freshness">{{ story.source }}{% if story.date %} · {{ story.date }}{% endif %}</p>{% endif %}{% if story.summary %}<p>{{ story.summary }}</p>{% endif %}</li>{% endfor %}</ul>{% endif %}
+  {% if peers %}<h3>Related companies</h3><ul>{% for peer in peers %}<li><a href="{{ peer.path }}">{{ peer.name }} company research</a></li>{% endfor %}</ul>{% endif %}
+</section>
+<script id="company-bootstrap" type="application/json">{{ snapshot|tojson }}</script>
+{% endif %}

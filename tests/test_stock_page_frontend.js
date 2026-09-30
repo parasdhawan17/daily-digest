@@ -28,7 +28,7 @@ test('standalone research page renders accessible filtered P\/E history', () => 
 test('standalone research page versions the new assets', () => {
   assert.match(template, /ai-overview\.css\?v=20260930-animated-compact/);
   assert.match(template, /stock\.css\?v=20260928-launcher-tip/);
-  assert.match(template, /stock\.js\?v=20260930-random-bots/);
+  assert.match(template, /stock\.js\?v=20260930-ssr/);
 });
 
 test('Overview tab does not render company signals', () => {

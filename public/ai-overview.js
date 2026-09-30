@@ -89,6 +89,11 @@
   syncTheme();
 
   async function request(path) {
+    if (path.startsWith('/api/stock-data?') && new URLSearchParams(path.split('?')[1]).get('section') === 'core') {
+      try { const seed = $('company-bootstrap'); const payload = seed && JSON.parse(seed.textContent);
+        if (payload && payload.ok && payload.symbol === symbol) return payload;
+      } catch (error) { /* Fall back to the normal request if bootstrap data is invalid. */ }
+    }
     const response = await fetch(path);
     const payload = await response.json();
     if (!response.ok || !payload.ok) throw new Error(payload.error || 'This overview is temporarily unavailable.');
@@ -184,7 +189,7 @@
     $('company-price').textContent = price === null ? '—' : money(price);
     const sourceTime = core.source_time || (response.fetched_at ? dateTime(response.fetched_at) : 'Time unavailable');
     $('price-meta').textContent = (exchange || 'Price unavailable') + ' · As of ' + sourceTime;
-    document.title = name + ' AI Overview — Tickr Digest';
+    document.title = name + ' (' + symbol.slice(3) + ') AI Overview | Tickr Digest';
     const change = $('company-change');
     change.hidden = !present(core.change_percent);
     if (!change.hidden) {

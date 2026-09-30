@@ -556,3 +556,11 @@ html[data-theme="dark"] .home-page .home-signin .auth-controls a { background: #
   .home-page .home-feature, .home-page .home-search-form, .home-page .home-search-form button, .home-page .home-final-button { transition: none; }
   .home-page .home-feature:hover, .home-page .home-search-form button:hover, .home-page .home-final-button:hover { transform: none; }
 }
+
+.home-page .home-stock-links { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; padding: 0; margin: 28px 0 0; list-style: none; }
+.home-page .home-stock-links a { display: flex; flex-direction: column; gap: 10px; min-height: 100px; padding: 24px; border: 1px solid var(--border); border-radius: 18px; background: var(--card-bg); color: var(--text-strong); text-decoration: none; }
+.home-page .home-stock-links a:hover { border-color: var(--link); }
+.home-page .home-stock-links a:focus-visible { outline: 2px solid var(--link); outline-offset: 4px; }
+.home-page .home-stock-links strong { font-size: 18px; overflow-wrap: anywhere; }
+.home-page .home-stock-links span { color: var(--link); font-size: 13px; }
+@media (max-width: 600px) { .home-page .home-stock-links { grid-template-columns: 1fr; } }

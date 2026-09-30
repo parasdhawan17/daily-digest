@@ -51,7 +51,7 @@ class DashboardPreferencesTest(unittest.TestCase):
         config = json.loads(Path("vercel.json").read_text(encoding="utf-8"))
         self.assertEqual(
             config["functions"]["api/index.py"]["includeFiles"],
-            "public/dashboard-catalog.json",
+            "{public/dashboard-catalog.json,config/in_entities_cache.json}",
         )
 
 

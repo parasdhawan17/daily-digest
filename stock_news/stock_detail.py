@@ -230,3 +230,18 @@ def get_data(symbol, section, period, series, key, root=None, history_filter='pr
     finally:
         with _lock:
             _pending.pop(cache_key, None)
+
+
+def get_page_snapshot(symbol, key):
+    """Resolve company existence; retain a recent snapshot during transient outages."""
+    try:
+        return get_data(symbol, 'core', '1yr', 'quarter_results', key)[0]
+    except StockDataError as error:
+        if key and error.status in (429, 503):
+            cache_key = (indianapi._api_root().rstrip('/'), hashlib.sha256(key.encode()).hexdigest(),
+                         symbol, 'core', '', '', '')
+            with _lock:
+                cached = _cache.get(cache_key)
+                if cached and time.monotonic() - cached[0] <= 3600:
+                    return {**cached[1], 'stale': True}
+        raise

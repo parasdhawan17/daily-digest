@@ -76,8 +76,9 @@ function history() {
   ]}};
 }
 
-async function setup(corePayload, aiResponses, historyResponse = history()) {
+async function setup(corePayload, aiResponses, historyResponse = history(), bootstrap = null) {
   const elements = Object.fromEntries(ids.map(id => [id, new Element()]));
+  if (bootstrap !== null) { elements['company-bootstrap'] = new Element(); elements['company-bootstrap'].textContent = typeof bootstrap === 'string' ? bootstrap : JSON.stringify(bootstrap); }
   elements['overview-content'].hidden = true;
   elements['ai-content'].hidden = true;
   elements['range-card'].hidden = true;
@@ -229,4 +230,21 @@ test('AI failure preserves factual metrics and retry renders the summary', async
   await app.flush();
   assert.equal(app.aiCalls, 2);
   assert.equal(e['ai-content'].hidden, false);
+});
+
+
+test('uses matching server snapshot without a second core data request', async () => {
+  const seed = {...core(), symbol: 'IN:EXAMPLE'};
+  const app = await setup(core(), [ai()], history(), seed);
+  assert.equal(app.elements['company-name'].textContent, 'Example Ltd');
+  assert.equal(app.calls.some(url => url.includes('section=core')), false);
+  assert.ok(app.calls.some(url => url.includes('section=history')));
+});
+
+test('invalid or mismatched server snapshots fall back to core API', async () => {
+  for (const seed of ['invalid json', {...core(), symbol: 'IN:TCS'}]) {
+    const app = await setup(core(), [ai()], history(), seed);
+    assert.equal(app.elements['company-name'].textContent, 'Example Ltd');
+    assert.ok(app.calls.some(url => url.includes('section=core')));
+  }
 });

@@ -1,7 +1,7 @@
 {
   "functions": {
     "api/index.py": {
-      "includeFiles": "public/dashboard-catalog.json"
+      "includeFiles": "{public/dashboard-catalog.json,config/in_entities_cache.json}"
     }
   },
   "rewrites": [
