@@ -28,8 +28,9 @@
   <link rel="stylesheet" href="/subscribe-form.css">
   <link rel="stylesheet" href="/landing.css">
   <link rel="stylesheet" href="/auth.css">
-  <link rel="stylesheet" href="/home.css?v=20260930-seo">
+  <link rel="stylesheet" href="/home.css?v=20261001-robot-spotlight">
   <script src="/analytics.js?v=20260928-1" defer></script>
+  <script src="/home-robot.js?v=20261001-2" defer></script>
   <script src="/home-search.js?v=20260926-choice-dialog" defer></script>
 </head>
 <body class="home-page">
@@ -51,26 +52,57 @@
         <h1>Meet the AI that<br><span>reads between the tickers.</span></h1>
         <p class="home-hero-intro">Tickr AI turns scattered company signals into a clear visual first read—then keeps the numbers, news, and source context within reach.</p>
         <div class="home-hero-actions">
-          <aside class="home-ai-companion" aria-label="Tickr AI research companion">
-            <span class="home-ai-orbit" aria-hidden="true"></span>
-            <span class="ai-robot is-large" aria-hidden="true">
-              <svg viewBox="0 0 88 88" focusable="false">
-                <path class="ai-robot-antenna" d="M44 18V9"/>
-                <circle class="ai-robot-antenna-tip" cx="44" cy="7" r="4"/>
-                <rect class="ai-robot-ear" x="5" y="39" width="8" height="16" rx="4"/>
-                <rect class="ai-robot-ear" x="75" y="39" width="8" height="16" rx="4"/>
-                <rect class="ai-robot-shell" x="10" y="18" width="68" height="60" rx="21"/>
-                <rect class="ai-robot-screen" x="16" y="25" width="56" height="46" rx="15"/>
-                <path class="ai-robot-brows" d="M27 36h10 M51 36h10"/>
-                <circle class="ai-robot-eye" cx="32" cy="45" r="3"/>
-                <circle class="ai-robot-eye" cx="56" cy="45" r="3"/>
-                <path class="ai-robot-mouth" d="M31 55q13 14 26 0"/>
-              </svg>
-            </span>
-            <span class="home-ai-companion-copy"><strong>Tickr AI</strong><small><i aria-hidden="true"></i> Ready to research</small></span>
-          </aside>
           <div class="home-search-area">
             <form class="home-search-form" role="search" autocomplete="off">
+            <aside class="home-ai-companion" aria-label="Tickr AI research companion">
+              <span class="home-robot-walker" aria-hidden="true">
+                <span class="home-robot-direction">
+                  <svg class="home-robot-character" viewBox="0 0 100 164" focusable="false">
+                    <ellipse class="home-robot-shadow" cx="50" cy="159" rx="28" ry="3"/>
+                    <g class="home-robot-body">
+                    <g class="home-robot-leg home-robot-leg-back">
+                      <rect class="home-robot-joint" x="55" y="117" width="12" height="27" rx="6"/>
+                      <rect class="home-robot-boot" x="53" y="140" width="22" height="16" rx="7"/>
+                      <path class="home-robot-sole" d="M57 152h14"/>
+                    </g>
+                    <g class="home-robot-arm home-robot-arm-back">
+                      <rect class="home-robot-joint" x="75" y="87" width="11" height="28" rx="5.5"/>
+                      <rect class="home-robot-hand" x="74" y="108" width="15" height="16" rx="6"/>
+                      <path class="home-robot-fingers" d="M79 116v4m5-4v4"/>
+                    </g>
+                    <rect class="home-robot-joint" x="42" y="72" width="16" height="15" rx="5"/>
+                    <rect class="home-robot-torso" x="27" y="82" width="46" height="42" rx="14"/>
+                    <rect class="home-robot-chest" x="35" y="90" width="30" height="22" rx="7"/>
+                    <path class="home-robot-signal" d="M40 102h5l3-6 5 11 3-5h4"/>
+                    <circle class="home-robot-light" cx="50" cy="118" r="2"/>
+                    <g class="home-robot-leg home-robot-leg-front">
+                      <rect class="home-robot-joint" x="33" y="117" width="12" height="27" rx="6"/>
+                      <rect class="home-robot-boot" x="31" y="140" width="22" height="16" rx="7"/>
+                      <path class="home-robot-sole" d="M35 152h14"/>
+                    </g>
+                    <g class="home-robot-arm home-robot-arm-front">
+                      <rect class="home-robot-joint" x="14" y="87" width="11" height="28" rx="5.5"/>
+                      <rect class="home-robot-hand" x="11" y="108" width="15" height="16" rx="6"/>
+                      <path class="home-robot-fingers" d="M16 116v4m5-4v4"/>
+                    </g>
+                    <g class="home-robot-head" transform="translate(6 0)">
+                      <path class="ai-robot-antenna" d="M44 18V9"/>
+                      <circle class="ai-robot-antenna-tip" cx="44" cy="7" r="4"/>
+                      <rect class="ai-robot-ear" x="5" y="39" width="8" height="16" rx="4"/>
+                      <rect class="ai-robot-ear" x="75" y="39" width="8" height="16" rx="4"/>
+                      <rect class="ai-robot-shell" x="10" y="18" width="68" height="60" rx="21"/>
+                      <rect class="ai-robot-screen" x="16" y="25" width="56" height="46" rx="15"/>
+                      <path class="ai-robot-brows" d="M27 36h10 M51 36h10"/>
+                      <circle class="ai-robot-eye" cx="32" cy="45" r="3"/>
+                      <circle class="ai-robot-eye" cx="56" cy="45" r="3"/>
+                      <path class="ai-robot-mouth" d="M31 55q13 14 26 0"/>
+                    </g>
+                    </g>
+                  </svg>
+                </span>
+              </span>
+            </aside>
+              <span class="home-ai-companion-copy"><strong>Tickr AI</strong><small><i aria-hidden="true"></i> Ready to research</small></span>
               <label class="home-search-label" for="home-stock-query">Search a company for an AI overview or stock details</label>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/></svg>
               <input id="home-stock-query" type="search" placeholder="Company or ticker" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="home-stock-results" aria-describedby="home-stock-status" maxlength="100" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false">
