@@ -42,3 +42,19 @@ html[data-theme=dark] .stock-page{--signal-green:#57bb93;--signal-strong-green:#
 @keyframes stock-ai-arrive{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}@keyframes stock-ai-expand{0%{opacity:.32;transform:translate(14px,14px) scale(.16);border-radius:30px}42%{opacity:.94}100%{opacity:1;transform:none;border-radius:18px}}@keyframes stock-ai-launcher-attach{0%{opacity:1;transform:scale(1)}60%{opacity:.88;transform:scale(1.18)}100%{opacity:0;transform:scale(1.32)}}@keyframes stock-ai-collapse{0%{opacity:1;transform:none;border-radius:18px}58%{opacity:.82;transform:translate(5px,5px) scale(.78)}100%{opacity:0;transform:translate(14px,14px) scale(.16);border-radius:30px}}@keyframes stock-ai-launcher-in{0%{opacity:0;transform:scale(.52)}68%{opacity:1;transform:scale(1.08)}100%{opacity:1;transform:scale(1)}}@keyframes stock-ai-thinking{50%{transform:scale(1.04);box-shadow:0 0 0 7px color-mix(in srgb,var(--accent) 7%,transparent)}}@keyframes stock-ai-dot{0%,70%,100%{opacity:.3;transform:translateY(0)}35%{opacity:1;transform:translateY(-3px)}}
 @media(max-width:600px){.stock-section-assistant{right:12px;bottom:max(12px,env(safe-area-inset-bottom));width:calc(100vw - 24px);max-height:min(72vh,620px);border-radius:16px}.stock-section-ai-body{max-height:calc(72vh - 58px)}.stock-section-ai-launcher{right:12px;bottom:max(12px,env(safe-area-inset-bottom))}.stock-section-assistant.is-minimized{width:calc(100vw - 24px)}}
 @media(prefers-reduced-motion:reduce){.stock-ai-target.is-ai-holding::after{transition:none;width:100%}.stock-section-assistant,.stock-section-ai-launcher,.stock-section-ai-thinking-face,.stock-section-ai-dots i{animation:none!important}}
+
+/* Keep the mobile long-press explainer from starting native text selection. */
+@media (any-pointer: coarse) {
+  .stock-ai-target {
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+  }
+  .stock-ai-target input,
+  .stock-ai-target textarea,
+  .stock-ai-target [contenteditable="true"] {
+    -webkit-user-select: text;
+    user-select: text;
+    -webkit-touch-callout: default;
+  }
+}

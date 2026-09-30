@@ -141,3 +141,19 @@ html[data-theme=dark] .indian-dashboard{--signal-green:#57bb93;--signal-strong-g
 .dashboard-shimmer-line{width:75%;height:12px}.dashboard-shimmer-line.is-short{width:45%}.dashboard-shimmer-block{width:100%;height:54px;margin-top:3px}
 @keyframes dashboard-shimmer{to{background-position-x:-200%}}
 @media(prefers-reduced-motion:reduce){.dashboard-shimmer-line,.dashboard-shimmer-block{animation:none}}
+
+/* Keep the mobile long-press explainer from starting native text selection. */
+@media (any-pointer: coarse) {
+  .stock-ai-target {
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+  }
+  .stock-ai-target input,
+  .stock-ai-target textarea,
+  .stock-ai-target [contenteditable="true"] {
+    -webkit-user-select: text;
+    user-select: text;
+    -webkit-touch-callout: default;
+  }
+}
