@@ -26,9 +26,9 @@ test('standalone research page renders accessible filtered P\/E history', () => 
 });
 
 test('standalone research page versions the new assets', () => {
-  assert.match(template, /ai-overview\.css\?v=20260927-compact-type/);
+  assert.match(template, /ai-overview\.css\?v=20260930-animated-compact/);
   assert.match(template, /stock\.css\?v=20260928-launcher-tip/);
-  assert.match(template, /stock\.js\?v=20260928-launcher-tip/);
+  assert.match(template, /stock\.js\?v=20260930-random-bots/);
 });
 
 test('Overview tab does not render company signals', () => {
@@ -100,6 +100,7 @@ test('AI overview tab omits empty signal groups', () => {
       this.children = [];
       this.dataset = {};
       this.attributes = {};
+      this.style = {setProperty() {}};
       this.hidden = false;
       this.className = '';
       this.classList = {add: name => { this.className += ' ' + name; }};
@@ -128,8 +129,35 @@ test('AI overview tab omits empty signal groups', () => {
   assert.match(panel.textContent, /The AI take/);
   assert.match(panel.textContent, /What looks encouraging/);
   assert.doesNotMatch(panel.textContent, /What needs attention|What changed recently|Potential catalysts|Key risks|What to watch next/);
+  const firstCategory = panel.children[0].children[1].children[1].children[0];
+  assert.equal(firstCategory.tagName, 'section');
+
+  response.data.attention = [{heading: 'Margin pressure', text: 'Margins narrowed.', tone: 'caution', evidence_ids: []}];
+  response.data.changes = [{heading: 'Debt rose', text: 'Net debt increased.', tone: 'negative', evidence_ids: []}];
+  response.data.watch_next = [{heading: 'Next results', text: 'Monitor the next report.', tone: 'neutral', evidence_ids: []}];
+  const fullPanel = new Element('section');
+  window.testRender(fullPanel, response);
+  const groups = fullPanel.children[0].children[1].children[1].children;
+  assert.equal(groups.length, 4);
+  assert.ok(groups.every(group => group.tagName === 'section'));
+  const signals = groups.map(group => group.children[1].children[0].children[0]);
+  assert.deepEqual(signals.map(signal => signal.children[0].children[0].dataset.tone), ['positive', 'caution', 'negative', 'neutral']);
+  assert.equal(new Set(signals.map(signal => signal.children[0].children[0].children[0].children[7].attributes.d)).size, 4);
+
+  response.data.watch_next[0].tone = 'unsupported';
+  response.data.watch_next[0].evidence_ids = ['S1'];
+  response.data.sources = [{id: 'S1', section: 'financials', label: 'Reported financials'}];
+  const fallbackPanel = new Element('section');
+  window.testRender(fallbackPanel, response);
+  const fallbackSignal = fallbackPanel.children[0].children[1].children[1].children[3].children[1].children[0].children[0];
+  assert.equal(fallbackSignal.children[0].children[0].dataset.tone, 'neutral');
+  assert.match(fallbackSignal.textContent, /Context/);
+  assert.equal(fallbackSignal.children.at(-1).children[0].children[0].href, '#financials');
 
   response.data.encouraging = [];
+  response.data.attention = [];
+  response.data.changes = [];
+  response.data.watch_next = [];
   const emptyPanel = new Element('section');
   window.testRender(emptyPanel, response);
   assert.equal(emptyPanel.children.length, 1);

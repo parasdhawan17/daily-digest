@@ -100,7 +100,12 @@ test('every selectable Indian dashboard card renders without a fallback or excep
     fetch: async url => {
       requested.push(url);
       return {json: async () => url === '/dashboard-catalog.json' ? catalog
-        : url.startsWith('/api/stock-ai') ? {ok: true, data: {summary: {heading: 'Summary', text: 'Text', tone: 'positive'}, encouraging: [], attention: [], changes: [], catalysts: [], risks: [], watch_next: [], sources: [], generated_at: '2026-09-01'}}
+        : url.startsWith('/api/stock-ai') ? {ok: true, data: {summary: {heading: 'Summary', text: 'Text', tone: 'caution', evidence_ids: ['S1']},
+          encouraging: [{heading: 'Revenue', text: 'Revenue grew.', tone: 'positive', evidence_ids: ['S1']}],
+          attention: [{heading: 'Margins', text: 'Margins narrowed.', tone: 'caution', evidence_ids: ['S1']}],
+          changes: [{heading: 'Debt', text: 'Debt rose.', tone: 'negative', evidence_ids: ['S1']}],
+          catalysts: [], risks: [], watch_next: [{heading: 'Next results', text: 'Watch the next report.', tone: 'neutral', evidence_ids: ['S1']}],
+          sources: [{id: 'S1', section: 'financials', label: 'Reported financials'}], generated_at: '2026-09-01'}}
         : {ok: true, data: mockData(new URL(url, 'https://example.test').searchParams.get('section'), new URL(url, 'https://example.test').searchParams)}};
     }
   };
@@ -118,6 +123,11 @@ test('every selectable Indian dashboard card renders without a fallback or excep
   const card = id => cards.find(node => node.dataset.card === id);
   assert.ok(descendants(root, node => node.className === 'ai-insight-explorer').length);
   assert.ok(descendants(root, node => node.className === 'ai-summary').length);
+  const board = descendants(root, node => node.className === 'ai-insight-explorer')[0];
+  assert.equal(descendants(board, node => node.tagName === 'SECTION' && node.className === 'ai-category').length, 4);
+  assert.equal(descendants(board, node => node.className?.startsWith('ai-signal ')).length, 4);
+  assert.equal(descendants(board, node => node.tagName === 'DETAILS').length, 0);
+  assert.equal(descendants(board, node => node.tagName === 'A' && node.href?.endsWith('#financials')).length, 5);
   assert.ok(descendants(card('financial_quarterly_results'), node => node.attributes?.class === 'stock-chart').length);
   assert.ok(descendants(card('ownership_current_mix'), node => node.className === 'dashboard-stacked-bar').length);
   assert.ok(descendants(card('overview_pe_history'), node => node.className === 'dashboard-metrics').length);

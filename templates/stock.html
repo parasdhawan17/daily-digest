@@ -9,8 +9,8 @@
   <link rel="icon" href="/assets/tickr-digest-icon-t-concept.png" type="image/png">
   <link rel="apple-touch-icon" href="/assets/tickr-digest-icon-t-concept.png">
   <script>(function(){try{var t=localStorage.getItem('daily-digest-theme');if(t!=='light'&&t!=='dark')t=matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light';document.documentElement.dataset.theme=t;document.documentElement.style.colorScheme=t;}catch(e){}})();</script>
-  <link rel="stylesheet" href="/landing.css"><link rel="stylesheet" href="/stock-search.css"><link rel="stylesheet" href="/ai-overview.css?v=20260927-compact-type"><link rel="stylesheet" href="/stock.css?v=20260928-launcher-tip">
-  <script src="/analytics.js?v=20260928-1" defer></script><script src="/stock-search.js" defer></script><script src="/stock-format.js" defer></script><script src="/stock.js?v=20260928-launcher-tip" defer></script>
+  <link rel="stylesheet" href="/landing.css"><link rel="stylesheet" href="/stock-search.css"><link rel="stylesheet" href="/ai-overview.css?v=20260930-animated-compact"><link rel="stylesheet" href="/stock.css?v=20260928-launcher-tip">
+  <script src="/analytics.js?v=20260928-1" defer></script><script src="/stock-search.js" defer></script><script src="/stock-format.js" defer></script><script src="/stock.js?v=20260930-random-bots" defer></script>
 </head>
 <body class="stock-page" data-symbol="{{ symbol }}">
 <a class="skip-link" href="#stock-main">Skip to company details</a>
@@ -25,11 +25,11 @@
     <section class="stock-hero" aria-labelledby="company-name"><div><p class="stock-eyebrow" id="company-industry"></p><h1 id="company-name"></h1><div id="company-identifiers" class="stock-identifiers"></div></div><div class="stock-price-block"><p class="stock-eyebrow" id="primary-exchange"></p><div class="stock-price-line"><strong id="company-price"></strong><span id="company-change" class="stock-change"></span></div><p id="secondary-price"></p></div></section>
     <div class="stock-freshness"><span id="source-time"></span><span>Source: IndianAPI · Market data may be delayed</span></div>
     <nav class="stock-tabs" role="tablist" aria-label="Company research">
-      {% for id, label in [('overview','Overview'),('ai-overview','AI Overview'),('financials','Financials'),('ownership','Ownership'),('analysis','Market Data'),('actions','Corporate actions'),('news','News')] %}
+      {% for id, label in [('ai-overview','AI Overview'),('overview','Overview'),('financials','Financials'),('ownership','Ownership'),('analysis','Market Data'),('actions','Corporate actions'),('news','News')] %}
       <button type="button" role="tab" id="tab-{{ id }}" aria-controls="panel-{{ id }}" aria-selected="{{ 'true' if loop.first else 'false' }}" tabindex="{{ '0' if loop.first else '-1' }}" data-tab="{{ id }}">{{ label }}</button>
       {% endfor %}
     </nav>
-    {% for id in ['overview','ai-overview','financials','ownership','analysis','actions','news'] %}<section id="panel-{{ id }}" class="stock-panel{% if id == 'ai-overview' %} stock-ai-overview-host{% endif %}" role="tabpanel" aria-labelledby="tab-{{ id }}" tabindex="0"{% if not loop.first %} hidden{% endif %}></section>{% endfor %}
+    {% for id in ['ai-overview','overview','financials','ownership','analysis','actions','news'] %}<section id="panel-{{ id }}" class="stock-panel{% if id == 'ai-overview' %} stock-ai-overview-host{% endif %}" role="tabpanel" aria-labelledby="tab-{{ id }}" tabindex="0"{% if not loop.first %} hidden{% endif %}></section>{% endfor %}
   </div>
 </main>
 <footer class="container stock-footer"><a class="brand" href="/">tickr digest<span class="brand-dot">.</span></a><p>A clearer view of the companies you follow.</p><span>Financial figures reflect their reported periods. Market data may be incomplete or delayed.</span></footer>

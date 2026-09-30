@@ -96,6 +96,9 @@ html[data-theme=dark] .ai-overview-page, html[data-theme=dark] .stock-ai-overvie
 .ai-robot-brows, .ai-robot-mouth { fill: none; stroke: #f7f9ff; stroke-width: 3.6; stroke-linecap: round; stroke-linejoin: round; }
 .ai-robot-brows { stroke-width: 2.4; opacity: .76; }
 .ai-robot-eye { fill: #fff; transform-box: fill-box; transform-origin: center; animation: ai-robot-blink 6s infinite; }
+.ai-robot-eyes { fill: none; stroke: #fff; stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; }
+.ai-robot-cheeks { fill: none; stroke: #ffbfd3; stroke-width: 3; stroke-linecap: round; opacity: 0; }
+.ai-robot.positive .ai-robot-cheeks { opacity: .9; }
 .ai-insight-explorer { overflow: hidden; border: 1px solid #7b92f855; border-radius: 18px; background: var(--ai-surface); box-shadow: 0 12px 32px #24488b0d; animation: ai-rise .55s .15s ease-out both; }
 .ai-insight-body { padding: 18px 20px 16px; background: linear-gradient(135deg, color-mix(in srgb, var(--ai-blue) 7%, var(--ai-surface)), var(--ai-surface) 44%); }
 .ai-insight-meta, .ai-categories { position: relative; z-index: 1; }
@@ -178,6 +181,8 @@ html[data-theme=dark] .ai-overview-page, html[data-theme=dark] .stock-ai-overvie
 @keyframes ai-robot-blink { 0%, 46%, 50%, 100% { transform: scaleY(1); } 48% { transform: scaleY(.14); } }
 @keyframes ai-robot-float { 0%, 100% { transform: translateY(0) rotate(-2deg); } 50% { transform: translateY(-5px) rotate(2deg); } }
 @keyframes ai-robot-halo { 0%, 100% { transform: scale(.96); opacity: .7; } 50% { transform: scale(1.05); opacity: 1; } }
+@keyframes ai-robot-idle { 0%, 100% { transform: translateY(0) rotate(-2deg); } 25% { transform: translateY(-2px) rotate(1deg); } 55% { transform: translateY(1px) rotate(2deg); } 78% { transform: translateY(-1px) rotate(-1deg); } }
+@keyframes ai-robot-eye-blink { 0%, 43%, 47%, 78%, 82%, 100% { transform: scaleY(1); } 45%, 80% { transform: scaleY(.12); } }
 @media (max-width: 900px) {
   .ai-metrics-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); row-gap: 12px; }
   .ai-metric:nth-child(3n+1) { padding-left: 0; border-left: 0; }
@@ -224,4 +229,66 @@ html[data-theme=dark] .ai-overview-page, html[data-theme=dark] .stock-ai-overvie
 }
 @media (prefers-reduced-motion: reduce) {
   .ai-overview-page *, .ai-overview-page *::before, .ai-overview-page *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+}
+
+/* Signal board shared by the stock detail tab and the personal dashboard. */
+.stock-panel.stock-ai-overview-host, .dashboard-ai-overview-host { min-height: 0; }
+.stock-ai-overview-host .ai-insight-explorer { border-radius: 18px; background: var(--ai-bg); }
+.stock-ai-overview-host .ai-summary { grid-template-columns: 92px minmax(0, 1fr); gap: 15px; min-height: 130px; padding: 15px 20px; }
+.stock-ai-overview-host .ai-summary::before { left: -42px; width: 260px; height: 260px; }
+.stock-ai-overview-host .ai-robot-guide { min-height: 96px; gap: 3px; }
+.stock-ai-overview-host .ai-robot-guide-face { width: 82px; height: 82px; }
+.stock-ai-overview-host .ai-robot-guide-face::before { width: 68px; height: 68px; animation: none; }
+.stock-ai-overview-host .ai-robot.is-large { width: 76px; height: 76px; }
+.stock-ai-overview-host .ai-robot.is-large svg { animation: none; }
+.stock-ai-overview-host .ai-robot { width: 29px; height: 29px; transform-origin: 50% 70%; animation: ai-robot-idle var(--ai-bot-idle-duration, 3.8s) ease-in-out infinite; animation-delay: var(--ai-bot-idle-delay, 0s); }
+.stock-ai-overview-host .ai-robot-eyes { transform-box: fill-box; transform-origin: center; animation: ai-robot-eye-blink var(--ai-bot-blink-duration, 5.2s) linear infinite; animation-delay: var(--ai-bot-blink-delay, 0s); }
+.stock-ai-overview-host .ai-robot.positive svg { transform: rotate(-5deg); }
+.stock-ai-overview-host .ai-robot.negative svg { transform: rotate(5deg); }
+.stock-ai-overview-host .ai-robot.caution svg { transform: rotate(-3deg); }
+.stock-ai-overview-host .ai-robot-antenna-tip { filter: drop-shadow(0 0 4px var(--robot-accent)); }
+.stock-ai-overview-host .ai-robot-tone { max-width: 120px; padding: 3px 7px; font-size: 9px; }
+.stock-ai-overview-host .ai-summary h2 { margin: 4px 0 5px; font-size: clamp(18px, 1.8vw, 23px); line-height: 1.2; }
+.stock-ai-overview-host .ai-summary p { max-width: 78ch; font-size: 12px; line-height: 1.48; }
+.stock-ai-overview-host .ai-insight-body { padding: 12px 14px 15px; }
+.stock-ai-overview-host .ai-insight-meta { align-items: center; }
+.stock-ai-overview-host .ai-signal-count { color: var(--ai-ink); font-size: 10px; }
+.stock-ai-overview-host .ai-categories { grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; gap: 10px; margin-top: 10px; padding-top: 10px; }
+.stock-ai-overview-host .ai-category { padding: 11px; border-color: var(--ai-border); border-radius: 13px; background: var(--ai-surface); box-shadow: 0 6px 22px #172e610a; }
+.stock-ai-overview-host .ai-category h3 { justify-content: flex-start; gap: 8px; margin-bottom: 8px; font-size: 12px; line-height: 1.35; }
+.stock-ai-overview-host .ai-category h3::before { content: ""; width: 7px; height: 7px; flex: 0 0 auto; border-radius: 50%; background: var(--ai-blue); box-shadow: 0 0 0 4px var(--ai-soft); }
+.stock-ai-overview-host .ai-category-count { margin-left: auto; }
+.stock-ai-overview-host .ai-category ul { grid-template-columns: minmax(0, 1fr); gap: 7px; }
+.stock-ai-overview-host .ai-category:last-child:nth-child(odd) { grid-column: 1 / -1; }
+.stock-ai-overview-host .ai-category:last-child:nth-child(odd) ul { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.stock-ai-overview-host .ai-signal { height: 100%; padding: 9px 10px; border: 1px solid color-mix(in srgb, var(--signal-color) 32%, var(--ai-border)); border-top: 2px solid var(--signal-color); border-radius: 10px; background: linear-gradient(145deg, color-mix(in srgb, var(--signal-color) 6%, var(--ai-surface)), var(--ai-surface) 64%); box-shadow: 0 3px 12px #172e6108; transition: border-color .2s, box-shadow .2s; }
+.stock-ai-overview-host .ai-signal:hover, .stock-ai-overview-host .ai-signal:focus-within { border-color: color-mix(in srgb, var(--signal-color) 55%, var(--ai-border)); box-shadow: 0 7px 20px #172e6117; }
+.stock-ai-overview-host .ai-signal-heading { gap: 7px; }
+.stock-ai-overview-host .ai-signal-title { font-size: 12px; }
+.stock-ai-overview-host .ai-tone { flex: 0 0 auto; font-size: 9px; letter-spacing: .05em; }
+.stock-ai-overview-host .ai-signal-facts { margin: 6px 0 0 36px; }
+.stock-ai-overview-host .ai-signal-fact { padding: 3px 6px; }
+.stock-ai-overview-host .ai-signal p { margin: 5px 0 0 36px; font-size: 11px; line-height: 1.45; }
+.stock-ai-overview-host .ai-evidence a:focus-visible { outline: 2px solid var(--ai-blue); outline-offset: 3px; border-radius: 2px; }
+@media (max-width: 760px) {
+  .stock-ai-overview-host .ai-categories { grid-template-columns: minmax(0, 1fr); }
+  .stock-ai-overview-host .ai-category:last-child:nth-child(odd) ul { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 480px) {
+  .stock-ai-overview-host .ai-summary { grid-template-columns: minmax(0, 1fr); gap: 7px; min-height: 0; padding: 13px 15px 15px; }
+  .stock-ai-overview-host .ai-summary::before { left: -90px; top: -100px; transform: none; }
+  .stock-ai-overview-host .ai-robot-guide { display: flex; justify-content: flex-start; align-items: center; gap: 10px; min-height: 0; }
+  .stock-ai-overview-host .ai-robot-guide-face { width: 57px; height: 57px; }
+  .stock-ai-overview-host .ai-robot-guide-face::before { width: 49px; height: 49px; }
+  .stock-ai-overview-host .ai-robot.is-large { width: 54px; height: 54px; }
+  .stock-ai-overview-host .ai-robot-tone { max-width: 180px; }
+  .stock-ai-overview-host .ai-summary h2 { font-size: 18px; }
+  .stock-ai-overview-host .ai-summary p { font-size: 11px; }
+  .stock-ai-overview-host .ai-insight-body { padding: 10px; }
+  .stock-ai-overview-host .ai-category { padding: 9px; }
+  .stock-ai-overview-host .ai-signal { padding: 8px; }
+  .stock-ai-overview-host .ai-signal-facts, .stock-ai-overview-host .ai-signal p { margin-left: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .stock-ai-overview-host *, .stock-ai-overview-host *::before, .stock-ai-overview-host *::after { animation: none !important; transition: none !important; }
 }

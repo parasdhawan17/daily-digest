@@ -250,11 +250,15 @@
   }
   const aiCategories = [['encouraging', 'What looks encouraging'], ['attention', 'What needs attention'],
     ['changes', 'What changed recently'], ['catalysts', 'Potential catalysts'], ['risks', 'Key risks'], ['watch_next', 'What to watch next']];
-  const aiTones = {positive: 'Positive', negative: 'Negative', caution: 'Watch', neutral: 'Neutral'};
+  const aiTones = {positive: 'Encouraging', negative: 'Concern', caution: 'Watch', neutral: 'Context'};
   function aiRobotFace(tone, large = false) {
     const mood = Object.hasOwn(aiTones, tone) ? tone : 'neutral';
     const face = node('span', 'ai-robot ' + mood + (large ? ' is-large' : ''));
     face.setAttribute('aria-hidden', 'true'); face.dataset.tone = mood;
+    face.style.setProperty('--ai-bot-idle-duration', (3.4 + Math.random() * 2.2).toFixed(2) + 's');
+    face.style.setProperty('--ai-bot-idle-delay', (-Math.random() * 5.6).toFixed(2) + 's');
+    face.style.setProperty('--ai-bot-blink-duration', (4.1 + Math.random() * 3.3).toFixed(2) + 's');
+    face.style.setProperty('--ai-bot-blink-delay', (-Math.random() * 7.4).toFixed(2) + 's');
     const svg = svgNode('svg', {viewBox: '0 0 88 88', focusable: 'false'});
     svg.append(
       svgNode('path', {class: 'ai-robot-antenna', d: 'M44 18V9'}),
@@ -263,10 +267,10 @@
       svgNode('rect', {class: 'ai-robot-ear', x: 75, y: 39, width: 8, height: 16, rx: 4}),
       svgNode('rect', {class: 'ai-robot-shell', x: 10, y: 18, width: 68, height: 60, rx: 21}),
       svgNode('rect', {class: 'ai-robot-screen', x: 16, y: 25, width: 56, height: 46, rx: 15}),
-      svgNode('path', {class: 'ai-robot-brows', d: {positive: 'M27 36h10 M51 36h10', negative: 'M27 35l10 3 M51 38l10-3', caution: 'M27 38l10-3 M51 35l10 3', neutral: 'M27 36h10 M51 36h10'}[mood]}),
-      svgNode('circle', {class: 'ai-robot-eye', cx: 32, cy: 45, r: 3}),
-      svgNode('circle', {class: 'ai-robot-eye', cx: 56, cy: 45, r: 3}),
-      svgNode('path', {class: 'ai-robot-mouth', d: {positive: 'M31 55q13 14 26 0', negative: 'M31 64q13-14 26 0', caution: 'M31 59q7-6 13 0t13 0', neutral: 'M33 58h22'}[mood]})
+      svgNode('path', {class: 'ai-robot-brows', d: {positive: 'M26 35q6-4 12 0 M50 35q6-4 12 0', negative: 'M26 35l12 4 M50 39l12-4', caution: 'M26 39l12-6 M50 33l12 6', neutral: 'M27 36h10 M51 36h10'}[mood]}),
+      svgNode('path', {class: 'ai-robot-eyes', d: {positive: 'M26 47q6-8 12 0 M50 47q6-8 12 0', negative: 'M29 47q3-2 6 0 M53 47q3-2 6 0', caution: 'M27 47q4-5 8 0 M55 43v6', neutral: 'M32 44v5 M56 44v5'}[mood]}),
+      svgNode('path', {class: 'ai-robot-cheeks', d: 'M22 54h5 M61 54h5'}),
+      svgNode('path', {class: 'ai-robot-mouth', d: {positive: 'M29 55q15 18 30 0', negative: 'M31 63q13-12 26 0', caution: 'M40 57q4-3 8 0v5q-4 3-8 0Z', neutral: 'M34 59q10 4 20 0'}[mood]})
     );
     face.append(svg); return face;
   }
@@ -310,6 +314,7 @@
       if (!items.length) return;
       total += items.length; visibleAreas++;
       const group = node('section', 'ai-category'), heading = node('h3', '', title);
+      group.dataset.category = key;
       heading.append(node('span', 'ai-category-count', String(items.length))); group.append(heading);
       const list = node('ul'); items.forEach(item => { const row = node('li'); row.append(aiSignal(item, sources)); list.append(row); });
       group.append(list); categories.append(group);
@@ -548,7 +553,7 @@
     document.querySelectorAll('[data-tab]').forEach(tab => { const available = sectionAvailable(tab.dataset.tab); tab.hidden = !available; $('panel-' + tab.dataset.tab).hidden = !available; });
   }
   function activate(id, focus) {
-    if (!builders[id] || !sectionAvailable(id)) id = 'overview';
+    if (!builders[id] || !sectionAvailable(id)) id = 'ai-overview';
     document.querySelectorAll('[data-tab]').forEach(tab => { const selected = tab.dataset.tab === id; tab.setAttribute('aria-selected', String(selected)); tab.tabIndex = selected ? 0 : -1; $('panel-' + tab.dataset.tab).hidden = !selected; });
     if (core && !built.has(id)) { builders[id](); built.add(id); }
     if (focus) { history.replaceState(null, '', '#' + id); $('tab-' + id).focus(); }
@@ -575,7 +580,7 @@
       const change = $('company-change'); change.textContent = pct(core.change_percent); change.classList.toggle('positive', core.change_percent > 0); change.classList.toggle('negative', core.change_percent < 0);
       $('secondary-price').textContent = exchange === 'NSE' && core.prices.BSE !== null ? 'BSE ' + money(core.prices.BSE) : '';
       $('source-time').textContent = core.source_time ? 'Provider timestamp · ' + core.source_time : 'Retrieved ' + stamp(result.fetched_at) + ' · Provider timestamp unavailable';
-      syncAvailableSections(); status.hidden = true; $('stock-content').hidden = false; activate(location.hash.slice(1) || 'overview', false);
+      syncAvailableSections(); status.hidden = true; $('stock-content').hidden = false; activate(location.hash.slice(1) || 'ai-overview', false);
     } catch (error) {
       status.replaceChildren(node('p', '', error.message)); const retry = node('button', 'stock-retry', 'Try again'); retry.onclick = init; status.append(retry);
     } finally { status.classList.remove('loading'); }
