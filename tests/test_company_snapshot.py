@@ -28,7 +28,7 @@ def handler(path):
 
 
 class CompanySnapshotTests(unittest.TestCase):
-    def test_initial_html_contains_visible_facts_and_safe_bootstrap_for_both_pages(self):
+    def test_initial_html_preserves_safe_bootstrap_and_page_specific_snapshot_visibility(self):
         for module, path, content_id in [(stock, '/stocks/IN:TCS', 'stock-content'),
                                          (ai_overview_page, '/ai-overview/IN:TCS', 'overview-content')]:
             with self.subTest(path=path), patch.object(detail, 'get_data', return_value=(snapshot(), 300)):
@@ -38,12 +38,16 @@ class CompanySnapshotTests(unittest.TestCase):
                 body = request.wfile.getvalue().decode()
                 self.assertIn('id="company-name">Tata Consultancy Services</h1>', body)
                 self.assertIn(f'id="{content_id}">', body)
-                self.assertIn('Company description &lt;/script&gt;', body)
-                self.assertIn('Net profit · FY 2026', body)
-                self.assertIn('-10 ₹ cr', body)
+                if module is stock:
+                    self.assertNotIn('class="company-snapshot"', body)
+                    self.assertNotIn('research snapshot', body)
+                else:
+                    self.assertIn('Company description &lt;/script&gt;', body)
+                    self.assertIn('Net profit · FY 2026', body)
+                    self.assertIn('-10 ₹ cr', body)
+                    self.assertIn('href="/stocks/IN:INFY"', body)
                 self.assertIn('₹0', body)
                 self.assertIn('Company news', body)
-                self.assertIn('href="/stocks/IN:INFY"', body)
                 self.assertNotIn('href="javascript:', body)
                 self.assertNotIn('/stocks/US:AAPL', body)
                 seed = body.split('id="company-bootstrap" type="application/json">')[1].split('</script>')[0]

@@ -46,7 +46,9 @@
     </nav>
     {% for id in ['ai-overview','overview','financials','ownership','analysis','actions','news'] %}<section id="panel-{{ id }}" class="stock-panel{% if id == 'ai-overview' %} stock-ai-overview-host{% endif %}" role="tabpanel" aria-labelledby="tab-{{ id }}" tabindex="0"{% if not loop.first %} hidden{% endif %}></section>{% endfor %}
   </div>
-{% include 'company_snapshot.html' %}
+{% if snapshot is defined %}
+<script id="company-bootstrap" type="application/json">{{ snapshot|tojson }}</script>
+{% endif %}
 </main>
 <footer class="container stock-footer"><a class="brand" href="/">tickr digest<span class="brand-dot">.</span></a><p>A clearer view of the companies you follow.</p><span>Financial figures reflect their reported periods. Market data may be incomplete or delayed.</span></footer>
 </body></html>
