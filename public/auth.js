@@ -46,14 +46,14 @@
     }
     var homeSignInCopy = document.querySelector ? document.querySelector('.home-page .home-signin > p') : null;
     if (homeSignInCopy && data.authenticated) {
-      homeSignInCopy.textContent = data.needs_subscription ? 'Finish choosing your stocks and dashboard cards.' : 'Your personal dashboard is ready whenever you are.';
+      homeSignInCopy.textContent = data.needs_subscription ? 'Choose your stocks and what to show on your dashboard.' : 'Open your dashboard to see the stocks you saved.';
     }
     if (!controls || !data.authenticated) return;
     controls.replaceChildren();
     if (location.pathname !== '/digest') {
       var digest = document.createElement('a');
       digest.href = homeLink && data.needs_subscription ? '/onboarding' : '/digest';
-      digest.textContent = homeLink ? (data.needs_subscription ? 'Finish setup' : 'Open my dashboard') : 'My digest';
+      digest.textContent = homeLink ? (data.needs_subscription ? 'Finish setup' : 'Open my dashboard') : (location.pathname === '/onboarding' ? 'Open my dashboard' : 'My digest');
       controls.appendChild(digest);
     }
     var logout = document.createElement('button');

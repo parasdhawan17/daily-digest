@@ -57,7 +57,7 @@
     input.value = item.name || item.symbol.slice(3);
     area.classList.add('has-query');
     choiceTitle.textContent = item.name || item.symbol.slice(3);
-    choiceSymbol.textContent = item.symbol.slice(3) + ' · Indian equity';
+    choiceSymbol.textContent = item.symbol.slice(3) + ' · Indian stock';
     choiceAI.href = '/ai-overview/' + encoded;
     choiceDetails.href = '/stocks/' + encoded;
     choice.showModal();
@@ -143,7 +143,7 @@
       }
       show(items.length
         ? items.length + (items.length === 1 ? ' company found' : ' companies found') + ' · Use ↑ ↓ and Enter to choose'
-        : 'No companies found. Try another name or ticker.');
+        : 'No companies found. Try another name or stock symbol.');
     } catch (error) {
       if (error.name !== 'AbortError' && id === requestId) {
         show(error.message || 'Search is unavailable. Please try again.');

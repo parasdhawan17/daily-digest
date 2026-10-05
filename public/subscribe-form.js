@@ -96,17 +96,17 @@
       '<p class="subscribe-error" id="subscribe-error" hidden></p>' +
       '<label for="subscribe-email">Email</label>' +
       '<input type="email" id="subscribe-email" name="email" required autocomplete="email" placeholder="you@example.com">' +
-      '<label for="subscribe-ticker-input">Tickers</label>' +
+      '<label for="subscribe-ticker-input">Stocks</label>' +
       '<div class="subscribe-ticker-field">' +
       '<div class="subscribe-ticker-row">' +
-      '<input type="text" id="subscribe-ticker-input" class="subscribe-ticker-input" autocomplete="off" placeholder="Search by ticker or company name">' +
+      '<input type="text" id="subscribe-ticker-input" class="subscribe-ticker-input" autocomplete="off" placeholder="Search by company name or stock symbol">' +
       '<button type="button" class="subscribe-add-btn" id="subscribe-add-btn">Add</button>' +
       "</div>" +
-      '<p class="subscribe-field-status" id="subscribe-field-status">Search, pick a match, or press Enter to validate.</p>' +
+      '<p class="subscribe-field-status" id="subscribe-field-status">Choose a stock from the results, or press Enter to check its symbol.</p>' +
       '<ul class="subscribe-suggestions" id="subscribe-suggestions" hidden></ul>' +
       "</div>" +
       '<div class="subscribe-chips" id="subscribe-chips"></div>' +
-      '<p class="subscribe-hint">Indian stocks are validated against NSE listings before they are added.</p>' +
+      '<p class="subscribe-hint">We check that each stock is listed on the NSE before adding it.</p>' +
       '<div class="subscribe-email-option" id="subscribe-email-option" hidden>' +
       '<input type="checkbox" id="subscribe-email-briefings" name="email_briefings">' +
       '<label for="subscribe-email-briefings"><strong>Email briefings <em>Optional</em></strong><span>Get a concise update on your saved stocks around each market session. You can turn these emails off anytime.</span></label>' +
@@ -185,7 +185,7 @@
     }
     els.tickerInput.disabled = false;
     els.addBtn.disabled = false;
-    els.tickerInput.placeholder = "Search by ticker or company name";
+    els.tickerInput.placeholder = "Search by company name or stock symbol";
   }
 
   function renderChips() {
@@ -233,7 +233,7 @@
       els.tickerInput.value = "";
     }
     showError("");
-    setFieldStatus("success", displaySymbol(upper) + " added. Add another or submit.");
+    setFieldStatus("success", displaySymbol(upper) + " added. Add another or save your watchlist.");
     return true;
   }
 
@@ -245,7 +245,7 @@
     formDirty = true;
     renderChips();
     showError("");
-    setFieldStatus("neutral", "Search, pick a match, or press Enter to validate.");
+    setFieldStatus("neutral", "Choose a stock from the results, or press Enter to check its symbol.");
   }
 
   function hideSuggestions() {
@@ -295,7 +295,7 @@
       if (text.charAt(0) === "<") {
         return {
           ok: false,
-          error: "API unavailable. Run: python3 scripts/dev_server.py",
+          error: "Stock search is unavailable. Please try again later.",
         };
       }
       try {
@@ -351,7 +351,7 @@
 
     if (!query) {
       hideSuggestions();
-      setFieldStatus("neutral", "Search, pick a match, or press Enter to validate.");
+      setFieldStatus("neutral", "Choose a stock from the results, or press Enter to check its symbol.");
       return;
     }
 
@@ -384,7 +384,7 @@
           var results = result.data.results || [];
           if (!results.length) {
             hideSuggestions();
-            setFieldStatus("error", "No NSE listings found for \"" + query + "\".");
+            setFieldStatus("error", "No Indian stocks found for \"" + query + "\".");
             return;
           }
           renderSuggestions(results);
@@ -415,10 +415,10 @@
   function validateSymbol(symbol) {
     var query = (symbol || "").trim();
     if (!query) {
-      return Promise.resolve({ ok: false, valid: false, error: "Enter a ticker or company name." });
+      return Promise.resolve({ ok: false, valid: false, error: "Enter a company name or stock symbol." });
     }
 
-    setFieldStatus("loading", "Validating " + query + "...");
+    setFieldStatus("loading", "Checking the stock symbol: " + query + "...");
     var requestId = ++validateRequestId;
 
     return fetch("/api/tickers/validate?symbol=" + encodeURIComponent(query))
@@ -432,11 +432,11 @@
           return null;
         }
         if (!result.data.ok) {
-          setFieldStatus("error", result.data.error || "Validation failed.");
+          setFieldStatus("error", result.data.error || "Could not check the stock symbol. Try again.");
           return null;
         }
         if (!result.data.valid) {
-          setFieldStatus("error", result.data.error || "Could not validate " + query + ".");
+          setFieldStatus("error", result.data.error || "Could not find " + query + ".");
           return null;
         }
         return result.data;
@@ -445,7 +445,7 @@
         if (requestId !== validateRequestId) {
           return null;
         }
-        setFieldStatus("error", "Could not validate right now. Try again.");
+        setFieldStatus("error", "Could not check the stock symbol. Try again.");
         return null;
       });
   }
@@ -453,7 +453,7 @@
   function validateAndAddInput() {
     var query = (els.tickerInput.value || "").trim();
     if (!query) {
-      setFieldStatus("error", "Enter a ticker or company name.");
+      setFieldStatus("error", "Enter a company name or stock symbol.");
       return;
     }
 
@@ -566,7 +566,7 @@
       return;
     }
     if (!selectedTickers.length) {
-      showError("Add at least one validated ticker.");
+      showError("Add at least one stock to your watchlist.");
       return;
     }
 
@@ -616,13 +616,13 @@
     }
     if (successTitle) {
       successTitle.textContent =
-        data.mode === "update" ? "Tickers updated" : "Almost there";
+        data.mode === "update" ? "Watchlist updated" : "Almost there";
     }
     if (successText) {
       successText.textContent =
         data.mode === "update"
-          ? (data.message || "Your tickers update on the next session.")
-          : "Check your inbox for a confirmation email from Tickr Digest and click Confirm subscription to finish signing up.";
+          ? (data.message || "Your stock changes will appear in the next market session.")
+          : "Open the confirmation email from Tickr Digest and click Confirm subscription to finish signing up.";
     }
   }
 
@@ -638,7 +638,7 @@
     }
     renderChips();
     showError("");
-    setFieldStatus("neutral", "Search, pick a match, or press Enter to validate.");
+    setFieldStatus("neutral", "Choose a stock from the results, or press Enter to check its symbol.");
     if (modalBody) {
       modalBody.hidden = false;
     }

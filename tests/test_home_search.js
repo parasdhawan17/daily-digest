@@ -8,7 +8,7 @@ const pageSource = fs.readFileSync('public/index.html', 'utf8');
 const homeStyles = fs.readFileSync('public/home.css', 'utf8');
 
 test('homepage presents Tickr AI with a walking robot companion', () => {
-  assert.match(pageSource, /AI-powered Indian stock research/);
+  assert.match(pageSource, /Understand Indian stocks<br><span>with AI\./);
   assert.match(pageSource, /class="home-ai-companion"/);
   assert.match(pageSource, /class="ai-robot-shell"/);
   assert.match(pageSource, /src="\/home-robot\.js/);

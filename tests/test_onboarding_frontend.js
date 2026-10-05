@@ -26,7 +26,7 @@ test('email briefings stay hidden and disabled while the feature is paused', () 
 });
 
 test('onboarding only exposes Indian stock discovery', () => {
-  assert.match(html, /Search Indian stocks by NSE ticker or company name/);
+  assert.match(html, /Search by company name or stock symbol, such as TCS\./);
   assert.match(js, /\/api\/tickers\/search\?market=IN&/);
   assert.match(js, /indexOf\('IN:'\) === 0/);
   assert.doesNotMatch(html, /US and NSE listings/);

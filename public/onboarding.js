@@ -36,13 +36,13 @@
   }
   function search() {
     var query = $('ticker-input').value.trim(); clearTimeout(searchTimer);
-    if (!query) { hideSuggestions(); $('ticker-status').textContent = 'Search, choose a match, or press Enter to validate.'; return; }
+    if (!query) { hideSuggestions(); $('ticker-status').textContent = 'Choose a stock from the results, or press Enter to check its symbol.'; return; }
     $('ticker-status').textContent = 'Searching…'; var generation = ++searchGeneration;
     searchTimer = setTimeout(function () {
       fetch('/api/tickers/search?market=IN&q=' + encodeURIComponent(query)).then(json).then(function (data) {
         if (generation !== searchGeneration) return;
-        if (!data.ok || !(data.results || []).length) { hideSuggestions(); $('ticker-status').textContent = data.error || 'No NSE listings found.'; return; }
-        renderSuggestions(data.results); $('ticker-status').textContent = 'Choose a matching listing.';
+        if (!data.ok || !(data.results || []).length) { hideSuggestions(); $('ticker-status').textContent = data.error || 'No Indian stocks found. Try another company name or stock symbol.'; return; }
+        renderSuggestions(data.results); $('ticker-status').textContent = 'Choose a stock from the results.';
       }).catch(function () { $('ticker-status').textContent = 'Search is unavailable. Try again.'; });
     }, 280);
   }
@@ -51,11 +51,11 @@
     if (activeSuggestion >= 0 && suggestions[activeSuggestion]) { addTicker(suggestions[activeSuggestion].symbol); return; }
     var exact = suggestions.find(function (item) { return item.symbol === query.toUpperCase() || displaySymbol(item.symbol) === query.toUpperCase(); });
     if (exact) { addTicker(exact.symbol); return; }
-    $('ticker-add').disabled = true; $('ticker-status').textContent = 'Validating…';
+    $('ticker-add').disabled = true; $('ticker-status').textContent = 'Checking the stock symbol…';
     fetch('/api/tickers/validate?symbol=' + encodeURIComponent(query)).then(json).then(function (data) {
-      if (!data.ok || !data.valid) { $('ticker-status').textContent = data.error || 'Could not validate that stock.'; return; }
+      if (!data.ok || !data.valid) { $('ticker-status').textContent = data.error || 'Could not find that stock. Check the name or symbol and try again.'; return; }
       addTicker(data.symbol);
-    }).catch(function () { $('ticker-status').textContent = 'Could not validate right now.'; }).finally(function () { $('ticker-add').disabled = false; });
+    }).catch(function () { $('ticker-status').textContent = 'Could not check the stock symbol. Try again.'; }).finally(function () { $('ticker-add').disabled = false; });
   }
 
   var iconPaths = {
@@ -98,12 +98,12 @@
     if (id.indexOf('ytd') >= 0) return ['+12.8%','Year to date'];
     if (id.indexOf('landmark') >= 0) return ['₹2,846','72% of 52W range'];
     if (id.indexOf('day_') >= 0) return ['+1.7%','₹2,791 – ₹2,862'];
-    return ['Healthy','Updated today'];
+    return ['Example','Sample data'];
   }
   function cardVisual(card, categoryId, compact) {
     var kind = previewKind(card, categoryId), sample = metricSample(card.id), cls = compact ? ' card-visual--compact' : '';
     if (kind === 'chart') return '<div class="card-visual card-visual--chart' + cls + '"><div class="mini-chart-meta"><strong>₹2,846</strong><span>+12.8%</span></div><svg viewBox="0 0 180 48" preserveAspectRatio="none" aria-hidden="true"><path class="mini-chart-area" d="M0 43 C18 39 24 26 40 31 S68 40 82 24 106 30 122 15 148 22 180 5 V48 H0Z"/><path class="mini-chart-line" d="M0 43 C18 39 24 26 40 31 S68 40 82 24 106 30 122 15 148 22 180 5"/></svg><div class="mini-axis"><span>Apr</span><span>Sep</span></div></div>';
-    if (kind === 'ai') return '<div class="card-visual card-visual--ai' + cls + '"><div class="ai-preview-head">' + icon('ai','mini-inline-icon') + '<span>AI insight</span><em>Fresh</em></div><div class="preview-copy-line is-long"></div><div class="preview-copy-line"></div><div class="ai-signal"><i></i><span>Evidence-linked signal</span></div></div>';
+    if (kind === 'ai') return '<div class="card-visual card-visual--ai' + cls + '"><div class="ai-preview-head">' + icon('ai','mini-inline-icon') + '<span>AI summary</span><em>Example</em></div><div class="preview-copy-line is-long"></div><div class="preview-copy-line"></div><div class="ai-signal"><i></i><span>Summary with sources</span></div></div>';
     if (kind === 'donut') return '<div class="card-visual card-visual--donut' + cls + '"><div class="mini-donut"><span>68%</span></div><div class="donut-legend"><span><i></i>Promoter <b>50.3%</b></span><span><i></i>Institutions <b>17.7%</b></span><span><i></i>Public <b>32.0%</b></span></div></div>';
     if (kind === 'timeline') return '<div class="card-visual card-visual--timeline' + cls + '"><div class="timeline-date"><strong>18</strong><span>SEP</span></div><div class="timeline-copy"><strong>Upcoming event</strong><span>Record date · Confirmed</span><div><i></i><i></i><i></i></div></div></div>';
     if (kind === 'news') return '<div class="card-visual card-visual--news' + cls + '"><div class="news-thumb">' + icon('news','mini-inline-icon') + '</div><div><span class="source-pill">REUTERS</span><div class="preview-copy-line is-long"></div><div class="preview-copy-line"></div><small>2h ago · 4 min read</small></div></div>';
@@ -111,16 +111,88 @@
     return '<div class="card-visual card-visual--metric' + cls + '"><div><strong>' + sample[0] + '</strong><span>' + sample[1] + '</span></div><svg viewBox="0 0 80 36" preserveAspectRatio="none" aria-hidden="true"><path d="M1 31 C14 27 15 18 27 22 S42 30 51 15 67 17 79 4"/></svg></div>';
   }
 
+  // Use plain-language descriptions in setup without changing the shared dashboard catalog.
+  function setupCatalogCopy(catalog) {
+    var categories = {
+      overview:['Overview','Share prices and company information.'],
+      ai:['AI summary','Company summaries, risks, and what to watch next.'],
+      financials:['Financial results','Revenue, profits, debt, and cash flow.'],
+      ownership:['Ownership','Who owns the company and how that changes.'],
+      analysis:['Market data','Price trends, price swings, and other market data.'],
+      actions:['Company events','Dividends, share changes, and meetings.'],
+      news:['News','Recent company news and original sources.']
+    };
+    var descriptions = {
+      overview_market_cap:'Total market value of the company’s shares.',
+      overview_pe_ratio:'Share price compared with earnings per share over the past 12 months.',
+      overview_pe_history:'How the price-to-earnings ratio has changed over time.',
+      overview_dividend_yield:'Dividends over the past 12 months as a percentage of the share price.',
+      overview_price_landmarks:'Highest and lowest prices over 52 weeks, and where the current price sits.',
+      overview_day_statistics:'Daily high and low prices, the previous closing price, and recent price changes.',
+      overview_financial_pulse:'Revenue, profit, cash flow, and debt minus cash.',
+      overview_company_description:'What the company does.',
+      overview_company_information:'Industry, stock identifiers, and company details.',
+      overview_leadership:'Company leaders and their roles.',
+      overview_peer_comparison:'Similar companies and how their share prices compare with earnings or company value.',
+      ai_company_summary:'A short AI summary based on available company data.',
+      ai_encouraging_signals:'Company developments that may be positive.',
+      ai_attention_signals:'Company issues to look at more closely.',
+      ai_recent_changes:'What has changed since earlier reports.',
+      ai_potential_catalysts:'Events and plans that could affect the company.',
+      ai_key_risks:'Risks identified in available company data.',
+      ai_watch_next:'Questions to check when the company reports new results.',
+      ai_sources_freshness:'Sources used, dates, and information available for the summary.',
+      financial_annual_results:'How the company’s financial results have changed each year.',
+      financial_ratios_history:'Measures of profit, business efficiency, and debt over time.',
+      financial_health_growth:'Revenue, operating profit, net profit, and earnings per share.',
+      financial_health_profitability:'Profit margins and returns on the money invested in the business.',
+      financial_health_balance_sheet:'Debt, cash, and the ability to pay interest.',
+      financial_health_cash_generation:'Cash from operations, spending on long-term assets, and cash left after that spending.',
+      financial_statement_income:'The latest reported revenue, costs, and profit.',
+      financial_statement_balance_sheet:'The latest reported assets, debts, and shareholders’ equity.',
+      financial_statement_cash_flow:'The latest reported cash coming in and going out.',
+      financial_provider_metrics:'Other financial measures supplied by the data provider.',
+      financial_additional_data:'Other available financial information.',
+      ownership_current_mix:'The latest ownership breakdown by shareholder type.',
+      ownership_detail:'Ownership records and reporting dates.',
+      analysis_technical_averages:'Price measures used to show trading trends.',
+      analysis_risk_assessment:'Measures of how much the share price varies.',
+      analysis_futures:'Available futures contracts and their expiry dates.',
+      analysis_market_snapshot:'Other available market information and reporting periods.',
+      actions_dividends:'Payments to shareholders and key dates.',
+      actions_bonus_issues:'Extra shares issued to existing shareholders.',
+      actions_rights_issues:'Offers for existing shareholders to buy additional shares.',
+      actions_stock_splits:'Changes to the number of shares and their face value, with key dates.',
+      actions_annual_general_meetings:'Dates for annual shareholder meetings.',
+      actions_board_meetings:'Dates for meetings of the company’s board.',
+      actions_other:'Other reported company events.',
+      news_company_coverage:'Recent headlines, summaries, and links to original articles.'
+    };
+    var titles = {
+      overview_price_landmarks:'52-week price range',overview_financial_pulse:'Financial snapshot',
+      ai_company_summary:'AI summary',ai_potential_catalysts:'Events to watch',ai_sources_freshness:'Sources and dates'
+    };
+    catalog.categories.forEach(function (category) {
+      var copy = categories[category.id];
+      if (copy) { category.title = copy[0]; category.description = copy[1]; }
+      category.cards.forEach(function (card) {
+        if (descriptions[card.id]) card.description = descriptions[card.id];
+        if (titles[card.id]) card.title = titles[card.id];
+      });
+    });
+    return catalog;
+  }
+
   // Keep the sample in the same card language as the stock page. Values here are illustrative.
   function dashboardSample(card, categoryId) {
     var id = card.id, kind = previewKind(card, categoryId), sample = metricSample(id);
-    var titles = {ai_company_summary:'The 60-second view',ai_encouraging_signals:'What looks encouraging',overview_price_history:'The price story',overview_pe_history:'P/E valuation history',overview_price_landmarks:'Price context',overview_peer_comparison:'In good company',ownership_current_mix:'Who owns the company?'};
-    var captions = {ai_company_summary:'A concise synthesis of the latest available company evidence.',overview_price_history:'Price, moving averages and trading volume.',overview_pe_history:'Historical price-to-earnings ratio with its median.',overview_price_landmarks:'Reported price landmarks · ₹',overview_peer_comparison:'Peers reported by IndianAPI · Prices in ₹ · Market cap in ₹ crore',ownership_current_mix:'Shareholding categories as reported by IndianAPI.'};
+    var titles = {ai_company_summary:'AI summary',ai_encouraging_signals:'What looks encouraging',overview_price_history:'Share price history',overview_pe_history:'P/E valuation history',overview_price_landmarks:'52-week price range',overview_peer_comparison:'Compare similar companies',ownership_current_mix:'Who owns the company?'};
+    var captions = {ai_company_summary:'A short AI summary based on available company data.',overview_price_history:'Price, moving averages and trading volume.',overview_pe_history:'Price-to-earnings ratio over time, with its middle value.',overview_price_landmarks:'Highest and lowest share prices over 52 weeks · ₹',overview_peer_comparison:'Similar companies · Prices in ₹ · Total share value in ₹ crore',ownership_current_mix:'Who owns the company, grouped by shareholder type.'};
     var body;
     if (id === 'overview_price_landmarks') body = '<div class="dashboard-range"><i style="left:72%"></i></div><div class="dashboard-range-labels"><span>₹2,420<small>52-week low</small></span><span>₹3,012<small>52-week high</small></span></div>';
     else if (kind === 'chart') body = '<div class="stock-controls"><span class="sample-control is-active">1Y</span><span class="sample-control">3Y</span><span class="sample-control">5Y</span></div><p class="stock-chart-readout">Sep 2026 · ₹2,846</p><svg class="sample-stock-chart" viewBox="0 0 260 90" preserveAspectRatio="none" aria-hidden="true"><path class="sample-grid-line" d="M0 20H260M0 50H260M0 80H260"/><path class="sample-price-line" d="M0 74 C25 65 32 48 55 57 S88 72 110 44 142 58 163 34 194 43 214 22 242 30 260 12"/></svg><div class="stock-chart-legend"><span>Price</span><span class="stock-indicator positive">+12.8%</span></div>';
     else if (kind === 'ai') body = '<div class="dashboard-ai-insight signal-positive"><span class="dashboard-ai-tone">Sample insight</span><p class="dashboard-ai-text">Revenue and cash generation have remained steady in recent reports.</p></div>';
-    else if (kind === 'donut') body = '<p class="dashboard-ownership-date">Illustrative ownership mix</p><div class="dashboard-stacked-bar"><span style="width:50%;background:#6f8aff"></span><span style="width:18%;background:#60b6b0"></span><span style="width:32%;background:#ce9c67"></span></div><dl class="dashboard-facts"><div class="dashboard-fact"><dt>Promoters</dt><dd>50.3%</dd></div><div class="dashboard-fact"><dt>Institutions</dt><dd>17.7%</dd></div></dl>';
+    else if (kind === 'donut') body = '<p class="dashboard-ownership-date">Example ownership breakdown</p><div class="dashboard-stacked-bar"><span style="width:50%;background:#6f8aff"></span><span style="width:18%;background:#60b6b0"></span><span style="width:32%;background:#ce9c67"></span></div><dl class="dashboard-facts"><div class="dashboard-fact"><dt>Promoters</dt><dd>50.3%</dd></div><div class="dashboard-fact"><dt>Institutions</dt><dd>17.7%</dd></div></dl>';
     else if (kind === 'timeline') body = '<div class="dashboard-table-wrap"><table class="dashboard-mini-table"><thead><tr><th>Event</th><th>Record date</th></tr></thead><tbody><tr><td>Dividend</td><td>18 Sep 2026</td></tr></tbody></table></div>';
     else if (kind === 'news') body = '<div class="dashboard-news-grid"><div class="dashboard-news-card"><div class="dashboard-news-body"><span class="dashboard-news-meta">Sample company news · Today</span><h4><span>Company announces its latest quarterly update</span></h4></div></div></div>';
     else if (kind === 'profile') body = '<dl class="dashboard-facts"><div class="dashboard-fact"><dt>Company</dt><dd>Example Industries</dd></div><div class="dashboard-fact"><dt>Sector</dt><dd>Energy &amp; Retail</dd></div></dl>';
@@ -155,7 +227,7 @@
     $('category-rail').scrollLeft = railScrollLeft;
     $('category-rail').querySelectorAll('[data-category]').forEach(function (button) { button.onclick = function () { activateCategory(button.dataset.category); }; });
     var category = categoryById(activeCategory) || catalog.categories[0];
-    $('active-category-kicker').textContent = 'Choose cards'; $('active-category-title').textContent = category.title; $('active-category-description').textContent = category.description;
+    $('active-category-kicker').textContent = 'Choose information'; $('active-category-title').textContent = category.title; $('active-category-description').textContent = category.description;
     $('category-selection-count').textContent = categorySelected(category).length + ' of ' + category.cards.length + ' selected in this section';
     $('card-grid').className = 'selection-grid tone-' + category.id;
     $('card-grid').innerHTML = category.cards.map(function (card) {
@@ -173,7 +245,7 @@
   }
   function renderSelectionSummary() {
     var categoryCount = catalog.categories.filter(function (category) { return categorySelected(category).length; }).length;
-    $('selection-count').textContent = categoryCount + ' categories · ' + selectedCards.size + ' cards selected';
+    $('selection-count').textContent = categoryCount + ' sections · ' + selectedCards.size + ' cards selected';
   }
   function showStep(step) {
     document.querySelectorAll('[data-step]').forEach(function (node) { node.hidden = Number(node.dataset.step) !== step; });
@@ -182,8 +254,8 @@
   }
   function save() {
     notice('step-one-error', ''); notice('step-two-error', '');
-    if (!selectedTickers.length) { notice('step-one-error', 'Add at least one validated stock.'); showStep(1); return; }
-    if (hasIndia() && !selectedCards.size) { notice('step-two-error', 'Select at least one card for your Indian dashboard.'); return; }
+    if (!selectedTickers.length) { notice('step-one-error', 'Add at least one stock to your watchlist.'); showStep(1); return; }
+    if (hasIndia() && !selectedCards.size) { notice('step-two-error', 'Choose at least one item to show on your dashboard.'); return; }
     var buttons = [$('save-dashboard'), $('step-one-next')];
     var labels = buttons.map(function (button) { return button.textContent; });
     function setSaving(saving) {
@@ -215,7 +287,7 @@
       $('ticker-suggestions').querySelectorAll('li').forEach(function (li, index) { li.classList.toggle('is-active', index === activeSuggestion); li.setAttribute('aria-selected', String(index === activeSuggestion)); });
     });
     $('ticker-suggestions').onclick = function (event) { var item = event.target.closest('[data-index]'); if (item) addTicker(suggestions[Number(item.dataset.index)].symbol); };
-    $('step-one-next').onclick = function () { if (!selectedTickers.length) { notice('step-one-error','Add at least one validated stock.'); return; } notice('step-one-error',''); if (hasIndia()) { showStep(2); renderCustomizer(); } else save(); };
+    $('step-one-next').onclick = function () { if (!selectedTickers.length) { notice('step-one-error','Add at least one stock to your watchlist.'); return; } notice('step-one-error',''); if (hasIndia()) { showStep(2); renderCustomizer(); } else save(); };
     $('step-two-back').onclick = function () { showStep(1); };
     $('save-dashboard').onclick = save;
     $('select-recommended').onclick = function () { var category = categoryById(activeCategory); category.cards.forEach(function (card) { selectedCards.delete(card.id); }); category.recommended.forEach(function (id) { selectedCards.add(id); }); renderCustomizer(); };
@@ -226,7 +298,7 @@
 
   bind();
   Promise.all([fetch('/dashboard-catalog.json').then(json), window.tickrAuth.ready]).then(function (values) {
-    catalog = values[0]; var state = values[1];
+    catalog = setupCatalogCopy(values[0]); var state = values[1];
     if (!state.authenticated) { location.assign('/?signin=1'); return; }
     $('onboarding-email').value = state.email || ''; $('email-briefings').checked = false;
     selectedTickers = Array.isArray(state.tickers) ? state.tickers.filter(function (ticker) { return String(ticker).indexOf('IN:') === 0; }) : [];
