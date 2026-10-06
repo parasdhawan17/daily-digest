@@ -59,6 +59,20 @@
     return face;
   }
 
+  function loadingBot(message) {
+    const loading = node('div', 'ai-bot-loading');
+    const face = node('span', 'ai-bot-loading-face');
+    const copy = node('span', 'ai-bot-loading-copy');
+    const dots = node('span', 'ai-bot-loading-dots');
+    face.append(robotFace('neutral', true));
+    copy.append(node('strong', '', message));
+    dots.setAttribute('aria-hidden', 'true');
+    for (let i = 0; i < 3; i++) dots.append(node('i'));
+    copy.append(dots);
+    loading.append(face, copy);
+    return loading;
+  }
+
   function present(value) { return number(value) !== null; }
   function dateTime(value) {
     const date = new Date(value);
@@ -346,7 +360,7 @@
   async function loadAI() {
     const status = $('ai-status');
     status.classList.remove('error');
-    status.textContent = 'Connecting the evidence…';
+    status.replaceChildren(loadingBot('Connecting the evidence…'));
     status.hidden = false;
     status.setAttribute('aria-busy', 'true');
     try {

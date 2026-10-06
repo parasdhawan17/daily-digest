@@ -329,7 +329,15 @@
   }
   async function aiOverview() {
     const panel = $('panel-ai-overview');
-    panel.replaceChildren(node('div', 'stock-state loading', 'Building a concise overview from the latest evidence…'));
+    const loading = node('div', 'ai-bot-loading');
+    loading.setAttribute('role', 'status');
+    const face = node('span', 'ai-bot-loading-face'); face.append(aiRobotFace('neutral', true));
+    const copy = node('span', 'ai-bot-loading-copy');
+    copy.append(node('strong', '', 'Building a concise overview from the latest evidence…'));
+    const dots = node('span', 'ai-bot-loading-dots'); dots.setAttribute('aria-hidden', 'true');
+    for (let i = 0; i < 3; i++) dots.append(node('i'));
+    copy.append(dots); loading.append(face, copy);
+    panel.replaceChildren(loading);
     panel.setAttribute('aria-busy', 'true');
     try {
       const response = await requestAI(); panel.replaceChildren(); renderAIOverview(panel, response);
