@@ -135,6 +135,7 @@ test('renders available metrics and links AI citations to stock evidence', async
   assert.ok(app.calls.some(url => url.includes('section=history&period=max&filter=price')));
   assert.equal(e['ai-content'].hidden, false);
   assert.equal(e['nav-stock-details'].href, '/stocks/IN:EXAMPLE');
+  assert.equal(e['hero-stock-details'].href, '/stocks/IN:EXAMPLE');
   assert.equal(e['ai-summary'].children[1].children[2].children[0].children[0].href, '/stocks/IN:EXAMPLE#financials');
   assert.equal(e['ai-summary'].children.length, 2);
   assert.equal(e['ai-categories'].children.length, 1);
@@ -152,6 +153,9 @@ test('renders available metrics and links AI citations to stock evidence', async
 });
 
 test('shows the company summary followed by supported signal groups', () => {
+  assert.doesNotMatch(template, /company_snapshot\.html|class="company-snapshot"/);
+  assert.match(template, /id="hero-stock-details"[^>]*>Full stock details/);
+  assert.match(template, /id="company-bootstrap" type="application\/json"/);
   assert.doesNotMatch(template, /ai-signal-board|ai-signal-bar|ai-signal-counts/);
   assert.match(template, /id="ai-signal-count"[\s\S]*id="ai-categories"/);
   assert.doesNotMatch(template, /Explore the synthesis|Signals and what to watch|signals-title/);

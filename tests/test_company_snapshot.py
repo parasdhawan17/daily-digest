@@ -38,14 +38,11 @@ class CompanySnapshotTests(unittest.TestCase):
                 body = request.wfile.getvalue().decode()
                 self.assertIn('id="company-name">Tata Consultancy Services</h1>', body)
                 self.assertIn(f'id="{content_id}">', body)
-                if module is stock:
-                    self.assertNotIn('class="company-snapshot"', body)
-                    self.assertNotIn('research snapshot', body)
-                else:
-                    self.assertIn('Company description &lt;/script&gt;', body)
-                    self.assertIn('Net profit · FY 2026', body)
-                    self.assertIn('-10 ₹ cr', body)
-                    self.assertIn('href="/stocks/IN:INFY"', body)
+                self.assertNotIn('class="company-snapshot"', body)
+                self.assertNotIn('research snapshot', body)
+                if module is ai_overview_page:
+                    self.assertIn('id="hero-stock-details"', body)
+                    self.assertIn('href="/stocks/IN:TCS"', body)
                 self.assertIn('₹0', body)
                 self.assertIn('Company news', body)
                 self.assertNotIn('href="javascript:', body)

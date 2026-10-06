@@ -73,7 +73,7 @@
     return error && error.message ? error.message : fallback;
   }
 
-  for (const id of ['nav-stock-details', 'footer-stock-details']) $(id).href = stockUrl;
+  for (const id of ['nav-stock-details', 'hero-stock-details', 'footer-stock-details']) $(id).href = stockUrl;
 
   const themeButton = $('theme-toggle');
   function syncTheme() {
