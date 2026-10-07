@@ -24,10 +24,11 @@
   <link rel="apple-touch-icon" href="/assets/tickr-digest-icon-t-concept.png">
   <script>(function(){try{var t=localStorage.getItem('daily-digest-theme');if(t!=='light'&&t!=='dark')t=matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light';document.documentElement.dataset.theme=t;document.documentElement.style.colorScheme=t;}catch(e){}})();</script>
   <link rel="stylesheet" href="/landing.css">
-  <link rel="stylesheet" href="/ai-overview.css?v=20261007-bot-loading">
-  <script src="/analytics.js?v=20260928-1" defer></script>
-  <script src="/stock-format.js" defer></script>
-  <script src="/ai-overview.js?v=20261007-bot-loading" defer></script>
+  <link rel="stylesheet" href="/ai-overview.css?v=20261007-story"><link rel="stylesheet" href="/ai-story.css?v=20261007-bright">
+  <script src="/analytics.js?v=20261007-flag" defer></script>
+  <script src="/stock-format.js" defer></script><script src="/ai-overview-layout.js?v=20261007-flag" defer></script><script src="/ai-overview-legacy-renderer.js?v=20261007-flag" defer></script><script src="/ai-story.js?v=20261007-meaning" defer></script>
+  <script src="/ai-overview-legacy.js?v=20261007-flag" defer></script>
+  <script src="/ai-overview.js?v=20261007-flag" defer></script>
 </head>
 <body class="ai-overview-page" data-symbol="{{ symbol }}">
 <a class="skip-link" href="#overview-main">Skip to AI overview</a>
@@ -38,6 +39,22 @@
 <main id="overview-main" class="ai-container">
   <nav class="ai-breadcrumb" aria-label="Breadcrumb"><a href="/">Home</a><span aria-hidden="true">/</span><span>AI overview</span><span aria-hidden="true">/</span><span>{{ symbol|replace('IN:', '') }}</span></nav>
   <div id="page-status"{% if page_core is defined %} hidden{% endif %} class="ai-page-status" role="status">{{ error or 'Gathering company evidence…' }}</div>
+  <div id="overview-content"{% if page_core is not defined %} hidden{% endif %}>
+    <header class="ai-company-bar">
+      <div class="ai-company-headline"><div><h1 id="company-name">{{ page_core.name if page_core is defined else '' }}</h1><p class="ai-company-meta"><span id="company-symbol">{{ symbol|replace('IN:', '') }}</span><span id="company-industry">{{ page_core.industry or 'Indian equities' if page_core is defined else '' }}</span></p></div><a id="hero-stock-details" class="ai-stock-details-button" href="{{ seo.stock_path if seo is defined else '/' }}">Full stock details <span aria-hidden="true">↗</span></a></div>
+      <small id="price-meta">Market data may be delayed</small>
+    </header>
+    <div id="ai-facts" aria-label="Available company facts">
+      {% if page_core is defined %}<div class="ai-story ai-story-fallback"><article class="ai-story-stage now"><h3>Now</h3><span class="ai-story-caption">Latest available price</span><strong class="ai-story-price">{% set price = page_core.prices.NSE if page_core.prices.NSE is not none else page_core.prices.BSE %}{{ '₹' ~ format_number(price) if price is not none else '—' }}</strong><p class="ai-story-caption">Market data may be delayed</p></article></div>{% endif %}
+    </div>
+    <section class="ai-dashboard" id="ai-insights" aria-label="AI company perspective">
+      <div id="ai-status" class="ai-loading" role="status" aria-live="polite">Connecting the evidence…</div>
+      <div id="ai-content" hidden></div>
+    </section>
+    <div class="ai-bottom-row"><details id="ai-sources" class="ai-sources"><summary>Evidence and freshness <span aria-hidden="true">↗</span></summary><ol id="sources-list"></ol><p id="ai-coverage"></p></details><a id="footer-stock-details" href="{{ seo.stock_path if seo is defined else '/' }}">Full stock details <span aria-hidden="true">↗</span></a></div>
+    <p class="ai-disclaimer">AI-generated synthesis · Not investment advice · Coverage may be incomplete or delayed.</p>
+  </div>
+<template id="ai-overview-legacy-template">
   <div id="overview-content"{% if page_core is not defined %} hidden{% endif %}>
     <header class="ai-company-bar">
       <div class="ai-company-headline"><div><h1 id="company-name">{{ page_core.name if page_core is defined else '' }}</h1><p class="ai-company-meta"><span id="company-symbol">{{ symbol|replace('IN:', '') }}</span><span id="company-industry">{{ page_core.industry or 'Indian equities' if page_core is defined else '' }}</span></p><a id="hero-stock-details" class="ai-stock-details-button" href="{{ seo.stock_path if seo is defined else '/' }}">Full stock details <span aria-hidden="true">↗</span></a></div><div class="ai-company-price"><span>Latest available price</span><strong id="company-price">{% if page_core is defined %}{% set price = page_core.prices.NSE if page_core.prices.NSE is not none else page_core.prices.BSE %}{{ '₹' ~ format_number(price) if price is not none else '—' }}{% else %}—{% endif %}</strong><span id="company-change" class="ai-change" hidden></span><small id="price-meta">Market data may be delayed</small></div></div>
@@ -58,6 +75,7 @@
     <div class="ai-bottom-row"><details id="ai-sources" class="ai-sources"><summary>Evidence and freshness <span aria-hidden="true">↗</span></summary><ol id="sources-list"></ol><p id="ai-coverage"></p></details><a id="footer-stock-details" href="{{ seo.stock_path if seo is defined else '/' }}">Full stock details <span aria-hidden="true">↗</span></a></div>
     <p class="ai-disclaimer">AI-generated synthesis · Not investment advice · Coverage may be incomplete or delayed.</p>
   </div>
+</template>
 {% if snapshot is defined %}<script id="company-bootstrap" type="application/json">{{ snapshot|tojson }}</script>{% endif %}
 </main>
 <footer class="ai-footer ai-container"><a href="/">tickr digest<span class="brand-dot">.</span></a><span>Market data may be delayed.</span></footer>

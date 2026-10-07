@@ -79,7 +79,7 @@
   function requestAI() {
     const key = 'ai-overview:' + symbol;
     if (requests.has(key)) return requests.get(key);
-    const promise = fetch('/api/stock-ai?' + new URLSearchParams({symbol, schema: '3'})).then(async response => {
+    const promise = fetch('/api/stock-ai?' + new URLSearchParams({symbol, schema: '3', brief: window.tickrAIStory.contentVersion})).then(async response => {
       const data = await response.json();
       if (!response.ok || !data.ok) throw new Error(data.error || 'Unable to generate the AI overview.');
       return data;
@@ -242,19 +242,6 @@
       peers.append(details('Full peer metrics', dataView(core.peers)));
     } else peers.append(empty()); panel.append(peers);
   }
-  function aiEvidence(ids, sources) {
-    const links = node('span', 'stock-ai-evidence');
-    (ids || []).forEach(id => {
-      const source = sources.get(id); if (!source) return;
-      const link = node('a', '', id); link.href = '#' + source.section;
-      link.title = 'View source: ' + source.label;
-      link.setAttribute('aria-label', id + ': ' + source.label);
-      links.append(link);
-    });
-    return links;
-  }
-  const aiCategories = [['encouraging', 'What looks encouraging'], ['attention', 'What needs attention'],
-    ['changes', 'What changed recently'], ['catalysts', 'Potential catalysts'], ['risks', 'Key risks'], ['watch_next', 'What to watch next']];
   const aiTones = {positive: 'Encouraging', negative: 'Concern', caution: 'Watch', neutral: 'Context'};
   function aiRobotFace(tone, large = false) {
     const mood = Object.hasOwn(aiTones, tone) ? tone : 'neutral';
@@ -279,53 +266,12 @@
     );
     face.append(svg); return face;
   }
-  function aiSignal(item, sources) {
-    const tone = Object.hasOwn(aiTones, item.tone) ? item.tone : 'neutral';
-    const signal = node('article', 'ai-signal ' + tone), head = node('span', 'ai-signal-head');
-    head.append(node('span', 'ai-signal-title', item.heading || 'Company signal'), node('span', 'ai-tone', aiTones[tone]));
-    const title = node('div', 'ai-signal-heading'); title.append(aiRobotFace(tone), head);
-    const facts = node('div', 'ai-signal-facts');
-    (Array.isArray(item.facts) ? item.facts : []).forEach(fact => {
-      if (!fact || !fact.label || !fact.value) return;
-      const chip = node('span', 'ai-signal-fact');
-      chip.append(node('span', 'ai-signal-fact-label', fact.label), node('strong', '', fact.value)); facts.append(chip);
-    });
-    const body = node('p', '', item.text || ''); body.append(aiEvidence(item.evidence_ids, sources));
-    signal.append(title); if (facts.children.length) signal.append(facts); signal.append(body); return signal;
-  }
   function renderAIOverview(panel, response) {
-    const data = response.data || {};
-    if (!data.summary || !data.summary.text) throw new Error('The AI overview could not be read.');
-    const sources = new Map((data.sources || []).map(source => [source.id, source]));
-    const explorer = node('div', 'ai-insight-explorer');
-    const summary = node('article', 'ai-summary'), guide = node('aside', 'ai-robot-guide');
-    guide.setAttribute('aria-label', 'Overall AI signal');
-    const guideFace = node('div', 'ai-robot-guide-face'), summaryTone = Object.hasOwn(aiTones, data.summary.tone) ? data.summary.tone : 'neutral';
-    guideFace.append(aiRobotFace(summaryTone, true));
-    guide.dataset.tone = summaryTone;
-    guide.append(guideFace, node('span', 'ai-robot-tone', ({positive: 'Encouraging evidence', negative: 'Needs attention', caution: 'Mixed or uncertain', neutral: 'Monitoring point'})[summaryTone]));
-    const summaryBody = node('p', '', data.summary.text); summaryBody.append(aiEvidence(data.summary.evidence_ids, sources));
-    const summaryCopy = node('div', 'ai-summary-copy');
-    summaryCopy.append(node('span', 'ai-summary-label', '✦ The AI take'), node('h2', '', data.summary.heading || 'Company perspective'), summaryBody);
-    summary.dataset.tone = summaryTone; summary.append(guide, summaryCopy);
-
-    const insightBody = node('div', 'ai-insight-body'), meta = node('div', 'ai-insight-meta');
-    meta.append(node('span', '', 'Generated ' + stamp(data.generated_at)));
-    const count = node('p', 'ai-signal-count'), categories = node('div', 'ai-categories');
-    categories.setAttribute('role', 'group'); categories.setAttribute('aria-label', 'AI signals');
-    let total = 0, visibleAreas = 0;
-    aiCategories.forEach(([key, title]) => {
-      const items = Array.isArray(data[key]) ? data[key] : [];
-      if (!items.length) return;
-      total += items.length; visibleAreas++;
-      const group = node('section', 'ai-category'), heading = node('h3', '', title);
-      group.dataset.category = key;
-      heading.append(node('span', 'ai-category-count', String(items.length))); group.append(heading);
-      const list = node('ul'); items.forEach(item => { const row = node('li'); row.append(aiSignal(item, sources)); list.append(row); });
-      group.append(list); categories.append(group);
-    });
-    count.textContent = visibleAreas ? total + ' supported ' + (total === 1 ? 'signal' : 'signals') + ' across ' + visibleAreas + ' ' + (visibleAreas === 1 ? 'area' : 'areas') : 'No supported signals in the available evidence.';
-    categories.hidden = visibleAreas === 0; meta.append(count); insightBody.append(meta, categories); explorer.append(summary, insightBody); panel.append(explorer);
+    const renderer = window.tickrAIOverviewLayout?.visual === false ? window.tickrAILegacy : window.tickrAIStory;
+    panel.append(renderer.render(response, core, {
+      robot: aiRobotFace, stamp,
+      sourceHref: source => '#' + (['overview', 'financials', 'ownership', 'analysis', 'actions', 'news'].includes(source.section) ? source.section : 'overview')
+    }));
   }
   async function aiOverview() {
     const panel = $('panel-ai-overview');
@@ -340,7 +286,8 @@
     panel.replaceChildren(loading);
     panel.setAttribute('aria-busy', 'true');
     try {
-      const response = await requestAI(); panel.replaceChildren(); renderAIOverview(panel, response);
+      const [response] = await Promise.all([requestAI(), window.tickrAIOverviewLayout?.ready]);
+      panel.replaceChildren(); renderAIOverview(panel, response);
     } catch (error) {
       const state = node('div', 'stock-state'); state.setAttribute('role', 'status'); state.append(node('p', '', error.message));
       const retry = node('button', 'stock-retry', 'Try again'); retry.type = 'button'; retry.onclick = aiOverview; state.append(retry); panel.replaceChildren(state);

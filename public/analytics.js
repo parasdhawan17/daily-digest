@@ -5,6 +5,7 @@
   var queue = [];
   var ready = false;
   var disabled = false;
+  var readyCallbacks = [];
   var originalFetch = window.fetch && window.fetch.bind(window);
   var observedSections = new WeakSet();
   var seenSections = new Set();
@@ -70,13 +71,30 @@
     else queue.push(['__identify__', {apply: apply}]);
   }
 
-  window.tickrAnalytics = {capture: send, identify: identify, pageType: pageType};
+  window.tickrAnalytics = {capture: send, identify: identify, pageType: pageType,
+    onReady: function (callback) {
+      if (ready) callback(window.posthog);
+      else if (disabled) callback(null);
+      else readyCallbacks.push(callback);
+    }
+  };
+
+  function disableAnalytics() {
+    disabled = true;
+    queue.length = 0;
+    readyCallbacks.splice(0).forEach(function (callback) {
+      try { callback(null); } catch (error) { /* Keep the page usable without analytics. */ }
+    });
+  }
 
   function flush() {
     ready = true;
     queue.splice(0).forEach(function (item) {
       if (item[0] === '__identify__') item[1].apply();
       else window.posthog.capture(item[0], item[1]);
+    });
+    readyCallbacks.splice(0).forEach(function (callback) {
+      try { callback(window.posthog); } catch (error) { /* Analytics must not block the page. */ }
     });
   }
 
@@ -89,7 +107,7 @@
     script.src = assetHost + '/static/array.js';
     script.onload = function () {
       if (!window.posthog || typeof window.posthog.init !== 'function') {
-        disabled = true;
+        disableAnalytics();
         return;
       }
       window.posthog.init(config.project_key, {
@@ -106,7 +124,7 @@
         loaded: flush
       });
     };
-    script.onerror = function () { disabled = true; queue.length = 0; };
+    script.onerror = disableAnalytics;
     document.head.appendChild(script);
   }
 
@@ -290,14 +308,14 @@
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start, {once: true});
   else start();
 
-  if (!originalFetch) { disabled = true; return; }
+  if (!originalFetch) { disableAnalytics(); return; }
   originalFetch('/api/analytics/config', {credentials: 'same-origin'})
     .then(function (response) { return response.ok ? response.json() : null; })
     .then(function (config) {
       if (!config || !config.enabled || !config.project_key || !/^https:\/\//.test(config.host || '')) {
-        disabled = true; queue.length = 0; return;
+        disableAnalytics(); return;
       }
       loadPostHog(config);
     })
-    .catch(function () { disabled = true; queue.length = 0; });
+    .catch(disableAnalytics);
 })();

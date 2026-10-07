@@ -1,0 +1,379 @@
+window.tickrLegacyAIOverviewPage = function () {
+  'use strict';
+
+  const symbol = document.body.dataset.symbol;
+  if (!/^IN:[A-Z][A-Z0-9&-]{0,19}$/.test(symbol || '')) return;
+
+  const $ = id => document.getElementById(id);
+  const {number, fmt, money, pct, direction} = window.tickrStockFormat;
+  const stockUrl = '/stocks/' + encodeURIComponent(symbol).replace('%3A', ':');
+  const sections = new Set(['overview', 'financials', 'ownership', 'analysis', 'actions', 'news']);
+  const categories = [
+    ['encouraging', 'What looks encouraging'],
+    ['attention', 'What needs attention'],
+    ['changes', 'What changed recently'],
+    ['catalysts', 'Potential catalysts'],
+    ['risks', 'Key risks'],
+    ['watch_next', 'What to watch next'],
+  ];
+  const tones = {positive: 'Positive', negative: 'Negative', caution: 'Watch', neutral: 'Neutral'};
+
+  function node(tag, className, value) {
+    const element = document.createElement(tag);
+    if (className) element.className = className;
+    if (value !== undefined) element.textContent = value;
+    return element;
+  }
+
+  function svgNode(tag, attributes) {
+    const element = document.createElementNS('http://www.w3.org/2000/svg', tag);
+    for (const [name, value] of Object.entries(attributes)) element.setAttribute(name, String(value));
+    return element;
+  }
+
+  function robotFace(tone, large = false) {
+    const mood = Object.hasOwn(tones, tone) ? tone : 'neutral';
+    const face = node('span', 'ai-robot ' + mood + (large ? ' is-large' : ''));
+    face.setAttribute('aria-hidden', 'true');
+    face.dataset.tone = mood;
+    const svg = svgNode('svg', {viewBox: '0 0 88 88', focusable: 'false'});
+    svg.append(
+      svgNode('path', {class: 'ai-robot-antenna', d: 'M44 18V9'}),
+      svgNode('circle', {class: 'ai-robot-antenna-tip', cx: 44, cy: 7, r: 4}),
+      svgNode('rect', {class: 'ai-robot-ear', x: 5, y: 39, width: 8, height: 16, rx: 4}),
+      svgNode('rect', {class: 'ai-robot-ear', x: 75, y: 39, width: 8, height: 16, rx: 4}),
+      svgNode('rect', {class: 'ai-robot-shell', x: 10, y: 18, width: 68, height: 60, rx: 21}),
+      svgNode('rect', {class: 'ai-robot-screen', x: 16, y: 25, width: 56, height: 46, rx: 15}),
+      svgNode('path', {class: 'ai-robot-brows', d: {
+        positive: 'M27 36h10 M51 36h10', negative: 'M27 35l10 3 M51 38l10-3',
+        caution: 'M27 38l10-3 M51 35l10 3', neutral: 'M27 36h10 M51 36h10'
+      }[mood]}),
+      svgNode('circle', {class: 'ai-robot-eye', cx: 32, cy: 45, r: 3}),
+      svgNode('circle', {class: 'ai-robot-eye', cx: 56, cy: 45, r: 3}),
+      svgNode('path', {class: 'ai-robot-mouth', d: {
+        positive: 'M31 55q13 14 26 0', negative: 'M31 64q13-14 26 0',
+        caution: 'M31 59q7-6 13 0t13 0', neutral: 'M33 58h22'
+      }[mood]})
+    );
+    face.append(svg);
+    return face;
+  }
+
+  function loadingBot(message) {
+    const loading = node('div', 'ai-bot-loading');
+    const face = node('span', 'ai-bot-loading-face');
+    const copy = node('span', 'ai-bot-loading-copy');
+    const dots = node('span', 'ai-bot-loading-dots');
+    face.append(robotFace('neutral', true));
+    copy.append(node('strong', '', message));
+    dots.setAttribute('aria-hidden', 'true');
+    for (let i = 0; i < 3; i++) dots.append(node('i'));
+    copy.append(dots);
+    loading.append(face, copy);
+    return loading;
+  }
+
+  function present(value) { return number(value) !== null; }
+  function dateTime(value) {
+    const date = new Date(value);
+    return Number.isNaN(+date) ? 'Time unavailable' : date.toLocaleString('en-IN', {
+      day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Kolkata'
+    }) + ' IST';
+  }
+  function sourceHref(source) {
+    return stockUrl + '#' + (sections.has(source.section) ? source.section : 'overview');
+  }
+  function errorMessage(error, fallback) {
+    return error && error.message ? error.message : fallback;
+  }
+
+  for (const id of ['nav-stock-details', 'hero-stock-details', 'footer-stock-details']) $(id).href = stockUrl;
+
+  const themeButton = $('theme-toggle');
+  function syncTheme() {
+    themeButton.setAttribute('aria-label', 'Switch to ' + (document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark') + ' mode');
+  }
+  themeButton.addEventListener('click', () => {
+    const theme = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+    document.documentElement.dataset.theme = theme;
+    document.documentElement.style.colorScheme = theme;
+    try { localStorage.setItem('daily-digest-theme', theme); } catch (error) {}
+    syncTheme();
+  });
+  syncTheme();
+
+  async function request(path) {
+    if (path.startsWith('/api/stock-data?') && new URLSearchParams(path.split('?')[1]).get('section') === 'core') {
+      try { const seed = $('company-bootstrap'); const payload = seed && JSON.parse(seed.textContent);
+        if (payload && payload.ok && payload.symbol === symbol) return payload;
+      } catch (error) { /* Fall back to the normal request if bootstrap data is invalid. */ }
+    }
+    const response = await fetch(path);
+    const payload = await response.json();
+    if (!response.ok || !payload.ok) throw new Error(payload.error || 'This overview is temporarily unavailable.');
+    return payload;
+  }
+
+  function metric(label, value, note) {
+    const card = node('article', 'ai-metric');
+    card.append(node('span', 'ai-metric-label', label), node('strong', 'ai-metric-value', value));
+    if (note) {
+      const annotation = node('span', 'ai-metric-note', note);
+      if (/^\+/.test(note)) annotation.classList.add('positive');
+      if (/^[−-]/.test(note)) annotation.classList.add('negative');
+      card.append(annotation);
+    }
+    return card;
+  }
+
+  function healthMetric(core, pattern) {
+    for (const group of (core.health && core.health.groups) || []) {
+      for (const entry of group.metrics || []) {
+        if (pattern.test(entry.label || '') && present(entry.value)) return entry;
+      }
+    }
+    return null;
+  }
+
+  function allTimeHighFromHistory(data) {
+    let high = null;
+    const datasets = data && Array.isArray(data.datasets) ? data.datasets : [];
+    for (const dataset of datasets) {
+      if (!dataset || !Array.isArray(dataset.values)) continue;
+      const metric = String(dataset.metric || '').trim().toLowerCase();
+      const label = String(dataset.label || '').trim().toLowerCase();
+      if (metric !== 'price' && !label.startsWith('price')) continue;
+      for (const row of dataset.values) {
+        const value = Array.isArray(row) ? number(row[1]) : null;
+        if (value !== null && (high === null || value > high)) high = value;
+      }
+    }
+    return high;
+  }
+
+  function renderRange(core, price, allTimeHigh = null) {
+    const card = $('range-card');
+    const low = number(core.year_low), high = number(core.year_high);
+    const hasRange = low !== null && high !== null && high > low && price !== null;
+    if (!hasRange) { card.hidden = true; return; }
+    const ceiling = Math.max(high, allTimeHigh ?? high, price);
+    const position = value => Math.max(0, Math.min(100, (value - low) / (ceiling - low) * 100));
+    const head = node('div', 'ai-range-head');
+    head.append(node('strong', '', 'Price range'), node('span', '', 'Current position ' + Math.round(position(price)) + '% of range'));
+    const plot = node('div', 'ai-range-plot');
+    const track = node('div', 'ai-range-track');
+    const currentPoint = node('span', 'ai-range-marker');
+    currentPoint.style.left = position(price) + '%';
+    currentPoint.setAttribute('title', 'Current price ' + money(price));
+    const yearPoint = node('span', 'ai-range-point ai-range-year-point');
+    yearPoint.style.left = position(high) + '%';
+    yearPoint.setAttribute('title', '52-week high ' + money(high));
+    track.append(yearPoint);
+    if (allTimeHigh !== null) {
+      const athPoint = node('span', 'ai-range-point ai-range-ath-point');
+      athPoint.style.left = position(ceiling) + '%';
+      athPoint.setAttribute('title', 'All-time high ' + money(ceiling));
+      track.append(athPoint);
+    }
+    track.append(currentPoint);
+    const labels = node('div', 'ai-range-labels');
+    if (allTimeHigh === null) labels.classList.add('without-ath');
+    const landmark = (className, value, caption) => {
+      const label = node('span', className);
+      label.append(node('strong', '', money(value)), node('small', '', caption));
+      return label;
+    };
+    labels.append(landmark('ai-range-low-label', low, '52-week low'), landmark('ai-range-year-label', high, '52-week high'));
+    if (allTimeHigh !== null) labels.append(landmark('ai-range-ath-label', ceiling, 'All-time high'));
+    plot.append(track, labels);
+    card.replaceChildren(head, plot);
+    card.hidden = false;
+  }
+
+  function renderCore(response) {
+    const core = response.data;
+    if (!core || typeof core !== 'object') throw new Error('Company data is unavailable.');
+    const name = core.name || symbol.slice(3);
+    const prices = core.prices || {};
+    const exchange = present(prices.NSE) ? 'NSE' : present(prices.BSE) ? 'BSE' : '';
+    const price = exchange ? number(prices[exchange]) : null;
+    $('company-name').textContent = name;
+    $('company-symbol').textContent = symbol.slice(3);
+    $('company-industry').textContent = core.industry || 'Indian equity';
+    $('company-price').textContent = price === null ? '—' : money(price);
+    const sourceTime = core.source_time || (response.fetched_at ? dateTime(response.fetched_at) : 'Time unavailable');
+    $('price-meta').textContent = (exchange || 'Price unavailable') + ' · As of ' + sourceTime;
+    document.title = name + ' (' + symbol.slice(3) + ') AI Overview | Tickr Digest';
+    const change = $('company-change');
+    change.hidden = !present(core.change_percent);
+    if (!change.hidden) {
+      change.textContent = pct(core.change_percent) + ' today';
+      change.className = 'ai-change ' + direction(core.change_percent);
+    }
+
+    const snapshot = core.snapshot || {};
+    const grid = $('metrics-grid');
+    grid.replaceChildren();
+    if (present(snapshot.marketCap)) grid.append(metric('Market cap', '₹' + fmt(snapshot.marketCap) + ' cr', 'Provider-reported'));
+    if (present(snapshot.pPerEBasicExcludingExtraordinaryItemsTTM)) grid.append(metric('P/E ratio', fmt(snapshot.pPerEBasicExcludingExtraordinaryItemsTTM) + '×', 'Trailing 12 months'));
+    if (present(snapshot.sectorPriceToEarningsValueRatio)) grid.append(metric('Sector P/E', fmt(snapshot.sectorPriceToEarningsValueRatio) + '×', 'Provider-reported'));
+    if (present(snapshot.priceYTDPricePercentChange)) grid.append(metric('Year-to-date return', pct(snapshot.priceYTDPricePercentChange), 'Price return'));
+    const revenue = healthMetric(core, /^(revenue|sales|total income)$/i);
+    const profit = healthMetric(core, /^(net (income|profit)|profit after tax)$/i);
+    for (const entry of [revenue, profit]) {
+      if (!entry) continue;
+      const value = (entry.unit || '').trim() === '₹ cr' ? '₹' + fmt(entry.value) + ' cr' : fmt(entry.value) + (entry.unit ? ' ' + entry.unit : '');
+      grid.append(metric(entry.label, value, [entry.period, entry.change_label].filter(Boolean).join(' · ') || 'Reported actual'));
+    }
+    if (!grid.children.length) grid.append(node('p', 'ai-empty', 'No comparable market or financial measures are available for this company.'));
+    renderRange(core, price);
+    $('page-status').hidden = true;
+    $('overview-content').hidden = false;
+  }
+
+  function citations(ids, sources) {
+    const wrap = node('span', 'ai-evidence');
+    for (const id of ids || []) {
+      const source = sources.get(id);
+      if (!source) continue;
+      const link = node('a', '', id);
+      link.href = sourceHref(source);
+      link.title = 'View source: ' + source.label;
+      link.setAttribute('aria-label', id + ': ' + source.label);
+      wrap.append(link);
+    }
+    return wrap;
+  }
+
+  function signal(item, sources) {
+    const tone = Object.hasOwn(tones, item.tone) ? item.tone : 'neutral';
+    const card = node('article', 'ai-signal ' + tone);
+    const head = node('span', 'ai-signal-head');
+    head.append(node('span', 'ai-signal-title', item.heading || 'Company signal'), node('span', 'ai-tone', tones[tone]));
+    const title = node('div', 'ai-signal-heading');
+    title.append(robotFace(tone), head);
+    const facts = node('div', 'ai-signal-facts');
+    for (const fact of Array.isArray(item.facts) ? item.facts : []) {
+      if (!fact || !fact.label || !fact.value) continue;
+      const chip = node('span', 'ai-signal-fact');
+      chip.append(node('span', 'ai-signal-fact-label', fact.label), node('strong', '', fact.value));
+      facts.append(chip);
+    }
+    const body = node('p', '', item.text || '');
+    body.append(citations(item.evidence_ids, sources));
+    card.append(title);
+    if (facts.children.length) card.append(facts);
+    card.append(body);
+    return card;
+  }
+
+  function renderAI(response) {
+    const data = response.data;
+    if (!data || !data.summary || !data.summary.text) throw new Error('The AI overview could not be read.');
+    const sources = new Map((data.sources || []).map(item => [item.id, item]));
+    const summary = $('ai-summary');
+    const summaryBody = node('p', '', data.summary.text);
+    summaryBody.append(citations(data.summary.evidence_ids, sources));
+    const summaryCopy = node('div', 'ai-summary-copy');
+    summaryCopy.append(node('span', 'ai-summary-label', '✦ The AI take'), node('h2', '', data.summary.heading || 'Company perspective'), summaryBody);
+    const guide = $('ai-robot-guide'), guideFace = $('ai-robot-guide-face');
+    const toneLabel = $('ai-robot-tone');
+    const summaryTone = Object.hasOwn(tones, data.summary.tone) ? data.summary.tone : 'neutral';
+    summary.dataset.tone = summaryTone;
+    guide.dataset.tone = summaryTone;
+    guideFace.replaceChildren(robotFace(summaryTone, true));
+    toneLabel.textContent = ({positive: 'Encouraging evidence', negative: 'Needs attention',
+      caution: 'Mixed or uncertain', neutral: 'Monitoring point'})[summaryTone];
+    summary.replaceChildren(guide, summaryCopy);
+
+    const container = $('ai-categories');
+    container.replaceChildren();
+    let total = 0;
+    let visibleAreas = 0;
+    categories.forEach(([key, label]) => {
+      const items = Array.isArray(data[key]) ? data[key] : [];
+      if (!items.length) return;
+      total += items.length;
+      visibleAreas++;
+      const group = node('section', 'ai-category');
+      const heading = node('h3', '', label);
+      heading.append(node('span', 'ai-category-count', String(items.length)));
+      group.append(heading);
+      const list = node('ul');
+      items.forEach(item => {
+        const row = node('li');
+        row.append(signal(item, sources));
+        list.append(row);
+      });
+      group.append(list);
+      container.append(group);
+    });
+    container.hidden = visibleAreas === 0;
+    $('ai-signal-count').textContent = visibleAreas
+      ? total + ' supported ' + (total === 1 ? 'signal' : 'signals') + ' across ' + visibleAreas + ' ' + (visibleAreas === 1 ? 'area' : 'areas')
+      : 'No supported signals in the available evidence.';
+
+    const sourceList = $('sources-list');
+    sourceList.replaceChildren();
+    for (const source of data.sources || []) {
+      const item = node('li');
+      const link = node('a', '', source.label);
+      link.href = sourceHref(source);
+      item.append(link, node('span', '', ' · ' + source.section));
+      sourceList.append(item);
+    }
+    $('ai-generated').textContent = 'Generated ' + dateTime(data.generated_at);
+    const coverage = response.coverage || {};
+    $('ai-coverage').textContent = fmt(coverage.sources) + ' evidence groups · ' + fmt(coverage.news_stories) + ' available news stories · Cached for up to 6 hours';
+    $('ai-status').hidden = true;
+    $('ai-content').hidden = false;
+  }
+
+  async function loadCore() {
+    const status = $('page-status');
+    status.textContent = 'Gathering company evidence…';
+    status.hidden = false;
+    try {
+      const response = await request('/api/stock-data?' + new URLSearchParams({symbol, section: 'core'}));
+      renderCore(response);
+      loadAllTimeHigh(response.data);
+    } catch (error) {
+      const retry = node('button', '', 'Try again');
+      retry.type = 'button';
+      retry.addEventListener('click', loadCore);
+      status.replaceChildren(node('span', '', errorMessage(error, 'Company data is unavailable.')), retry);
+    }
+  }
+
+  async function loadAllTimeHigh(core) {
+    try {
+      const response = await request('/api/stock-data?' + new URLSearchParams({symbol, section: 'history', period: 'max', filter: 'price'}));
+      const high = allTimeHighFromHistory(response.data);
+      if (high !== null) {
+        const prices = core.prices || {};
+        const price = number(prices.NSE) ?? number(prices.BSE);
+        renderRange(core, price, Math.max(high, number(core.year_high) ?? high, price ?? high));
+      }
+    } catch (error) { /* The 52-week range remains available if history is unavailable. */ }
+  }
+
+  async function loadAI() {
+    const status = $('ai-status');
+    status.classList.remove('error');
+    status.replaceChildren(loadingBot('Connecting the evidence…'));
+    status.hidden = false;
+    status.setAttribute('aria-busy', 'true');
+    try {
+      renderAI(await request('/api/stock-ai?' + new URLSearchParams({symbol, schema: '3'})));
+    } catch (error) {
+      const retry = node('button', '', 'Retry AI overview');
+      retry.type = 'button';
+      retry.addEventListener('click', loadAI);
+      status.classList.add('error');
+      status.replaceChildren(node('span', '', errorMessage(error, 'The AI overview is temporarily unavailable.')), retry);
+    } finally { status.removeAttribute('aria-busy'); }
+  }
+
+  loadCore();
+  loadAI();
+};

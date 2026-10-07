@@ -57,6 +57,9 @@ test('loads the regional PostHog SDK and sends privacy-safe page context', async
   assert.equal(page.properties.referrer_host, 'search.example');
   assert.equal(page.properties.schema_version, 1);
   assert.equal(JSON.stringify(page.properties).includes('private'), false);
+  let readySDK;
+  app.context.tickrAnalytics.onReady(sdk => {readySDK = sdk;});
+  assert.equal(readySDK, app.context.posthog);
 });
 
 test('records API health and AI usage without query strings or payloads', async () => {

@@ -127,10 +127,17 @@ python3 -m venv .venv
 | `AI_SUMMARY_RETRIES` | Optional AI email briefing | Default `2`; retries transient or unusable responses with backoff |
 | `AI_SUMMARY_MAX_OUTPUT_TOKENS` | Optional AI email briefing | Default `1800` per ticker batch |
 | `AI_SUMMARY_MARKET_MAX_OUTPUT_TOKENS` | Optional AI email briefing | Default `400` for final headline and market context |
-| `AI_STOCK_OVERVIEW_MAX_OUTPUT_TOKENS` | Optional stock AI overview | Default `1200` for one bounded, structured company overview |
+| `AI_STOCK_OVERVIEW_MAX_OUTPUT_TOKENS` | Optional stock AI overview | Default `2400` for one bounded, structured company overview |
 | `AI_STOCK_SECTION_MAX_OUTPUT_TOKENS` | Optional stock section explainer | Default `500` for one bounded card explanation |
 | `POSTHOG_PROJECT_KEY` | Optional website analytics | Public PostHog project key. When unset, analytics stays disabled. |
 | `POSTHOG_HOST` | Optional website analytics | Defaults to `https://us.i.posthog.com`; use `https://eu.i.posthog.com` for an EU project. |
+
+The PostHog boolean feature flag `ai-overview-visual` controls the stock tab and
+shareable AI Overview layout. Set it to **true** for the visual timeline or
+**false** for the committed category layout. A missing flag, disabled analytics,
+or a flag loading failure defaults to the visual timeline. Flags resolve once
+per page (with a 1.5-second loading limit); reload the page after changing rollout
+rules. Both layouts use the same overview API and improved explanation prompt.
 
 Copy from sibling `stock-news-bot/.env` via `./scripts/setup_vercel_env.sh`.
 

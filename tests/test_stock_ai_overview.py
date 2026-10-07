@@ -96,6 +96,28 @@ class EvidenceTests(unittest.TestCase):
         self.assertIn("summary.heading as the overall takeaway", prompt)
         self.assertIn('Avoid "Overview"', prompt)
 
+    def test_prompt_requests_meaning_and_limits_instead_of_repeating_facts(self):
+        prompt = overview._prompt("IN:EXAMPLE", overview.build_evidence(core_data()))
+        self.assertIn('"Why this matters"', prompt)
+        self.assertIn("30-50 words", prompt)
+        self.assertIn("Do not merely repeat", prompt)
+        self.assertIn("Define unfamiliar terms", prompt)
+        self.assertIn("never invent the cause", prompt)
+        self.assertIn("what the answer would reveal", prompt)
+        self.assertNotIn("at most 28 words", prompt)
+
+    def test_parser_preserves_a_complete_explanation_longer_than_old_limit(self):
+        raw = model_result()
+        text = ("Revenue is the money the company earns from selling its products or services. "
+                "Growth indicates more sales in the reported period, but it does not show how much "
+                "of that income becomes profit. Reading it alongside margins and cash flow helps "
+                "explain whether the business is turning sales into earnings and cash.")
+        self.assertGreater(len(text), 260)
+        raw["changes"][0]["text"] = text
+        parsed = overview._parse(json.dumps(raw), {"S1", "S2", "S3"})
+        self.assertEqual(parsed["changes"][0]["text"], text)
+        self.assertEqual(parsed["changes"][0]["evidence_ids"], ["S2"])
+
 
 class GenerationTests(unittest.TestCase):
     def setUp(self):
@@ -112,13 +134,25 @@ class GenerationTests(unittest.TestCase):
 
         self.assertIs(first, second)
         self.assertEqual(request.call_count, 1)
-        self.assertEqual(request.call_args.kwargs["max_tokens"], 1200)
+        self.assertEqual(request.call_args.kwargs["max_tokens"], overview.AI_STOCK_OVERVIEW_MAX_OUTPUT_TOKENS)
         self.assertEqual(request.call_args.kwargs["retries"], 0)
         self.assertEqual(ttl, overview.TTL_SECONDS)
         self.assertLessEqual(remaining, ttl)
         self.assertEqual(first["data"]["sources"][0]["id"], "S1")
         self.assertEqual(first["schema_version"], 3)
         self.assertNotIn("data", first["data"]["sources"][0])
+
+    @patch.object(overview.ai_summary, "OPENROUTER_API_KEY", "test-key")
+    @patch.object(overview.ai_summary, "_request_structured_json")
+    def test_new_content_version_does_not_reuse_an_old_brief(self, request):
+        request.return_value = model_result()
+        with patch.object(overview, "CONTENT_VERSION", "old-brief"):
+            first, _ = overview.get_stock_ai_overview("IN:EXAMPLE", core_data())
+        fresh, _ = overview.get_stock_ai_overview("IN:EXAMPLE", core_data())
+        cached, _ = overview.get_stock_ai_overview("IN:EXAMPLE", core_data())
+        self.assertEqual(request.call_count, 2)
+        self.assertIsNot(first, fresh)
+        self.assertIs(fresh, cached)
 
     @patch.object(overview.ai_summary, "OPENROUTER_API_KEY", "")
     def test_disabled_ai_does_not_generate(self):

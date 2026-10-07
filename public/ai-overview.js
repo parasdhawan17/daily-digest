@@ -1,21 +1,22 @@
-(function () {
+(async function () {
   'use strict';
+
+  await window.tickrAIOverviewLayout?.ready;
+  if (window.tickrAIOverviewLayout?.visual === false) {
+    const template = document.getElementById('ai-overview-legacy-template');
+    document.getElementById('overview-content').replaceWith(template.content.firstElementChild.cloneNode(true));
+    window.tickrLegacyAIOverviewPage();
+    return;
+  }
 
   const symbol = document.body.dataset.symbol;
   if (!/^IN:[A-Z][A-Z0-9&-]{0,19}$/.test(symbol || '')) return;
 
   const $ = id => document.getElementById(id);
-  const {number, fmt, money, pct, direction} = window.tickrStockFormat;
+  let companyCore = {};
+  let aiResponse = null;
   const stockUrl = '/stocks/' + encodeURIComponent(symbol).replace('%3A', ':');
   const sections = new Set(['overview', 'financials', 'ownership', 'analysis', 'actions', 'news']);
-  const categories = [
-    ['encouraging', 'What looks encouraging'],
-    ['attention', 'What needs attention'],
-    ['changes', 'What changed recently'],
-    ['catalysts', 'Potential catalysts'],
-    ['risks', 'Key risks'],
-    ['watch_next', 'What to watch next'],
-  ];
   const tones = {positive: 'Positive', negative: 'Negative', caution: 'Watch', neutral: 'Neutral'};
 
   function node(tag, className, value) {
@@ -73,7 +74,6 @@
     return loading;
   }
 
-  function present(value) { return number(value) !== null; }
   function dateTime(value) {
     const date = new Date(value);
     return Number.isNaN(+date) ? 'Time unavailable' : date.toLocaleString('en-IN', {
@@ -114,219 +114,46 @@
     return payload;
   }
 
-  function metric(label, value, note) {
-    const card = node('article', 'ai-metric');
-    card.append(node('span', 'ai-metric-label', label), node('strong', 'ai-metric-value', value));
-    if (note) {
-      const annotation = node('span', 'ai-metric-note', note);
-      if (/^\+/.test(note)) annotation.classList.add('positive');
-      if (/^[−-]/.test(note)) annotation.classList.add('negative');
-      card.append(annotation);
-    }
-    return card;
-  }
-
-  function healthMetric(core, pattern) {
-    for (const group of (core.health && core.health.groups) || []) {
-      for (const entry of group.metrics || []) {
-        if (pattern.test(entry.label || '') && present(entry.value)) return entry;
-      }
-    }
-    return null;
-  }
-
-  function allTimeHighFromHistory(data) {
-    let high = null;
-    const datasets = data && Array.isArray(data.datasets) ? data.datasets : [];
-    for (const dataset of datasets) {
-      if (!dataset || !Array.isArray(dataset.values)) continue;
-      const metric = String(dataset.metric || '').trim().toLowerCase();
-      const label = String(dataset.label || '').trim().toLowerCase();
-      if (metric !== 'price' && !label.startsWith('price')) continue;
-      for (const row of dataset.values) {
-        const value = Array.isArray(row) ? number(row[1]) : null;
-        if (value !== null && (high === null || value > high)) high = value;
-      }
-    }
-    return high;
-  }
-
-  function renderRange(core, price, allTimeHigh = null) {
-    const card = $('range-card');
-    const low = number(core.year_low), high = number(core.year_high);
-    const hasRange = low !== null && high !== null && high > low && price !== null;
-    if (!hasRange) { card.hidden = true; return; }
-    const ceiling = Math.max(high, allTimeHigh ?? high, price);
-    const position = value => Math.max(0, Math.min(100, (value - low) / (ceiling - low) * 100));
-    const head = node('div', 'ai-range-head');
-    head.append(node('strong', '', 'Price range'), node('span', '', 'Current position ' + Math.round(position(price)) + '% of range'));
-    const plot = node('div', 'ai-range-plot');
-    const track = node('div', 'ai-range-track');
-    const currentPoint = node('span', 'ai-range-marker');
-    currentPoint.style.left = position(price) + '%';
-    currentPoint.setAttribute('title', 'Current price ' + money(price));
-    const yearPoint = node('span', 'ai-range-point ai-range-year-point');
-    yearPoint.style.left = position(high) + '%';
-    yearPoint.setAttribute('title', '52-week high ' + money(high));
-    track.append(yearPoint);
-    if (allTimeHigh !== null) {
-      const athPoint = node('span', 'ai-range-point ai-range-ath-point');
-      athPoint.style.left = position(ceiling) + '%';
-      athPoint.setAttribute('title', 'All-time high ' + money(ceiling));
-      track.append(athPoint);
-    }
-    track.append(currentPoint);
-    const labels = node('div', 'ai-range-labels');
-    if (allTimeHigh === null) labels.classList.add('without-ath');
-    const landmark = (className, value, caption) => {
-      const label = node('span', className);
-      label.append(node('strong', '', money(value)), node('small', '', caption));
-      return label;
-    };
-    labels.append(landmark('ai-range-low-label', low, '52-week low'), landmark('ai-range-year-label', high, '52-week high'));
-    if (allTimeHigh !== null) labels.append(landmark('ai-range-ath-label', ceiling, 'All-time high'));
-    plot.append(track, labels);
-    card.replaceChildren(head, plot);
-    card.hidden = false;
+  function renderStory(response = aiResponse) {
+    if (!response) return;
+    $('ai-content').replaceChildren(window.tickrAIStory.render(response, companyCore, {
+      robot: robotFace, sourceHref, stamp: dateTime
+    }));
+    $('ai-content').hidden = false;
+    $('ai-facts').hidden = true;
   }
 
   function renderCore(response) {
     const core = response.data;
     if (!core || typeof core !== 'object') throw new Error('Company data is unavailable.');
+    companyCore = core;
     const name = core.name || symbol.slice(3);
-    const prices = core.prices || {};
-    const exchange = present(prices.NSE) ? 'NSE' : present(prices.BSE) ? 'BSE' : '';
-    const price = exchange ? number(prices[exchange]) : null;
     $('company-name').textContent = name;
     $('company-symbol').textContent = symbol.slice(3);
     $('company-industry').textContent = core.industry || 'Indian equity';
-    $('company-price').textContent = price === null ? '—' : money(price);
-    const sourceTime = core.source_time || (response.fetched_at ? dateTime(response.fetched_at) : 'Time unavailable');
-    $('price-meta').textContent = (exchange || 'Price unavailable') + ' · As of ' + sourceTime;
+    $('price-meta').textContent = 'Market data as of ' + (core.source_time || (response.fetched_at ? dateTime(response.fetched_at) : 'Time unavailable'));
     document.title = name + ' (' + symbol.slice(3) + ') AI Overview | Tickr Digest';
-    const change = $('company-change');
-    change.hidden = !present(core.change_percent);
-    if (!change.hidden) {
-      change.textContent = pct(core.change_percent) + ' today';
-      change.className = 'ai-change ' + direction(core.change_percent);
-    }
-
-    const snapshot = core.snapshot || {};
-    const grid = $('metrics-grid');
-    grid.replaceChildren();
-    if (present(snapshot.marketCap)) grid.append(metric('Market cap', '₹' + fmt(snapshot.marketCap) + ' cr', 'Provider-reported'));
-    if (present(snapshot.pPerEBasicExcludingExtraordinaryItemsTTM)) grid.append(metric('P/E ratio', fmt(snapshot.pPerEBasicExcludingExtraordinaryItemsTTM) + '×', 'Trailing 12 months'));
-    if (present(snapshot.sectorPriceToEarningsValueRatio)) grid.append(metric('Sector P/E', fmt(snapshot.sectorPriceToEarningsValueRatio) + '×', 'Provider-reported'));
-    if (present(snapshot.priceYTDPricePercentChange)) grid.append(metric('Year-to-date return', pct(snapshot.priceYTDPricePercentChange), 'Price return'));
-    const revenue = healthMetric(core, /^(revenue|sales|total income)$/i);
-    const profit = healthMetric(core, /^(net (income|profit)|profit after tax)$/i);
-    for (const entry of [revenue, profit]) {
-      if (!entry) continue;
-      const value = (entry.unit || '').trim() === '₹ cr' ? '₹' + fmt(entry.value) + ' cr' : fmt(entry.value) + (entry.unit ? ' ' + entry.unit : '');
-      grid.append(metric(entry.label, value, [entry.period, entry.change_label].filter(Boolean).join(' · ') || 'Reported actual'));
-    }
-    if (!grid.children.length) grid.append(node('p', 'ai-empty', 'No comparable market or financial measures are available for this company.'));
-    renderRange(core, price);
+    $('ai-facts').replaceChildren(window.tickrAIStory.renderFacts(core));
     $('page-status').hidden = true;
     $('overview-content').hidden = false;
-  }
-
-  function citations(ids, sources) {
-    const wrap = node('span', 'ai-evidence');
-    for (const id of ids || []) {
-      const source = sources.get(id);
-      if (!source) continue;
-      const link = node('a', '', id);
-      link.href = sourceHref(source);
-      link.title = 'View source: ' + source.label;
-      link.setAttribute('aria-label', id + ': ' + source.label);
-      wrap.append(link);
-    }
-    return wrap;
-  }
-
-  function signal(item, sources) {
-    const tone = Object.hasOwn(tones, item.tone) ? item.tone : 'neutral';
-    const card = node('article', 'ai-signal ' + tone);
-    const head = node('span', 'ai-signal-head');
-    head.append(node('span', 'ai-signal-title', item.heading || 'Company signal'), node('span', 'ai-tone', tones[tone]));
-    const title = node('div', 'ai-signal-heading');
-    title.append(robotFace(tone), head);
-    const facts = node('div', 'ai-signal-facts');
-    for (const fact of Array.isArray(item.facts) ? item.facts : []) {
-      if (!fact || !fact.label || !fact.value) continue;
-      const chip = node('span', 'ai-signal-fact');
-      chip.append(node('span', 'ai-signal-fact-label', fact.label), node('strong', '', fact.value));
-      facts.append(chip);
-    }
-    const body = node('p', '', item.text || '');
-    body.append(citations(item.evidence_ids, sources));
-    card.append(title);
-    if (facts.children.length) card.append(facts);
-    card.append(body);
-    return card;
+    renderStory();
   }
 
   function renderAI(response) {
+    renderStory(response);
+    aiResponse = response;
     const data = response.data;
-    if (!data || !data.summary || !data.summary.text) throw new Error('The AI overview could not be read.');
-    const sources = new Map((data.sources || []).map(item => [item.id, item]));
-    const summary = $('ai-summary');
-    const summaryBody = node('p', '', data.summary.text);
-    summaryBody.append(citations(data.summary.evidence_ids, sources));
-    const summaryCopy = node('div', 'ai-summary-copy');
-    summaryCopy.append(node('span', 'ai-summary-label', '✦ The AI take'), node('h2', '', data.summary.heading || 'Company perspective'), summaryBody);
-    const guide = $('ai-robot-guide'), guideFace = $('ai-robot-guide-face');
-    const toneLabel = $('ai-robot-tone');
-    const summaryTone = Object.hasOwn(tones, data.summary.tone) ? data.summary.tone : 'neutral';
-    summary.dataset.tone = summaryTone;
-    guide.dataset.tone = summaryTone;
-    guideFace.replaceChildren(robotFace(summaryTone, true));
-    toneLabel.textContent = ({positive: 'Encouraging evidence', negative: 'Needs attention',
-      caution: 'Mixed or uncertain', neutral: 'Monitoring point'})[summaryTone];
-    summary.replaceChildren(guide, summaryCopy);
-
-    const container = $('ai-categories');
-    container.replaceChildren();
-    let total = 0;
-    let visibleAreas = 0;
-    categories.forEach(([key, label]) => {
-      const items = Array.isArray(data[key]) ? data[key] : [];
-      if (!items.length) return;
-      total += items.length;
-      visibleAreas++;
-      const group = node('section', 'ai-category');
-      const heading = node('h3', '', label);
-      heading.append(node('span', 'ai-category-count', String(items.length)));
-      group.append(heading);
-      const list = node('ul');
-      items.forEach(item => {
-        const row = node('li');
-        row.append(signal(item, sources));
-        list.append(row);
-      });
-      group.append(list);
-      container.append(group);
-    });
-    container.hidden = visibleAreas === 0;
-    $('ai-signal-count').textContent = visibleAreas
-      ? total + ' supported ' + (total === 1 ? 'signal' : 'signals') + ' across ' + visibleAreas + ' ' + (visibleAreas === 1 ? 'area' : 'areas')
-      : 'No supported signals in the available evidence.';
-
     const sourceList = $('sources-list');
     sourceList.replaceChildren();
     for (const source of data.sources || []) {
-      const item = node('li');
-      const link = node('a', '', source.label);
+      const item = node('li'), link = node('a', '', source.label);
       link.href = sourceHref(source);
       item.append(link, node('span', '', ' · ' + source.section));
       sourceList.append(item);
     }
-    $('ai-generated').textContent = 'Generated ' + dateTime(data.generated_at);
     const coverage = response.coverage || {};
-    $('ai-coverage').textContent = fmt(coverage.sources) + ' evidence groups · ' + fmt(coverage.news_stories) + ' available news stories · Cached for up to 6 hours';
+    $('ai-coverage').textContent = (coverage.sources || 0) + ' evidence groups · ' + (coverage.news_stories || 0) + ' available news stories · Cached for up to 6 hours';
     $('ai-status').hidden = true;
-    $('ai-content').hidden = false;
   }
 
   async function loadCore() {
@@ -336,25 +163,12 @@
     try {
       const response = await request('/api/stock-data?' + new URLSearchParams({symbol, section: 'core'}));
       renderCore(response);
-      loadAllTimeHigh(response.data);
     } catch (error) {
       const retry = node('button', '', 'Try again');
       retry.type = 'button';
       retry.addEventListener('click', loadCore);
       status.replaceChildren(node('span', '', errorMessage(error, 'Company data is unavailable.')), retry);
     }
-  }
-
-  async function loadAllTimeHigh(core) {
-    try {
-      const response = await request('/api/stock-data?' + new URLSearchParams({symbol, section: 'history', period: 'max', filter: 'price'}));
-      const high = allTimeHighFromHistory(response.data);
-      if (high !== null) {
-        const prices = core.prices || {};
-        const price = number(prices.NSE) ?? number(prices.BSE);
-        renderRange(core, price, Math.max(high, number(core.year_high) ?? high, price ?? high));
-      }
-    } catch (error) { /* The 52-week range remains available if history is unavailable. */ }
   }
 
   async function loadAI() {
@@ -364,7 +178,7 @@
     status.hidden = false;
     status.setAttribute('aria-busy', 'true');
     try {
-      renderAI(await request('/api/stock-ai?' + new URLSearchParams({symbol, schema: '3'})));
+      renderAI(await request('/api/stock-ai?' + new URLSearchParams({symbol, schema: '3', brief: window.tickrAIStory.contentVersion})));
     } catch (error) {
       const retry = node('button', '', 'Retry AI overview');
       retry.type = 'button';

@@ -26,16 +26,16 @@ test('standalone research page renders accessible filtered P\/E history', () => 
 });
 
 test('standalone research page versions the new assets', () => {
-  assert.match(template, /ai-overview\.css\?v=20261007-bot-loading/);
+  assert.match(template, /ai-overview\.css\?v=20261007-story/);
   assert.match(template, /stock\.css\?v=20261007-simple-tour/);
-  assert.match(template, /stock\.js\?v=20261007-simple-tour/);
+  assert.match(template, /stock\.js\?v=20261007-flag/);
   assert.match(template, /data-active-tab="ai-overview"/);
   assert.match(source, /document\.body\.dataset\.activeTab = id/);
   assert.match(styles, /data-active-tab="ai-overview"\] \.stock-section-assistant,[\s\S]*data-active-tab="ai-overview"\] \.stock-section-ai-launcher\{display:none\}/);
 });
 
 test('Overview tab does not render company signals', () => {
-  const overviewSource = source.slice(source.indexOf('function overview()'), source.indexOf('function aiEvidence('));
+  const overviewSource = source.slice(source.indexOf('function overview()'), source.indexOf('const aiTones'));
   assert.doesNotMatch(overviewSource, /Company signals|loadSignalPreview|stock-signals-preview/);
   assert.doesNotMatch(styles, /stock-signals-preview/);
 });
@@ -97,74 +97,32 @@ test('launcher smoothly expands into and attaches to the assistant', () => {
   assert.doesNotMatch(styles, /will-change:transform,opacity;animation:stock-ai-arrive/);
 });
 
-test('AI overview tab omits empty signal groups', () => {
-  class Element {
-    constructor(tag) {
-      this.tagName = tag;
-      this.children = [];
-      this.dataset = {};
-      this.attributes = {};
-      this.style = {setProperty() {}};
-      this.hidden = false;
-      this.className = '';
-      this.classList = {add: name => { this.className += ' ' + name; }};
-    }
-    set textContent(value) { this.value = String(value); this.children = []; }
-    get textContent() { return (this.value || '') + this.children.map(child => child.textContent).join(''); }
-    append(...children) { this.children.push(...children); }
-    setAttribute(name, value) { this.attributes[name] = value; }
-  }
-  const testSource = source.replace(/\n  init\(\);\n\}\)\(\);\s*$/, '\n  window.testRender = renderAIOverview;\n})();');
+test('stock tab uses the shared visual renderer and local evidence navigation', () => {
+  const {Element, core, ai, install, stockFormat, byClass, visibleText, walk} = require('./helpers/ai_story_fixture');
+  const testSource = source.replace(/\n  init\(\);\n\}\)\(\);\s*$/, '\n  window.testRender = renderAIOverview; window.setCore = value => {core = value;};\n})();');
   assert.notEqual(testSource, source);
   const themeButton = new Element('button');
-  const window = {tickrStockFormat: require('../public/stock-format.js'), addEventListener() {}};
+  const window = {tickrStockFormat: stockFormat, addEventListener() {}};
   const document = {body: {dataset: {symbol: 'IN:EXAMPLE'}}, documentElement: {dataset: {theme: 'light'}},
     createElement: tag => new Element(tag), createElementNS: (_namespace, tag) => new Element(tag), getElementById: () => themeButton, querySelectorAll: () => []};
-  vm.runInNewContext(testSource, {window, document, URLSearchParams, Date, Intl});
-  const response = {data: {
-    summary: {heading: 'Steady revenue', text: 'Revenue was steady.', tone: 'neutral', evidence_ids: []},
-    encouraging: [{heading: 'Revenue stability', text: 'Revenue held up.', tone: 'positive', evidence_ids: []}],
-    attention: [], changes: [], catalysts: [], risks: [], watch_next: [], sources: [], generated_at: '2026-09-25T00:00:00Z'
-  }, coverage: {sources: 0, news_stories: 0}};
-  const panel = new Element('section');
-  window.testRender(panel, response);
-  assert.equal(panel.children.length, 1);
-  assert.equal(panel.children[0].className, 'ai-insight-explorer');
-  assert.match(panel.textContent, /The AI take/);
-  assert.match(panel.textContent, /What looks encouraging/);
-  assert.doesNotMatch(panel.textContent, /What needs attention|What changed recently|Potential catalysts|Key risks|What to watch next/);
-  const firstCategory = panel.children[0].children[1].children[1].children[0];
-  assert.equal(firstCategory.tagName, 'section');
+  const context = {window, document, URLSearchParams, Date, Intl};
+  install(context); vm.runInNewContext(testSource, context);
+  window.setCore(core().data);
+  const panel = new Element('section'); window.testRender(panel, ai());
+  assert.equal(byClass(panel, 'ai-story-stage').length, 3);
+  assert.equal(byClass(panel, 'ai-story-robot').length, 1);
+  assert.equal(byClass(panel, 'ai-story-trend').length, 1);
+  assert.match(visibleText(panel), /₹100.00/);
+  assert.doesNotMatch(visibleText(panel), /original AI paragraph/);
+  assert.equal(walk(panel, el => el.tagName === 'a')[0].href, '#financials');
+  assert.ok(template.indexOf('ai-story.js') < template.indexOf('stock.js'));
 
-  response.data.attention = [{heading: 'Margin pressure', text: 'Margins narrowed.', tone: 'caution', evidence_ids: []}];
-  response.data.changes = [{heading: 'Debt rose', text: 'Net debt increased.', tone: 'negative', evidence_ids: []}];
-  response.data.watch_next = [{heading: 'Next results', text: 'Monitor the next report.', tone: 'neutral', evidence_ids: []}];
-  const fullPanel = new Element('section');
-  window.testRender(fullPanel, response);
-  const groups = fullPanel.children[0].children[1].children[1].children;
-  assert.equal(groups.length, 4);
-  assert.ok(groups.every(group => group.tagName === 'section'));
-  const signals = groups.map(group => group.children[1].children[0].children[0]);
-  assert.deepEqual(signals.map(signal => signal.children[0].children[0].dataset.tone), ['positive', 'caution', 'negative', 'neutral']);
-  assert.equal(new Set(signals.map(signal => signal.children[0].children[0].children[0].children[7].attributes.d)).size, 4);
-
-  response.data.watch_next[0].tone = 'unsupported';
-  response.data.watch_next[0].evidence_ids = ['S1'];
-  response.data.sources = [{id: 'S1', section: 'financials', label: 'Reported financials'}];
-  const fallbackPanel = new Element('section');
-  window.testRender(fallbackPanel, response);
-  const fallbackSignal = fallbackPanel.children[0].children[1].children[1].children[3].children[1].children[0].children[0];
-  assert.equal(fallbackSignal.children[0].children[0].dataset.tone, 'neutral');
-  assert.match(fallbackSignal.textContent, /Context/);
-  assert.equal(fallbackSignal.children.at(-1).children[0].children[0].href, '#financials');
-
-  response.data.encouraging = [];
-  response.data.attention = [];
-  response.data.changes = [];
-  response.data.watch_next = [];
-  const emptyPanel = new Element('section');
-  window.testRender(emptyPanel, response);
-  assert.equal(emptyPanel.children.length, 1);
-  const categories = emptyPanel.children[0].children[1].children[1];
-  assert.equal(categories.hidden, true);
+  vm.runInNewContext(fs.readFileSync('public/ai-overview-legacy-renderer.js', 'utf8'), context);
+  window.tickrAIOverviewLayout = {visual: false};
+  const legacy = new Element('section'); window.testRender(legacy, ai());
+  assert.equal(byClass(legacy, 'ai-story-stage').length, 0);
+  assert.equal(byClass(legacy, 'ai-category').length, 3);
+  assert.match(visibleText(legacy), /original AI paragraph/);
+  assert.match(visibleText(legacy), /What looks encouraging/);
+  assert.equal(walk(legacy, el => el.tagName === 'a')[0].href, '#financials');
 });
