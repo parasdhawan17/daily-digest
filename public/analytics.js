@@ -235,9 +235,7 @@
       action = 'onboarding_watchlist_completed';
     } else if (target.id === 'save-dashboard') {
       action = 'dashboard_preferences_saved';
-    } else if (target.id === 'home-choice-ai') {
-      action = 'ai_overview_opened';
-    } else if (target.id === 'home-choice-details' || target.id === 'nav-stock-details' || target.id === 'footer-stock-details') {
+    } else if (target.id === 'nav-stock-details' || target.id === 'footer-stock-details') {
       action = 'stock_details_opened';
     } else if (target.id === 'theme-toggle' || target.classList.contains('theme-toggle')) {
       action = 'theme_changed';

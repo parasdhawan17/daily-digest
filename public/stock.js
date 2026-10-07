@@ -25,7 +25,7 @@
   function date(value) { if (!value) return 'Date unavailable'; const d = new Date(value); return Number.isNaN(+d) ? String(value) : d.toLocaleDateString('en-IN', {day: 'numeric', month: 'short', year: 'numeric'}); }
   function stamp(value) { const d = new Date(value); return Number.isNaN(+d) ? 'Time unavailable' : d.toLocaleString('en-IN', {day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Kolkata'}) + ' IST'; }
   function aiCardId(title) { return String(title || '').toLowerCase().replace(/&/g, ' and ').replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, ''); }
-  function card(title, caption) { const c = node('article', 'stock-card stock-ai-target'); c.dataset.aiCardId = aiCardId(title); c.append(node('h2', '', title)); if (caption) c.append(node('p', 'stock-caption', caption)); return c; }
+  function card(title, caption) { const c = node('article', 'stock-card stock-ai-target'); c.dataset.aiCardId = aiCardId(title); c.tabIndex = 0; c.setAttribute('aria-label', title + '. Press Enter for an AI explanation.'); c.append(node('h2', '', title)); if (caption) c.append(node('p', 'stock-caption', caption)); return c; }
   function empty(text) { return node('p', 'stock-caption', text || 'Not available for this company.'); }
   function indicator(text, tone = 'neutral', hint = '') { const value = node('span', 'stock-indicator tone-' + tone, text); if (hint) value.title = hint; return value; }
   function factList(entries) { const dl = node('dl', 'stock-facts'); entries.forEach(([key, value]) => { const row = node('div', 'stock-fact'); const dd = node('dd'); if (value instanceof Node) dd.append(value); else dd.textContent = value; row.append(node('dt', '', key), dd); dl.append(row); }); return dl; }
@@ -119,7 +119,7 @@
       const retry = node('button', 'stock-retry', 'Try again'); retry.type = 'button'; retry.onclick = () => loadInto(target, section, params, render, onEmpty); state.append(retry); target.replaceChildren(state);
     } finally { if (version === target._requestVersion) target.removeAttribute('aria-busy'); }
   }
-  function metric(title, value, note, tone = 'neutral') { const box = node('div', 'stock-metric stock-ai-target tone-' + tone); box.dataset.aiCardId = aiCardId(title); box.append(node('span', '', title), node('strong', '', value)); if (note) box.append(node('small', '', note)); return box; }
+  function metric(title, value, note, tone = 'neutral') { const box = node('div', 'stock-metric stock-ai-target tone-' + tone); box.dataset.aiCardId = aiCardId(title); box.tabIndex = 0; box.setAttribute('aria-label', title + '. Press Enter for an AI explanation.'); box.append(node('span', '', title), node('strong', '', value)); if (note) box.append(node('small', '', note)); return box; }
   function bars(rows, unit, stacked = false) {
     const box = node('div', 'stock-bars'); const valid = rows.filter(x => number(x.value) !== null);
     if (!valid.length) return empty();
@@ -347,14 +347,25 @@
     } finally { panel.removeAttribute('aria-busy'); }
   }
   let sectionAssistant, sectionAssistantBody, sectionAssistantLauncher, sectionAIController, sectionAIRequestVersion = 0;
-  let sectionWelcomeTimer, sectionCollapseTimer, sectionOpenTimer, sectionLauncherTimer, sectionAssistantWelcomeOpen = false;
+  let sectionCollapseTimer, sectionOpenTimer, sectionLauncherTimer, sectionAssistantWelcomeOpen = false;
+  let sectionTour, sectionTourTarget, sectionTourDelay;
+  const onboardingKey = 'tickr-section-ai-onboarded-v3';
+  function onboardingDone() { try { return localStorage.getItem(onboardingKey) === '1'; } catch (error) { return false; } }
+  function finishOnboarding() { clearTimeout(sectionTourDelay); try { localStorage.setItem(onboardingKey, '1'); } catch (error) {} }
+  function scheduleSectionTour(id) {
+    clearTimeout(sectionTourDelay);
+    if (id === 'ai-overview' || onboardingDone() || sectionTour) return;
+    sectionTourDelay = setTimeout(() => {
+      if (!onboardingDone() && document.body.dataset.activeTab !== 'ai-overview') showSectionDemo();
+    }, 3000);
+  }
   function assistantIcon(path) {
     const svg = svgNode('svg', {viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', 'stroke-width': '1.8', 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'aria-hidden': 'true'});
     svg.append(svgNode('path', {d: path})); return svg;
   }
   function showSectionAssistant() {
     if (!sectionAssistant) return;
-    clearTimeout(sectionWelcomeTimer); clearTimeout(sectionCollapseTimer); clearTimeout(sectionOpenTimer); clearTimeout(sectionLauncherTimer);
+    clearTimeout(sectionCollapseTimer); clearTimeout(sectionOpenTimer); clearTimeout(sectionLauncherTimer);
     const reducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const attachFromLauncher = !sectionAssistantLauncher.hidden;
     sectionAssistant.hidden = false;
@@ -371,7 +382,7 @@
   }
   function collapseSectionAssistant() {
     if (!sectionAssistant || sectionAssistant.hidden || sectionAssistant.classList.contains('is-collapsing')) return;
-    clearTimeout(sectionWelcomeTimer); clearTimeout(sectionOpenTimer); clearTimeout(sectionLauncherTimer); sectionAssistantWelcomeOpen = false;
+    clearTimeout(sectionOpenTimer); clearTimeout(sectionLauncherTimer); sectionAssistantWelcomeOpen = false;
     sectionAssistant.classList.remove('is-opening'); sectionAssistantLauncher.classList.remove('is-attaching');
     const finish = () => {
       sectionAssistant.classList.remove('is-collapsing'); sectionAssistant.hidden = true;
@@ -384,8 +395,96 @@
   function assistantWelcome() {
     sectionAssistantWelcomeOpen = true; sectionAssistantBody.replaceChildren();
     const welcome = node('div', 'stock-section-ai-welcome');
-    welcome.append(node('strong', '', 'Ask about any section'), node('p', '', 'Long press a section to have an AI summary for it.'));
+    welcome.append(node('strong', '', 'Let me explain a section'), node('p', '', 'Click a section card or metric to get a short AI explanation. Want to see how?'));
+    const actions = node('div', 'stock-section-ai-onboarding-actions');
+    const demo = node('button', 'stock-section-ai-primary', 'Show me'); demo.type = 'button'; demo.onclick = showSectionDemo;
+    const later = node('button', 'stock-section-ai-secondary', 'Maybe later'); later.type = 'button'; later.onclick = () => { finishOnboarding(); collapseSectionAssistant(); };
+    actions.append(demo, later); welcome.append(actions);
     sectionAssistantBody.append(welcome);
+  }
+  function tourButton(text, action, secondary = false) {
+    const button = node('button', secondary ? 'stock-section-ai-secondary' : 'stock-section-ai-primary', text);
+    button.type = 'button'; button.onclick = action; return button;
+  }
+  function endSectionTour() {
+    if (!sectionTour) return;
+    finishOnboarding();
+    sectionTour.close(); sectionTour.remove(); sectionTour = null;
+    sectionAssistant.hidden = true; sectionAssistantLauncher.hidden = false;
+    sectionAssistantWelcomeOpen = false;
+    sectionAssistantLauncher.focus();
+  }
+  function tourStep(step, title, copy) {
+    sectionTour.replaceChildren();
+    const shell = node('div', 'stock-ai-tour-shell');
+    const top = node('div', 'stock-ai-tour-top');
+    top.append(node('span', '', 'MEET TICKR AI'), tourButton('Skip tour', endSectionTour, true));
+    const progress = node('div', 'stock-ai-tour-progress'); progress.setAttribute('aria-label', 'Step ' + step + ' of 3');
+    for (let i = 1; i <= 3; i++) progress.append(node('i', i <= step ? 'is-current' : ''));
+    const face = node('div', 'stock-ai-tour-face'); face.append(aiRobotFace('neutral', true));
+    const heading = node('h2', '', title); heading.id = 'stock-ai-tour-title'; heading.tabIndex = -1;
+    shell.append(top, progress, face, node('span', 'stock-ai-tour-step', 'STEP ' + step + ' OF 3'), heading, node('p', 'stock-ai-tour-copy', copy));
+    sectionTour.append(shell); return shell;
+  }
+  function animateTourText(element, delay = 0.45, pace = 0.09) {
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return 0;
+    const text = element.textContent;
+    element.setAttribute('aria-label', text);
+    element.replaceChildren();
+    text.split(/\s+/).forEach(word => {
+      const span = node('span', 'stock-ai-tour-word', word + ' ');
+      span.setAttribute('aria-hidden', 'true');
+      span.style.setProperty('--word-delay', delay.toFixed(2) + 's');
+      element.append(span); delay += pace;
+    });
+    return delay + 0.25;
+  }
+  function revealTourAction(element, delay) {
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    element.classList.add('stock-ai-tour-cta-reveal');
+    element.style.setProperty('--word-delay', delay.toFixed(2) + 's');
+  }
+  function animateTourStep(shell) {
+    let delay = 0.45;
+    shell.querySelectorAll('h2, .stock-ai-tour-copy').forEach((element, index) => {
+      delay = animateTourText(element, delay, index === 0 ? 0.18 : 0.09);
+    });
+    shell.querySelectorAll(':scope > .stock-section-ai-primary, .stock-ai-tour-metric').forEach(element => revealTourAction(element, delay));
+  }
+  function showSectionDemo() {
+    clearTimeout(sectionTourDelay);
+    if (sectionTour) return;
+    sectionAssistantWelcomeOpen = false;
+    sectionTour = node('dialog', 'stock-ai-tour');
+    sectionTour.setAttribute('aria-labelledby', 'stock-ai-tour-title');
+    sectionTour.addEventListener('cancel', event => { event.preventDefault(); endSectionTour(); });
+    document.body.append(sectionTour);
+    const shell = tourStep(1, 'Hi, I’m Tickr AI.', 'Finding the numbers tough to understand? Let me help. Click a section and I’ll explain it in simple words.');
+    shell.append(tourButton('Let’s try P/E', () => {
+      activate('overview', false);
+      sectionTourTarget = document.querySelector('#panel-overview [data-ai-card-id="p_e_ratio"]');
+      const step = tourStep(2, 'Your turn. Click the P/E tile.', 'This is the P/E ratio from this company’s Overview. Select it just as you would a section on the page.');
+      if (!sectionTourTarget) {
+        step.querySelector('.stock-ai-tour-copy').textContent = 'This company has no reported P/E ratio. You can still ask me about its other sections.';
+        step.append(tourButton('Explore the page', endSectionTour)); animateTourStep(step); step.querySelector('h2').focus();
+        return;
+      }
+      const tile = node('button', 'stock-ai-tour-metric'); tile.type = 'button';
+      tile.append(node('span', '', 'P/E ratio'), node('strong', '', sectionTourTarget.querySelector('strong').textContent), node('small', '', 'Trailing 12 months'), node('span', 'stock-ai-tour-tap', 'Click to ask Tickr AI →'));
+      tile.onclick = showTourComplete; step.append(tile); animateTourStep(step); step.querySelector('h2').focus();
+    }));
+    animateTourStep(shell);
+    sectionTour.showModal();
+    shell.querySelector('h2').focus();
+  }
+  function showTourComplete() {
+    const shell = tourStep(3, 'That’s all it takes.', 'Click any card when a number feels confusing. I’ll explain it in simple words.');
+    shell.append(tourButton('Try it on the page', () => {
+      const target = sectionTourTarget;
+      endSectionTour();
+      target.scrollIntoView({block: 'center'}); target.focus();
+    }));
+    animateTourStep(shell); shell.querySelector('h2').focus();
   }
   function assistantThinking(title) {
     sectionAssistantWelcomeOpen = false; showSectionAssistant(); sectionAssistant.setAttribute('aria-busy', 'true'); sectionAssistantBody.replaceChildren();
@@ -420,6 +519,7 @@
   async function explainSection(target) {
     const panel = target.closest('.stock-panel');
     if (!panel || panel.id === 'panel-ai-overview') return;
+    finishOnboarding();
     const heading = target.querySelector('h2, .stock-news-body h2, span');
     const title = 'innerText' in (heading || {}) ? heading.innerText : (heading ? heading.textContent : 'Selected section');
     const visibleText = ('innerText' in target ? target.innerText : target.textContent || '').replace(/\s+/g, ' ').trim().slice(0, 8000);
@@ -439,18 +539,20 @@
     sectionAssistant.setAttribute('aria-label', 'AI section explainer');
     const head = node('header', 'stock-section-ai-header'), identity = node('div', 'stock-section-ai-identity'), face = node('span', 'stock-section-ai-avatar');
     face.append(aiRobotFace('neutral')); const name = node('span'); name.append(node('strong', '', 'Tickr AI'), node('small', '', 'Section explainer')); identity.append(face, name);
-    const actions = node('div', 'stock-section-ai-actions'), minimize = node('button'), close = node('button');
+    const actions = node('div', 'stock-section-ai-actions'), help = node('button', '', '?'), minimize = node('button'), close = node('button');
+    help.type = 'button'; help.setAttribute('aria-label', 'How to use Tickr AI'); help.onclick = showSectionDemo;
     minimize.type = close.type = 'button'; minimize.setAttribute('aria-label', 'Minimize AI section explainer'); close.setAttribute('aria-label', 'Close AI section explainer');
-    minimize.append(assistantIcon('M5 12h14')); close.append(assistantIcon('M6 6l12 12M18 6 6 18')); actions.append(minimize, close); head.append(identity, actions);
+    minimize.append(assistantIcon('M5 12h14')); close.append(assistantIcon('M6 6l12 12M18 6 6 18')); actions.append(help, minimize, close); head.append(identity, actions);
     sectionAssistantBody = node('div', 'stock-section-ai-body'); sectionAssistantBody.id = 'stock-section-ai-live'; sectionAssistantBody.setAttribute('aria-live', 'polite');
     sectionAssistant.append(head, sectionAssistantBody); document.body.append(sectionAssistant);
     setTimeout(() => sectionAssistant.classList.remove('is-initial'), 340);
     sectionAssistantLauncher = node('button', 'stock-section-ai-launcher'); sectionAssistantLauncher.type = 'button'; sectionAssistantLauncher.hidden = true; sectionAssistantLauncher.setAttribute('aria-label', 'Open AI section explainer');
-    sectionAssistantLauncher.append(node('span', 'stock-section-ai-launcher-tip', 'Long press a section to let Tickr AI explain'), aiRobotFace('neutral')); document.body.append(sectionAssistantLauncher);
+    sectionAssistantLauncher.append(node('span', 'stock-section-ai-launcher-tip', 'Click a section to let Tickr AI explain'), aiRobotFace('neutral')); document.body.append(sectionAssistantLauncher);
     minimize.onclick = collapseSectionAssistant;
-    close.onclick = collapseSectionAssistant;
-    sectionAssistantLauncher.onclick = () => { sectionAssistantWelcomeOpen = false; showSectionAssistant(); };
-    assistantWelcome(); sectionWelcomeTimer = setTimeout(collapseSectionAssistant, 5000);
+    close.onclick = () => { finishOnboarding(); collapseSectionAssistant(); };
+    sectionAssistantLauncher.onclick = () => { if (sectionAssistantWelcomeOpen) assistantWelcome(); showSectionAssistant(); };
+    assistantWelcome();
+    sectionAssistant.hidden = true; sectionAssistantLauncher.hidden = false; sectionAssistantWelcomeOpen = false;
 
     const content = $('stock-content'); let hold = null, suppressTarget = null, suppressUntil = 0;
     function cancelHold() { if (!hold) return; clearTimeout(hold.timer); hold.target.classList.remove('is-ai-holding'); hold = null; }
@@ -470,6 +572,16 @@
     ['pointerup', 'pointercancel', 'lostpointercapture'].forEach(type => content.addEventListener(type, cancelHold));
     window.addEventListener('scroll', () => { cancelHold(); if (sectionAssistantWelcomeOpen) collapseSectionAssistant(); }, true);
     content.addEventListener('click', event => { if (suppressTarget && Date.now() < suppressUntil && suppressTarget.contains(event.target)) { event.preventDefault(); event.stopPropagation(); suppressTarget = null; } }, true);
+    content.addEventListener('click', event => {
+      if (event.target.closest('a,button,input,select,textarea,summary,[role=button],.stock-chart')) return;
+      const target = event.target.closest('[data-ai-card-id]');
+      if (target && !target.closest('#panel-ai-overview')) explainSection(target);
+    });
+    content.addEventListener('keydown', event => {
+      if (event.target.dataset.aiCardId && (event.key === 'Enter' || event.key === ' ')) {
+        event.preventDefault(); explainSection(event.target);
+      }
+    });
     content.addEventListener('contextmenu', event => { const target = hold && hold.target || suppressTarget; if (target && target.contains(event.target)) event.preventDefault(); });
   }
   function periodSort(a, b) { const aa = Date.parse('1 ' + a), bb = Date.parse('1 ' + b); return Number.isFinite(aa) && Number.isFinite(bb) ? aa - bb : a.localeCompare(b); }
@@ -547,7 +659,7 @@
   }
   function news() {
     const panel = $('panel-news'); panel.append(node('p', 'stock-caption', core.news.length + ' stories returned by IndianAPI. Open a headline to read the original coverage.'));
-    const grid = node('div', 'stock-news-grid'); core.news.forEach(story => { const c = node('article', 'stock-card stock-news-card stock-ai-target'); c.dataset.aiCardId = 'news_story'; const imageUrl = url(story.image); if (imageUrl) { const img = node('img'); img.src = imageUrl; img.alt = ''; img.loading = 'lazy'; img.referrerPolicy = 'no-referrer'; img.onerror = () => img.remove(); c.append(img); }
+    const grid = node('div', 'stock-news-grid'); core.news.forEach(story => { const c = node('article', 'stock-card stock-news-card stock-ai-target'); c.dataset.aiCardId = 'news_story'; c.tabIndex = 0; c.setAttribute('aria-label', story.headline + '. Press Enter for an AI explanation.'); const imageUrl = url(story.image); if (imageUrl) { const img = node('img'); img.src = imageUrl; img.alt = ''; img.loading = 'lazy'; img.referrerPolicy = 'no-referrer'; img.onerror = () => img.remove(); c.append(img); }
       const body = node('div', 'stock-news-body'), sourceUrl = url(story.url); body.append(node('span', 'stock-news-meta', (story.source || (sourceUrl ? new URL(sourceUrl).hostname.replace('www.', '') : 'Company news')) + ' · ' + date(story.date)));
       const h = node('h2'); if (sourceUrl) { const a = node('a', '', story.headline); a.href = sourceUrl; a.target = '_blank'; a.rel = 'noopener noreferrer'; h.append(a); } else h.textContent = story.headline; body.append(h);
       if (story.summary) body.append(node('p', '', story.summary)); c.append(body); grid.append(c);
@@ -567,8 +679,11 @@
   }
   function activate(id, focus) {
     if (!builders[id] || !sectionAvailable(id)) id = 'ai-overview';
+    document.body.dataset.activeTab = id;
     document.querySelectorAll('[data-tab]').forEach(tab => { const selected = tab.dataset.tab === id; tab.setAttribute('aria-selected', String(selected)); tab.tabIndex = selected ? 0 : -1; $('panel-' + tab.dataset.tab).hidden = !selected; });
     if (core && !built.has(id)) { builders[id](); built.add(id); }
+    if (id !== 'ai-overview' && !sectionAssistant) initSectionAssistant();
+    scheduleSectionTour(id);
     if (focus) { history.replaceState(null, '', '#' + id); $('tab-' + id).focus(); }
   }
   document.querySelectorAll('[data-tab]').forEach(tab => {
@@ -581,7 +696,6 @@
   themeButton.onclick = () => { const theme = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark'; document.documentElement.dataset.theme = theme; document.documentElement.style.colorScheme = theme; try { localStorage.setItem('daily-digest-theme', theme); } catch (e) {} themeLabel(); }; themeLabel();
   async function init() {
     if (!symbol) return;
-    if (!sectionAssistant) initSectionAssistant();
     const status = $('stock-status'); status.hidden = false; status.classList.add('loading'); status.textContent = 'Loading your company overview…';
     try {
       const result = await request('core'); core = result.data;

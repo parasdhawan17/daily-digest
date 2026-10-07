@@ -26,9 +26,12 @@ test('standalone research page renders accessible filtered P\/E history', () => 
 });
 
 test('standalone research page versions the new assets', () => {
-  assert.match(template, /ai-overview\.css\?v=20260930-animated-compact/);
-  assert.match(template, /stock\.css\?v=20260928-launcher-tip/);
-  assert.match(template, /stock\.js\?v=20260930-ssr/);
+  assert.match(template, /ai-overview\.css\?v=20261007-bot-loading/);
+  assert.match(template, /stock\.css\?v=20261007-simple-tour/);
+  assert.match(template, /stock\.js\?v=20261007-simple-tour/);
+  assert.match(template, /data-active-tab="ai-overview"/);
+  assert.match(source, /document\.body\.dataset\.activeTab = id/);
+  assert.match(styles, /data-active-tab="ai-overview"\] \.stock-section-assistant,[\s\S]*data-active-tab="ai-overview"\] \.stock-section-ai-launcher\{display:none\}/);
 });
 
 test('Overview tab does not render company signals', () => {
@@ -41,13 +44,13 @@ test('stock cards and metrics expose the floating section explainer', () => {
   assert.match(source, /stock-card stock-ai-target/);
   assert.match(source, /stock-metric stock-ai-target/);
   assert.match(source, /c\.dataset\.aiCardId = 'news_story'/);
-  assert.match(source, /Long press a section to have an AI summary for it\./);
+  assert.match(source, /Click a section card or metric to get a short AI explanation/);
   assert.match(source, /fetch\('\/api\/stock-section-ai'/);
   assert.match(source, /Restart the local server, then reload this page/);
   assert.match(source, /AI-generated synthesis · Not investment advice/);
   assert.match(styles, /\.stock-section-assistant/);
   assert.match(styles, /\.stock-section-ai-launcher/);
-  assert.match(source, /stock-section-ai-launcher-tip', 'Long press a section to let Tickr AI explain'/);
+  assert.match(source, /stock-section-ai-launcher-tip', 'Click a section to let Tickr AI explain'/);
   assert.match(styles, /\.stock-section-ai-launcher-tip::after/);
   assert.match(styles, /env\(safe-area-inset-bottom\)/);
 });
@@ -72,8 +75,9 @@ test('section explainer replaces prior state and handles stale or failed request
   assert.match(styles, /prefers-reduced-motion:reduce/);
 });
 
-test('welcome assistant collapses to the bot after five seconds or on scroll', () => {
-  assert.match(source, /setTimeout\(collapseSectionAssistant, 5000\)/);
+test('welcome assistant remains available until dismissed or the user scrolls', () => {
+  assert.doesNotMatch(source, /setTimeout\(collapseSectionAssistant, 5000\)/);
+  assert.match(source, /later\.onclick = \(\) => \{ finishOnboarding\(\); collapseSectionAssistant\(\); \}/);
   assert.match(source, /if \(sectionAssistantWelcomeOpen\) collapseSectionAssistant\(\)/);
   assert.match(source, /minimize\.onclick = collapseSectionAssistant/);
   assert.match(styles, /\.stock-section-assistant\.is-collapsing/);

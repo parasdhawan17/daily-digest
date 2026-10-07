@@ -28,8 +28,8 @@ Bare symbols from existing subscribers (e.g. `AAPL`) are normalized to `US:AAPL`
 
 ## Stock research
 
-Use the homepage search to choose between a visual AI overview at
-`/ai-overview/IN:TCS` and full company details at `/stocks/IN:TCS`.
+Use the homepage search to open full company details at `/stocks/IN:TCS`.
+A separate visual AI overview remains available at `/ai-overview/IN:TCS`.
 **Search a stock** on the digest still opens the full company page. No sign-in is required. Pages use the existing light/dark
 theme and contain Overview, Financials, Ownership, Analysis, Corporate actions,
 and News tabs. Indian tickers in the digest and resolved peers link to these pages.
@@ -48,7 +48,7 @@ request from a compact subset of the existing company snapshot, then caches succ
 results for six hours in-process and at the CDN. Evidence links lead back to the
 deterministic tabs; unavailable or malformed AI output never replaces factual content.
 
-Stock-page cards and metric tiles can also be held for 600 ms to open the floating AI
+Stock-page cards and metric tiles can be clicked or held for 600 ms to open the floating AI
 section explainer. `POST /api/stock-section-ai` accepts one allowlisted card and a bounded
 snapshot of its visible public data, returning a short structured summary, explanation,
 and highlighted facts. Successful identical explanations are cached in-process for six

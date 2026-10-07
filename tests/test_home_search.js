@@ -34,9 +34,6 @@ function setup(results) {
     removeAttribute(key) { delete this.attributes[key]; }
     scrollIntoView() {}
     focus() { this.focused = true; }
-    showModal() { this.open = true; }
-    close() { this.open = false; this.fire('close'); }
-    getBoundingClientRect() { return {left: 100, right: 500, top: 100, bottom: 500}; }
   }
   const area = new Element();
   const form = new Element();
@@ -44,17 +41,6 @@ function setup(results) {
   const popover = new Element();
   const list = new Element();
   const status = new Element();
-  const choice = new Element();
-  choice.open = false;
-  const choiceClose = new Element();
-  const choiceTitle = new Element();
-  const choiceSymbol = new Element();
-  const choiceAI = new Element();
-  const choiceDetails = new Element();
-  const choiceParts = {'#home-choice-title': choiceTitle, '#home-choice-symbol': choiceSymbol,
-    '#home-choice-ai': choiceAI, '#home-choice-details': choiceDetails,
-    '.home-choice-close': choiceClose};
-  choice.querySelector = selector => choiceParts[selector];
   const links = [new Element(), new Element()];
   const parts = {'form': form, 'input': input, '.home-search-popover': popover,
     'ul': list, '[role="status"]': status};
@@ -63,15 +49,16 @@ function setup(results) {
   const timers = new Map();
   let nextTimer = 0;
   const calls = [];
+  const navigations = [];
   const document = {
-    querySelector: selector => selector === '.home-search-choice' ? choice : area,
+    querySelector: () => area,
     querySelectorAll: () => links,
     createElement: () => new Element(),
     addEventListener() {}
   };
   const context = {
     document,
-    window: {},
+    window: {location: {assign(url) { navigations.push(url); }}},
     fetch: async url => {
       calls.push(url);
       return {ok: true, json: async () => ({ok: true, results})};
@@ -82,7 +69,7 @@ function setup(results) {
   };
   vm.runInNewContext(source, context);
   return {
-    input, form, list, popover, links, calls, choice, choiceClose, choiceTitle, choiceSymbol, choiceAI, choiceDetails,
+    input, form, list, popover, links, calls, navigations,
     async search(query) {
       input.value = query;
       input.fire('input');
@@ -94,21 +81,18 @@ function setup(results) {
   };
 }
 
-test('typing in the homepage field shows Indian results and both navigation choices', async () => {
+test('selecting a homepage search result opens stock details directly', async () => {
   const app = setup([{market: 'IN', symbol: 'IN:TCS', name: 'Tata Consultancy Services'}]);
   await app.search('TCS');
   assert.match(app.calls[0], /market=IN&q=TCS$/);
   assert.equal(app.list.children.length, 1);
   assert.equal(app.input.attributes['aria-expanded'], 'true');
   app.list.children[0].fire('click');
-  assert.equal(app.choice.open, true);
-  assert.equal(app.choiceTitle.textContent, 'Tata Consultancy Services');
-  assert.equal(app.choiceAI.href, '/ai-overview/IN:TCS');
-  assert.equal(app.choiceDetails.href, '/stocks/IN:TCS');
-  assert.equal(app.choiceTitle.focused, true);
+  assert.deepEqual(app.navigations, ['/stocks/IN:TCS']);
+  assert.doesNotMatch(pageSource, /home-search-choice/);
 });
 
-test('keyboard selection opens the chosen company actions', async () => {
+test('keyboard selection opens stock details', async () => {
   const app = setup([
     {market: 'IN', symbol: 'IN:TCS', name: 'Tata Consultancy Services'},
     {market: 'IN', symbol: 'IN:TECHM', name: 'Tech Mahindra'}
@@ -118,8 +102,7 @@ test('keyboard selection opens the chosen company actions', async () => {
   app.input.fire('keydown', {key: 'ArrowDown', preventDefault() {}});
   assert.equal(app.input.attributes['aria-activedescendant'], 'home-stock-result-1');
   app.form.fire('submit', {preventDefault() {}});
-  assert.equal(app.choiceAI.href, '/ai-overview/IN:TECHM');
-  assert.equal(app.choiceDetails.href, '/stocks/IN:TECHM');
+  assert.deepEqual(app.navigations, ['/stocks/IN:TECHM']);
 });
 
 test('ambiguous submitted names require an explicit selection', async () => {
@@ -129,36 +112,13 @@ test('ambiguous submitted names require an explicit selection', async () => {
   ]);
   await app.search('Techn');
   app.form.fire('submit', {preventDefault() {}});
-  assert.equal(app.choice.open, false);
+  assert.deepEqual(app.navigations, []);
   assert.equal(app.list.children.length, 2);
   app.list.children[1].fire('click');
-  assert.equal(app.choiceAI.href, '/ai-overview/IN:TECH');
+  assert.deepEqual(app.navigations, ['/stocks/IN:TECH']);
 });
 
-test('editing the chosen company resets both actions', async () => {
-  const app = setup([{market: 'IN', symbol: 'IN:TCS', name: 'Tata Consultancy Services'}]);
-  await app.search('TCS');
-  app.list.children[0].fire('click');
-  assert.equal(app.choice.open, true);
-  app.input.value = 'INFY';
-  app.input.fire('input');
-  assert.equal(app.choice.open, false);
-});
-
-test('company dialog closes and can be reopened from the selected search', async () => {
-  const app = setup([{market: 'IN', symbol: 'IN:TCS', name: 'Tata Consultancy Services'}]);
-  await app.search('TCS');
-  app.list.children[0].fire('click');
-  app.choiceClose.fire('click');
-  assert.equal(app.choice.open, false);
-  assert.equal(app.input.focused, true);
-  app.form.fire('submit', {preventDefault() {}});
-  assert.equal(app.choice.open, true);
-  app.choice.fire('click', {target: app.choice, clientX: 0, clientY: 0});
-  assert.equal(app.choice.open, false);
-});
-
-test('an exact ticker submitted before suggestions return advances to the choice', async () => {
+test('an exact ticker submitted before suggestions return opens stock details', async () => {
   const app = setup([
     {market: 'IN', symbol: 'IN:TCS', name: 'Tata Consultancy Services'},
     {market: 'IN', symbol: 'IN:TCI', name: 'Transport Corporation of India'}
@@ -166,7 +126,7 @@ test('an exact ticker submitted before suggestions return advances to the choice
   app.input.value = 'TCS';
   app.form.fire('submit', {preventDefault() {}});
   await new Promise(setImmediate);
-  assert.equal(app.choiceAI.href, '/ai-overview/IN:TCS');
+  assert.deepEqual(app.navigations, ['/stocks/IN:TCS']);
 });
 
 test('clearing the field closes suggestions', async () => {

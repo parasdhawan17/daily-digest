@@ -9,19 +9,12 @@
   const list = area.querySelector('ul');
   const status = area.querySelector('[role="status"]');
   const preview = area.querySelector('.fx-typewriter');
-  const choice = document.querySelector('.home-search-choice');
-  const choiceTitle = choice.querySelector('#home-choice-title');
-  const choiceSymbol = choice.querySelector('#home-choice-symbol');
-  const choiceAI = choice.querySelector('#home-choice-ai');
-  const choiceDetails = choice.querySelector('#home-choice-details');
-  const choiceClose = choice.querySelector('.home-choice-close');
   const validSymbol = /^IN:[A-Z][A-Z0-9&-]{0,19}$/;
   let timer;
   let controller;
   let requestId = 0;
   let items = [];
   let active = -1;
-  let selected = null;
 
   if (preview) {
     const examples = ['TCS', 'RELIANCE', 'INFY', 'HDFCBANK'];
@@ -52,16 +45,8 @@
       feature: 'stock_search_result_selected', selected_symbol: item.symbol
     });
     reset();
-    selected = item;
     const encoded = encodeURIComponent(item.symbol).replace('%3A', ':');
-    input.value = item.name || item.symbol.slice(3);
-    area.classList.add('has-query');
-    choiceTitle.textContent = item.name || item.symbol.slice(3);
-    choiceSymbol.textContent = item.symbol.slice(3) + ' · Indian stock';
-    choiceAI.href = '/ai-overview/' + encoded;
-    choiceDetails.href = '/stocks/' + encoded;
-    choice.showModal();
-    choiceTitle.focus();
+    window.location.assign('/stocks/' + encoded);
   }
 
   function select(index) {
@@ -97,8 +82,6 @@
     items = [];
     list.replaceChildren();
     close();
-    selected = null;
-    if (choice.open) choice.close();
   }
 
   function render() {
@@ -114,7 +97,7 @@
       option.setAttribute('aria-selected', 'false');
       name.textContent = item.name || item.symbol.slice(3);
       symbol.textContent = item.symbol.slice(3);
-      badge.textContent = 'Choose ↗';
+      badge.textContent = 'View details ↗';
       identity.append(name, symbol);
       option.append(identity, badge);
       option.addEventListener('click', () => choose(item));
@@ -164,7 +147,7 @@
   });
 
   input.addEventListener('focus', () => {
-    if (!selected && input.value.trim() && items.length) {
+    if (input.value.trim() && items.length) {
       popover.hidden = false;
       input.setAttribute('aria-expanded', 'true');
     }
@@ -184,7 +167,6 @@
 
   form.addEventListener('submit', event => {
     event.preventDefault();
-    if (selected) { choice.showModal(); choiceTitle.focus(); return; }
     if (active >= 0) return choose(items[active]);
     if (items.length) {
       const exact = items.find(item => item.symbol.slice(3) === input.value.trim().toUpperCase());
@@ -205,15 +187,6 @@
   document.addEventListener('pointerdown', event => {
     if (!area.contains(event.target)) close();
   });
-
-  choiceClose.addEventListener('click', () => choice.close());
-  choice.addEventListener('click', event => {
-    if (event.target !== choice) return;
-    const bounds = choice.getBoundingClientRect();
-    if (event.clientX < bounds.left || event.clientX > bounds.right ||
-        event.clientY < bounds.top || event.clientY > bounds.bottom) choice.close();
-  });
-  choice.addEventListener('close', () => input.focus());
 
   document.querySelectorAll('a[href="#home-stock-query"]').forEach(link => {
     link.addEventListener('click', event => {
