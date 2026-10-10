@@ -38,24 +38,32 @@ class HomeSignalTests(unittest.TestCase):
             result, ttl = signal.get_home_ai_signal('key')
             return result, ttl, fetch, ai
 
-    def test_numeric_sort_primary_and_payload_reuse(self):
+    def test_highest_market_cap_and_payload_reuse(self):
         result, ttl, fetch, ai = self.build([row('A', '9'), row('B', '10'), row('C', '11')],
                                           {'A': stock('A', 200000), 'B': stock('B', 100000), 'C': stock('C', 99999)})
-        self.assertEqual(result['stock']['symbol'], 'IN:B')
-        self.assertEqual(result['stock']['threshold_crore'], 100000)
-        self.assertEqual(result['core']['snapshot']['marketCap'], 100000)
+        self.assertEqual(result['stock']['symbol'], 'IN:A')
+        self.assertEqual(result['stock']['selection'], 'highest_market_cap')
+        self.assertEqual(result['core']['snapshot']['marketCap'], 200000)
         self.assertNotIn('companyProfile', result['core'])
         self.assertEqual(ttl, 86400)
         self.assertEqual(fetch.call_count, 4)
         ai.assert_called_once()
-        self.assertEqual(ai.call_args.args[1]['snapshot']['marketCap'], 100000)
+        self.assertEqual(ai.call_args.args[1]['snapshot']['marketCap'], 200000)
 
-    def test_fallback_highest_gain_boundary(self):
-        result, ttl, _, ai = self.build([row('A', '12'), row('B', '8')],
-                                       {'A': stock('A', '20,000'), 'B': stock('B', 99999)})
-        self.assertEqual(result['stock']['symbol'], 'IN:A')
-        self.assertEqual(result['stock']['threshold_crore'], 20000)
+    def test_small_caps_and_later_batches_are_considered(self):
+        result, ttl, fetch, _ = self.build(
+            [row('A', 12), row('B', 10), row('C', 8), row('D', 6)],
+            {'A': stock('A', 10), 'B': stock('B', 20),
+             'C': stock('C', 30), 'D': stock('D', '1,000')})
+        self.assertEqual(result['stock']['symbol'], 'IN:D')
+        self.assertEqual(result['stock']['market_cap_crore'], 1000)
         self.assertEqual(ttl, 86400)
+        self.assertEqual(fetch.call_count, 5)
+
+    def test_equal_caps_prefer_higher_gain(self):
+        result, _, _, _ = self.build([row('A', 8), row('B', 12)],
+                                    {'A': stock('A', 100), 'B': stock('B', 100)})
+        self.assertEqual(result['stock']['symbol'], 'IN:B')
 
     def test_invalid_changes_and_identity(self):
         result, ttl, _, ai = self.build([row('A', 'NaN'), row('B', '-1'), row('C', 'Infinity'), row('D', '3')],
@@ -66,7 +74,7 @@ class HomeSignalTests(unittest.TestCase):
 
     def test_no_match_and_missing_symbol_or_cap(self):
         result, ttl, _, ai = self.build([row('A', 5), row('B', 4), row('C', 3)],
-                                       {'A': stock('A', 19999), 'B': stock('B', float('nan')), 'C': stock('C', 500000, ' ')})
+                                       {'A': stock('A', 0), 'B': stock('B', float('nan')), 'C': stock('C', 500000, ' ')})
         self.assertEqual(result['code'], 'no_match')
         self.assertEqual(ttl, 300)
         ai.assert_not_called()

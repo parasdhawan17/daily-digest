@@ -70,27 +70,22 @@ def _build(key, root):
             and isinstance(row.get('company_name'), str) and row['company_name'].strip()
             and (numeric(row.get('percent_change')) or 0) > 0]
     rows.sort(key=lambda row: numeric(row['percent_change']), reverse=True)
-    fallback, winner, partial_failure = None, None, False
-    # Three upstream reads at a time; stop after finding the first primary match.
+    winner, partial_failure = None, False
+    # Verify every gainer's market cap, with three upstream reads at a time.
     with ThreadPoolExecutor(max_workers=3) as pool:
         for start in range(0, len(rows), 3):
             for candidate, failed in pool.map(lambda row: _candidate(row, key, root), rows[start:start + 3]):
                 partial_failure |= failed
                 if candidate:
-                    if candidate[3] >= 100000 and winner is None:
+                    if winner is None or candidate[3] > winner[3]:
                         winner = candidate
-                    if candidate[3] >= 20000 and fallback is None:
-                        fallback = candidate
-            if winner:
-                break
-    winner = winner or fallback
     if not winner:
         return {'ok': False, 'code': 'no_match', 'error': 'No qualifying trending stock is available.'}, (0 if partial_failure else NO_MATCH_TTL)
     row, raw, symbol, cap = winner
     core = normalize_core(raw, symbol)
     selected_at = datetime.now(timezone.utc).isoformat()
     stock = {'name': core['name'], 'symbol': symbol, 'industry': core['industry'],
-             'market_cap_crore': cap, 'threshold_crore': 100000 if cap >= 100000 else 20000,
+             'market_cap_crore': cap, 'selection': 'highest_market_cap',
              'price': numeric(row.get('price')), 'percent_change': numeric(row['percent_change']),
              'exchange': row.get('exchange_type'),
              'source_time': ' '.join(str(row.get(k) or '') for k in ('date', 'time')).strip(),

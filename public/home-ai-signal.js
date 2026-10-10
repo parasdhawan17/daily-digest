@@ -68,7 +68,7 @@
     if (quote.children.length) title.append(quote);
     copy.append(title, node('p', 'preview-kicker', meta));
     company.append(copy);
-    const tag = node('span', 'home-ai-mover-tag', 'Highest mover');
+    const tag = node('span', 'home-ai-mover-tag', 'Highest market cap');
     const icon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     icon.setAttribute('viewBox', '0 0 24 24'); icon.setAttribute('fill', 'none');
     icon.setAttribute('stroke', 'currentColor'); icon.setAttribute('stroke-width', '2');
@@ -95,11 +95,11 @@
     footer.append(link);
     content.replaceChildren(company, storyHost, footer);
     const cap = Number(stock.market_cap_crore).toLocaleString('en-IN', {maximumFractionDigits: 0});
-    caption.textContent = 'Market cap ₹' + cap + ' crore · Filter ≥ ₹' + Number(stock.threshold_crore).toLocaleString('en-IN') + ' crore. Provider data: ' + (stock.source_time || 'Unavailable') + '. Not investment advice.';
+    caption.textContent = 'Market cap ₹' + cap + ' crore · Highest market cap among verified trending gainers. Provider data: ' + (stock.source_time || 'Unavailable') + '. Not investment advice.';
   }
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 180000);
-  fetch('/api/home-ai-signal?visual=meaning-v1', {signal: controller.signal})
+  fetch('/api/home-ai-signal?selection=market-cap-v1', {signal: controller.signal})
     .then(response => { if (!response.ok) throw new Error('Unavailable'); return response.json(); })
     .then(render)
     .catch(() => unavailable())

@@ -12,7 +12,7 @@ class DOMElement extends Element {
 const source = fs.readFileSync('public/home-ai-signal.js', 'utf8');
 function payload(overrides = {}) {
   return {ok: true, stock: {name: 'Example Ltd', symbol: 'IN:EXAMPLE', industry: 'Software',
-    exchange: 'BSE', market_cap_crore: 120000, threshold_crore: 100000, price: 100,
+    exchange: 'BSE', market_cap_crore: 120000, selection: 'highest_market_cap', price: 100,
     percent_change: 6, source_time: '2026-10-09 10:00', selected_at: '2026-10-10T00:00:00Z'}, core: core().data, overview: ai(), ...overrides};
 }
 async function setup(data, ok = true) {
@@ -20,7 +20,7 @@ async function setup(data, ok = true) {
   let calls = 0;
   const context = {document: {getElementById: id => elements[id], createElement: tag => new DOMElement(tag), createElementNS: (_ns, tag) => new DOMElement(tag)}, window: {tickrStockFormat: stockFormat},
     AbortController, setTimeout, clearTimeout,
-    fetch: async url => { assert.equal(url, '/api/home-ai-signal?visual=meaning-v1'); calls++; if (data instanceof Error) throw data; return {ok, json: async () => data}; }};
+    fetch: async url => { assert.equal(url, '/api/home-ai-signal?selection=market-cap-v1'); calls++; if (data instanceof Error) throw data; return {ok, json: async () => data}; }};
   install(context); vm.runInNewContext(source, context);
   await new Promise(setImmediate);
   return {elements, calls};
@@ -36,19 +36,20 @@ test('loads once and renders real overview, sources, dates and full link', async
   assert.equal(byClass(e['home-ai-content'], 'ai-story-lead').length, 0);
   assert.equal(byClass(e['home-ai-content'], 'ai-story-more-rows').length, 0);
   assert.equal(byClass(e['home-ai-content'], 'ai-story-footer').length, 0);
-  assert.equal(byClass(e['home-ai-toolbar-status'], 'home-ai-mover-tag')[0].textContent, 'Highest mover');
+  assert.equal(byClass(e['home-ai-toolbar-status'], 'home-ai-mover-tag')[0].textContent, 'Highest market cap');
   assert.doesNotMatch(e['home-ai-content'].textContent, /Read the AI take|Explore more signals|AI-generated synthesis/);
   const links = walk(e['home-ai-content'], el => el.tagName === 'a');
   assert.ok(links.some(link => link.href === '/stocks/IN:EXAMPLE#financials'));
   assert.ok(links.some(link => link.href === '/stocks/IN:EXAMPLE'));
-  assert.match(e['home-ai-caption'].textContent, /1,00,000.*2026-10-09/);
+  assert.match(e['home-ai-caption'].textContent, /1,20,000.*Highest market cap.*2026-10-09/);
 });
-test('lower threshold has no large-stock claim', async () => {
-  const data = payload(); data.stock.threshold_crore = 20000; data.stock.market_cap_crore = 50000;
+test('small market caps have no minimum threshold claim', async () => {
+  const data = payload(); data.stock.market_cap_crore = 32.78;
   const {elements: e} = await setup(data);
-  assert.equal(byClass(e['home-ai-toolbar-status'], 'home-ai-mover-tag')[0].textContent, 'Highest mover');
+  assert.equal(byClass(e['home-ai-toolbar-status'], 'home-ai-mover-tag')[0].textContent, 'Highest market cap');
   assert.doesNotMatch(e['home-ai-content'].textContent, /Trending large stock/);
-  assert.match(e['home-ai-caption'].textContent, /20,000/);
+  assert.match(e['home-ai-caption'].textContent, /33 crore/);
+  assert.doesNotMatch(e['home-ai-caption'].textContent, /Filter|NaN/);
 });
 test('AI failure restores illustrative signal UI', async () => {
   const {elements: e} = await setup(payload({overview: null}));
@@ -118,7 +119,7 @@ test('header shows price beside company without duplicate ticker or price card',
   assert.equal(byClass(e['home-ai-content'], 'home-ai-header-price').length, 1);
   assert.match(company.textContent, /₹100.00/);
   assert.doesNotMatch(company.textContent, /Trending large stock/);
-  assert.match(e['home-ai-toolbar-status'].textContent, /Highest mover/);
+  assert.match(e['home-ai-toolbar-status'].textContent, /Highest market cap/);
   assert.equal(byClass(e['home-ai-content'], 'ai-story-price').length, 0);
 });
 
