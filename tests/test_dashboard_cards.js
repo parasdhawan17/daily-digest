@@ -82,7 +82,7 @@ function mockData(section, params) {
   return {};
 }
 
-test('every selectable Indian dashboard card renders without a fallback or exception', async () => {
+for (const visual of [true, false]) test(`every selectable Indian dashboard card renders with the shared ${visual ? 'visual' : 'legacy'} overview`, async () => {
   const selected = catalog.categories.flatMap(category => category.cards.map(card => card.id));
   const root = new Element(); root.dataset.symbol = 'IN:INFY';
   const section = new Element(); section.append(root);
@@ -96,7 +96,7 @@ test('every selectable Indian dashboard card renders without a fallback or excep
   };
   const requested = [];
   const context = {document, Node: Element, URL, URLSearchParams, Intl, Map, Set, Array, Object, Number, String, Date, Math, console,
-    window: {tickrStockFormat: format},
+    window: {tickrStockFormat: format, tickrAIOverviewLayout: {visual, ready: Promise.resolve(visual)}},
     fetch: async url => {
       requested.push(url);
       return {json: async () => url === '/dashboard-catalog.json' ? catalog
@@ -109,7 +109,10 @@ test('every selectable Indian dashboard card renders without a fallback or excep
         : {ok: true, data: mockData(new URL(url, 'https://example.test').searchParams.get('section'), new URL(url, 'https://example.test').searchParams)}};
     }
   };
-  vm.runInNewContext(source, context);
+  vm.createContext(context);
+  vm.runInContext(fs.readFileSync('public/ai-story.js', 'utf8'), context);
+  vm.runInContext(fs.readFileSync('public/ai-overview-legacy-renderer.js', 'utf8'), context);
+  vm.runInContext(source, context);
   for (let i = 0; i < 8; i++) await new Promise(resolve => setImmediate(resolve));
   const tabs = descendants(root, node => node.className?.split(/\s+/).includes('dashboard-category-tab'));
   assert.equal(tabs.length, catalog.categories.length, JSON.stringify(root.children.map(child => child.textContent || child.className)));
@@ -121,12 +124,16 @@ test('every selectable Indian dashboard card renders without a fallback or excep
   const selectedNonAI = selected.filter(id => !id.startsWith('ai_'));
   assert.deepEqual(cards.map(card => card.dataset.card).sort(), selectedNonAI.sort());
   const card = id => cards.find(node => node.dataset.card === id);
-  assert.ok(descendants(root, node => node.className === 'ai-insight-explorer').length);
-  assert.ok(descendants(root, node => node.className === 'ai-summary').length);
-  const board = descendants(root, node => node.className === 'ai-insight-explorer')[0];
-  assert.equal(descendants(board, node => node.tagName === 'SECTION' && node.className === 'ai-category').length, 4);
-  assert.equal(descendants(board, node => node.className?.startsWith('ai-signal ')).length, 4);
-  assert.equal(descendants(board, node => node.tagName === 'DETAILS').length, 0);
+  const board = descendants(root, node => node.className === (visual ? 'ai-story' : 'ai-insight-explorer'))[0];
+  assert.ok(board, 'dashboard uses the same renderer as the stock page');
+  if (visual) {
+    assert.equal(descendants(board, node => node.className?.startsWith('ai-story-stage ')).length, 3);
+    assert.equal(descendants(board, node => node.className === 'ai-story-price neutral').length, 1);
+    assert.equal(descendants(board, node => node.className === 'ai-story-disclosure').length, 7);
+  } else {
+    assert.equal(descendants(board, node => node.className === 'ai-category').length, 4);
+    assert.equal(descendants(board, node => node.className?.startsWith('ai-signal ')).length, 4);
+  }
   assert.equal(descendants(board, node => node.tagName === 'A' && node.href?.endsWith('#financials')).length, 5);
   assert.ok(descendants(card('financial_quarterly_results'), node => node.attributes?.class === 'stock-chart').length);
   assert.ok(descendants(card('ownership_current_mix'), node => node.className === 'dashboard-stacked-bar').length);
