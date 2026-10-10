@@ -546,3 +546,63 @@ html[data-theme="dark"] .home-page .home-signin .auth-controls a { background: #
 .home-page .home-stock-links strong { font-size: 18px; overflow-wrap: anywhere; }
 .home-page .home-stock-links span { color: var(--link); font-size: 13px; }
 @media (max-width: 600px) { .home-page .home-stock-links { grid-template-columns: 1fr; } }
+
+.home-page .preview-ai-footer a { color: #b8c6ff; text-decoration: none; }
+.home-page .preview-ai-footer a:hover { text-decoration: underline; }
+.home-page .preview-company-badge { overflow-wrap: anywhere; padding: 4px; text-align: center; }
+.home-page #home-ai-signal .preview-ai-heading { flex-wrap: wrap; }
+.home-page #home-ai-caption { line-height: 1.6; }
+
+/* A single alignment grid for the daily homepage signal. */
+.home-page #home-ai-signal { --home-signal-inset: 24px; }
+.home-page #home-ai-signal .preview-toolbar { gap: 12px; padding: 16px var(--home-signal-inset); }
+.home-page #home-ai-signal .preview-toolbar-mark { font-size: 12px; }
+.home-page #home-ai-signal .preview-company { display: block; padding: 14px var(--home-signal-inset) 12px; }
+.home-page #home-ai-signal .preview-company h2 { margin: 0 0 6px; font-size: 24px; line-height: 1.2; overflow-wrap: anywhere; }
+.home-page #home-ai-signal .preview-kicker { margin: 0; color: #a9b9cd; font-size: 11px; font-weight: 500; letter-spacing: 0; text-transform: none; line-height: 1.5; }
+.home-page .home-ai-mover-tag { display: inline-flex; flex-direction: row-reverse; align-items: center; gap: 6px; padding: 6px 9px; border: 1px solid #ffd37b; border-radius: 7px; background: #ffdc91; color: #332307; font-size: 10px; font-weight: 750; line-height: 1.2; white-space: nowrap; }
+.home-page .home-ai-mover-tag svg { width: 14px; height: 14px; flex: 0 0 14px; }
+.home-page .home-ai-story-host { min-height: 0; margin: 0 var(--home-signal-inset) 20px; background: transparent; }
+.home-page .home-ai-story-host .ai-story { padding: 0; border: 0; border-radius: 0; background: transparent; box-shadow: none; }
+.home-ai-story-host .ai-story-timeline { grid-template-columns: minmax(0, 1fr); gap: 12px; padding: 0; }
+.home-ai-story-host .ai-story-timeline::before, .home-ai-story-host .ai-story-stage::before { display: none; }
+.home-ai-story-host .ai-story-stage { min-height: 0; padding: 10px; }
+.home-ai-story-host .ai-story-stage-head { margin-bottom: 6px; }
+.home-ai-story-host .ai-story-stage h4 { font-size: 14px; }
+.home-ai-story-host .ai-story-more-rows, .home-ai-story-host .ai-story-fallback { grid-template-columns: minmax(0, 1fr); }
+.home-ai-story-host .ai-story-disclosure > summary { min-height: 34px; cursor: pointer; }
+.home-ai-story-host .ai-story-disclosure > summary:hover { color: var(--story-ink); }
+.home-ai-story-host .ai-story-disclosure > summary:focus-visible { outline: 2px solid var(--story-blue); outline-offset: 2px; }
+.home-ai-story-host .ai-story-price { width: fit-content; padding: 4px 6px; border-radius: 6px; font-size: 22px; font-weight: 750; }
+.home-ai-story-host .ai-story-price.positive { color: var(--story-green); background: color-mix(in srgb, var(--story-green) 10%, var(--story-surface)); }
+.home-ai-story-host .ai-story-price.negative { color: var(--story-red); background: color-mix(in srgb, var(--story-red) 10%, var(--story-surface)); }
+.home-ai-story-host .ai-story-facts dd { font-size: 15px; }
+.home-ai-story-host .ai-story-checkpoint { width: 28px; height: 28px; }
+.home-page #home-ai-signal .preview-ai-footer { padding: 14px var(--home-signal-inset); }
+.home-page .home-ai-selection-label { margin: 0 0 12px; color: #b8c6ff; font-size: 11px; line-height: 1.5; }
+@media (max-width: 600px) {
+  .home-page #home-ai-signal { --home-signal-inset: 16px; }
+  .home-page #home-ai-signal .preview-company { padding-top: 16px; }
+}
+
+/* Compact homepage measurements; expanded research remains on the stock page. */
+.home-ai-story-host .ai-story-marker { width: 22px; height: 22px; border-radius: 6px; }
+.home-ai-story-host .ai-story-marker svg { width: 14px; height: 14px; }
+.home-ai-story-host .ai-story-quote { flex-direction: row; flex-wrap: wrap; align-items: center; gap: 4px 8px; }
+.home-ai-story-host .ai-story-quote > .ai-story-caption:first-child { flex: 0 0 100%; }
+.home-ai-story-host .ai-story .ai-story-range { margin: 8px 0; }
+.home-ai-story-host .ai-story-range-track { margin-top: 8px; margin-bottom: 8px; height: 5px; }
+.home-ai-story-host .ai-story .ai-story-facts { margin-bottom: 8px; gap: 6px 12px; }
+.home-ai-story-host .ai-story-facts dt { margin-bottom: 3px; }
+.home-ai-story-host .ai-story-stage h4 { margin: 4px 0 8px; font-size: 13px; }
+.home-ai-story-host .ai-story-stage > .ai-story-disclosure { margin-top: 4px; }
+.home-ai-story-host .ai-story-explanation .ai-story-trend { margin-top: 10px; }
+@media (pointer: coarse) { .home-ai-story-host .ai-story-disclosure > summary { min-height: 44px; } }
+
+.home-page .home-ai-company-title { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; margin-bottom: 6px; }
+.home-page #home-ai-signal .home-ai-company-title h2 { margin: 0; }
+.home-page .home-ai-header-price { display: inline-flex; flex-wrap: wrap; align-items: baseline; gap: 8px; padding: 6px 9px; border-radius: 7px; background: #233047; color: #c0ccdd; font-size: 12px; font-variant-numeric: tabular-nums; }
+.home-page .home-ai-header-price strong { font-size: 16px; font-weight: 750; }
+.home-page #home-ai-signal .home-ai-header-price span { color: inherit; font-size: 12px; font-weight: 700; }
+.home-page .home-ai-header-price.positive { background: #173b35; color: #82edbd; }
+.home-page .home-ai-header-price.negative { background: #44282f; color: #ff9fab; }

@@ -28,9 +28,14 @@
   <link rel="stylesheet" href="/subscribe-form.css">
   <link rel="stylesheet" href="/landing.css">
   <link rel="stylesheet" href="/auth.css">
-  <link rel="stylesheet" href="/home.css?v=20261005-ai-signals">
+  <link rel="stylesheet" href="/ai-overview.css?v=20261007-story">
+  <link rel="stylesheet" href="/ai-story.css?v=20261007-bright">
+  <link rel="stylesheet" href="/home.css?v=20261010-example-fallback">
   <script src="/analytics.js?v=20260928-1" defer></script>
   <script src="/home-robot.js?v=20261001-safari-1" defer></script>
+  <script src="/stock-format.js" defer></script>
+  <script src="/ai-story.js?v=20261010-example-fallback" defer></script>
+  <script src="/home-ai-signal.js?v=20261010-example-fallback" defer></script>
   <script src="/home-search.js?v=20261007-direct-details" defer></script>
 </head>
 <body class="home-page">
@@ -117,31 +122,11 @@
         <p class="home-hero-note">Search without signing in. Sign in to save your watchlist.</p>
       </div>
       <div class="home-preview-wrap">
-        <div class="home-preview">
-          <div class="preview-toolbar"><span class="preview-toolbar-mark"><img src="/assets/tickr-digest-icon.svg" alt="" width="18" height="18"> AI signals</span><span>Indian stocks</span></div>
-          <div class="preview-company"><div><p class="preview-kicker">Technology · NSE</p><h2>Tata Consultancy Services</h2><span>TCS · Indian stock</span></div><span class="preview-company-badge">TCS</span></div>
-          <div class="preview-ai-summary">
-            <div class="preview-ai-heading"><span class="preview-ai-mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="m12 3 2.2 6.8L21 12l-6.8 2.2L12 21l-2.2-6.8L3 12l6.8-2.2L12 3Z"/></svg></span><span>Tickr AI signals</span><span class="preview-example">Example</span></div>
-            <h3>Beyond the share price.</h3>
-            <p>What looks positive, what needs attention, and what to watch next.</p>
-          </div>
-          <div class="preview-signals" aria-label="Example AI signals">
-            <article class="preview-signal preview-signal-positive">
-              <span class="preview-signal-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="m4 16 6-6 4 4 6-8M14 6h6v6"/></svg></span>
-              <div><span class="preview-signal-label">Looks positive</span><h4>Steady cash flow</h4><p>Cash from the business helps fund growth and dividends.</p></div>
-            </article>
-            <article class="preview-signal preview-signal-attention">
-              <span class="preview-signal-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3 9 17H3L12 3Z"/><path d="M12 9v4m0 3h.01"/></svg></span>
-              <div><span class="preview-signal-label">Needs attention</span><h4>Slower sales growth</h4><p>Lower client spending could put pressure on revenue.</p></div>
-            </article>
-            <article class="preview-signal preview-signal-next">
-              <span class="preview-signal-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="16" height="16" rx="3"/><path d="M8 3v4m8-4v4M4 11h16m-12 5h3"/></svg></span>
-              <div><span class="preview-signal-label">Watch next</span><h4>The next quarterly results</h4><p>Look for changes in new orders and profit margins.</p></div>
-            </article>
-          </div>
-          <div class="preview-ai-footer"><span aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3 9 5-9 5-9-5 9-5Zm-9 9 9 5 9-5M3 16l9 5 9-5"/></svg></span>Company data &amp; news<span class="preview-ai-footer-note">Summarised by AI</span></div>
+        <div class="home-preview" id="home-ai-signal" aria-busy="true">
+          <div class="preview-toolbar"><span class="preview-toolbar-mark"><img src="/assets/tickr-digest-icon.svg" alt="" width="18" height="18"> AI signals</span><span id="home-ai-toolbar-status">Indian stocks</span></div>
+          <div id="home-ai-content"><div class="preview-ai-summary"><div class="preview-ai-heading">Tickr AI signals</div><h3>Finding a trending stock</h3><p role="status">Loading company data and AI signals…</p></div></div>
         </div>
-        <p class="preview-caption">Illustrative AI signals. Not a current assessment of TCS.</p>
+        <p class="preview-caption" id="home-ai-caption">Company data from IndianAPI. AI summaries are not investment advice.</p>
       </div>
     </div>
   </div>

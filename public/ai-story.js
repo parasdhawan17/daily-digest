@@ -85,13 +85,20 @@
     });
     return list;
   }
+  function hasNowData(core) {
+    const low = number(core.year_low), high = number(core.year_high);
+    return number(core.prices?.NSE) !== null || number(core.prices?.BSE) !== null
+      || number(core.change_percent) !== null
+      || (low !== null && high !== null && low >= 0 && high > low)
+      || companyFacts(core).children.length > 0;
+  }
   function renderNow(core, sources = new Map(), href = () => '#overview') {
     const el = stage('Now', 'now');
     const price = number(core.prices?.NSE) ?? number(core.prices?.BSE);
     const low = number(core.year_low), high = number(core.year_high);
     const hasRange = low !== null && high !== null && low >= 0 && high > low;
     const quote = node('div', 'ai-story-quote');
-    quote.append(node('span', 'ai-story-caption', 'Latest available price'), node('strong', 'ai-story-price', price === null ? '—' : money(price)));
+    quote.append(node('span', 'ai-story-caption', 'Latest available price'), node('strong', 'ai-story-price ' + direction(core.change_percent), price === null ? '—' : money(price)));
     const change = number(core.change_percent);
     if (change !== null) quote.append(node('span', 'ai-story-change ' + direction(change), pct(change) + ' · daily change'));
     else quote.append(node('span', 'ai-story-caption', 'Daily change unavailable'));
@@ -184,32 +191,76 @@
     }));
     return {recent, watch, remaining};
   }
+  function aiRobotFace(tone, large = false) {
+    const mood = Object.hasOwn(tones, tone) ? tone : 'neutral';
+    const face = node('span', 'ai-robot ' + mood + (large ? ' is-large' : ''));
+    face.setAttribute('aria-hidden', 'true'); face.dataset.tone = mood;
+    face.style.setProperty('--ai-bot-idle-duration', (3.4 + Math.random() * 2.2).toFixed(2) + 's');
+    face.style.setProperty('--ai-bot-idle-delay', (-Math.random() * 5.6).toFixed(2) + 's');
+    face.style.setProperty('--ai-bot-blink-duration', (4.1 + Math.random() * 3.3).toFixed(2) + 's');
+    face.style.setProperty('--ai-bot-blink-delay', (-Math.random() * 7.4).toFixed(2) + 's');
+    const svg = svgNode('svg', {viewBox: '0 0 88 88', focusable: 'false'});
+    svg.append(
+      svgNode('path', {class: 'ai-robot-antenna', d: 'M44 18V9'}),
+      svgNode('circle', {class: 'ai-robot-antenna-tip', cx: 44, cy: 7, r: 4}),
+      svgNode('rect', {class: 'ai-robot-ear', x: 5, y: 39, width: 8, height: 16, rx: 4}),
+      svgNode('rect', {class: 'ai-robot-ear', x: 75, y: 39, width: 8, height: 16, rx: 4}),
+      svgNode('rect', {class: 'ai-robot-shell', x: 10, y: 18, width: 68, height: 60, rx: 21}),
+      svgNode('rect', {class: 'ai-robot-screen', x: 16, y: 25, width: 56, height: 46, rx: 15}),
+      svgNode('path', {class: 'ai-robot-brows', d: {positive: 'M26 35q6-4 12 0 M50 35q6-4 12 0', negative: 'M26 35l12 4 M50 39l12-4', caution: 'M26 39l12-6 M50 33l12 6', neutral: 'M27 36h10 M51 36h10'}[mood]}),
+      svgNode('path', {class: 'ai-robot-eyes', d: {positive: 'M26 47q6-8 12 0 M50 47q6-8 12 0', negative: 'M29 47q3-2 6 0 M53 47q3-2 6 0', caution: 'M27 47q4-5 8 0 M55 43v6', neutral: 'M32 44v5 M56 44v5'}[mood]}),
+      svgNode('path', {class: 'ai-robot-cheeks', d: 'M22 54h5 M61 54h5'}),
+      svgNode('path', {class: 'ai-robot-mouth', d: {positive: 'M29 55q15 18 30 0', negative: 'M31 63q13-12 26 0', caution: 'M40 57q4-3 8 0v5q-4 3-8 0Z', neutral: 'M34 59q10 4 20 0'}[mood]})
+    );
+    face.append(svg); return face;
+  }
   function render(response, core = {}, options = {}) {
     const data = response.data || {};
     if (!data.summary?.heading || !data.summary?.text) throw new Error('The AI overview could not be read.');
     const sources = new Map((data.sources || []).map(s => [s.id, s]));
     const href = options.sourceHref || (s => '#' + s.section);
     const selected = select(data), root = node('div', 'ai-story');
-    const lead = node('header', 'ai-story-lead');
-    if (options.robot) { const robot = node('span', 'ai-story-robot'); robot.append(options.robot(tone(data.summary), true)); lead.append(robot); }
-    const copy = node('div', 'ai-story-lead-copy'), label = node('div', 'ai-story-lead-label');
-    label.append(node('span', 'ai-story-eyebrow', 'The AI take'), badge(data.summary));
-    copy.append(label, node('h2', '', data.summary.heading), disclosure('Read the AI take', explanation(data.summary, sources, href)));
-    lead.append(copy); root.append(lead);
+    if (options.signalLimit) {
+      const timeline = node('div', 'ai-story-timeline');
+      timeline.setAttribute('role', 'group'); timeline.setAttribute('aria-label', 'Available company signals');
+      const signals = [selected.recent && {...selected.recent, label: 'Recent context'},
+        selected.watch && {...selected.watch, label: 'What to watch'}, ...selected.remaining].filter(Boolean);
+      signals.slice(0, options.signalLimit).forEach(({item, category, label}) => {
+        const kind = ['watch_next', 'catalysts', 'risks'].includes(category) ? 'watch' : 'recent';
+        const card = stage(label, kind, item);
+        card.append(node('h4', '', item.heading), facts(item));
+        const why = explanation(item, sources, href), trend = financialTrend(item, core, sources);
+        if (trend) why.append(trend.figure, disclosure('View chart data', trend.table));
+        card.append(disclosure('Why this matters', why));
+        timeline.append(card);
+      });
+      if (timeline.children.length) root.append(timeline);
+      return root;
+    }
+    if (!options.compact) {
+      const lead = node('header', 'ai-story-lead');
+      const robot = node('span', 'ai-story-robot');
+      robot.append((options.robot || aiRobotFace)(tone(data.summary), true)); lead.append(robot);
+      const copy = node('div', 'ai-story-lead-copy'), label = node('div', 'ai-story-lead-label');
+      label.append(node('span', 'ai-story-eyebrow', 'The AI take'), badge(data.summary));
+      copy.append(label, node('h2', '', data.summary.heading), disclosure('Read the AI take', explanation(data.summary, sources, href)));
+      lead.append(copy); root.append(lead);
+    }
     const timeline = node('div', 'ai-story-timeline'); timeline.setAttribute('role', 'group'); timeline.setAttribute('aria-label', 'Now, recent context, and what to watch');
-    timeline.append(renderNow(core, sources, href));
+    if (!options.hideEmpty || hasNowData(core)) timeline.append(renderNow(core, sources, href));
     const recent = stage('Recent context', 'recent', selected.recent?.item);
     if (selected.recent) {
       const {item, category} = selected.recent;
       recent.append(node('span', 'ai-story-caption', categories.find(c => c[0] === category)[1]), node('h4', '', item.heading), facts(item));
       const trend = financialTrend(item, core, sources);
-      if (trend) recent.append(trend.figure);
-      else recent.append(node('div', 'ai-story-signal-mark', tones[tone(item)]));
+      if (trend && !options.compactCharts) recent.append(trend.figure);
+      else if (!trend) recent.append(node('div', 'ai-story-signal-mark', tones[tone(item)]));
       const why = explanation(item, sources, href);
+      if (trend && options.compactCharts) why.append(trend.figure);
       if (trend) why.append(disclosure('View chart data', trend.table));
       recent.append(disclosure('Why this matters', why));
     } else recent.append(node('h4', '', 'Recent context is limited'), node('p', 'ai-story-unavailable', 'No supported change or company signal is available in this brief.'));
-    timeline.append(recent);
+    if (!options.hideEmpty || selected.recent) timeline.append(recent);
     const watch = stage('What to watch', 'watch', selected.watch?.item);
     if (selected.watch) {
       const {item, category} = selected.watch;
@@ -219,8 +270,10 @@
       const mark = node('div', 'ai-story-checkpoint'); mark.append(icon('watch'));
       watch.append(mark, node('h4', '', 'No supported checkpoint yet'), node('p', 'ai-story-unavailable', 'The available evidence does not identify a next watch question or catalyst.'));
     }
-    timeline.append(watch); root.append(timeline);
-    if (selected.remaining.length) {
+    if (!options.hideEmpty || selected.watch) timeline.append(watch);
+    if (options.hideEmpty) timeline.setAttribute('aria-label', 'Available company signals');
+    if (timeline.children.length) root.append(timeline);
+    if (!options.compact && selected.remaining.length) {
       const rows = node('div', 'ai-story-more-rows');
       selected.remaining.forEach(({item, label, category}) => {
         const card = node('article', 'ai-story-more-card');
@@ -234,15 +287,18 @@
       });
       root.append(disclosure('Explore more signals (' + selected.remaining.length + ')', rows));
     }
-    const footer = node('footer', 'ai-story-footer');
-    if (data.generated_at) footer.append(node('span', '', 'Generated ' + (options.stamp ? options.stamp(data.generated_at) : data.generated_at)));
-    footer.append(node('span', '', 'AI-generated synthesis · Not investment advice'));
-    root.append(footer);
+    if (!options.compact) {
+      const footer = node('footer', 'ai-story-footer');
+      if (data.generated_at) footer.append(node('span', '', 'Generated ' + (options.stamp ? options.stamp(data.generated_at) : data.generated_at)));
+      footer.append(node('span', '', 'AI-generated synthesis · Not investment advice'));
+      root.append(footer);
+    }
     return root;
   }
   // Company facts remain available while AI is loading or unavailable.
-  function renderFacts(core) {
-    const root = node('div', 'ai-story ai-story-fallback'); root.append(renderNow(core));
+  function renderFacts(core, options = {}) {
+    const root = node('div', 'ai-story ai-story-fallback');
+    if (!options.hideEmpty || hasNowData(core)) root.append(renderNow(core));
     return root;
   }
   window.tickrAIStory = {render, renderFacts, contentVersion: 'meaning-v1'};

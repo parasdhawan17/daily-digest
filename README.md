@@ -265,3 +265,23 @@ When changing the production domain, update `stock_news/seo.py`, the homepage
 (and legacy homepage) canonical/social URLs, `public/robots.txt` and
 `public/sitemap.xml` together. Submit the deployed sitemap in Search Console;
 this repository does not submit it automatically.
+
+### Homepage daily AI signal
+
+`GET /api/home-ai-signal` selects the highest positive percentage gainer from
+IndianAPI's `/trending` list whose verified `/stock` market cap is at least
+₹1 lakh crore. If no stock qualifies, it uses ₹20,000 crore and labels the
+selection as a trending stock. These are size filters, not AMFI classifications.
+The selected company response feeds the existing stock AI overview generator.
+
+The homepage uses the stock detail page’s shared visual AI story: Now, Recent
+context, and What to watch, with fact tiles, available charts, expandable
+explanations, and evidence links to the stock details. The compact homepage
+variant shows only these three cards and a Highest mover tag; it omits the
+summary header, extra signals, and generation footer. Successful selection
+and AI output are cached together for 24 hours in-process and through Vercel's
+CDN; the browser revalidates. Cold instances/regions can recompute. Verified
+no-match results are cached for five minutes. Provider or AI failures are not
+cached for a day; AI failures preserve the selected company's market facts.
+Existing `INDIANAPI_API_KEY`, `INDIANAPI_BASE_URL`, and `OPENROUTER_API_KEY`
+settings are used. No additional service or scheduled job is required.

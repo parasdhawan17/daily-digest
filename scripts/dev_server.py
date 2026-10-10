@@ -69,6 +69,10 @@ class DevHandler(BaseHTTPRequestHandler):
             from api.ai_overview_page import handle_page
             handle_page(self)
             return
+        if path == '/api/home-ai-signal':
+            from api.home_ai_signal import handle_get
+            handle_get(self)
+            return
         if path == '/api/stock-data':
             from api.stock import handle_data
             handle_data(self)

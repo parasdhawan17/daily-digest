@@ -9,6 +9,7 @@ ROOT = Path(__file__).resolve().parent.parent
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
+from api.home_ai_signal import handle_get as handle_home_ai_signal
 from api.auth import handle_auth
 from api.analytics import handle_get as handle_analytics_config
 from api.ai_overview_page import handle_page as handle_ai_overview_page
@@ -50,7 +51,7 @@ def route(handler: BaseHTTPRequestHandler) -> str | None:
     explicit = (query.get("route") or [""])[0].strip().lower()
     if explicit in ("auth-config", "auth-session", "auth-google", "auth-logout", "analytics-config"):
         return explicit
-    if explicit in ("digest", "digest-data", "digest-ai", "subscription", "subscribe", "search", "validate", "stock", "stock-data", "stock-ai", "stock-section-ai", "ai-overview-page"):
+    if explicit in ("digest", "digest-data", "digest-ai", "subscription", "subscribe", "search", "validate", "stock", "stock-data", "stock-ai", "stock-section-ai", "ai-overview-page", "home-ai-signal"):
         return explicit
 
     normalized = request_path(handler).rstrip("/") or "/"
@@ -58,6 +59,8 @@ def route(handler: BaseHTTPRequestHandler) -> str | None:
         return 'ai-overview-page'
     if normalized.startswith('/stocks/'):
         return 'stock'
+    if normalized == '/api/home-ai-signal':
+        return 'home-ai-signal'
     if normalized == '/api/stock-data':
         return 'stock-data'
     if normalized == '/api/stock-ai':
@@ -88,7 +91,9 @@ def route(handler: BaseHTTPRequestHandler) -> str | None:
 class handler(BaseHTTPRequestHandler):
     def do_GET(self) -> None:
         matched = route(self)
-        if matched == 'stock':
+        if matched == 'home-ai-signal':
+            handle_home_ai_signal(self)
+        elif matched == 'stock':
             handle_stock_page(self)
         elif matched == 'ai-overview-page':
             handle_ai_overview_page(self)

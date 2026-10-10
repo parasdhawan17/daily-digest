@@ -5,6 +5,7 @@
     }
   },
   "rewrites": [
+    {"source": "/api/home-ai-signal", "destination": "/api/index?route=home-ai-signal"},
     {"source": "/onboarding", "destination": "/onboarding.html"},
     {"source": "/stocks/:symbol", "destination": "/api/index?route=stock&symbol=:symbol"},
     {"source": "/ai-overview/:symbol", "destination": "/api/index?route=ai-overview-page&symbol=:symbol"},
