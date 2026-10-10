@@ -89,6 +89,20 @@ class NormalizationTests(unittest.TestCase):
 
 
 class IndianSearchTests(unittest.TestCase):
+    @patch.object(indianapi, '_search_industry', return_value=[])
+    def test_pb_fintech_is_found_by_name_and_ticker_prefix(self, _remote):
+        expected = {'symbol': 'IN:POLICYBZR', 'name': 'PB Fintech', 'market': 'IN'}
+        for query in ['PB', 'PB Fintech', 'policy', 'POLICYBZR', ' policy ']:
+            with self.subTest(query=query):
+                self.assertIn(expected, indianapi.search_symbols(query, 'key'))
+
+    @patch.object(indianapi, '_search_industry', side_effect=requests.RequestException)
+    def test_policy_search_survives_provider_failure(self, _remote):
+        self.assertEqual(
+            indianapi.search_symbols('policy', 'key'),
+            [{'symbol': 'IN:POLICYBZR', 'name': 'PB Fintech', 'market': 'IN'}],
+        )
+
     @patch.object(indianapi, '_load_entities_cache', return_value=[
         {'symbol': 'RELIANCE', 'name': 'Reliance Industries'}
     ])
