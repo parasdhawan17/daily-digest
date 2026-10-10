@@ -46,6 +46,39 @@ test('price range marker uses the reported endpoints, including zero and missing
   assert.match(visibleText(missing), /Daily change unavailable/);
 });
 
+test('home and additional stock signals show the same reported chart and expandable data', () => {
+  const story = renderer(), data = ai(), coreData = core().data;
+  const home = story.render(data, coreData, {compact: true, compactCharts: true, signalLimit: 3});
+  const stock = story.render(data, coreData);
+  const homeCard = byClass(home, 'ai-story-stage').find(card => /Revenue momentum/.test(card.textContent));
+  const stockCard = byClass(stock, 'ai-story-more-card')[0];
+  const chart = card => walk(card, el => el.tagName === 'svg' && el.attributes.role === 'img')[0];
+  assert.equal(chart(stockCard).attributes['aria-label'], chart(homeCard).attributes['aria-label']);
+  assert.equal(byClass(stockCard, 'ai-story-data')[0].textContent, byClass(homeCard, 'ai-story-data')[0].textContent);
+  assert.doesNotMatch(visibleText(stockCard), /Reported actuals/);
+  const why = walk(stockCard, el => el.tagName === 'details' && el.children[0].textContent === 'Why this matters')[0];
+  why.open = true;
+  assert.match(visibleText(stockCard), /Reported actuals.*View chart data/);
+  const table = walk(why, el => el.tagName === 'details' && el.children[0].textContent === 'View chart data')[0];
+  assert.equal(table.open, false);
+  table.open = true;
+  assert.match(visibleText(stockCard), /2024-03-31600.*2026-03-31900/);
+});
+
+test('watch and additional signal charts require supported financial history', () => {
+  for (const supported of [true, false]) {
+    const data = ai(), coreData = core().data;
+    data.data.watch_next = [signal('Will revenue growth continue?')];
+    if (!supported) coreData.health.groups[0].metrics[0].history = [{period: '2026-03-31', value: 900}];
+    const root = renderer().render(data, coreData);
+    for (const card of [byClass(root, 'ai-story-stage')[2], byClass(root, 'ai-story-more-card')[0]]) {
+      assert.equal(byClass(card, 'ai-story-trend').length, supported ? 1 : 0);
+      assert.equal(byClass(card, 'ai-story-data').length, supported ? 1 : 0);
+      assert.match(card.textContent, /\+12% YoY/);
+    }
+  }
+});
+
 test('Now explains the actual range position, with clear handling for missing quotes', () => {
   for (const [price, description] of [[75, 'lower third'], [100, 'middle third'], [115, 'upper third'], [140, 'above'], [60, 'below']]) {
     const root = renderer().render(ai(), core({prices: {NSE: price}}).data);
@@ -89,7 +122,7 @@ test('unmatched, uncited, or insufficient financial series remain fact tiles', (
     if (scenario === 'insufficient') coreData.health.groups[0].metrics[0].history = [{period: '2026-03-31', value: 900}];
     if (scenario === 'invalid') coreData.health.groups[0].metrics[0].history = [{period: 'bad', value: 100}, {period: '2026-03-31', value: null}];
     const root = renderer().render(data, coreData);
-    assert.equal(byClass(root, 'ai-story-trend').length, 0, scenario);
+    assert.equal(byClass(byClass(root, 'ai-story-stage')[1], 'ai-story-trend').length, 0, scenario);
     assert.match(visibleText(root), /\+12% YoY/);
   }
 });

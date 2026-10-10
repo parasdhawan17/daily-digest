@@ -41,9 +41,13 @@
     });
     return box;
   }
-  function explanation(item, sources, href) {
+  function explanation(item, sources, href, core) {
     const body = node('div', 'ai-story-explanation');
     body.append(node('p', '', item.text), citations(item.evidence_ids, sources, href));
+    if (core) {
+      const trend = financialTrend(item, core, sources);
+      if (trend) body.append(trend.figure, disclosure('View chart data', trend.table));
+    }
     return body;
   }
   function facts(item) {
@@ -229,8 +233,7 @@
         const kind = ['watch_next', 'catalysts', 'risks'].includes(category) ? 'watch' : 'recent';
         const card = stage(label, kind, item);
         card.append(node('h4', '', item.heading), facts(item));
-        const why = explanation(item, sources, href), trend = financialTrend(item, core, sources);
-        if (trend) why.append(trend.figure, disclosure('View chart data', trend.table));
+        const why = explanation(item, sources, href, core);
         card.append(disclosure('Why this matters', why));
         timeline.append(card);
       });
@@ -265,7 +268,7 @@
     if (selected.watch) {
       const {item, category} = selected.watch;
       const mark = node('div', 'ai-story-checkpoint'); mark.append(icon(category === 'catalysts' ? 'event' : 'watch'));
-      watch.append(mark, node('span', 'ai-story-caption', category === 'catalysts' ? 'Reported development' : 'Next question'), node('h4', '', item.heading), facts(item), disclosure('Why this matters', explanation(item, sources, href)));
+      watch.append(mark, node('span', 'ai-story-caption', category === 'catalysts' ? 'Reported development' : 'Next question'), node('h4', '', item.heading), facts(item), disclosure('Why this matters', explanation(item, sources, href, core)));
     } else {
       const mark = node('div', 'ai-story-checkpoint'); mark.append(icon('watch'));
       watch.append(mark, node('h4', '', 'No supported checkpoint yet'), node('p', 'ai-story-unavailable', 'The available evidence does not identify a next watch question or catalyst.'));
@@ -282,7 +285,7 @@
         mark.append(icon(category === 'catalysts' ? 'event' : category === 'watch_next' || category === 'risks' ? 'watch' : category === 'changes' ? 'recent' : 'now'));
         head.append(mark, node('span', 'ai-story-caption', label));
         card.append(head, node('h4', '', item.heading), badge(item), facts(item),
-          disclosure('Why this matters', explanation(item, sources, href)));
+          disclosure('Why this matters', explanation(item, sources, href, core)));
         rows.append(card);
       });
       root.append(disclosure('Explore more signals (' + selected.remaining.length + ')', rows));

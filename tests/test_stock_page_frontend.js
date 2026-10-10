@@ -111,7 +111,7 @@ test('stock tab uses the shared visual renderer and local evidence navigation', 
   const panel = new Element('section'); window.testRender(panel, ai());
   assert.equal(byClass(panel, 'ai-story-stage').length, 3);
   assert.equal(byClass(panel, 'ai-story-robot').length, 1);
-  assert.equal(byClass(panel, 'ai-story-trend').length, 1);
+  assert.equal(byClass(panel, 'ai-story-trend').length, 2);
   assert.match(visibleText(panel), /₹100.00/);
   assert.doesNotMatch(visibleText(panel), /original AI paragraph/);
   assert.equal(walk(panel, el => el.tagName === 'a')[0].href, '#financials');
