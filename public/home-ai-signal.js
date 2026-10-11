@@ -43,8 +43,7 @@
   }
   function render(payload) {
     if (!payload.ok || !payload.stock) {
-      unavailable();
-      return;
+      return false;
     }
     const stock = payload.stock;
     if (!/^IN:[A-Z][A-Z0-9.&-]{0,19}$/.test(stock.symbol)) throw new Error('Invalid stock');
@@ -53,7 +52,7 @@
     const {number, money, pct, direction} = window.tickrStockFormat;
     if (!overview || !stock.name?.trim() || number(stock.price) === null
         || number(stock.percent_change) === null || !(number(stock.market_cap_crore) > 0)) {
-      unavailable(); return;
+      return false;
     }
     const company = node('div', 'preview-company'), copy = node('div');
     const ticker = stock.symbol.slice(3);
@@ -76,7 +75,6 @@
     const arrow = document.createElementNS('http://www.w3.org/2000/svg', 'path');
     arrow.setAttribute('d', 'M4 17l6-6 4 4 6-10M14 5h6v6'); icon.append(arrow);
     tag.append(icon);
-    if (toolbarStatus) toolbarStatus.replaceChildren(tag);
     const storyHost = node('div', 'home-ai-story-host stock-ai-overview-host');
     const visualCore = {...(payload.core || {}), name: stock.name, industry: stock.industry,
       prices: {[stock.exchange || 'BSE']: stock.price}, change_percent: stock.percent_change,
@@ -87,21 +85,70 @@
         compact: true, hideEmpty: true, compactCharts: true, signalLimit: 3,
         sourceHref: source => path + '#' + (['overview', 'financials', 'ownership', 'analysis', 'actions', 'news'].includes(source.section) ? source.section : 'overview')
       });
-      if (!story.children.length) { unavailable(); return; }
+      if (!story.children.length) return false;
       storyHost.append(story);
     }
     const footer = node('div', 'preview-ai-footer');
     const link = node('a', '', 'Explore the full stock overview →'); link.href = path;
     footer.append(link);
+    if (toolbarStatus) toolbarStatus.replaceChildren(tag);
     content.replaceChildren(company, storyHost, footer);
     const cap = Number(stock.market_cap_crore).toLocaleString('en-IN', {maximumFractionDigits: 0});
-    caption.textContent = 'Market cap ₹' + cap + ' crore · Highest market cap among verified trending gainers. Provider data: ' + (stock.source_time || 'Unavailable') + '. Not investment advice.';
+    caption.textContent = 'AI generated ' + new Date(overview.generated_at).toLocaleString() + ' · Market cap ₹' + cap + ' crore · Highest market cap among verified trending gainers. Provider data: ' + (stock.source_time || 'Unavailable') + '. Not investment advice.';
+    return true;
   }
+  const MAX_AGE = 48 * 60 * 60 * 1000;
+  let displayedAt = null;
+  function timestamp(payload) {
+    try {
+      const stock = payload.stock, data = payload.overview.data;
+      const time = Date.parse(data.generated_at);
+      const age = Date.now() - time;
+      if (!payload.ok || !payload.overview.ok || !Number.isFinite(time) || age < 0 || age >= MAX_AGE
+          || !stock.name?.trim() || !/^IN:[A-Z][A-Z0-9.&-]{0,19}$/.test(stock.symbol)) return null;
+      for (const field of ['price', 'percent_change', 'market_cap_crore']) {
+        if (typeof stock[field] === 'boolean' || window.tickrStockFormat.number(stock[field]) === null) return null;
+      }
+      if (!(window.tickrStockFormat.number(stock.market_cap_crore) > 0)) return null;
+      const sources = new Set(data.sources.map(source => source.id));
+      function valid(item, facts) {
+        return item && item.heading?.trim() && item.text?.trim()
+          && ['positive', 'negative', 'caution', 'neutral'].includes(item.tone)
+          && Array.isArray(item.evidence_ids) && item.evidence_ids.length
+          && item.evidence_ids.every(id => sources.has(id))
+          && (!facts || Array.isArray(item.facts) && item.facts.length
+            && item.facts.every(fact => fact.label?.trim() && fact.value?.trim()));
+      }
+      const categories = ['encouraging', 'attention', 'changes', 'catalysts', 'risks', 'watch_next'];
+      if (!valid(data.summary, false) || !categories.every(key => Array.isArray(data[key]))) return null;
+      const items = categories.flatMap(key => data[key]);
+      return items.length && items.every(item => valid(item, true)) ? time : null;
+    } catch (_) { return null; }
+  }
+  function accept(payload) {
+    const time = timestamp(payload);
+    if (time === null || displayedAt !== null && time < displayedAt) return;
+    try {
+      if (render(payload)) displayedAt = time;
+    } catch (_) { /* Keep the visible card if rendering fails. */ }
+  }
+  unavailable();
+  const snapshot = document.getElementById('home-ai-snapshot');
+  try {
+    const envelope = JSON.parse(snapshot?.textContent || 'null');
+    if (envelope?.format_version === 1) accept(envelope.payload);
+  } catch (_) { /* Use the labeled example. */ }
+  host.setAttribute('aria-busy', 'false');
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible' && displayedAt !== null && Date.now() - displayedAt >= MAX_AGE) {
+      unavailable(); displayedAt = null;
+    }
+  });
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 180000);
+  const timeout = setTimeout(() => controller.abort(), 15000);
   fetch('/api/home-ai-signal?selection=market-cap-v1', {signal: controller.signal})
     .then(response => { if (!response.ok) throw new Error('Unavailable'); return response.json(); })
-    .then(render)
-    .catch(() => unavailable())
-    .finally(() => { clearTimeout(timeout); host.setAttribute('aria-busy', 'false'); });
+    .then(accept)
+    .catch(() => {})
+    .finally(() => clearTimeout(timeout));
 })();

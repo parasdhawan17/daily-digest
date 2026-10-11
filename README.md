@@ -286,3 +286,27 @@ no-match results are cached for five minutes. Provider or AI failures are not
 cached for a day; AI failures preserve the selected company's market facts.
 Existing `INDIANAPI_API_KEY`, `INDIANAPI_BASE_URL`, and `OPENROUTER_API_KEY`
 settings are used. No additional service or scheduled job is required.
+
+
+### Homepage snapshot during deployment
+
+Vercel's build command runs `scripts/build_home_ai_snapshot.py`. Production builds
+reuse a complete live homepage card under 24 hours old, otherwise generate one
+with a 120-second deadline. Failed generation falls back to the previous public
+snapshot if its original AI generation date is under 48 hours old. Preview builds
+skip provider calls and bundle the labeled example. The build logs the snapshot
+source, age, and preparation duration without credentials.
+
+The build writes an ignored `public/home-ai-snapshot.json` and embeds its public
+payload in the homepage. Generated artifacts must not be committed. The existing
+`INDIANAPI_API_KEY` and `OPENROUTER_API_KEY` must be available in the production
+build environment. No new storage or scheduled job is required.
+
+The homepage displays this card immediately, including its AI generation date,
+then requests the live endpoint with a 15-second timeout. Failed, incomplete, or
+older responses retain the visible card. Cards expire after 48 hours, including
+when a long-open tab becomes visible again. After expiry, the labeled example
+remains visible until a valid live response arrives. Between deployments, the
+bundled snapshot does not update; live API caching continues to supply fresh
+cards. To roll back, remove the build command and revert the homepage snapshot
+changes; the live endpoint and its existing cache remain independent.

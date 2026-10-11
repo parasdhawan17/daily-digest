@@ -1,4 +1,7 @@
 {
+  "framework": null,
+  "outputDirectory": "public",
+  "buildCommand": "python3 -m venv .venv && .venv/bin/python -m pip install -r requirements.txt && .venv/bin/python scripts/build_home_ai_snapshot.py",
   "functions": {
     "api/index.py": {
       "includeFiles": "{public/dashboard-catalog.json,config/in_entities_cache.json}"

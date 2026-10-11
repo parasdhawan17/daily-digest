@@ -13,17 +13,19 @@ const source = fs.readFileSync('public/home-ai-signal.js', 'utf8');
 function payload(overrides = {}) {
   return {ok: true, stock: {name: 'Example Ltd', symbol: 'IN:EXAMPLE', industry: 'Software',
     exchange: 'BSE', market_cap_crore: 120000, selection: 'highest_market_cap', price: 100,
-    percent_change: 6, source_time: '2026-10-09 10:00', selected_at: '2026-10-10T00:00:00Z'}, core: core().data, overview: ai(), ...overrides};
+    percent_change: 6, source_time: '2026-10-09 10:00', selected_at: '2026-10-10T00:00:00Z'}, core: core().data, overview: {...ai(), data: {...ai().data, generated_at: new Date().toISOString()}}, ...overrides};
 }
-async function setup(data, ok = true) {
+async function setup(data, ok = true, snapshot = null) {
   const elements = Object.fromEntries(['home-ai-signal', 'home-ai-content', 'home-ai-caption', 'home-ai-toolbar-status'].map(id => [id, new Element()]));
   let calls = 0;
-  const context = {document: {getElementById: id => elements[id], createElement: tag => new DOMElement(tag), createElementNS: (_ns, tag) => new DOMElement(tag)}, window: {tickrStockFormat: stockFormat},
+  let visibilityHandler;
+  if (snapshot) { elements['home-ai-snapshot'] = new Element(); elements['home-ai-snapshot'].textContent = JSON.stringify(snapshot); }
+  const context = {document: {getElementById: id => elements[id], visibilityState: 'visible', addEventListener(type, handler) { visibilityHandler = handler; }, createElement: tag => new DOMElement(tag), createElementNS: (_ns, tag) => new DOMElement(tag)}, window: {tickrStockFormat: stockFormat},
     AbortController, setTimeout, clearTimeout,
-    fetch: async url => { assert.equal(url, '/api/home-ai-signal?selection=market-cap-v1'); calls++; if (data instanceof Error) throw data; return {ok, json: async () => data}; }};
+    fetch: async url => { assert.equal(url, '/api/home-ai-signal?selection=market-cap-v1'); calls++; if (data instanceof Error) throw data; return {ok, json: async () => await data}; }};
   install(context); vm.runInNewContext(source, context);
   await new Promise(setImmediate);
-  return {elements, calls};
+  return {elements, calls, context, visibilityHandler};
 }
 test('loads once and renders real overview, sources, dates and full link', async () => {
   const {elements: e, calls} = await setup(payload());
@@ -159,4 +161,44 @@ test('missing market data, malformed AI, and network errors use the labeled exam
     assert.equal(byClass(e['home-ai-content'], 'home-ai-header-price').length, 0);
     assert.equal(e['home-ai-signal'].attributes['aria-busy'], 'false');
   }
+});
+
+
+test('bundled snapshot renders before pending live response and survives network failure', async () => {
+  const saved = payload(); saved.stock.name = 'Bundled company';
+  const {elements: e} = await setup(new Error('offline'), true, {format_version: 1, payload: saved});
+  assert.match(e['home-ai-content'].textContent, /Bundled company/);
+  assert.match(e['home-ai-caption'].textContent, /AI generated/);
+  let release;
+  const pending = new Promise(resolve => { release = resolve; });
+  const {elements: immediate} = await setup(pending, true, {format_version: 1, payload: saved});
+  assert.match(immediate['home-ai-content'].textContent, /Bundled company/);
+  assert.equal(immediate['home-ai-signal'].attributes['aria-busy'], 'false');
+  release(null);
+});
+
+test('older or malformed live responses retain snapshot; newer responses replace it', async () => {
+  const saved = payload(); saved.stock.name = 'Bundled company';
+  saved.overview.data.generated_at = new Date(Date.now() - 3600000).toISOString();
+  const older = payload(); older.overview.data.generated_at = new Date(Date.now() - 7200000).toISOString();
+  const malformed = payload(); malformed.overview.data.summary = null;
+  for (const live of [older, malformed]) {
+    const {elements: e} = await setup(live, true, {format_version: 1, payload: saved});
+    assert.match(e['home-ai-content'].textContent, /Bundled company/);
+  }
+  const {elements: e} = await setup(payload(), true, {format_version: 1, payload: saved});
+  assert.match(e['home-ai-content'].textContent, /Example Ltd/);
+});
+
+test('expired and unsupported snapshots use example; visible tabs expire saved cards', async () => {
+  const saved = payload(); saved.overview.data.generated_at = new Date(Date.now() - 48 * 3600000).toISOString();
+  for (const envelope of [{format_version: 1, payload: saved}, {format_version: 2, payload: payload()}]) {
+    const {elements: e} = await setup(new Error('offline'), true, envelope);
+    assert.equal(e['home-ai-toolbar-status'].textContent, 'Example');
+  }
+  saved.overview.data.generated_at = new Date(Date.now() - 47 * 3600000).toISOString();
+  const result = await setup(new Error('offline'), true, {format_version: 1, payload: saved});
+  result.context.Date = {now: () => Date.now() + 2 * 3600000};
+  result.visibilityHandler();
+  assert.equal(result.elements['home-ai-toolbar-status'].textContent, 'Example');
 });

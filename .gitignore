@@ -6,3 +6,5 @@ venv/
 .vercel/
 .vercel
 .env*
+
+/public/home-ai-snapshot.json
