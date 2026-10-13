@@ -28,7 +28,7 @@ def company_metadata(symbol, *, ai=False, name=None):
     return {"title": title, "description": description,
             "canonical": SITE_ORIGIN + path + quote(symbol, safe=":"),
             "stock_path": "/stocks/" + quote(symbol, safe=":"),
-            "image": SITE_ORIGIN + "/assets/tickr-digest-icon-t-concept.png"}
+            "image": SITE_ORIGIN + "/assets/tickr-digest-share-v1.png"}
 
 
 def snapshot_context(snapshot):
