@@ -657,8 +657,9 @@
       const change = $('company-change'); change.textContent = pct(core.change_percent); change.classList.toggle('positive', core.change_percent > 0); change.classList.toggle('negative', core.change_percent < 0);
       $('secondary-price').textContent = exchange === 'NSE' && core.prices.BSE !== null ? 'BSE ' + money(core.prices.BSE) : '';
       $('source-time').textContent = core.source_time ? 'Provider timestamp · ' + core.source_time : 'Retrieved ' + stamp(result.fetched_at) + ' · Provider timestamp unavailable';
+      syncAvailableSections(); status.hidden = true; $('stock-content').hidden = false;
       if (window.tickrAnalytics) window.tickrAnalytics.track('view_stock', {symbol});
-      syncAvailableSections(); status.hidden = true; $('stock-content').hidden = false; activate(location.hash.slice(1) || 'ai-overview', false);
+      activate(location.hash.slice(1) || 'ai-overview', false);
     } catch (error) {
       status.replaceChildren(node('p', '', error.message)); const retry = node('button', 'stock-retry', 'Try again'); retry.onclick = init; status.append(retry);
     } finally { status.classList.remove('loading'); }

@@ -138,7 +138,6 @@
     $('overview-content').hidden = false;
     renderStory();
     if (window.tickrAnalytics) {
-      window.tickrAnalytics.track('view_stock', {symbol});
       if (aiResponse) window.tickrAnalytics.track('view_ai_overview', {symbol});
     }
   }

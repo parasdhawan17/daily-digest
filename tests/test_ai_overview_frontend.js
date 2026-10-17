@@ -97,11 +97,11 @@ test('successful research and AI displays emit business events after content bec
   const app = await setup(core(), [ai()], null, true);
   assert.equal(app.events.length, 0);
   app.releaseCore(); await app.flush();
-  assert.deepEqual(app.events.map(item => item.event), ['view_stock', 'view_ai_overview']);
+  assert.deepEqual(app.events.map(item => item.event), ['view_ai_overview']);
   assert.equal(app.events[0].properties.symbol, 'IN:EXAMPLE');
 });
 
 test('failed AI responses never count as displayed AI overviews', async () => {
   const app = await setup(core(), [{ok: false, error: 'Unavailable'}]);
-  assert.deepEqual(app.events.map(item => item.event), ['view_stock']);
+  assert.deepEqual(app.events.map(item => item.event), []);
 });

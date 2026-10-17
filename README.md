@@ -149,7 +149,7 @@ PostHog configuration:
 |------|---------|
 | `sign_up` | A verified user successfully saves a watchlist and creates their first contact record; method is `google` |
 | `watchlist_saved` | A verified watchlist save succeeds; includes only `stock_count` |
-| `view_stock` | Company research data successfully renders; once per stock per page load |
+| `view_stock` | Stock detail page (`/stocks/...`) successfully renders company data; once per stock per page load |
 | `view_ai_overview` | AI overview successfully renders in the active view; once per stock per page load |
 
 Research events include only the public stock symbol. No email, credential,
@@ -157,9 +157,10 @@ digest token, or watchlist contents are sent to GA4. Navigation after saving wai
 up to 900 ms for the event completion callback and still works if Google is blocked.
 Email confirmation requests and failed saves never count as signups.
 
-In the GA4 property, mark `sign_up` as a key event and create its conversion in
-the linked Google Ads account. Keep the other events as supporting measurements
-initially. Verify genuine actions in Realtime or DebugView; do not send synthetic
+The main marketing goal is a successful stock detail page render (`view_stock`).
+Mark it as a GA4 key event and use its Google Ads conversion as the primary
+action for stock research campaigns. Count one conversion per ad interaction
+and keep signup, watchlist saves, and AI views as supporting measurements. Verify genuine actions in Realtime or DebugView; do not send synthetic
 signups into production. This account-side configuration is separate from deployment.
 
 Analytics uses a shared browser client with manual, versioned events rather than

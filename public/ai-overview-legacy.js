@@ -230,7 +230,6 @@ window.tickrLegacyAIOverviewPage = function () {
     $('page-status').hidden = true;
     $('overview-content').hidden = false;
     if (window.tickrAnalytics) {
-      window.tickrAnalytics.track('view_stock', {symbol});
       if (!$('ai-content').hidden) window.tickrAnalytics.track('view_ai_overview', {symbol});
     }
   }
