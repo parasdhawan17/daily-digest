@@ -131,6 +131,21 @@ class AuthTests(unittest.TestCase):
 @patch.dict(os.environ, ENV)
 class SubscribeTests(unittest.TestCase):
     @patch('api.subscribe.validate_symbol', return_value=True)
+    @patch('stock_news.brevo.requests.post')
+    @patch('stock_news.brevo.update_contact_tickers')
+    @patch('stock_news.brevo.get_contact')
+    def test_verified_response_reports_new_signup_without_personal_event_data(self, lookup, update, post, validate):
+        post.return_value.ok = True
+        for contact, expected in [(None, True), (CONTACT, False)]:
+            lookup.return_value = contact
+            h = handler(payload={'tickers': ['IN:TCS']}, signed_in=True)
+            handle_post(h)
+            payload = result(h)
+            self.assertTrue(payload['ok'])
+            self.assertEqual(payload['is_new_signup'], expected)
+            self.assertNotIn('email', payload)
+
+    @patch('api.subscribe.validate_symbol', return_value=True)
     @patch('api.subscribe.send_welcome_email')
     @patch('api.subscribe.subscribe_verified', return_value=True)
     def test_indian_dashboard_cards_are_validated_and_saved(self, save, welcome, validate):
@@ -249,6 +264,26 @@ class SubscribeTests(unittest.TestCase):
         self.assertTrue(subscribe_verified(IDENTITY['email'], ['AAPL'], 'key', 7,
                                            email_briefings=False))
         self.assertEqual(update.call_args.kwargs['unlink_list_id'], 7)
+
+
+    @patch('stock_news.brevo.requests.post')
+    @patch('stock_news.brevo.update_contact_tickers')
+    @patch('stock_news.brevo.get_contact')
+    def test_signup_metadata_only_after_a_successful_new_contact_save(self, lookup, update, post):
+        post.return_value.ok = True
+        for contact, expected in [(None, True), (CONTACT, False)]:
+            lookup.return_value = contact
+            metadata = {}
+            subscribe_verified(IDENTITY['email'], ['IN:TCS'], 'key', 7,
+                               email_briefings=False, analytics_result=metadata)
+            self.assertEqual(metadata, {'is_new_signup': expected})
+        lookup.return_value = None
+        post.return_value.ok = False
+        metadata = {}
+        with self.assertRaises(BrevoError):
+            subscribe_verified(IDENTITY['email'], ['IN:TCS'], 'key', 7,
+                               email_briefings=False, analytics_result=metadata)
+        self.assertEqual(metadata, {})
 
 
 @patch.dict(os.environ, ENV)

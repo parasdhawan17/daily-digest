@@ -71,7 +71,41 @@
     else queue.push(['__identify__', {apply: apply}]);
   }
 
-  window.tickrAnalytics = {capture: send, identify: identify, pageType: pageType,
+  var businessViews = new Set();
+  function track(event, properties, callback) {
+    properties = properties || {};
+    var safe = {};
+    if (event === 'sign_up') safe.method = 'google';
+    else if (event === 'watchlist_saved') {
+      safe.stock_count = Math.max(0, Math.min(1000, Number(properties.stock_count) || 0));
+    } else if (event === 'view_stock' || event === 'view_ai_overview') {
+      if (!/^IN:[A-Z][A-Z0-9&-]{0,19}$/.test(properties.symbol || '')) return;
+      safe.symbol = properties.symbol;
+      var key = event + ':' + safe.symbol;
+      if (businessViews.has(key)) return;
+      businessViews.add(key);
+    } else return;
+    try { send(event, safe); } catch (error) { /* Product analytics must not block GA4 or navigation. */ }
+    try {
+      if (typeof window.gtag === 'function') {
+        window.gtag('event', event, Object.assign({}, safe, {
+          send_to: 'G-6HV1LTZVDF', transport_type: 'beacon'
+        }, callback ? {event_callback: callback, event_timeout: 800} : {}));
+      } else if (callback) callback();
+    } catch (error) { if (callback) callback(); }
+  }
+
+  function savedWatchlist(data, stockCount, redirect) {
+    if (!data || !data.ok || data.mode !== 'verified') return;
+    var finished = false;
+    function done() { if (!finished) { finished = true; if (redirect) redirect(); } }
+    // Navigation must still work when the Google script is blocked or slow.
+    if (redirect) setTimeout(done, 900);
+    if (data.is_new_signup === true) track('sign_up');
+    track('watchlist_saved', {stock_count: stockCount}, redirect ? done : undefined);
+  }
+
+  window.tickrAnalytics = {capture: send, identify: identify, pageType: pageType, track: track, savedWatchlist: savedWatchlist,
     onReady: function (callback) {
       if (ready) callback(window.posthog);
       else if (disabled) callback(null);

@@ -28,7 +28,7 @@ test('standalone research page renders accessible filtered P\/E history', () => 
 test('standalone research page versions the new assets', () => {
   assert.match(template, /ai-overview\.css\?v=20261007-story/);
   assert.match(template, /stock\.css\?v=20261007-simple-tour/);
-  assert.match(template, /stock\.js\?v=20261007-flag/);
+  assert.match(template, /stock\.js\?v=20261018-events/);
   assert.match(template, /data-active-tab="ai-overview"/);
   assert.match(source, /document\.body\.dataset\.activeTab = id/);
   assert.match(styles, /data-active-tab="ai-overview"\] \.stock-section-assistant,[\s\S]*data-active-tab="ai-overview"\] \.stock-section-ai-launcher\{display:none\}/);

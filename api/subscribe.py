@@ -149,9 +149,10 @@ def handle_post(handler: BaseHTTPRequestHandler) -> None:
                 EMAIL_BRIEFINGS_ENABLED
                 and payload.get("email_briefings", True) is True
             )
+            analytics_result = {}
             already_active = subscribe_verified(
                 email, tickers, api_key, int(list_id), email_briefings=email_briefings,
-                dashboard_cards=dashboard_cards
+                dashboard_cards=dashboard_cards, analytics_result=analytics_result
             )
             warning = None
             if email_briefings and not already_active:
@@ -163,7 +164,8 @@ def handle_post(handler: BaseHTTPRequestHandler) -> None:
                     )
                     warning = "Your email briefings are active, but the welcome email could not be sent."
             send_json(handler, 200, {"ok": True, "mode": "verified", "redirect": "/digest",
-                                     "email_briefings": email_briefings, "warning": warning})
+                                     "email_briefings": email_briefings, "warning": warning,
+                                     "is_new_signup": analytics_result.get("is_new_signup", False)})
             return
         result = subscribe_or_update(
             email,

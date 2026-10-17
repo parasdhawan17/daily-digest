@@ -237,7 +237,7 @@ def _safe_brevo_message(response: requests.Response) -> str:
 
 
 def subscribe_verified(email, tickers, api_key, list_id, *, attr_name=BREVO_TICKERS_ATTRIBUTE,
-                       email_briefings=True, dashboard_cards=None):
+                       email_briefings=True, dashboard_cards=None, analytics_result=None):
     """Save a verified Google user's watchlist and optional email preference."""
     contact = get_contact(email, api_key)
     if email_briefings and contact and contact.get('emailBlacklisted'):
@@ -259,6 +259,8 @@ def subscribe_verified(email, tickers, api_key, list_id, *, attr_name=BREVO_TICK
             json=payload, timeout=30)
         if not response.ok:
             raise BrevoError(_safe_brevo_message(response))
+    if analytics_result is not None:
+        analytics_result["is_new_signup"] = not bool(contact)
     return already_active if email_briefings else True
 
 

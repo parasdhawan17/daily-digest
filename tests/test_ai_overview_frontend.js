@@ -13,10 +13,10 @@ async function setup(corePayload, aiResponses, bootstrap = null, deferCore = fal
   if (bootstrap !== null) { elements['company-bootstrap'] = new Element(); elements['company-bootstrap'].textContent = typeof bootstrap === 'string' ? bootstrap : JSON.stringify(bootstrap); }
   elements['overview-content'].hidden = true; elements['ai-content'].hidden = true;
   let aiCalls = 0, releaseCore;
-  const calls = [];
+  const calls = [], events = [];
   const document = {body: {dataset: {symbol: 'IN:EXAMPLE'}}, documentElement: {dataset: {theme: 'light'}, style: {}},
     getElementById: id => elements[id], createElement: tag => new Element(tag), createElementNS: (_ns, tag) => new Element(tag)};
-  const context = {document, window: {tickrStockFormat: stockFormat}, URLSearchParams,
+  const context = {document, window: {tickrStockFormat: stockFormat, tickrAnalytics: {track: (event, properties) => events.push({event, properties})}}, URLSearchParams,
     fetch: async url => {
       calls.push(url);
       if (url.startsWith('/api/stock-data?')) {
@@ -29,7 +29,7 @@ async function setup(corePayload, aiResponses, bootstrap = null, deferCore = fal
   install(context); vm.runInNewContext(source, context);
   const flush = async () => { await new Promise(setImmediate); await new Promise(setImmediate); };
   await flush();
-  return {elements, calls, flush, get aiCalls() {return aiCalls;}, releaseCore: () => releaseCore()};
+  return {elements, calls, events, flush, get aiCalls() {return aiCalls;}, releaseCore: () => releaseCore()};
 }
 
 test('standalone uses the shared visual story and consolidated company facts', async () => {
@@ -90,4 +90,18 @@ test('uses a matching server snapshot and falls back for invalid snapshots', asy
     const fallback = await setup(core(), [ai()], seed);
     assert.ok(fallback.calls.some(url => url.includes('section=core')));
   }
+});
+
+
+test('successful research and AI displays emit business events after content becomes visible', async () => {
+  const app = await setup(core(), [ai()], null, true);
+  assert.equal(app.events.length, 0);
+  app.releaseCore(); await app.flush();
+  assert.deepEqual(app.events.map(item => item.event), ['view_stock', 'view_ai_overview']);
+  assert.equal(app.events[0].properties.symbol, 'IN:EXAMPLE');
+});
+
+test('failed AI responses never count as displayed AI overviews', async () => {
+  const app = await setup(core(), [{ok: false, error: 'Unavailable'}]);
+  assert.deepEqual(app.events.map(item => item.event), ['view_stock']);
 });

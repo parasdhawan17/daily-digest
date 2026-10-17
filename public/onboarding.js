@@ -273,7 +273,8 @@
     })}).then(json).then(function (data) {
       if (!data.ok) throw new Error(data.error || 'Could not save your dashboard.');
       if (data.warning) try { sessionStorage.setItem('tickr-welcome-warning', data.warning); } catch (e) {}
-      location.assign('/digest');
+      if (window.tickrAnalytics) window.tickrAnalytics.savedWatchlist(data, selectedTickers.length, function () { location.assign('/digest'); });
+      else location.assign('/digest');
     }).catch(function (error) { notice(hasIndia() ? 'step-two-error' : 'step-one-error', error.message); setSaving(false); });
   }
 

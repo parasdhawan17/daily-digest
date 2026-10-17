@@ -1,6 +1,7 @@
 (function () {
   'use strict';
   const symbol = document.body.dataset.symbol;
+  let aiOverviewRendered = false;
   const $ = id => document.getElementById(id);
   const {number, fmt, money, pct, statementUnit, metricUnit, field, direction} = window.tickrStockFormat;
   const colors = ['#6f8aff', '#60b6b0', '#ce9c67', '#af8bcb', '#8093ac', '#ca8295'];
@@ -287,7 +288,8 @@
     panel.setAttribute('aria-busy', 'true');
     try {
       const [response] = await Promise.all([requestAI(), window.tickrAIOverviewLayout?.ready]);
-      panel.replaceChildren(); renderAIOverview(panel, response);
+      panel.replaceChildren(); renderAIOverview(panel, response); aiOverviewRendered = true;
+      if (!panel.hidden && window.tickrAnalytics) window.tickrAnalytics.track('view_ai_overview', {symbol});
     } catch (error) {
       const state = node('div', 'stock-state'); state.setAttribute('role', 'status'); state.append(node('p', '', error.message));
       const retry = node('button', 'stock-retry', 'Try again'); retry.type = 'button'; retry.onclick = aiOverview; state.append(retry); panel.replaceChildren(state);
@@ -629,6 +631,7 @@
     document.body.dataset.activeTab = id;
     document.querySelectorAll('[data-tab]').forEach(tab => { const selected = tab.dataset.tab === id; tab.setAttribute('aria-selected', String(selected)); tab.tabIndex = selected ? 0 : -1; $('panel-' + tab.dataset.tab).hidden = !selected; });
     if (core && !built.has(id)) { builders[id](); built.add(id); }
+    if (id === 'ai-overview' && aiOverviewRendered && window.tickrAnalytics) window.tickrAnalytics.track('view_ai_overview', {symbol});
     if (id !== 'ai-overview' && !sectionAssistant) initSectionAssistant();
     scheduleSectionTour(id);
     if (focus) { history.replaceState(null, '', '#' + id); $('tab-' + id).focus(); }
@@ -654,6 +657,7 @@
       const change = $('company-change'); change.textContent = pct(core.change_percent); change.classList.toggle('positive', core.change_percent > 0); change.classList.toggle('negative', core.change_percent < 0);
       $('secondary-price').textContent = exchange === 'NSE' && core.prices.BSE !== null ? 'BSE ' + money(core.prices.BSE) : '';
       $('source-time').textContent = core.source_time ? 'Provider timestamp · ' + core.source_time : 'Retrieved ' + stamp(result.fetched_at) + ' · Provider timestamp unavailable';
+      if (window.tickrAnalytics) window.tickrAnalytics.track('view_stock', {symbol});
       syncAvailableSections(); status.hidden = true; $('stock-content').hidden = false; activate(location.hash.slice(1) || 'ai-overview', false);
     } catch (error) {
       status.replaceChildren(node('p', '', error.message)); const retry = node('button', 'stock-retry', 'Try again'); retry.onclick = init; status.append(retry);

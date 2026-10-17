@@ -229,6 +229,10 @@ window.tickrLegacyAIOverviewPage = function () {
     renderRange(core, price);
     $('page-status').hidden = true;
     $('overview-content').hidden = false;
+    if (window.tickrAnalytics) {
+      window.tickrAnalytics.track('view_stock', {symbol});
+      if (!$('ai-content').hidden) window.tickrAnalytics.track('view_ai_overview', {symbol});
+    }
   }
 
   function citations(ids, sources) {
@@ -327,6 +331,7 @@ window.tickrLegacyAIOverviewPage = function () {
     $('ai-coverage').textContent = fmt(coverage.sources) + ' evidence groups · ' + fmt(coverage.news_stories) + ' available news stories · Cached for up to 6 hours';
     $('ai-status').hidden = true;
     $('ai-content').hidden = false;
+    if (!$('overview-content').hidden && window.tickrAnalytics) window.tickrAnalytics.track('view_ai_overview', {symbol});
   }
 
   async function loadCore() {

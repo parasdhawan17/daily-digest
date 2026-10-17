@@ -137,6 +137,10 @@
     $('page-status').hidden = true;
     $('overview-content').hidden = false;
     renderStory();
+    if (window.tickrAnalytics) {
+      window.tickrAnalytics.track('view_stock', {symbol});
+      if (aiResponse) window.tickrAnalytics.track('view_ai_overview', {symbol});
+    }
   }
 
   function renderAI(response) {
@@ -154,6 +158,7 @@
     const coverage = response.coverage || {};
     $('ai-coverage').textContent = (coverage.sources || 0) + ' evidence groups · ' + (coverage.news_stories || 0) + ' available news stories · Cached for up to 6 hours';
     $('ai-status').hidden = true;
+    if (!$('overview-content').hidden && window.tickrAnalytics) window.tickrAnalytics.track('view_ai_overview', {symbol});
   }
 
   async function loadCore() {

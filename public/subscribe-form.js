@@ -594,7 +594,8 @@
           try {
             if (result.data.warning) sessionStorage.setItem('tickr-welcome-warning', result.data.warning);
           } catch (error) {}
-          window.location.assign(result.data.redirect);
+          if (window.tickrAnalytics) window.tickrAnalytics.savedWatchlist(result.data, selectedTickers.length, function () { window.location.assign(result.data.redirect); });
+          else window.location.assign(result.data.redirect);
           return;
         }
         showSuccess(result.data);

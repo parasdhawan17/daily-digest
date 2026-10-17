@@ -141,6 +141,27 @@ rules. Both layouts use the same overview API and improved explanation prompt.
 
 Copy from sibling `stock-news-bot/.env` via `./scripts/setup_vercel_env.sh`.
 
+Google Analytics 4 uses measurement ID `G-6HV1LTZVDF` on browser pages. The
+shared analytics client sends these success events to GA4 independently of
+PostHog configuration:
+
+| Event | Trigger |
+|------|---------|
+| `sign_up` | A verified user successfully saves a watchlist and creates their first contact record; method is `google` |
+| `watchlist_saved` | A verified watchlist save succeeds; includes only `stock_count` |
+| `view_stock` | Company research data successfully renders; once per stock per page load |
+| `view_ai_overview` | AI overview successfully renders in the active view; once per stock per page load |
+
+Research events include only the public stock symbol. No email, credential,
+digest token, or watchlist contents are sent to GA4. Navigation after saving waits
+up to 900 ms for the event completion callback and still works if Google is blocked.
+Email confirmation requests and failed saves never count as signups.
+
+In the GA4 property, mark `sign_up` as a key event and create its conversion in
+the linked Google Ads account. Keep the other events as supporting measurements
+initially. Verify genuine actions in Realtime or DebugView; do not send synthetic
+signups into production. This account-side configuration is separate from deployment.
+
 Analytics uses a shared browser client with manual, versioned events rather than
 text autocapture. It records page and section views, stable feature identifiers,
 API outcome/latency, AI feature requests, and uncaught browser errors. Form
