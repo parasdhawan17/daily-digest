@@ -3,6 +3,32 @@
 <!DOCTYPE html>
 <html lang="en" data-theme="dark">
 <head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-6HV1LTZVDF"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    // Keep private digest tokens and form values out of Analytics URLs.
+    (function () {
+      var page = new URL(window.location.href);
+      var attribution = new URLSearchParams();
+      page.searchParams.forEach(function (value, key) {
+        if (/^(utm_(source|medium|campaign|term|content|id|source_platform|creative_format|marketing_tactic)|gclid|dclid|gbraid|wbraid)$/.test(key)) {
+          attribution.append(key, value);
+        }
+      });
+      page.search = attribution.toString();
+      page.hash = '';
+      gtag('set', {
+        page_location: page.href,
+        page_referrer: document.referrer.split(/[?#]/)[0]
+      });
+    })();
+
+    gtag('config', 'G-6HV1LTZVDF');
+  </script>
   <meta name="robots" content="noindex">
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
