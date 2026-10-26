@@ -1,0 +1,173 @@
+/* Shared charcoal and violet theme, inlined so saved digests retain their design. */
+:root {
+  --page-bg: #faf8fc; --card-bg: #fff; --muted-bg: #f1eaf7; --panel-bg: #f1eaf7;
+  --text: #271c33; --text-strong: #271c33; --text-secondary: #655571; --text-muted: #786786; --text-label: #655571;
+  --border: #ded0e9; --border-soft: #eadff1; --border-strong: #bd9bd5; --link: #7744ac;
+  --section-max: 1240px; --earnings-latest-bg: #f1e8fb;
+  --company-header-top: #f2e9fa; --company-header-bottom: #fff; --company-header-border: #d7bfe9;
+}
+html[data-theme=dark] {
+  --page-bg: #0d0c10; --card-bg: #18131f; --muted-bg: #231b2d; --panel-bg: #231b2d;
+  --text: #f1edf7; --text-strong: #f1edf7; --text-secondary: #b8aec7; --text-muted: #a395b4; --text-label: #b8aec7;
+  --border: #372a45; --border-soft: #2d2338; --border-strong: #614777; --link: #c0a0f2;
+  --pill-up-bg: #17332d; --pill-up-fg: #80dec0; --pill-down-bg: #3c222f; --pill-down-fg: #ff9faf;
+  --pill-flat-bg: #2c2337; --pill-flat-fg: #c6b8d9;
+  --earnings-beat: #80dec0; --earnings-beat-soft: #17332d; --earnings-miss: #ff9faf; --earnings-miss-soft: #3c222f;
+  --earnings-inline: #b8aec7; --earnings-latest-bg: #2b1c3d;
+  --company-header-top: #281a36; --company-header-bottom: #19121f; --company-header-border: #61417b;
+}
+body[data-digest-page] { background: radial-gradient(ellipse 70% 450px at 50% 0%, #53208420, transparent), var(--page-bg); line-height: 1.6; }
+body[data-digest-page] :focus-visible { outline: 2px solid var(--link); outline-offset: 4px; }
+.indian-personal-dashboard .digest-stock-shell { width: min(1240px, calc(100% - 64px)); }
+.indian-personal-dashboard .digest-stock-masthead { background: transparent; padding-top: 24px; }
+.indian-personal-dashboard .digest-stock-nav { padding: 13px 21px; gap: 20px; background: #19161e; border: 1px solid #ffffff08; border-radius: 60px; }
+.indian-personal-dashboard .digest-stock-brand { font-size: 21px; font-weight: 600; }
+.indian-personal-dashboard .digest-stock-brand img { width: 30px; height: 30px; }
+.indian-personal-dashboard .digest-stock-brand-dot { color: #b394ff; }
+.indian-personal-dashboard .digest-stock-overview { border: 0; background: transparent; }
+.indian-personal-dashboard .digest-stock-overview-grid { padding-top: 32px; padding-bottom: 26px; gap: 28px; }
+.indian-personal-dashboard .digest-stock-eyebrow { color: var(--link); font-size: 9px; font-weight: 500; letter-spacing: .14em; margin-bottom: 10px; }
+.indian-personal-dashboard .digest-stock-overview h1 { font-size: clamp(27px, 3vw, 38px); font-weight: 500; letter-spacing: -.045em; margin-bottom: 11px; }
+.indian-personal-dashboard .digest-stock-overview p { color: var(--text-secondary); font-size: 12px; line-height: 1.7; }
+.indian-personal-dashboard .digest-stock-meta { padding: 10px 17px; border: 1px solid var(--border); border-radius: 12px; background: var(--card-bg); }
+.indian-personal-dashboard .digest-stock-meta p { font-size: 10px; padding: 5px 0; }
+body[data-digest-page] .header-account-actions [data-stock-search] { background: #733ce0; border: 1px solid #9b64ec; color: #fff; border-radius: 50px; min-height: 40px; padding: 0 17px; font-size: 12px; }
+.indian-personal-dashboard .digest-stock-masthead .theme-toggle { width: 38px; height: 38px; border-color: #4a375b; color: #d0bddf; }
+body[data-digest-page] .header-account-actions .auth-controls button { border-color: #554064; color: #d0bddf; background: transparent; border-radius: 50px; }
+body[data-digest-page] .progressive-status { background: transparent; color: var(--text-muted); border-color: var(--border); font-size: 11px; }
+body[data-digest-page] .movers-edit-btn { border-color: var(--border-strong); color: var(--link); border-radius: 8px; background: var(--muted-bg); }
+body[data-digest-page] .watchlist-count { background: var(--muted-bg); color: var(--link); border-color: var(--border); }
+body[data-digest-page] .watchlist-sidebar .movers .pill { border: 1px solid transparent; color: var(--text); background: transparent; }
+body[data-digest-page] .watchlist-sidebar .movers .pill[aria-current=location] { border-color: #9e6bdf50; background: #a576ec1c; box-shadow: none; }
+body[data-digest-page] .watchlist-sidebar .mover-symbol { font-size: 12px; font-weight: 550; }
+body[data-digest-page] .watchlist-sidebar .mover-market { border-color: var(--border); color: var(--text-muted); }
+.indian-personal-dashboard #digest-sections .ticker-section > .section-inner,
+.indian-personal-dashboard #full-digest .ticker-section > .section-inner { padding: 0 22px 22px; border-radius: 17px; overflow: hidden; background: var(--card-bg); border-color: var(--border); }
+.indian-personal-dashboard .ticker-section .ticker-head { padding: 20px 22px; margin: 0 -22px; border-bottom: 1px solid var(--company-header-border); background: linear-gradient(115deg,var(--company-header-top),var(--company-header-bottom)); }
+.indian-personal-dashboard .ticker-section .ticker-symbol { font-size: 23px; font-weight: 550; letter-spacing: -.5px; }
+.indian-personal-dashboard .ticker-section .ticker-price { font-size: 25px; font-weight: 550; letter-spacing: -.6px; }
+.indian-personal-dashboard .ticker-section .ticker-change { padding: 4px 7px; border-radius: 7px; font-size: 11px; }
+body[data-digest-page] .exchange-badge { border-color: var(--border-strong); color: var(--link); background: var(--muted-bg); }
+.indian-personal-dashboard .dashboard-category-tabs { gap: 6px; padding: 8px 0; margin: 0; background: transparent; border-color: var(--border); }
+body[data-digest-page] .dashboard-category-tab { border: 1px solid transparent; border-radius: 8px; padding: 9px 12px; min-height: 40px; font-size: 11px; font-weight: 500; }
+body[data-digest-page] .dashboard-category-tab:hover { background: var(--muted-bg); }
+body[data-digest-page] .dashboard-category-tab[aria-selected=true] { background: #a576ec1c; border-color: #9e6bdf50; color: var(--link); }
+body[data-digest-page] .dashboard-category-tab .dashboard-category-icon { color: var(--link); }
+body[data-digest-page] .dashboard-category-panel { padding-top: 20px; }
+.indian-personal-dashboard .dashboard-card-grid { gap: 18px; }
+.indian-personal-dashboard .dashboard-card { padding: 21px; border-radius: 13px; border-color: var(--border); background: var(--page-bg); }
+body[data-digest-page] .dashboard-card h3 { font-size: 17px; font-weight: 550; letter-spacing: -.4px; margin-bottom: 7px; }
+body[data-digest-page] .dashboard-card-caption { color: var(--text-muted); font-size: 11px; line-height: 1.7; margin-bottom: 15px; }
+body[data-digest-page] .dashboard-card-value { font-size: 25px; font-weight: 550; margin-top: 12px; letter-spacing: -.6px; }
+body[data-digest-page] .dashboard-metric { border-radius: 10px; border-color: var(--border); padding: 14px; }
+body[data-digest-page] .dashboard-detail { padding: 11px 0; border-color: var(--border-soft); }
+body[data-digest-page] .dashboard-fact { padding: 10px 0; border-color: var(--border-soft); }
+body[data-digest-page] .dashboard-mini-table th, body[data-digest-page] .dashboard-mini-table td { padding: 12px 10px; border-color: var(--border-soft); }
+body[data-digest-page] .dashboard-table-wrap { border-radius: 9px; border: 1px solid var(--border-soft); }
+body[data-digest-page] .indian-dashboard .stock-controls { gap: 6px; margin: 14px 0; }
+body[data-digest-page] .indian-dashboard .stock-controls button { min-height: 34px; padding: 6px 10px; border-radius: 7px; background: var(--muted-bg); font-size: 11px; }
+body[data-digest-page] .indian-dashboard .stock-controls button[aria-pressed=true] { border-color: #9e6bdf70; background: #a576ec20; color: var(--link); }
+body[data-digest-page] .dashboard-news-card { padding: 0; }
+body[data-digest-page] .dashboard-news-body { padding: 20px; }
+body[data-digest-page] .dashboard-prose { font-size: 12px; line-height: 1.85; }
+body[data-digest-page] .dashboard-ai-overview-host { --ai-bg: var(--page-bg); --ai-surface: var(--card-bg); --ai-ink: var(--text); --ai-muted: var(--text-secondary); --ai-border: var(--border); --ai-soft: var(--muted-bg); --ai-blue: var(--link); --ai-violet: var(--link); }
+html[data-theme=dark] body[data-digest-page] .ai-story { --story-bg: #15101d; --story-surface: #1e1729; --story-ink: #eee7f7; --story-muted: #b5a7c7; --story-border: #433152; --story-blue: #b99aec; --story-green: #80dec0; --story-red: #ffa0ad; --story-amber: #ebca7c; border-radius: 15px; padding: 22px; }
+html[data-theme=light] body[data-digest-page] .ai-story { --story-bg: #fbf9fe; --story-surface: #fff; --story-ink: #271c33; --story-muted: #655571; --story-border: #ded0e9; --story-blue: #7744ac; }
+body[data-digest-page] .ai-story-stage { border-radius: 13px; padding: 18px; }
+body[data-digest-page] .ai-story-lead h2 { font-size: 24px; font-weight: 550; }
+body[data-digest-page] .stock-section-assistant { border-color: var(--border-strong); background: var(--card-bg); }
+body[data-digest-page] .stock-section-ai-launcher { background: #773cdd; border-color: #a875ee; }
+body[data-digest-page] .site-footer { background: transparent; color: var(--text-muted); }
+body[data-digest-page] .site-footer .section-inner { padding: 28px 0; }
+body[data-digest-page] .footer-brand { font-weight: 550; }
+body[data-digest-page] .footer-link-btn { color: var(--link); }
+/* Mixed-market digests use the same visual palette and rounded surfaces. */
+body[data-digest-page] > .header { background: radial-gradient(ellipse at 50% 100%,#7831df25,transparent 80%),#151019; }
+body[data-digest-page] .header .eyebrow, body[data-digest-page] .header .badge { color: #c0a0f2; }
+body[data-digest-page] .ticker-workspace, body[data-digest-page] .snapshot-range { border-color: var(--border); border-radius: 13px; }
+@media (min-width: 1024px) {
+  body[data-digest-page] .digest-dashboard-shell.has-watchlist { width: min(1240px, calc(100% - 64px)); grid-template-columns: 220px minmax(0,1fr); gap: 22px; padding-top: 0; }
+  body[data-digest-page] .watchlist-sidebar .movers-bar { border-radius: 15px; padding: 16px; background: var(--card-bg); }
+  body[data-digest-page] .watchlist-sidebar .movers .pill { min-height: 48px; padding: 10px; }
+}
+@media (max-width: 1023px) {
+  body[data-digest-page] .watchlist-sidebar { border-color: var(--border); }
+  body[data-digest-page] .watchlist-sidebar .movers-bar { background: var(--page-bg); padding: 8px 0; }
+  body[data-digest-page] .watchlist-sidebar .movers .pill { border-radius: 9px; min-height: 40px; padding: 7px 12px; }
+}
+@media (max-width: 760px) {
+  .indian-personal-dashboard .digest-stock-shell { width: calc(100% - 32px); }
+  .indian-personal-dashboard .digest-stock-masthead { padding-top: 12px; }
+  .indian-personal-dashboard .digest-stock-nav { padding: 8px 12px; min-height: 54px; gap: 10px; }
+  .indian-personal-dashboard .digest-stock-brand { font-size: 17px; gap: 7px; }
+  .indian-personal-dashboard .digest-stock-brand img { width: 27px; height: 27px; }
+  .indian-personal-dashboard .digest-stock-masthead .header-account-actions { gap: 7px; }
+  body[data-digest-page] .header-account-actions [data-stock-search] { width: 36px; height: 36px; min-height: 36px; padding: 0; border-radius: 50%; }
+  body[data-digest-page] .header-account-actions [data-stock-search] span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  .indian-personal-dashboard .digest-stock-masthead .theme-toggle { width: 36px; height: 36px; }
+  body[data-digest-page] .header-account-actions .auth-controls button { font-size: 10px; padding: 5px 9px; height: 34px; }
+  .indian-personal-dashboard .digest-stock-overview-grid { padding-top: 24px; padding-bottom: 21px; display: block; }
+  .indian-personal-dashboard .digest-stock-overview h1 { font-size: 28px; margin-bottom: 8px; }
+  .indian-personal-dashboard .digest-stock-overview p { font-size: 11px; }
+  .indian-personal-dashboard .digest-stock-meta { margin-top: 15px; padding: 8px 12px; }
+  .indian-personal-dashboard .digest-stock-meta p { font-size: 9px; }
+  .indian-personal-dashboard #full-digest, .indian-personal-dashboard #digest-sections { width: calc(100% - 28px); margin: 16px auto; }
+  .indian-personal-dashboard #digest-sections .ticker-section > .section-inner,
+  .indian-personal-dashboard #full-digest .ticker-section > .section-inner { padding: 0 15px 15px; border-radius: 14px; }
+  .indian-personal-dashboard .ticker-section .ticker-head { margin: 0 -15px; padding: 16px; }
+  .indian-personal-dashboard .ticker-section .ticker-symbol { font-size: 21px; }
+  .indian-personal-dashboard .ticker-section .ticker-price { font-size: 23px; }
+  .indian-personal-dashboard .dashboard-category-tabs { gap: 4px; padding: 6px 0; }
+  body[data-digest-page] .dashboard-category-tab { padding: 8px 10px; min-height: 38px; font-size: 10px; }
+  body[data-digest-page] .dashboard-category-panel { padding-top: 15px; }
+  .indian-personal-dashboard .dashboard-card-grid { gap: 13px; grid-template-columns: 1fr; }
+  .indian-personal-dashboard .dashboard-card { padding: 17px; }
+  body[data-digest-page] .dashboard-card h3 { font-size: 16px; }
+  body[data-digest-page] .dashboard-card-value { font-size: 22px; }
+  body[data-digest-page] .dashboard-news-card { padding: 0; }
+  body[data-digest-page] .stock-section-ai-launcher { width: 44px; height: 44px; border-radius: 14px; }
+  body[data-digest-page] .stock-section-ai-launcher .ai-robot { width: 34px; height: 34px; }
+  body[data-digest-page] .stock-section-ai-launcher-tip { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  body[data-digest-page] *, body[data-digest-page] *::before, body[data-digest-page] *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+}
+
+/* The search remains a modal, with the landing page's rounded purple field. */
+body[data-digest-page] .stock-search-dialog { width: min(570px, calc(100% - 32px)); max-height: 80dvh; margin-top: 15vh; border: 1px solid #674785; border-radius: 22px; background: #16101f; color: #f4edff; box-shadow: 0 30px 100px #0008; }
+body[data-digest-page] .stock-search-dialog::backdrop { background: #09060fbb; backdrop-filter: blur(8px); }
+body[data-digest-page] .stock-search-heading { padding: 24px 24px 22px; }
+body[data-digest-page] .stock-search-heading h2 { font-size: 24px; font-weight: 500; letter-spacing: -.7px; }
+body[data-digest-page] .stock-search-close { border: 1px solid #493354; border-radius: 50%; color: #c1acda; font-size: 23px; }
+body[data-digest-page] .stock-search-input-wrap { display: grid; grid-template-columns: 18px minmax(0, 1fr) 42px; align-items: center; gap: 10px; padding: 7px 7px 7px 18px; margin: 0 24px; border: 1px solid #72529e; border-radius: 99px; background: #1c1628; box-shadow: 0 0 0 4px #a878ff09; }
+body[data-digest-page] .stock-search-input-wrap:focus-within { border-color: #b78ceb; box-shadow: 0 0 0 4px #a878ff18; }
+body[data-digest-page] .stock-search-input-wrap > svg { width: 18px; height: 18px; color: #b3a6c5; }
+body[data-digest-page] .stock-search-input-wrap input { min-width: 0; height: 40px; padding: 0; border: 0; border-radius: 0; outline: none; background: transparent; color: #f4edff; font-size: 16px; }
+body[data-digest-page] .stock-search-input-wrap input:focus-visible { outline: none; }
+body[data-digest-page] .stock-search-input-wrap input::placeholder { color: #b3a6c5; opacity: 1; }
+body[data-digest-page] .stock-search-submit { display: grid; place-items: center; width: 42px; height: 42px; padding: 0; border: 0; border-radius: 50%; background: #773ee9; color: white; font-size: 24px; }
+body[data-digest-page] .stock-search-submit:hover { background: #9258fa; }
+body[data-digest-page] .stock-search-status { margin: 19px 25px 14px; color: #b3a6c5; font-size: 11px; }
+body[data-digest-page] .stock-search-results { padding: 0 12px 12px; }
+body[data-digest-page] .stock-search-results li { padding: 15px 13px; min-height: 60px; border-radius: 12px; }
+body[data-digest-page] .stock-search-results li:hover, body[data-digest-page] .stock-search-results li[aria-selected=true] { background: #a576ec20; }
+body[data-digest-page] .stock-search-results strong { color: #f4edff; font-size: 14px; font-weight: 550; }
+body[data-digest-page] .stock-search-results small { color: #b3a6c5; font-size: 11px; }
+body[data-digest-page] .stock-search-results li > span:last-child { color: #c8a5f1; font-size: 11px; }
+@media (max-width: 600px) {
+  body[data-digest-page] .stock-search-dialog { margin-top: 10vh; border-radius: 19px; }
+  body[data-digest-page] .stock-search-heading { padding: 20px 17px; gap: 10px; }
+  body[data-digest-page] .stock-search-heading h2 { font-size: 21px; }
+  body[data-digest-page] .stock-search-close { flex: 0 0 32px; width: 32px; height: 32px; }
+  body[data-digest-page] .stock-search-input-wrap { margin: 0 16px; padding: 6px 6px 6px 13px; gap: 7px; grid-template-columns: 17px minmax(0,1fr) 38px; }
+  body[data-digest-page] .stock-search-submit { width: 38px; height: 38px; }
+  body[data-digest-page] .stock-search-status { margin: 17px 20px 12px; }
+}
+html[data-theme=dark] body[data-digest-page] .stock-search-dialog { background: #16101f; color: #f4edff; border-color: #674785; }
+.indian-personal-dashboard { --company-header-top: #f2e9fa; --company-header-bottom: #fff; --company-header-border: #d7bfe9; }
+html[data-theme=dark] .indian-personal-dashboard { --company-header-top: #281a36; --company-header-bottom: #19121f; --company-header-border: #61417b; }
+.indian-personal-dashboard .digest-stock-overview .digest-stock-eyebrow { color: var(--link); font-size: 9px; }
+body[data-digest-page] .watchlist-sidebar .pill.up .mover-change { color: var(--pill-up-fg); }
+body[data-digest-page] .watchlist-sidebar .pill.down .mover-change { color: var(--pill-down-fg); }
+.indian-personal-dashboard .ticker-section .ticker-logo { background: #fff; border-radius: 8px; padding: 4px; object-fit: contain; }
+html[data-theme] body[data-digest-page] .exchange-badge { border-color: var(--border-strong); color: var(--link); background: var(--muted-bg); }

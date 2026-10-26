@@ -42,7 +42,7 @@
         var stored = localStorage.getItem("daily-digest-theme");
         var theme = stored === "light" || stored === "dark"
           ? stored
-          : (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+          : "dark";
         document.documentElement.setAttribute("data-theme", theme);
         document.documentElement.style.colorScheme = theme;
       } catch (e) {}
@@ -164,8 +164,10 @@
       }
     }
   </style>
+<style>{% include "web_digest_theme.css" %}</style>
+<style>body[data-digest-error]{padding:60px 20px}.card{border-color:var(--border-strong);border-radius:20px;padding:30px;background:var(--card-bg);box-shadow:0 20px 60px #0002}.btn-primary{background:#773ee9;color:#fff;border-radius:50px;padding:12px 20px}.eyebrow{color:var(--link)}h1{font-weight:550;letter-spacing:-.6px}</style>
 </head>
-<body>
+<body data-digest-page data-digest-error>
   <div class="container">
     <div class="card">
       <p class="eyebrow"><img src="/assets/tickr-digest-logo.png" alt="tickr digest." width="181" height="38"></p>

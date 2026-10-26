@@ -1,0 +1,294 @@
+/* Company research follows the landing page's Upstart-inspired design. */
+.stock-page {
+  --page-bg: #0d0c10; --card-bg: #18131f; --muted-bg: #231b2d;
+  --text: #f1edf7; --text-strong: #f1edf7; --text-secondary: #b8aec7;
+  --text-muted: #a395b4; --text-label: #b8aec7;
+  --border: #372a45; --border-soft: #2d2338; --border-strong: #614777;
+  --link: #c0a0f2; --accent: #b492ee;
+  --pill-up-bg: #17332d; --pill-up-fg: #80dec0;
+  --pill-down-bg: #3c222f; --pill-down-fg: #ff9faf;
+  --pill-flat-bg: #2c2337; --pill-flat-fg: #c6b8d9;
+  --signal-green: #80dec0; --signal-red: #ff9faf; --signal-caution: #ebca7c; --signal-caution-bg: #382d20;
+  background: radial-gradient(ellipse 70% 500px at 50% 0%, #53208420, transparent), var(--page-bg);
+  color: var(--text); font-size: 14px; line-height: 1.6;
+  font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+.stock-page .container { width: min(1240px, calc(100% - 64px)); }
+.stock-masthead { background: transparent; padding-top: 24px; }
+.stock-masthead .nav { padding: 13px 21px; gap: 26px; background: #19161e; border: 1px solid #ffffff08; border-radius: 60px; }
+.stock-masthead .brand { font-size: 21px; font-weight: 600; letter-spacing: -.6px; }
+.stock-masthead .brand-icon { width: 30px; height: 30px; }
+.stock-masthead .brand-dot { color: #b394ff; }
+.stock-nav-links { display: flex; gap: 30px; margin-left: auto; }
+.stock-nav-links a { font-size: 12px; text-decoration: none; color: #c6bcce; }
+.stock-nav-links a:hover { color: white; }
+.stock-masthead .nav-actions { gap: 12px; }
+.stock-masthead [data-stock-search] { min-height: 42px; padding: 0 21px; border: 1px solid #9b64ec; border-radius: 50px; background: #733ce0; color: white; font-size: 12px; }
+.stock-masthead [data-stock-search]:hover { background: #8a51ed; }
+.stock-masthead .theme-toggle { width: 38px; height: 38px; color: #d0bddf; border-color: #4a375b; }
+.stock-breadcrumb { gap: 12px; padding: 30px 0 24px; font-size: 11px; }
+.stock-breadcrumb > span:last-child { color: var(--link); }
+.stock-hero { padding: 18px 22px; gap: 24px; border: 1px solid #61417b; border-radius: 20px 20px 0 0; background: radial-gradient(ellipse at 15% 0%, #69359b30, transparent 75%), var(--card-bg); }
+.stock-hero > div:first-child { max-width: 72%; }
+.stock-company-intro { display: flex; gap: 16px; align-items: center; }
+.stock-company-copy { min-width: 0; }
+.stock-company-logo { width: 56px; height: 56px; flex: 0 0 56px; display: grid; place-items: center; padding: 9px; background: #fff; border-radius: 11px; border: 1px solid #ffffff20; }
+.stock-company-logo img { width: 100%; height: auto; max-height: 48px; object-fit: contain; }
+.stock-company-logo img[src$='tcs.png'] { width: 34px; }
+.stock-company-logo-reliance { background: #211b2b; }
+.stock-company-logo svg { width: 32px; height: 32px; color: #8252b5; }
+.stock-eyebrow { font-size: 9px; letter-spacing: .13em; font-weight: 550; color: var(--text-muted); }
+.stock-company-copy > .stock-eyebrow { color: var(--link); margin-bottom: 5px; }
+.stock-hero h1 { font-size: clamp(23px, 2.1vw, 30px); letter-spacing: -.045em; font-weight: 550; line-height: 1.14; margin-bottom: 8px; }
+.stock-identifiers { gap: 7px; }
+.stock-tag { padding: 4px 8px; font-size: 10px; border-radius: 6px; background: #ffffff03; }
+.stock-price-block { padding-left: 26px; border-left: 1px solid var(--border); }
+.stock-price-line { gap: 11px; }
+.stock-price-line > strong { font-size: 29px; font-weight: 550; letter-spacing: -1px; }
+.stock-change { padding: 5px 8px; border-radius: 7px; font-size: 11px; }
+.stock-price-block > p:last-child { font-size: 10px; color: var(--text-muted); }
+.stock-freshness { border: 1px solid #61417b; border-top: 1px solid var(--border); border-radius: 0 0 20px 20px; padding: 8px 22px; font-size: 10px; background: var(--card-bg); }
+.stock-research-heading { display: flex; justify-content: space-between; gap: 20px; align-items: end; margin: 28px 0 18px; }
+.stock-research-heading .stock-eyebrow { margin-bottom: 8px; color: var(--link); }
+.stock-research-heading h2 { margin: 0; color: var(--text); font-size: 26px; letter-spacing: -.8px; font-weight: 500; }
+.stock-research-heading > p { font-size: 11px; color: var(--text-muted); margin: 0 0 2px; }
+.stock-tabs { gap: 7px; padding: 9px; border: 1px solid var(--border); border-radius: 13px; background: var(--page-bg); scrollbar-width: thin; box-shadow: 0 8px 24px #0002; }
+.stock-tabs button { padding: 11px 17px; font-size: 12px; font-weight: 500; border: 1px solid transparent; border-radius: 8px; min-height: 42px; }
+.stock-tabs button:hover { background: var(--muted-bg); color: var(--text); }
+.stock-tabs button[aria-selected=true] { background: #a576ec1c; border-color: #9e6bdf50; color: var(--link); }
+.stock-panel { padding-top: 24px; min-height: 400px; }
+.stock-panel#panel-ai-overview { gap: 22px; }
+.stock-grid { gap: 22px; grid-template-columns: minmax(0, 1.75fr) minmax(270px,1fr); }
+.stock-stack { gap: 22px; }
+.stock-card { padding: 25px; border-radius: 16px; background: linear-gradient(145deg, #251b311f, transparent 70%), var(--card-bg); border-color: var(--border); }
+.stock-card h2 { font-size: 18px; font-weight: 550; letter-spacing: -.4px; margin-bottom: 7px; }
+.stock-card h3 { font-size: 14px; margin-top: 20px; font-weight: 550; }
+.stock-caption { font-size: 11px; line-height: 1.7; margin-bottom: 19px; }
+.stock-card-head { margin-bottom: 12px; }
+.stock-metrics { gap: 12px; border: 0; border-radius: 0; background: transparent; margin-bottom: 22px; overflow: visible; }
+.stock-metric { padding: 19px; border: 1px solid var(--border); border-radius: 12px; }
+.stock-metric span { font-size: 11px; margin-bottom: 9px; }
+.stock-metric strong { font-size: 23px; letter-spacing: -.6px; font-weight: 550; }
+.stock-metric small { font-size: 10px; line-height: 1.5; margin-top: 7px; }
+.stock-fact { padding: 12px 0; }
+.stock-fact dt, .stock-fact dd { font-size: 12px; }
+.stock-controls { gap: 7px; margin: 16px 0; }
+.stock-controls button, .stock-select, .stock-retry { padding: 7px 12px; border-radius: 8px; min-height: 36px; font-size: 11px; background: var(--muted-bg); }
+.stock-controls button[aria-pressed=true] { color: var(--link); background: #a576ec20; border-color: #9e6bdf70; }
+.stock-chart-readout { margin: 10px 0; font-size: 12px; }
+.stock-chart-legend { gap: 18px; margin-top: 14px; }
+.stock-table { font-size: 12px; }
+.stock-table th { font-size: 10px; padding: 12px; }
+.stock-table td { padding: 13px 12px; }
+.stock-table tbody tr:hover td { background: var(--muted-bg); }
+.stock-table-wrap { border: 1px solid var(--border-soft); border-radius: 10px; }
+.stock-detail { padding: 12px 0; }
+.stock-detail > summary { font-size: 12px; }
+.stock-prose { font-size: 13px; line-height: 1.85; color: var(--text-secondary); }
+.stock-person { padding: 13px 0; }
+.stock-news-grid { gap: 22px; }
+.stock-news-card { padding: 0; }
+.stock-news-card img { height: 175px; }
+.stock-news-body { padding: 23px; }
+.stock-news-body h2 { font-size: 18px; line-height: 1.5; font-weight: 500; }
+.stock-news-meta { font-size: 9px; color: var(--link); }
+.stock-state { padding: 35px 24px; border-radius: 15px; border-color: var(--border-strong); font-size: 13px; }
+.stock-footer { margin-top: 60px !important; padding: 30px 0; }
+.stock-footer .brand { font-size: 18px; font-weight: 550; }
+.stock-footer p, .stock-footer > span { color: var(--text-muted); font-size: 11px; }
+/* Reuse the actual AI summary layout, with the same palette as the product tour. */
+.stock-page .ai-story {
+  --story-bg: #15101d; --story-surface: #1e1729; --story-ink: #eee7f7;
+  --story-muted: #b5a7c7; --story-border: #433152; --story-blue: #b99aec;
+  --story-green: #80dec0; --story-red: #ffa0ad; --story-amber: #ebca7c;
+  border-radius: 18px; padding: 26px;
+}
+.stock-page .ai-story-lead { padding-bottom: 24px; gap: 16px; }
+.stock-page .ai-story-lead h2 { font-size: 25px; font-weight: 550; letter-spacing: -.7px; }
+.stock-page .ai-story-timeline { gap: 18px; }
+.stock-page .ai-story-stage { padding: 21px; border-radius: 14px; min-height: 290px; }
+.stock-page .ai-story-stage h4 { font-size: 17px; font-weight: 550; margin: 13px 0 18px; }
+.stock-page .ai-story-stage h3 { font-size: 12px; }
+.stock-page .ai-story-facts { gap: 17px; }
+.stock-page .ai-story-facts dd { font-size: 23px; font-weight: 550; }
+.stock-page .ai-story-explanation { line-height: 1.85; }
+.stock-page .ai-story-more-card { border-radius: 13px; padding: 20px; }
+.stock-page .ai-story-disclosure > summary { min-height: 42px; }
+.stock-page .ai-story-footer { padding-top: 20px; }
+.stock-page .stock-section-assistant { background: var(--card-bg); border-color: var(--border-strong); box-shadow: 0 20px 80px #0005; }
+.stock-page .stock-section-ai-launcher { background: #773cdd; border-color: #a875ee; }
+html[data-theme=light] .stock-page {
+  --page-bg: #faf8fc; --card-bg: #fff; --muted-bg: #f1eaf7;
+  --text: #271c33; --text-strong: #271c33; --text-secondary: #655571;
+  --text-muted: #786786; --text-label: #655571; --border: #ded0e9; --border-soft: #eadff1; --border-strong: #bd9bd5;
+  --link: #7744ac; --accent: #824cba;
+  --pill-up-bg: #e3f4ed; --pill-up-fg: #087355; --pill-down-bg: #fde9ef; --pill-down-fg: #aa344b;
+  --pill-flat-bg: #f0e8f6; --pill-flat-fg: #655571;
+}
+html[data-theme=light] .stock-page .ai-story {
+  --story-bg: #fbf9fe; --story-surface: #fff; --story-ink: #271c33;
+  --story-muted: #655571; --story-border: #ded0e9; --story-blue: #7744ac;
+  --story-green: #087355; --story-red: #aa344b; --story-amber: #88600c;
+}
+html[data-theme=light] .stock-hero, html[data-theme=light] .stock-freshness { border-color: #cdb2df; }
+@media (max-width: 1000px) {
+  .stock-nav-links { gap: 18px; }
+  .stock-masthead .nav { gap: 20px; }
+  .stock-hero { gap: 18px; padding: 18px; }
+  .stock-company-intro { gap: 16px; }
+  .stock-company-logo { width: 52px; height: 52px; flex-basis: 52px; padding: 8px; }
+  .stock-price-line { flex-wrap: wrap; }
+  .stock-price-line > strong { font-size: 30px; }
+  .stock-page .ai-story-stage { padding: 16px; }
+  .stock-page .ai-story-facts dd { font-size: 20px; }
+}
+@media (max-width: 760px) {
+  .stock-page .container { width: calc(100% - 36px); }
+  .stock-nav-links { display: none; }
+  .stock-masthead .nav { flex-wrap: nowrap; }
+  .stock-research-heading > p { display: none; }
+  .stock-hero { align-items: flex-start; }
+  .stock-grid { grid-template-columns: 1fr; }
+  .stock-page .ai-story-timeline { grid-template-columns: 1fr; }
+  .stock-page .ai-story-timeline::before { display: none; }
+  .stock-page .ai-story-stage { min-height: 0; padding: 20px; }
+  .stock-page .ai-story-more-rows { grid-template-columns: 1fr; }
+  .stock-page .ai-story-lead h2 { font-size: 22px; }
+  .stock-metrics { grid-template-columns: repeat(2, minmax(0,1fr)); }
+}
+@media (max-width: 540px) {
+  .stock-page .container { width: calc(100% - 28px); }
+  .stock-masthead { padding-top: 14px; }
+  .stock-masthead .nav { padding: 11px 13px; gap: 10px; }
+  .stock-masthead .brand { font-size: 16px; gap: 6px; }
+  .stock-masthead .brand-icon { width: 25px; height: 25px; }
+  .stock-masthead .nav-actions { gap: 7px; }
+  .stock-masthead [data-stock-search] { padding: 0 12px; font-size: 10px; min-height: 36px; }
+  .stock-masthead .theme-toggle { width: 32px; height: 32px; }
+  .stock-breadcrumb { padding: 24px 0 18px; font-size: 10px; gap: 9px; }
+  .stock-hero { display: block; padding: 22px; border-radius: 16px 16px 0 0; }
+  .stock-hero > div:first-child { max-width: 100%; }
+  .stock-company-intro { align-items: flex-start; gap: 14px; }
+  .stock-company-logo { width: 56px; height: 56px; flex-basis: 56px; border-radius: 11px; padding: 9px; }
+  .stock-company-logo img[src$='tcs.png'] { width: 32px; }
+  .stock-eyebrow { font-size: 8px; }
+  .stock-hero h1 { font-size: 25px; margin-bottom: 12px; }
+  .stock-tag { font-size: 9px; padding: 3px 6px; }
+  .stock-price-block { border-left: 0; border-top: 1px solid var(--border); padding: 19px 0 0; margin-top: 23px; }
+  .stock-price-line { justify-content: flex-start; }
+  .stock-price-line > strong { font-size: 32px; }
+  .stock-freshness { padding: 13px 22px; font-size: 9px; gap: 5px; border-radius: 0 0 16px 16px; }
+  .stock-research-heading { margin-top: 32px; }
+  .stock-research-heading h2 { font-size: 24px; }
+  .stock-tabs { margin: 0; padding: 6px; gap: 4px; border-radius: 11px; }
+  .stock-tabs button { padding: 9px 13px; min-height: 40px; font-size: 11px; }
+  .stock-panel { padding-top: 18px; }
+  .stock-card { padding: 20px; }
+  .stock-card h2 { font-size: 17px; }
+  .stock-metric { padding: 15px; }
+  .stock-metric strong { font-size: 20px; }
+  .stock-page .ai-story { padding: 17px; border-radius: 15px; }
+  .stock-page .ai-story-lead { gap: 11px; padding-bottom: 19px; }
+  .stock-page .ai-story-lead h2 { font-size: 20px; }
+  .stock-page .ai-story-stage { padding: 18px; }
+  .stock-news-grid { grid-template-columns: 1fr; }
+  .stock-news-card { padding: 0; }
+  .stock-table th, .stock-table td { padding: 11px; }
+}
+.stock-page #panel-ai-overview {
+  --ai-bg: var(--page-bg); --ai-surface: var(--card-bg); --ai-ink: var(--text);
+  --ai-muted: var(--text-secondary); --ai-border: var(--border); --ai-soft: var(--muted-bg);
+  --ai-blue: var(--accent); --ai-violet: var(--link); --ai-green: var(--pill-up-fg);
+  --ai-red: var(--pill-down-fg); --ai-amber: var(--signal-caution);
+}
+/* Mobile research layout: compact identity, clear quote, and unobstructed controls. */
+@media (max-width: 600px) {
+  .stock-page .container { width: calc(100% - 32px); }
+  .stock-masthead { padding-top: 12px; }
+  .stock-masthead .nav { min-height: 54px; padding: 8px 12px; gap: 12px; }
+  .stock-masthead .brand { font-size: 17px; letter-spacing: -.6px; }
+  .stock-masthead .brand-icon { width: 27px; height: 27px; }
+  .stock-masthead .nav-actions { gap: 8px; }
+  .stock-masthead [data-stock-search] { width: 36px; height: 36px; min-height: 36px; padding: 0; border-radius: 50%; }
+  .stock-masthead [data-stock-search] > span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  .stock-masthead .theme-toggle { width: 36px; height: 36px; }
+  .stock-breadcrumb { padding: 17px 0 15px; font-size: 10px; gap: 9px; }
+  .stock-hero { display: block; padding: 14px; border-radius: 16px 16px 0 0; }
+  .stock-hero > div:first-child { max-width: 100%; }
+  .stock-company-intro { display: grid; grid-template-columns: 36px minmax(0, 1fr); gap: 4px 11px; align-items: start; }
+  .stock-company-copy { display: contents; }
+  .stock-company-logo { grid-column: 1; grid-row: 1 / 3; width: 36px; height: 36px; padding: 5px; border-radius: 9px; margin-top: 2px; }
+  .stock-company-logo img[src$='tcs.png'] { width: 25px; }
+  .stock-company-copy > .stock-eyebrow { grid-column: 2; font-size: 8px; letter-spacing: .09em; margin: 0; line-height: 1.4; }
+  .stock-hero h1 { grid-column: 2; font-size: 19px; line-height: 1.2; letter-spacing: -.7px; margin: 0; font-weight: 550; }
+  .stock-identifiers { grid-column: 1 / -1; gap: 6px; margin-top: 6px; }
+  .stock-tag { font-size: 9px; line-height: 1.4; padding: 4px 7px; background: var(--muted-bg); }
+  .stock-price-block { display: grid; grid-template-columns: 1fr auto; align-items: end; column-gap: 12px; border-left: 0; border-top: 1px solid var(--border); padding: 10px 0 0; margin: 11px 0 0; text-align: left; }
+  .stock-price-block > .stock-eyebrow { grid-column: 1 / -1; font-size: 8px; margin-bottom: 4px; }
+  .stock-price-line { justify-content: flex-start; gap: 10px; flex-wrap: wrap; }
+  .stock-price-line > strong { font-size: 26px; line-height: 1.15; letter-spacing: -.9px; }
+  .stock-change { font-size: 10px; padding: 4px 7px; }
+  .stock-price-block > p:last-child { font-size: 9px; line-height: 1.4; margin: 0 0 3px; white-space: nowrap; }
+  .stock-freshness { padding: 7px 14px; gap: 2px; font-size: 8px; line-height: 1.55; border-radius: 0 0 16px 16px; }
+  .stock-research-heading { margin: 20px 0 13px; }
+  .stock-research-heading .stock-eyebrow { display: none; }
+  .stock-research-heading h2 { font-size: 20px; font-weight: 500; letter-spacing: -.5px; }
+  .stock-research-heading > p { display: none; }
+  .stock-tabs { gap: 5px; padding: 5px; margin: 0; border-radius: 11px; scrollbar-width: none; }
+  .stock-tabs::-webkit-scrollbar { display: none; }
+  .stock-tabs button { min-height: 38px; padding: 8px 12px; font-size: 11px; border-radius: 7px; }
+  .stock-panel { padding-top: 16px; }
+  .stock-metrics { gap: 10px; margin-bottom: 16px; }
+  .stock-metric { padding: 15px; }
+  .stock-metric:only-child { grid-column: 1 / -1; display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 4px 12px; }
+  .stock-metric:only-child > span { margin: 0; font-size: 11px; }
+  .stock-metric:only-child > strong { font-size: 20px; }
+  .stock-metric:only-child > small { grid-column: 1 / -1; margin: 0; font-size: 9px; }
+  .stock-grid, .stock-stack { gap: 16px; }
+  .stock-card { padding: 18px; border-radius: 14px; }
+  .stock-card h2 { font-size: 17px; }
+  .stock-caption { margin-bottom: 14px; font-size: 11px; }
+  .stock-controls { gap: 5px; margin: 12px 0; }
+  .stock-controls button { min-height: 34px; padding: 6px 9px; font-size: 10px; }
+  .stock-news-card { padding: 0; }
+  .stock-page .stock-section-ai-launcher { width: 44px; height: 44px; border-radius: 14px; right: 16px; bottom: max(16px, env(safe-area-inset-bottom)); box-shadow: 0 6px 24px #0004; }
+  .stock-page .stock-section-ai-launcher .ai-robot { width: 34px; height: 34px; }
+  .stock-page .stock-section-ai-launcher-tip { display: none; }
+  .stock-page .stock-footer { padding-bottom: 84px; }
+}
+@media (max-width: 360px) {
+  .stock-price-block { grid-template-columns: 1fr; }
+  .stock-price-block > p:last-child { margin-top: 6px; }
+  .stock-hero h1 { font-size: 18px; }
+}
+/* The search remains a modal, with the landing page's rounded purple field. */
+.stock-page .stock-search-dialog { width: min(570px, calc(100% - 32px)); max-height: 80dvh; margin-top: 15vh; border: 1px solid #674785; border-radius: 22px; background: #16101f; color: #f4edff; box-shadow: 0 30px 100px #0008; }
+.stock-page .stock-search-dialog::backdrop { background: #09060fbb; backdrop-filter: blur(8px); }
+.stock-page .stock-search-heading { padding: 24px 24px 22px; }
+.stock-page .stock-search-heading h2 { font-size: 24px; font-weight: 500; letter-spacing: -.7px; }
+.stock-page .stock-search-close { border: 1px solid #493354; border-radius: 50%; color: #c1acda; font-size: 23px; }
+.stock-page .stock-search-input-wrap { display: grid; grid-template-columns: 18px minmax(0, 1fr) 42px; align-items: center; gap: 10px; padding: 7px 7px 7px 18px; margin: 0 24px; border: 1px solid #72529e; border-radius: 99px; background: #1c1628; box-shadow: 0 0 0 4px #a878ff09; }
+.stock-page .stock-search-input-wrap:focus-within { border-color: #b78ceb; box-shadow: 0 0 0 4px #a878ff18; }
+.stock-page .stock-search-input-wrap > svg { width: 18px; height: 18px; color: #b3a6c5; }
+.stock-page .stock-search-input-wrap input { min-width: 0; height: 40px; padding: 0; border: 0; border-radius: 0; outline: none; background: transparent; color: #f4edff; font-size: 16px; }
+.stock-page .stock-search-input-wrap input:focus-visible { outline: none; }
+.stock-page .stock-search-input-wrap input::placeholder { color: #b3a6c5; opacity: 1; }
+.stock-page .stock-search-submit { display: grid; place-items: center; width: 42px; height: 42px; padding: 0; border: 0; border-radius: 50%; background: #773ee9; color: white; font-size: 24px; }
+.stock-page .stock-search-submit:hover { background: #9258fa; }
+.stock-page .stock-search-status { margin: 19px 25px 14px; color: #b3a6c5; font-size: 11px; }
+.stock-page .stock-search-results { padding: 0 12px 12px; }
+.stock-page .stock-search-results li { padding: 15px 13px; min-height: 60px; border-radius: 12px; }
+.stock-page .stock-search-results li:hover, .stock-page .stock-search-results li[aria-selected=true] { background: #a576ec20; }
+.stock-page .stock-search-results strong { color: #f4edff; font-size: 14px; font-weight: 550; }
+.stock-page .stock-search-results small { color: #b3a6c5; font-size: 11px; }
+.stock-page .stock-search-results li > span:last-child { color: #c8a5f1; font-size: 11px; }
+@media (max-width: 600px) {
+  .stock-page .stock-search-dialog { margin-top: 10vh; border-radius: 19px; }
+  .stock-page .stock-search-heading { padding: 20px 17px; gap: 10px; }
+  .stock-page .stock-search-heading h2 { font-size: 21px; }
+  .stock-page .stock-search-close { flex: 0 0 32px; width: 32px; height: 32px; }
+  .stock-page .stock-search-input-wrap { margin: 0 16px; padding: 6px 6px 6px 13px; gap: 7px; grid-template-columns: 17px minmax(0,1fr) 38px; }
+  .stock-page .stock-search-submit { width: 38px; height: 38px; }
+  .stock-page .stock-search-status { margin: 17px 20px 12px; }
+}
+html[data-theme=dark] .stock-page .stock-search-dialog { background: #16101f; color: #f4edff; border-color: #674785; }

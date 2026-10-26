@@ -12,7 +12,7 @@
   const dialog = document.createElement('dialog');
   dialog.className = 'stock-search-dialog';
   dialog.setAttribute('aria-labelledby', 'stock-search-title');
-  dialog.innerHTML = '<div class="stock-search-heading"><h2 id="stock-search-title">Find your next perspective.</h2><button class="stock-search-close" aria-label="Close stock search" type="button">×</button></div><div class="stock-search-input-wrap"><input type="search" aria-label="Search Indian stocks by name or symbol" placeholder="Company or symbol, e.g. TCS" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="stock-search-results" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" maxlength="100"></div><p class="stock-search-status" role="status">Search companies listed in India.</p><ul id="stock-search-results" class="stock-search-results" role="listbox" aria-label="Indian stock search results"></ul>';
+  dialog.innerHTML = '<div class="stock-search-heading"><h2 id="stock-search-title">Find your next perspective.</h2><button class="stock-search-close" aria-label="Close stock search" type="button">×</button></div><form class="stock-search-input-wrap" role="search">' + icon + '<input type="search" aria-label="Search Indian stocks by name or symbol" placeholder="Search a company, e.g. TCS" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="stock-search-results" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" maxlength="100"><button class="stock-search-submit" type="submit" aria-label="Find a company"><span aria-hidden="true">↗</span></button></form><p class="stock-search-status" role="status">Search companies listed in India.</p><ul id="stock-search-results" class="stock-search-results" role="listbox" aria-label="Indian stock search results"></ul>';
   document.body.append(dialog);
   const input = dialog.querySelector('input'), list = dialog.querySelector('ul'), status = dialog.querySelector('[role=status]');
   let timer, controller, generation = 0, items = [], active = -1, opener;
@@ -66,7 +66,23 @@
   input.addEventListener('keydown', event => {
     if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
       event.preventDefault(); if (items.length) select((active + (event.key === 'ArrowDown' ? 1 : -1) + items.length) % items.length);
-    } else if (event.key === 'Enter') { event.preventDefault(); if (active >= 0) navigate(active); else if (items.length === 1) navigate(0); }
+    }
+  });
+  dialog.querySelector('form').addEventListener('submit', async event => {
+    event.preventDefault();
+    if (active >= 0) return navigate(active);
+    const query = input.value.trim();
+    if (!query) return input.focus();
+    if (!items.length) {
+      reset(); status.textContent = 'Searching Indian stocks…';
+      const version = generation;
+      await search(query, version);
+      if (version !== generation || !dialog.open) return;
+    }
+    const exact = items.findIndex(item => item.symbol.slice(3) === query.toUpperCase());
+    if (exact >= 0) navigate(exact);
+    else if (items.length === 1) navigate(0);
+    else if (items.length > 1) status.textContent = 'Choose a company from the results to continue.';
   });
   dialog.querySelector('button').addEventListener('click', () => dialog.close());
   dialog.addEventListener('click', event => { if (event.target === dialog) { const r = dialog.getBoundingClientRect(); if (event.clientX < r.left || event.clientX > r.right || event.clientY < r.top || event.clientY > r.bottom) dialog.close(); } });

@@ -222,12 +222,30 @@
     var railScrollLeft = $('category-rail').scrollLeft;
     $('category-rail').innerHTML = catalog.categories.map(function (category) {
       var count = categorySelected(category).length;
-      return '<button type="button" class="category-button tone-' + category.id + ' ' + (category.id === activeCategory ? 'is-active ' : '') + (count ? 'has-selection' : '') + '" data-category="' + category.id + '" aria-current="' + (category.id === activeCategory ? 'true' : 'false') + '">' + icon(category.id,'category-icon') + '<span class="category-button-copy"><strong>' + category.title + '</strong><small>' + category.description + '</small></span><span class="category-count">' + count + '<small>/' + category.cards.length + '</small></span></button>';
+      var selectionLabel = category.id === 'ai' ? (count ? 'On' : 'Off') : count + '<small>/' + category.cards.length + '</small>';
+      return '<button type="button" class="category-button tone-' + category.id + ' ' + (category.id === activeCategory ? 'is-active ' : '') + (count ? 'has-selection' : '') + '" data-category="' + category.id + '" aria-current="' + (category.id === activeCategory ? 'true' : 'false') + '">' + icon(category.id,'category-icon') + '<span class="category-button-copy"><strong>' + category.title + '</strong><small>' + category.description + '</small></span><span class="category-count">' + selectionLabel + '</span></button>';
     }).join('');
     $('category-rail').scrollLeft = railScrollLeft;
     $('category-rail').querySelectorAll('[data-category]').forEach(function (button) { button.onclick = function () { activateCategory(button.dataset.category); }; });
     var category = categoryById(activeCategory) || catalog.categories[0];
     $('active-category-kicker').textContent = 'Choose information'; $('active-category-title').textContent = category.title; $('active-category-description').textContent = category.description;
+    var isAI = category.id === 'ai';
+    document.querySelector('.picker-actions').hidden = isAI;
+    $('category-selection-count').hidden = isAI;
+    if (isAI) {
+      var enabled = categorySelected(category).length > 0;
+      $('active-category-kicker').textContent = 'Dashboard preference';
+      $('active-category-description').textContent = 'Choose whether to show AI summaries for your saved stocks.';
+      $('card-grid').className = 'ai-summary-setting';
+      $('card-grid').innerHTML = '<label class="ai-summary-toggle" for="ai-summary-enabled"><span><strong>Enable AI summary</strong><small>Company insights, key risks, and what to watch next.</small></span><input id="ai-summary-enabled" type="checkbox" role="switch" ' + (enabled ? 'checked' : '') + '><span class="ai-summary-switch" aria-hidden="true"></span></label>';
+      $('ai-summary-enabled').onchange = function () {
+        setAIEnabled(this.checked);
+        renderCustomizer();
+        $('ai-summary-enabled').focus();
+      };
+      renderSelectionSummary();
+      return;
+    }
     $('category-selection-count').textContent = categorySelected(category).length + ' of ' + category.cards.length + ' selected in this section';
     $('card-grid').className = 'selection-grid tone-' + category.id;
     $('card-grid').innerHTML = category.cards.map(function (card) {
@@ -242,6 +260,12 @@
       renderCustomizer();
     }; });
     renderSelectionSummary();
+  }
+  function setAIEnabled(enabled) {
+    categoryById('ai').cards.forEach(function (card) {
+      if (enabled) selectedCards.add(card.id);
+      else selectedCards.delete(card.id);
+    });
   }
   function renderSelectionSummary() {
     var categoryCount = catalog.categories.filter(function (category) { return categorySelected(category).length; }).length;

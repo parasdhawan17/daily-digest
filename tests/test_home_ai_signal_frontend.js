@@ -15,8 +15,9 @@ function payload(overrides = {}) {
     exchange: 'BSE', market_cap_crore: 120000, selection: 'highest_market_cap', price: 100,
     percent_change: 6, source_time: '2026-10-09 10:00', selected_at: '2026-10-10T00:00:00Z'}, core: core().data, overview: {...ai(), data: {...ai().data, generated_at: new Date().toISOString()}}, ...overrides};
 }
-async function setup(data, ok = true, snapshot = null) {
+async function setup(data, ok = true, snapshot = null, demo = false) {
   const elements = Object.fromEntries(['home-ai-signal', 'home-ai-content', 'home-ai-caption', 'home-ai-toolbar-status'].map(id => [id, new Element()]));
+  if (demo) elements['home-ai-signal'].dataset.preview = 'demo';
   let calls = 0;
   let visibilityHandler;
   if (snapshot) { elements['home-ai-snapshot'] = new Element(); elements['home-ai-snapshot'].textContent = JSON.stringify(snapshot); }
@@ -27,6 +28,17 @@ async function setup(data, ok = true, snapshot = null) {
   await new Promise(setImmediate);
   return {elements, calls, context, visibilityHandler};
 }
+test('landing demo uses interactive research cards with sample data and no live request', async () => {
+  const {elements: e, calls} = await setup(null, true, null, true);
+  assert.equal(calls, 0);
+  assert.equal(byClass(e['home-ai-content'], 'ai-story-stage').length, 3);
+  assert.equal(byClass(e['home-ai-content'], 'ai-story-range').length, 1);
+  assert.equal(byClass(e['home-ai-content'], 'ai-story-disclosure').length, 3);
+  assert.match(e['home-ai-content'].textContent, /Example Technologies/);
+  assert.match(e['home-ai-toolbar-status'].textContent, /Interactive demo/);
+  assert.match(e['home-ai-caption'].textContent, /Fictional company and sample figures/);
+  assert.equal(e['home-ai-signal'].attributes['aria-busy'], 'false');
+});
 test('loads once and renders real overview, sources, dates and full link', async () => {
   const {elements: e, calls} = await setup(payload());
   assert.equal(calls, 1);

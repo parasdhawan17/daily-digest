@@ -11,6 +11,43 @@
     if (text) el.textContent = text;
     return el;
   }
+  // A stable, explicitly illustrative tour using the stock page's real card renderer.
+  function renderDemo() {
+    const company = node('div', 'preview-company');
+    company.append(node('h2', '', 'Example Technologies'), node('p', 'preview-kicker', 'DEMO · IT services · Illustrative figures'));
+    const summary = node('div', 'preview-ai-summary');
+    summary.append(node('h3', '', 'Revenue is growing. Keep an eye on margins.'),
+      node('p', '', 'A quick view of where the company stands, what changed, and what to watch next.'));
+    const demoCore = {
+      prices: {NSE: 3200}, change_percent: 1.24, year_low: 2700, year_high: 3900,
+      snapshot: {}, health: {groups: [{metrics: [{id: 'revenue', label: 'Revenue', value: 249,
+        unit: '₹ cr', period: '2026-03-31', history: [
+          {period: '2024-03-31', value: 210}, {period: '2025-03-31', value: 230}, {period: '2026-03-31', value: 249}
+        ]}]}]}
+    };
+    const demoAI = {ok: true, data: {
+      summary: {heading: 'Growth with a margin question', text: 'Illustrative company research.', tone: 'caution'},
+      changes: [{heading: 'Revenue keeps moving up', tone: 'positive',
+        text: 'In this demo, annual revenue rose from ₹230 crore to ₹249 crore. Higher sales show business growth; cash flow and costs help explain its quality.',
+        evidence_ids: ['demo-financials'], facts: [{label: 'Revenue growth', value: '+8.3% YoY'}, {label: 'Annual revenue', value: '₹249 cr'}]}],
+      watch_next: [{heading: 'Can profit margins recover?', tone: 'caution',
+        text: 'In this demo, operating margin eased from 25.2% to 24.5%. The next results can show whether sales growth is translating into stronger profits.',
+        evidence_ids: ['demo-financials'], facts: [{label: 'Operating margin', value: '24.5%'}, {label: 'Previous year', value: '25.2%'}]}],
+      encouraging: [], attention: [], risks: [], catalysts: [],
+      sources: [{id: 'demo-financials', section: 'financials', label: 'Illustrative financial data'}]
+    }};
+    const storyHost = node('div', 'home-ai-story-host stock-ai-overview-host home-demo-story');
+    storyHost.append(window.tickrAIStory.render(demoAI, demoCore, {
+      compact: true, hideEmpty: true, compactCharts: false, sourceHref: () => '#home-ai-caption'
+    }));
+    const footer = node('div', 'preview-ai-footer');
+    const link = node('a', '', 'Try it with a company you follow →'); link.href = '#home-stock-query';
+    footer.append(link, node('span', 'preview-ai-footer-note', 'Open a card to explore'));
+    content.replaceChildren(company, summary, storyHost, footer);
+    if (toolbarStatus) toolbarStatus.replaceChildren(node('span', 'preview-example', 'Interactive demo'));
+    caption.textContent = 'Product demo · Fictional company and sample figures. Not live market data or investment advice.';
+    host.setAttribute('aria-busy', 'false');
+  }
   function unavailable() {
     const company = node('div', 'preview-company'), copy = node('div');
     copy.append(node('h2', '', 'Tata Consultancy Services'), node('p', 'preview-kicker', 'TCS · Technology · NSE'));
@@ -131,6 +168,10 @@
     try {
       if (render(payload)) displayedAt = time;
     } catch (_) { /* Keep the visible card if rendering fails. */ }
+  }
+  if (host.dataset.preview === 'demo') {
+    renderDemo();
+    return;
   }
   unavailable();
   const snapshot = document.getElementById('home-ai-snapshot');

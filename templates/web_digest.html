@@ -45,7 +45,7 @@
         var stored = localStorage.getItem("daily-digest-theme");
         var theme = stored === "light" || stored === "dark"
           ? stored
-          : {% if indian_only %}(matchMedia("(prefers-color-scheme:dark)").matches ? "dark" : "light"){% else %}"dark"{% endif %};
+          : "dark";
         document.documentElement.setAttribute("data-theme", theme);
         document.documentElement.style.colorScheme = theme;
       } catch (e) {}
@@ -1506,8 +1506,9 @@
 <link rel="stylesheet" href="/auth.css">
 <link rel="stylesheet" href="/stock-search.css">
 <script src="/stock-search.js" defer></script>
+<style>{% include "web_digest_theme.css" %}</style>
 </head>
-<body{% if indian_only %} class="indian-personal-dashboard"{% endif %}>
+<body data-digest-page{% if indian_only %} class="indian-personal-dashboard"{% endif %}>
 <p id="auth-notice" class="auth-notice" role="status" hidden></p>
   {% if indian_only %}
   <header class="digest-stock-masthead">

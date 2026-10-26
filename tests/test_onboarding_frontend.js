@@ -74,3 +74,21 @@ test('every catalog card is unique and category recommendations are valid', () =
   assert.match(js, /selectedCards\.delete/);
   assert.doesNotMatch(js, /activateCategory\(button\.dataset\.category, true\)/);
 });
+
+test('AI summary switch enables or disables the full AI section and preserves other cards', () => {
+  const vm = require('node:vm');
+  const fn = js.slice(js.indexOf('  function setAIEnabled('), js.indexOf('  function renderSelectionSummary('));
+  const ai = catalog.categories.find(category => category.id === 'ai');
+  const selectedCards = new Set(['overview_market_cap', ai.cards[0].id]);
+  const context = {selectedCards, categoryById: id => catalog.categories.find(category => category.id === id)};
+  vm.runInNewContext(fn, context);
+  context.setAIEnabled(false);
+  assert.deepEqual([...selectedCards], ['overview_market_cap']);
+  context.setAIEnabled(true);
+  assert.ok(ai.cards.every(card => selectedCards.has(card.id)));
+  assert.ok(selectedCards.has('overview_market_cap'));
+  context.setAIEnabled(false);
+  assert.deepEqual([...selectedCards], ['overview_market_cap']);
+  assert.match(js, /id="ai-summary-enabled" type="checkbox" role="switch"/);
+  assert.match(js, /querySelector\('\.picker-actions'\)\.hidden = isAI/);
+});

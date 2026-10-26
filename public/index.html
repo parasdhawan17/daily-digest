@@ -50,13 +50,14 @@
   <link rel="icon" href="/assets/tickr-digest-icon-t-concept.png" type="image/png">
   <link rel="apple-touch-icon" href="/assets/tickr-digest-icon-t-concept.png">
   <meta name="color-scheme" content="light dark">
-  <script>(function(){try{var t=localStorage.getItem('daily-digest-theme');if(t!=='light'&&t!=='dark')t=matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light';document.documentElement.dataset.theme=t;document.documentElement.style.colorScheme=t}catch(e){}})();</script>
+  <script>(function(){try{var t=localStorage.getItem('daily-digest-theme');if(t!=='light'&&t!=='dark')t='dark';document.documentElement.dataset.theme=t;document.documentElement.style.colorScheme=t}catch(e){}})();</script>
   <link rel="stylesheet" href="/subscribe-form.css">
   <link rel="stylesheet" href="/landing.css">
   <link rel="stylesheet" href="/auth.css">
   <link rel="stylesheet" href="/ai-overview.css?v=20261007-story">
   <link rel="stylesheet" href="/ai-story.css?v=20261007-bright">
   <link rel="stylesheet" href="/home.css?v=20261010-example-fallback">
+  <link rel="stylesheet" href="/home-upstart.css?v=20261022">
   <script src="/analytics.js?v=20261018-events" defer></script>
   <script src="/home-robot.js?v=20261001-safari-1" defer></script>
   <script src="/stock-format.js" defer></script>
@@ -68,10 +69,29 @@
 <body class="home-page">
 <a class="skip-link" href="#main">Skip to content</a>
 <header class="masthead">
+  <svg class="market-background" viewBox="0 0 1440 600" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+    <defs><path id="market-background-line" d="M-80 470 10 448 65 465 125 398 175 420 240 365 300 387 365 310 425 340 490 285 555 312 620 255 685 280 750 220 810 245 875 180 935 205 1000 150 1060 175 1125 110 1190 135 1250 80 1310 105 1380 45 1520 65"/></defs>
+    <use class="market-background-trace" href="#market-background-line"/>
+    <use class="market-background-pulse" href="#market-background-line"/>
+    <g class="market-background-secondary" transform="translate(0 125)">
+      <use class="market-background-trace" href="#market-background-line"/>
+      <use class="market-background-pulse" href="#market-background-line"/>
+    </g>
+    <g class="market-candles">
+      <g class="market-candle" style="--delay:-3s"><path d="M180 235v90"/><rect x="174" y="255" width="12" height="45" rx="2"/></g>
+      <g class="market-candle market-candle-down" style="--delay:-9s"><path d="M340 110v88"/><rect x="334" y="130" width="12" height="42" rx="2"/></g>
+      <g class="market-candle" style="--delay:-6s"><path d="M430 390v95"/><rect x="424" y="410" width="12" height="48" rx="2"/></g>
+      <g class="market-candle" style="--delay:-12s"><path d="M620 70v70"/><rect x="614" y="85" width="12" height="35" rx="2"/></g>
+      <g class="market-candle market-candle-down" style="--delay:-4s"><path d="M810 410v88"/><rect x="804" y="430" width="12" height="42" rx="2"/></g>
+      <g class="market-candle" style="--delay:-10s"><path d="M1000 275v100"/><rect x="994" y="295" width="12" height="53" rx="2"/></g>
+      <g class="market-candle market-candle-down" style="--delay:-7s"><path d="M1150 85v80"/><rect x="1144" y="103" width="12" height="40" rx="2"/></g>
+      <g class="market-candle" style="--delay:-1s"><path d="M1310 320v95"/><rect x="1304" y="340" width="12" height="48" rx="2"/></g>
+    </g>
+  </svg>
   <div class="container">
     <nav class="nav" aria-label="Main navigation">
       <a class="brand" href="/" aria-label="Tickr Digest home"><img class="brand-icon" src="/assets/tickr-digest-icon.svg" alt="" width="33" height="33"><span>tickr digest<span class="brand-dot">.</span></span></a>
-      <div class="nav-links"><a href="#research">AI summaries</a><a href="#watchlist">Your watchlist</a><a href="#how-it-works">How it works</a></div>
+      <div class="nav-links"><a href="#research">AI summaries</a><a href="#watchlist">Your watchlist</a><a href="#how-it-works">How it works</a><a href="#faq">FAQs</a></div>
       <div class="nav-actions">
         <a class="nav-dashboard-link" href="#watchlist">Build your watchlist</a>
         <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Switch color theme"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M20 15A8 8 0 019 4a8 8 0 1011 11Z"/></svg></button>
@@ -80,9 +100,9 @@
     <p id="auth-notice" class="auth-notice" role="status" hidden></p>
     <div class="home-hero">
       <div class="home-hero-copy">
-        <p class="home-eyebrow"><span class="home-ai-status" aria-hidden="true"></span> AI-powered Indian stock research</p>
+        <p class="home-eyebrow"><span class="home-ai-status" aria-hidden="true"></span> A little clarity. A smarter starting point.</p>
         <h1>Understand Indian stocks<br><span>with AI.</span></h1>
-        <p class="home-hero-intro">Start with an AI summary of what a company does, its financial results, and recent news. Explore the share price and company data behind it.</p>
+        <p class="home-hero-intro">Your stocks. The stories behind them. Bring company data, news, and AI insights together — and make sense of what matters.</p>
         <div class="home-hero-actions">
           <div class="home-search-area">
             <form class="home-search-form" role="search" autocomplete="off">
@@ -145,13 +165,21 @@
           </div>
           <a class="home-secondary-cta" id="home-watchlist-cta" href="#watchlist">Build my watchlist <span aria-hidden="true">→</span></a>
         </div>
-        <div class="home-ai-proof" aria-label="Tickr AI benefits"><span>AI summaries</span><span>Company data</span><span>Stock news</span></div>
+        <div class="home-ai-proof" aria-label="Tickr AI benefits"><span>AI-powered insights</span><span>Source-backed research</span><span>Your own watchlist</span></div>
         <p class="home-hero-note">Search without signing in. Sign in to save your watchlist.</p>
       </div>
       <div class="home-preview-wrap">
-        <div class="home-preview" id="home-ai-signal" aria-busy="true">
+        <div class="product-window">
+          <div class="product-window-bar"><span class="window-dots" aria-hidden="true"><i></i><i></i><i></i></span><span>YOUR RESEARCH, IN ONE PLACE</span><span class="window-status"><i></i> Tickr workspace</span></div>
+          <div class="product-workspace">
+            <aside class="product-sidebar" aria-label="Explore the product"><a class="brand" href="/"><img src="/assets/tickr-digest-icon.svg" width="24" height="24" alt=""> tickr<span class="brand-dot">.</span></a><span class="workspace-label">WORKSPACE</span><a class="workspace-active" href="#research">✧ <span>AI insights</span></a><a href="#watchlist">▤ <span>My watchlist</span></a><a href="#explore-stocks-title">↗ <span>Explore stocks</span></a><a href="#how-it-works">◎ <span>Getting started</span></a><div class="sidebar-note"><span>Less noise.<br>More perspective.</span><small>Made for curious investors.</small></div></aside>
+            <div class="workspace-main"><div class="workspace-heading"><div><span class="workspace-label">THE BIGGER PICTURE</span><h2>Meet your next insight.</h2></div><span class="workspace-pill">Indian equities <span aria-hidden="true">↗</span></span></div>
+        <div class="home-preview" id="home-ai-signal" data-preview="demo" aria-busy="true">
           <div class="preview-toolbar"><span class="preview-toolbar-mark"><img src="/assets/tickr-digest-icon.svg" alt="" width="18" height="18"> AI signals</span><span id="home-ai-toolbar-status">Indian stocks</span></div>
           <div id="home-ai-content"><div class="preview-ai-summary"><div class="preview-ai-heading">Tickr AI signals</div><h3>Finding a trending stock</h3><p role="status">Loading company data and AI signals…</p></div></div>
+        </div>
+            </div>
+          </div>
         </div>
         <p class="preview-caption" id="home-ai-caption">Company data from IndianAPI. AI summaries are not investment advice.</p>
       </div>
@@ -160,7 +188,7 @@
 </header>
 <main id="main">
   <section class="home-section home-research" id="research" aria-labelledby="research-title"><div class="container">
-    <div class="home-section-heading"><p class="home-eyebrow">Your AI research assistant</p><h2 id="research-title">Start with an AI summary.</h2><p>Tickr AI brings company data and news into a short summary. Explore the details and sources to learn more.</p></div>
+    <div class="home-section-heading"><p class="home-eyebrow">Features at a glance</p><h2 id="research-title">A clearer view.<br>A little <em>less noise.</em></h2><p>Tickr AI brings company data and news into a short summary. Explore the details and sources to learn more.</p></div>
     <div class="home-feature-grid">
       <article class="home-feature"><span class="home-feature-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V5m0 14h16M8 15l4-4 3 2 5-6"/></svg></span><span class="home-feature-label">01 · SUMMARY</span><h3>Read an AI summary</h3><p>Get a short summary of what the company does, its financial results, and recent news.</p></article>
       <article class="home-feature"><span class="home-feature-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18M5 7h14M7 7l-3 6h6L7 7Zm10 0-3 6h6l-3-6Z"/></svg></span><span class="home-feature-label">02 · DETAILS</span><h3>Explore the details</h3><p>See share prices, financial results, who owns the company, and news from the original sources.</p></article>
@@ -169,23 +197,40 @@
     <a class="home-text-link" href="#home-stock-query">Search Indian stocks</a>
   </div></section>
   <section class="home-section home-stock-directory" aria-labelledby="explore-stocks-title"><div class="container">
-    <div class="home-section-heading"><p class="home-eyebrow">Explore Indian companies</p><h2 id="explore-stocks-title">Start with a stock you know.</h2><p>Choose a company to see its share price, financial results, who owns it, and recent news.</p></div>
+    <div class="home-section-heading"><p class="home-eyebrow">Explore Indian companies</p><h2 id="explore-stocks-title">Familiar companies. <em>Fresh perspective.</em></h2><p>Choose a company to see its share price, financial results, who owns it, and recent news.</p></div>
     <ul class="home-stock-links">
-      <li><a href="/stocks/IN:TCS"><strong>Tata Consultancy Services</strong><span>TCS · Stock details →</span></a></li>
-      <li><a href="/stocks/IN:RELIANCE"><strong>Reliance Industries</strong><span>RELIANCE · Stock details →</span></a></li>
-      <li><a href="/stocks/IN:INFY"><strong>Infosys</strong><span>INFY · Stock details →</span></a></li>
-      <li><a href="/stocks/IN:HDFCBANK"><strong>HDFC Bank</strong><span>HDFCBANK · Stock details →</span></a></li>
+      <li><a class="company-card" href="/stocks/IN:TCS">
+        <div class="company-card-top"><span class="company-logo company-logo-tcs"><img src="/assets/companies/tcs.png" alt="" width="64" height="40" loading="lazy"></span><span class="company-card-arrow" aria-hidden="true">↗</span></div>
+        <div class="company-card-identity"><span class="company-ticker">TCS</span><strong>Tata Consultancy Services</strong><span class="company-sector">IT services</span></div>
+        <div class="company-card-bottom"><span>Explore company</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M4 12h15m-5-5 5 5-5 5"/></svg></div>
+      </a></li>
+      <li><a class="company-card" href="/stocks/IN:RELIANCE">
+        <div class="company-card-top"><span class="company-logo company-logo-reliance"><img src="/assets/companies/reliance-logo.png" alt="" width="64" height="40" loading="lazy"></span><span class="company-card-arrow" aria-hidden="true">↗</span></div>
+        <div class="company-card-identity"><span class="company-ticker">RELIANCE</span><strong>Reliance Industries</strong><span class="company-sector">Energy & retail</span></div>
+        <div class="company-card-bottom"><span>Explore company</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M4 12h15m-5-5 5 5-5 5"/></svg></div>
+      </a></li>
+      <li><a class="company-card" href="/stocks/IN:INFY">
+        <div class="company-card-top"><span class="company-logo company-logo-infy"><img src="/assets/companies/infosys.svg" alt="" width="64" height="40" loading="lazy"></span><span class="company-card-arrow" aria-hidden="true">↗</span></div>
+        <div class="company-card-identity"><span class="company-ticker">INFY</span><strong>Infosys</strong><span class="company-sector">IT services</span></div>
+        <div class="company-card-bottom"><span>Explore company</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M4 12h15m-5-5 5 5-5 5"/></svg></div>
+      </a></li>
+      <li><a class="company-card" href="/stocks/IN:HDFCBANK">
+        <div class="company-card-top"><span class="company-logo company-logo-hdfcbank"><img src="/assets/companies/hdfc-bank-logo.svg" alt="" width="64" height="40" loading="lazy"></span><span class="company-card-arrow" aria-hidden="true">↗</span></div>
+        <div class="company-card-identity"><span class="company-ticker">HDFCBANK</span><strong>HDFC Bank</strong><span class="company-sector">Banking</span></div>
+        <div class="company-card-bottom"><span>Explore company</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M4 12h15m-5-5 5 5-5 5"/></svg></div>
+      </a></li>
     </ul>
   </div></section>
   <section class="home-section home-watchlist-section" id="watchlist" aria-labelledby="watchlist-title"><div class="container home-watchlist-grid">
-    <div class="home-watchlist-copy"><p class="home-eyebrow">Your saved stocks</p><h2 id="watchlist-title">Keep the stocks you follow in one place.</h2><p>Save companies to your watchlist and choose the information you want on your dashboard.</p>
+    <div class="home-watchlist-copy"><p class="home-eyebrow">Your saved stocks</p><h2 id="watchlist-title">Your market.<br>Your <em>watchlist.</em></h2><p>Save companies to your watchlist and choose the information you want on your dashboard.</p>
       <ul><li><span aria-hidden="true">✓</span> Save the companies you follow</li><li><span aria-hidden="true">✓</span> Choose the information you want to see</li><li><span aria-hidden="true">✓</span> See your saved stocks on your dashboard</li></ul>
       <div class="home-signin"><p>Sign in with Google to save your watchlist.</p><div id="auth-controls" class="auth-controls hero-auth"></div></div>
     </div>
     <div class="watchlist-preview"><div class="watchlist-preview-head"><div><span>PERSONAL DASHBOARD</span><strong>My watchlist</strong></div><span class="watchlist-preview-count">3 stocks</span></div><div class="watchlist-preview-row"><span><b>TCS</b><small>Tata Consultancy Services</small></span><span class="watchlist-preview-up">+1.24%</span></div><div class="watchlist-preview-row"><span><b>RELIANCE</b><small>Reliance Industries</small></span><span class="watchlist-preview-down">−0.58%</span></div><div class="watchlist-preview-row"><span><b>INFY</b><small>Infosys</small></span><span class="watchlist-preview-up">+0.76%</span></div><div class="watchlist-preview-customize"><span>INFORMATION YOU CHOOSE</span><div><span>Price history</span><span>Financial health</span><span>Company news</span></div></div><p class="preview-caption">Example only. Price changes shown are not live.</p></div>
   </div></section>
-  <section class="home-section home-steps-section" id="how-it-works" aria-labelledby="steps-title"><div class="container"><div class="home-section-heading"><p class="home-eyebrow">How it works</p><h2 id="steps-title">Search. Explore. Save.</h2></div><div class="home-steps"><article><span>01</span><h3>Find a company</h3><p>Search by company name or stock symbol, such as TCS.</p></article><article><span>02</span><h3>Read the AI summary</h3><p>Get to know the company with AI, then explore its share price, financial results, and news.</p></article><article><span>03</span><h3>Save your stocks</h3><p>Sign in to save companies to your watchlist and choose what to show on your dashboard.</p></article></div></div></section>
-  <section class="home-section home-final-section"><div class="container home-final"><div><p class="home-eyebrow">Explore Indian stocks</p><h2>Which company would you like to explore?</h2><p>Search a stock to start with AI. Save it to your watchlist whenever you’re ready.</p></div><a class="home-final-button" href="#home-stock-query">Search Indian stocks</a></div></section>
+  <section class="home-section home-steps-section" id="how-it-works" aria-labelledby="steps-title"><div class="container"><div class="home-section-heading"><p class="home-eyebrow">How it works</p><h2 id="steps-title">From curious to informed.<br><em>In three simple steps.</em></h2></div><div class="home-steps"><article><span>01</span><h3>Find a company</h3><p>Search by company name or stock symbol, such as TCS.</p></article><article><span>02</span><h3>Read the AI summary</h3><p>Get to know the company with AI, then explore its share price, financial results, and news.</p></article><article><span>03</span><h3>Save your stocks</h3><p>Sign in to save companies to your watchlist and choose what to show on your dashboard.</p></article></div></div></section>
+  <section class="home-section home-faq" id="faq" aria-labelledby="faq-title"><div class="container faq-grid"><div><p class="home-eyebrow">A few things to know</p><h2 id="faq-title">Good questions.<br><em>Clear answers.</em></h2><p>Everything you need to get started.</p></div><div class="faq-items"><details open><summary>What can I do with Tickr Digest?</summary><p>Search Indian companies, read AI summaries, and explore their financial results and recent news. Sign in to save the stocks you follow to a personal watchlist.</p></details><details><summary>Do I need an account to explore stocks?</summary><p>No. Search for a company and explore its research without signing in. A Google sign-in lets you save your watchlist and personalize your dashboard.</p></details><details><summary>Where does the information come from?</summary><p>Company data is provided by IndianAPI. AI summaries bring that data and company news together, with sources available so you can explore the details.</p></details><details><summary>Are the AI summaries investment advice?</summary><p>No. They are a starting point for research. AI summaries may contain mistakes and market data may be delayed. Check the underlying sources before making decisions.</p></details></div></div></section>
+  <section class="home-section home-final-section"><div class="container home-final"><div><p class="home-eyebrow">Explore Indian stocks</p><h2>Your next insight<br>starts with <em>a search.</em></h2><p>Search a stock to start with AI. Save it to your watchlist whenever you’re ready.</p></div><a class="home-final-button" href="#home-stock-query">Search Indian stocks</a></div></section>
 </main>
 <footer class="site-footer container"><div class="footer-top"><a class="brand" href="/"><img class="brand-icon" src="/assets/tickr-digest-icon.svg" alt="" width="33" height="33"><span>tickr digest<span class="brand-dot">.</span></span></a><div class="footer-links"><a href="#research">AI summaries</a><a href="#watchlist">Your watchlist</a><a href="#how-it-works">How it works</a></div></div><div class="footer-bottom"><span>© 2026 Tickr Digest</span><span>AI summaries may contain mistakes. Market data may be delayed. This information is not investment advice.</span></div></footer>
 <div class="subscribe-modal" id="subscribe-modal" hidden><div class="subscribe-modal-backdrop" onclick="closeSubscribeModal()"></div><div class="subscribe-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="subscribe-modal-title"><div class="subscribe-modal-header"><h2 id="subscribe-modal-title">Set up or update your watchlist</h2><button type="button" class="subscribe-modal-close" onclick="closeSubscribeModal()" aria-label="Close">&times;</button></div><div class="subscribe-modal-body" id="subscribe-modal-body"></div><div class="subscribe-success" id="subscribe-success" hidden><h3>Almost there</h3><p>Open the confirmation email from Tickr Digest and click Confirm subscription to finish signing up.</p></div></div></div>
